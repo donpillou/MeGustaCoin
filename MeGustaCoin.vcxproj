@@ -1,0 +1,206 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{A7AFB0B9-820A-7E4B-A38E-D1EF84432874}</ProjectGuid>
+    <RootNamespace>MeGustaCoin</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">MeGustaCoin</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.exe</TargetExt>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">MeGustaCoin</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.exe</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <AdditionalIncludeDirectories>Ext/Qt/include;Ext/Qt/include/QtCore;Ext/Qt/include/QtGUI;Ext/libqxt/include;Ext/libqxt/include/QxtCore;Ext/libqxt/src/core;Ext/curl/include;Build/Debug/libcurl/include;Build/Debug/libcurl/include/curl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_STL;QXT_STATIC;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_STL;QXT_STATIC;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>qtmain.lib;QtGui4.lib;QtCore4.lib;qxt.lib;curl.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Ext/Qt/lib;Build/Debug/libqxt;Build/Debug/libcurl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <OmitFramePointers>true</OmitFramePointers>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <AdditionalIncludeDirectories>Ext/Qt/include;Ext/Qt/include/QtCore;Ext/Qt/include/QtGUI;Ext/libqxt/include;Ext/libqxt/include/QxtCore;Ext/libqxt/src/core;Ext/curl/include;Build/Release/libcurl/include;Build/Release/libcurl/include/curl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_STL;QXT_STATIC;CURL_STATICLIB;QT_NO_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_STL;QXT_STATIC;CURL_STATICLIB;QT_NO_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <Link>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <SubSystem>Windows</SubSystem>
+      <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies>qtmain.lib;QtGui4.lib;QtCore4.lib;qxt.lib;curl.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Ext/Qt/lib;Build/Release/libqxt;Build/Release/libcurl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\BitstampMarket.cpp" />
+    <ClCompile Include="Src\Download.cpp" />
+    <ClCompile Include="Src\LoginDialog.cpp" />
+    <ClCompile Include="Src\Main.cpp" />
+    <ClCompile Include="Src\MainWindow.cpp" />
+    <ClCompile Include="Src\OrderModel.cpp" />
+    <ClCompile Include="Src\OrderWidget.cpp" />
+    <ClCompile Include="Src\Sha256.cpp" />
+    <ClCompile Include="Src\stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <CustomBuild Include="Src\BitstampMarket.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"BitstampMarket.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/BitstampMarket.h -o Build/Debug/moc_BitstampMarket.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_BitstampMarket.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"BitstampMarket.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_NO_DEBUG -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/BitstampMarket.h -o Build/Release/moc_BitstampMarket.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_BitstampMarket.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClInclude Include="Src\Download.h" />
+    <CustomBuild Include="Src\LoginDialog.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"LoginDialog.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/LoginDialog.h -o Build/Debug/moc_LoginDialog.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_LoginDialog.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"LoginDialog.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_NO_DEBUG -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/LoginDialog.h -o Build/Release/moc_LoginDialog.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_LoginDialog.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="Src\MainWindow.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"MainWindow.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/MainWindow.h -o Build/Debug/moc_MainWindow.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_MainWindow.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"MainWindow.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_NO_DEBUG -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/MainWindow.h -o Build/Release/moc_MainWindow.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_MainWindow.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClInclude Include="Src\Market.h" />
+    <ClInclude Include="Src\OrderModel.h" />
+    <ClInclude Include="Src\OrderWidget.h" />
+    <ClInclude Include="Src\Sha256.h" />
+    <ClInclude Include="Src\stdafx.h" />
+    <CustomBuild Include="Ext\Qt\bin\QtCore4.dll">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"QtCore4.dll (copy)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy Ext\Qt\bin\QtCore4.dll Build\Debug\QtCore4.dll</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/QtCore4.dll;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"QtCore4.dll (copy)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy Ext\Qt\bin\QtCore4.dll Build\Release\QtCore4.dll</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/QtCore4.dll;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="Ext\Qt\bin\QtGui4.dll">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"QtGui4.dll (copy)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy Ext\Qt\bin\QtGui4.dll Build\Debug\QtGui4.dll</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/QtGui4.dll;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"QtGui4.dll (copy)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy Ext\Qt\bin\QtGui4.dll Build\Release\QtGui4.dll</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/QtGui4.dll;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="Src\MeGustaCoin.qrc">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"MeGustaCoin.qrc (Qt rcc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\rcc.exe -name MeGustaCoin Src/MeGustaCoin.qrc -o Build/Debug/qrc_MeGustaCoin.cpp</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Src/Icons/folder.png;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/qrc_MeGustaCoin.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"MeGustaCoin.qrc (Qt rcc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\rcc.exe -name MeGustaCoin Src/MeGustaCoin.qrc -o Build/Release/qrc_MeGustaCoin.cpp</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Src/Icons/folder.png;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/qrc_MeGustaCoin.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <ClCompile Include="Build\Debug\qrc_MeGustaCoin.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <None Include="Src\Icons\folder.png" />
+    <ClCompile Include="Build\Debug\moc_MainWindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_LoginDialog.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_BitstampMarket.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Release\qrc_MeGustaCoin.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_MainWindow.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_LoginDialog.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_BitstampMarket.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="libcurl.vcxproj">
+      <Project>{38CA7032-3C0B-CF7F-6B28-0900D11FB1C2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="libqxt.vcxproj">
+      <Project>{3982E32A-12F7-207B-7C0D-48C8BB39B02C}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

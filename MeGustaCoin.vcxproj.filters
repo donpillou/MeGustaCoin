@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include=".copy">
+      <UniqueIdentifier>{AD269A76-186A-33DE-C895-9E96D65A2CF7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include=".Qt">
+      <UniqueIdentifier>{26983797-AD25-9CBF-C563-C317038CED7C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Icons">
+      <UniqueIdentifier>{8F679730-0715-8337-3465-84551B093BE8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\BitstampMarket.cpp" />
+    <ClCompile Include="Src\Download.cpp" />
+    <ClCompile Include="Src\LoginDialog.cpp" />
+    <ClCompile Include="Src\Main.cpp" />
+    <ClCompile Include="Src\MainWindow.cpp" />
+    <ClCompile Include="Src\OrderModel.cpp" />
+    <ClCompile Include="Src\Sha256.cpp" />
+    <ClCompile Include="Src\stdafx.cpp" />
+    <CustomBuild Include="Src\BitstampMarket.h" />
+    <ClInclude Include="Src\Download.h" />
+    <CustomBuild Include="Src\LoginDialog.h" />
+    <CustomBuild Include="Src\MainWindow.h" />
+    <ClInclude Include="Src\Market.h" />
+    <ClInclude Include="Src\OrderModel.h" />
+    <ClInclude Include="Src\Sha256.h" />
+    <ClInclude Include="Src\stdafx.h" />
+    <CustomBuild Include="Ext\Qt\bin\QtCore4.dll">
+      <Filter>.copy</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Ext\Qt\bin\QtGui4.dll">
+      <Filter>.copy</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\MeGustaCoin.qrc" />
+    <ClCompile Include="Build\Debug\qrc_MeGustaCoin.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <None Include="Src\Icons\folder.png">
+      <Filter>Icons</Filter>
+    </None>
+    <ClCompile Include="Build\Debug\moc_MainWindow.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_LoginDialog.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_BitstampMarket.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\qrc_MeGustaCoin.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_MainWindow.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_LoginDialog.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_BitstampMarket.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\OrderWidget.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\OrderWidget.h" />
+  </ItemGroup>
+</Project>

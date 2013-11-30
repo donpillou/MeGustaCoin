@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MeGustaCoin", "MeGustaCoin.vcxproj", "{A7AFB0B9-820A-7E4B-A38E-D1EF84432874}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libqxt", "libqxt.vcxproj", "{3982E32A-12F7-207B-7C0D-48C8BB39B02C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libcurl", "libcurl.vcxproj", "{38CA7032-3C0B-CF7F-6B28-0900D11FB1C2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libs", "Libs", "{D12171A9-6008-3473-984B-35B1CA3E5D94}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A7AFB0B9-820A-7E4B-A38E-D1EF84432874}.Debug|Win32.ActiveCfg = Debug|Win32
+		{A7AFB0B9-820A-7E4B-A38E-D1EF84432874}.Debug|Win32.Build.0 = Debug|Win32
+		{A7AFB0B9-820A-7E4B-A38E-D1EF84432874}.Release|Win32.ActiveCfg = Release|Win32
+		{A7AFB0B9-820A-7E4B-A38E-D1EF84432874}.Release|Win32.Build.0 = Release|Win32
+		{3982E32A-12F7-207B-7C0D-48C8BB39B02C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{3982E32A-12F7-207B-7C0D-48C8BB39B02C}.Debug|Win32.Build.0 = Debug|Win32
+		{3982E32A-12F7-207B-7C0D-48C8BB39B02C}.Release|Win32.ActiveCfg = Release|Win32
+		{3982E32A-12F7-207B-7C0D-48C8BB39B02C}.Release|Win32.Build.0 = Release|Win32
+		{38CA7032-3C0B-CF7F-6B28-0900D11FB1C2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{38CA7032-3C0B-CF7F-6B28-0900D11FB1C2}.Debug|Win32.Build.0 = Debug|Win32
+		{38CA7032-3C0B-CF7F-6B28-0900D11FB1C2}.Release|Win32.ActiveCfg = Release|Win32
+		{38CA7032-3C0B-CF7F-6B28-0900D11FB1C2}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3982E32A-12F7-207B-7C0D-48C8BB39B02C} = {D12171A9-6008-3473-984B-35B1CA3E5D94}
+		{38CA7032-3C0B-CF7F-6B28-0900D11FB1C2} = {D12171A9-6008-3473-984B-35B1CA3E5D94}
+	EndGlobalSection
+EndGlobal
