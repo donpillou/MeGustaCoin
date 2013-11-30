@@ -3,19 +3,13 @@
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0)
 {
-  orderView = new QTreeView(this);
-  orderProxyModel = new QSortFilterProxyModel(this);
-  orderProxyModel->setDynamicSortFilter(true);
-  orderView->setModel(orderProxyModel);
-  //orderView->setIndentation(0);
-  orderView->setSortingEnabled(true);
-  orderView->setRootIsDecorated(false);
-  orderView->setAlternatingRowColors(true);
+  orderWidget = new OrderWidget(this, settings);
+  connect(this, SIGNAL(marketChanged(Market*)), orderWidget, SLOT(setMarket(Market*)));
 
-  setWindowTitle(tr("MeGustaCoin Trading Client"));
-  setCentralWidget(orderView);
+  setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
+  updateWindowTitle();
+  setCentralWidget(orderWidget);
   resize(600, 400);
-  //statusBar()->showMessage(tr("Ready"));
 
   QMenuBar* menuBar = this->menuBar();
   QMenu* menu = menuBar->addMenu(tr("&Market"));
@@ -45,9 +39,11 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
     QString user = settings.value("User").toString();
     QString key = settings.value("Key").toString();
     QString secret = settings.value("Secret").toString();
+    settings.endGroup();
     open(market, user, key, secret);
   }
-  settings.endGroup();
+  else
+    settings.endGroup();
 
   if(!market)
     QTimer::singleShot(0, this, SLOT(login()));
@@ -74,11 +70,8 @@ void MainWindow::logout()
 
   settings.setValue("Geometry", saveGeometry());
   settings.setValue("WindowState", saveState());
-  settings.setValue("OrderHeaderState", orderView->header()->saveState());
-  //settings.setValue("OrderHeaderGeometry", orderView->header()->saveGeometry());
 
-  //orderView->setModel(0);
-  orderProxyModel->setSourceModel(0);
+  emit marketChanged(0);
   delete market;
   market = 0;
 }
@@ -88,6 +81,8 @@ void MainWindow::refresh()
   if(!market)
     return;
   market->loadOrders();
+  market->loadBalance();
+  market->loadTicker();
 }
 
 void MainWindow::open(const QString& marketName, const QString& userName, const QString& key, const QString& secret)
@@ -95,32 +90,23 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
   logout();
 
   // login
+  this->marketName = marketName;
+  this->userName = userName;
   if(marketName == "Bitstamp/USD")
   {
     market = new BitstampMarket(userName, key, secret);
   }
   if(!market)
     return;
+  connect(market, SIGNAL(balanceUpdated()), this, SLOT(updateWindowTitle()));
+  connect(market, SIGNAL(tickerUpdated()), this, SLOT(updateWindowTitle()));
 
   // update gui
-  orderProxyModel->setSourceModel(&market->getOrderModel());
-  orderView->header()->resizeSection(0, 85);
-  orderView->header()->resizeSection(1, 85);
-  orderView->header()->resizeSection(2, 150);
-  orderView->header()->resizeSection(3, 85);
-  orderView->header()->resizeSection(4, 85);
-  orderView->header()->resizeSection(5, 85);
-  //orderView->header()->restoreState(settings.value("OrderHeaderState").toByteArray());
-  //orderView->setModel(&market->getOrderModel());
-  setWindowTitle(userName + "@" + marketName);
-  updateStatusBar();
+  updateWindowTitle();
+  emit marketChanged(market);
 
   // request data
   refresh();
-}
-
-void MainWindow::updateStatusBar()
-{
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -128,4 +114,26 @@ void MainWindow::closeEvent(QCloseEvent* event)
   logout();
 
   QMainWindow::closeEvent(event);
+}
+
+void MainWindow::updateWindowTitle()
+{
+  if(!market)
+    setWindowTitle(tr("MeGustaCoin Trading Client"));
+  else
+  {
+    QString title;
+    const Market::Balance* balance = market->getBalance();
+    if(balance)
+      title.sprintf("%.02f %s, %.02f %s - ", balance->availableUsd + balance->reservedUsd, market->getMarketCurrency(), balance->availableBtc + balance->reservedBtc, market->getCoinCurrency());
+    title += userName + "@" + marketName;
+    const Market::TickerData* tickerData = market->getTickerData();
+    if(tickerData)
+    {
+      QString tickerInfo;
+      tickerInfo.sprintf(" - %.02f, %.02f bid, %.02f ask", tickerData->lastTradePrice, tickerData->highestBuyOrder, tickerData->lowestSellOrder);
+      title += tickerInfo;
+    }
+    setWindowTitle(title);
+  }
 }

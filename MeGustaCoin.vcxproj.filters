@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include=".copy">
@@ -18,14 +18,16 @@
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\MainWindow.cpp" />
     <ClCompile Include="Src\OrderModel.cpp" />
+    <ClCompile Include="Src\OrderWidget.cpp" />
     <ClCompile Include="Src\Sha256.cpp" />
     <ClCompile Include="Src\stdafx.cpp" />
     <CustomBuild Include="Src\BitstampMarket.h" />
     <ClInclude Include="Src\Download.h" />
     <CustomBuild Include="Src\LoginDialog.h" />
     <CustomBuild Include="Src\MainWindow.h" />
-    <ClInclude Include="Src\Market.h" />
+    <CustomBuild Include="Src\Market.h" />
     <ClInclude Include="Src\OrderModel.h" />
+    <CustomBuild Include="Src\OrderWidget.h" />
     <ClInclude Include="Src\Sha256.h" />
     <ClInclude Include="Src\stdafx.h" />
     <CustomBuild Include="Ext\Qt\bin\QtCore4.dll">
@@ -38,7 +40,25 @@
     <ClCompile Include="Build\Debug\qrc_MeGustaCoin.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <None Include="Src\Icons\folder.png">
+    <None Include="Src\Icons\arrow_refresh.png">
+      <Filter>Icons</Filter>
+    </None>
+    <None Include="Src\Icons\bitcoin.png">
+      <Filter>Icons</Filter>
+    </None>
+    <None Include="Src\Icons\bitcoin_add.png">
+      <Filter>Icons</Filter>
+    </None>
+    <None Include="Src\Icons\bitcoin_big.png">
+      <Filter>Icons</Filter>
+    </None>
+    <None Include="Src\Icons\bullet_go.png">
+      <Filter>Icons</Filter>
+    </None>
+    <None Include="Src\Icons\cancel.png">
+      <Filter>Icons</Filter>
+    </None>
+    <None Include="Src\Icons\money_add.png">
       <Filter>Icons</Filter>
     </None>
     <ClCompile Include="Build\Debug\moc_MainWindow.cpp">
@@ -47,7 +67,13 @@
     <ClCompile Include="Build\Debug\moc_LoginDialog.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_Market.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_BitstampMarket.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_OrderWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\qrc_MeGustaCoin.cpp">
@@ -59,12 +85,14 @@
     <ClCompile Include="Build\Release\moc_LoginDialog.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Release\moc_Market.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Release\moc_BitstampMarket.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Src\OrderWidget.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Src\OrderWidget.h" />
+    <ClCompile Include="Build\Release\moc_OrderWidget.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

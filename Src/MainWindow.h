@@ -9,15 +9,19 @@ public:
   MainWindow();
   ~MainWindow();
 
+signals:
+  void marketChanged(Market* market);
+
 private:
   QSettings settings;
-  QTreeView* orderView;
-  QSortFilterProxyModel* orderProxyModel;
+
+  OrderWidget* orderWidget;
 
   Market* market;
+  QString marketName;
+  QString userName;
 
   void open(const QString& market, const QString& userName, const QString& key, const QString& secret);
-  void updateStatusBar();
 
   virtual void closeEvent(QCloseEvent* event);
 
@@ -25,4 +29,5 @@ private slots:
   void login();
   void logout();
   void refresh();
+  void updateWindowTitle();
 };

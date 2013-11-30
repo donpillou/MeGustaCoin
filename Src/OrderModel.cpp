@@ -1,7 +1,12 @@
 
 #include "stdafx.h"
 
-OrderModel::OrderModel() : openStr(tr("open")), deletedStr(tr("deleted")), buyStr(tr("buy")), sellStr(tr("sell"))
+OrderModel::OrderModel(const Market& market) : market(market), openStr(tr("open")), draftStr(tr("draft")), canceledStr(tr("canceled")), buyStr(tr("buy")), sellStr(tr("sell")), nextDraftId(0)
+{
+  italicFont.setItalic(true);
+}
+
+OrderModel::~OrderModel()
 {
   qDeleteAll(orders);
 }
@@ -16,9 +21,9 @@ void OrderModel::setData(const QList<Order>& updatedOrders)
   {
     Order* order = orders[i];
     QHash<QString, const Order*>::iterator openIt = openOrders.find(order->id);
-    if(order->state != Order::State::deleted && openIt == openOrders.end())
+    if(order->state == Order::State::open && openIt == openOrders.end())
     {
-      order->state = Order::State::deleted;
+      order->state = Order::State::canceled;
       QModelIndex index = createIndex(i, (int)Column::state, 0);
       emit dataChanged(index, index);
       openOrders.erase(openIt);
@@ -52,6 +57,28 @@ void OrderModel::setData(const QList<Order>& updatedOrders)
   }
 }
 
+int OrderModel::addOrder(Order::Type type, double price)
+{
+  int orderCount = orders.size();
+  beginInsertRows(QModelIndex(), orderCount, orderCount);
+  Order* newOrder = new Order;
+  newOrder->id = QString("draft") + QString::number(nextDraftId++);
+  newOrder->type = type;
+  newOrder->state = Order::State::draft;
+  newOrder->price = price;
+  orders.append(newOrder);
+  endInsertRows();
+  return orderCount;
+}
+
+const OrderModel::Order* OrderModel::getOrder(const QModelIndex& index) const
+{
+  int row = index.row();
+  if(row < 0 || row >= orders.size())
+    return 0;
+  return orders[row];
+}
+
 QModelIndex OrderModel::index(int row, int column, const QModelIndex& parent) const
 {
   return createIndex(row, column, 0);
@@ -81,7 +108,7 @@ Qt::ItemFlags OrderModel::flags(const QModelIndex &index) const
   {
     Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     const Order& order = *orders[row];
-    if(order.state == Order::State::open)
+    if(order.state == Order::State::open || order.state == Order::State::draft)
     {
       Column column = (Column)index.column();
       if(column == Column::amount || column == Column::price)
@@ -96,52 +123,72 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
 {
   if(!index.isValid())
     return QVariant();
+
+  if(role == Qt::TextAlignmentRole)
+    switch((Column)index.column())
+    {
+    case Column::price:
+    case Column::value:
+    case Column::amount:
+      return Qt::AlignRight;
+    default:
+      return Qt::AlignLeft;
+    }
+
+  int row = index.row();
+  if(row < 0 || row >= orders.size())
+    return QVariant();
+  const Order& order = *orders[row];
+
   switch(role)
   {
-    case Qt::TextAlignmentRole:
-      switch((Column)index.column())
-      {
-      case Column::price:
-      case Column::value:
-      case Column::amount:
-        return Qt::AlignRight;
-      default:
-        return Qt::AlignLeft;
-      }
-    case Qt::DisplayRole:
-    case Qt::EditRole:
+  case Qt::FontRole:
+    switch((Column)index.column())
     {
-      int row = index.row();
-      if(row >= 0 && row < orders.size())
+    case Column::price:
+      if(order.newPrice != 0.)
+        return italicFont;
+      return QVariant();
+    case Column::amount:
+      if(order.newAmount != 0.)
+        return italicFont;
+      return QVariant();
+    default:
+      return QVariant();
+    }
+  case Qt::DisplayRole:
+  case Qt::EditRole:
+    switch((Column)index.column())
+    {
+    case Column::type:
+      switch(order.type)
       {
-        const Order& order = *orders[row];
-        switch((Column)index.column())
-        {
-        case Column::type:
-          switch(order.type)
-          {
-          case Order::Type::buy:
-            return buyStr;
-          case Order::Type::sell:
-            return sellStr;
-          }
-        case Column::date:
-          return order.date;
-        case Column::amount:
-          return order.amount;
-        case Column::price:
-          return order.price;
-        case Column::value:
-          return order.amount * order.price;
-        case Column::state:
-          switch(order.state)
-          {
-          case Order::State::open:
-            return openStr;
-          case Order::State::deleted:
-            return deletedStr;
-          }
-        }
+      case Order::Type::buy:
+        return buyStr;
+      case Order::Type::sell:
+        return sellStr;
+      }
+    case Column::date:
+      return order.date;
+    case Column::amount:
+      if(role == Qt::EditRole)
+        return order.newAmount != 0. ? order.newAmount : order.amount;
+      return QString().sprintf("%.08f %s", order.amount, market.getCoinCurrency());
+    case Column::price:
+      if(role == Qt::EditRole)
+        return order.newPrice != 0. ? order.newPrice : order.price;
+      return QString().sprintf("%.02f %s", order.price, market.getMarketCurrency());
+    case Column::value:
+      return QString().sprintf("%.02f %s", order.amount * order.price, market.getMarketCurrency());
+    case Column::state:
+      switch(order.state)
+      {
+      case Order::State::draft:
+        return draftStr;
+      case Order::State::open:
+        return openStr;
+      case Order::State::canceled:
+        return canceledStr;
       }
     }
   }
@@ -182,4 +229,42 @@ QVariant OrderModel::headerData(int section, Qt::Orientation orientation, int ro
     }
   }
   return QVariant();
+}
+
+bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int role)
+{
+  if (role != Qt::EditRole)
+    return false;
+
+  int row = index.row();
+  if(row < 0 || row >= orders.size())
+    return false;
+
+  Order& order = *orders[row];
+  if(order.state != OrderModel::Order::State::draft && order.state != OrderModel::Order::State::open)
+    return false;
+
+  switch((Column)index.column())
+  {
+  case Column::price:
+    {
+      double newPrice = value.toDouble();
+      if(order.state == OrderModel::Order::State::draft)
+        order.price = newPrice;
+      else if(newPrice != order.price)
+        order.newPrice = newPrice;
+      return true;
+    }
+  case Column::amount:
+    {
+      double newAmount = value.toDouble();
+      if(order.state == OrderModel::Order::State::draft)
+        order.amount = newAmount;
+      else if(newAmount != order.amount)
+        order.newAmount = value.toDouble();
+      return true;
+    }
+  }
+
+  return false;
 }

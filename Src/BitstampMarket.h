@@ -10,17 +10,27 @@ class BitstampWorker : public QObject
 public:
   BitstampWorker(const BitstampMarket& market);
 
+  enum class Request
+  {
+    openOrders,
+    balance,
+    ticker,
+  };
+
 public slots:
-  void loadOrders();
+  void loadData(int request);
 
 signals:
-  void ordersLoaded(const QVariant& data);
+  void dataLoaded(int request, const QVariant& data);
 
 private:
   const BitstampMarket& market;
+  QDateTime lastRequestTime;
+
+  void avoidSpamming();
 };
 
-class BitstampMarket : private QObject, public Market
+class BitstampMarket : public Market
 {
   Q_OBJECT
 
@@ -29,6 +39,12 @@ public:
   ~BitstampMarket();
 
   virtual void loadOrders();
+  virtual void loadBalance();
+  virtual void loadTicker();
+  virtual void createOrder(const QString& id, bool sell, double amout, double price);
+
+signals:
+  void requestData(int request);
 
 private:
   QThread thread;
@@ -39,7 +55,7 @@ private:
   QString secret;
 
 private slots:
-  void handleOrders(const QVariant& data);
+  void handleData(int request, const QVariant& data);
 
   friend class BitstampWorker;
 };
