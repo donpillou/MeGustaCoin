@@ -3,6 +3,8 @@
 
 class OrderModel : public QAbstractItemModel
 {
+  Q_OBJECT
+
 public:
   OrderModel(const Market& market);
   ~OrderModel();
@@ -25,7 +27,9 @@ public:
     enum class State
     {
       draft,
+      submitting,
       open,
+      canceling,
       canceled,
     } state;
 
@@ -45,19 +49,27 @@ public:
   };
 
   void setData(const QList<Order>& order);
+  void updateOrder(const QString& id, const Order& order);
+  void setOrderState(const QString& id, Order::State state);
 
   int addOrder(Order::Type type, double price);
 
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
   const Order* getOrder(const QModelIndex& index) const;
+  void removeOrder(const QModelIndex& index);
+
+signals:
+  void orderEdited(const QModelIndex& index);
 
 private:
   const Market& market;
   QList<Order*> orders;
   QHash<QString, Order*> ordersById;
-  QString openStr;
   QString draftStr;
+  QString submittingStr;
+  QString openStr;
+  QString cancelingStr;
   QString canceledStr;
   QString buyStr;
   QString sellStr;

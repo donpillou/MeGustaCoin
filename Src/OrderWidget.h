@@ -14,6 +14,7 @@ public slots:
   void newSellOrder();
   void submitOrder();
   void cancelOrder();
+  void updateOrder(const QModelIndex& index);
 
 private:
   QSettings& settings;
@@ -22,5 +23,6 @@ private:
   QSortFilterProxyModel* orderProxyModel;
 
   void addOrder(OrderModel::Order::Type type);
+  QList<QModelIndex> getSelectedRows();
 };
 

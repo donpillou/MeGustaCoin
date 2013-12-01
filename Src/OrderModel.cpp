@@ -1,7 +1,9 @@
 
 #include "stdafx.h"
 
-OrderModel::OrderModel(const Market& market) : market(market), openStr(tr("open")), draftStr(tr("draft")), canceledStr(tr("canceled")), buyStr(tr("buy")), sellStr(tr("sell")), nextDraftId(0)
+OrderModel::OrderModel(const Market& market) : market(market), 
+draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), 
+canceledStr(tr("canceled")), buyStr(tr("buy")), sellStr(tr("sell")), nextDraftId(0)
 {
   italicFont.setItalic(true);
 }
@@ -31,7 +33,7 @@ void OrderModel::setData(const QList<Order>& updatedOrders)
     }
     if(openIt != openOrders.end())
     {
-      *orders[i] = *openIt.value();
+      *order = *openIt.value();
       emit dataChanged(createIndex(i, (int)Column::first, 0), createIndex(i, (int)Column::last, 0));
       openOrders.erase(openIt);
       continue;
@@ -57,6 +59,42 @@ void OrderModel::setData(const QList<Order>& updatedOrders)
   }
 }
 
+void OrderModel::updateOrder(const QString& id, const Order& newOrder)
+{
+  for(int i = 0, count = orders.size(); i < count; ++i)
+  {
+    Order* order = orders[i];
+    if(order->id == id)
+    {
+      *order = newOrder;
+      emit dataChanged(createIndex(i, (int)Column::first, 0), createIndex(i, (int)Column::last, 0));
+      return;
+    }
+  }
+
+  int oldOrderCount = orders.size();
+  beginInsertRows(QModelIndex(), oldOrderCount, oldOrderCount);
+  Order* order = new Order;
+  *order = newOrder;
+  orders.append(order);
+  endInsertRows();
+}
+
+void OrderModel::setOrderState(const QString& id, Order::State state)
+{
+  for(int i = 0, count = orders.size(); i < count; ++i)
+  {
+    Order* order = orders[i];
+    if(order->id == id)
+    {
+      order->state = state;
+      QModelIndex index = createIndex(i, (int)Column::state, 0);
+      emit dataChanged(index, index);
+      return;
+    }
+  }
+}
+
 int OrderModel::addOrder(Order::Type type, double price)
 {
   int orderCount = orders.size();
@@ -69,6 +107,17 @@ int OrderModel::addOrder(Order::Type type, double price)
   orders.append(newOrder);
   endInsertRows();
   return orderCount;
+}
+
+void OrderModel::removeOrder(const QModelIndex& index)
+{
+  int row = index.row();
+  if(row < 0 || row >= orders.size())
+    return;
+  beginRemoveRows(QModelIndex(), row, row);
+  delete orders[row];
+  orders.removeAt(row);
+  endRemoveRows();
 }
 
 const OrderModel::Order* OrderModel::getOrder(const QModelIndex& index) const
@@ -185,8 +234,12 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
       {
       case Order::State::draft:
         return draftStr;
+      case Order::State::submitting:
+        return submittingStr;
       case Order::State::open:
         return openStr;
+      case Order::State::canceling:
+        return cancelingStr;
       case Order::State::canceled:
         return canceledStr;
       }
@@ -252,7 +305,10 @@ bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int 
       if(order.state == OrderModel::Order::State::draft)
         order.price = newPrice;
       else if(newPrice != order.price)
+      {
         order.newPrice = newPrice;
+        emit orderEdited(index);
+      }
       return true;
     }
   case Column::amount:
@@ -261,7 +317,10 @@ bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int 
       if(order.state == OrderModel::Order::State::draft)
         order.amount = newAmount;
       else if(newAmount != order.amount)
+      {
         order.newAmount = value.toDouble();
+        emit orderEdited(index);
+      }
       return true;
     }
   }

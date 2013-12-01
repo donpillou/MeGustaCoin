@@ -15,10 +15,13 @@ public:
     openOrders,
     balance,
     ticker,
+    buy,
+    sell,
+    cancel,
   };
 
 public slots:
-  void loadData(int request);
+  void loadData(int request, QVariant args);
 
 signals:
   void dataLoaded(int request, const QVariant& data);
@@ -41,10 +44,12 @@ public:
   virtual void loadOrders();
   virtual void loadBalance();
   virtual void loadTicker();
-  virtual void createOrder(const QString& id, bool sell, double amout, double price);
+  virtual void createOrder(const QString& draftId, bool sell, double amount, double price);
+  virtual void cancelOrder(const QString& id);
+  virtual void updateOrder(const QString& id, bool sell, double amount, double price);
 
 signals:
-  void requestData(int request);
+  void requestData(int request, QVariant args);
 
 private:
   QThread thread;

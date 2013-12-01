@@ -29,6 +29,11 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   action->setShortcut(QKeySequence(QKeySequence::Refresh));
   connect(action, SIGNAL(triggered()), this, SLOT(refresh()));
 
+  menu = menuBar->addMenu(tr("&Help"));
+  connect(menu->addAction(tr("&About...")), SIGNAL(triggered()), this, SLOT(about()));
+  connect(menu->addAction(tr("About &Qt...")), SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+
+
   restoreGeometry(settings.value("Geometry").toByteArray());
   restoreState(settings.value("WindowState").toByteArray());
 
@@ -74,6 +79,7 @@ void MainWindow::logout()
   emit marketChanged(0);
   delete market;
   market = 0;
+  updateWindowTitle();
 }
 
 void MainWindow::refresh()
@@ -136,4 +142,9 @@ void MainWindow::updateWindowTitle()
     }
     setWindowTitle(title);
   }
+}
+
+void MainWindow::about()
+{
+  QMessageBox::about(this, "About", "MeGustaCoin - Bitcoin Trading Client<br><br>Donald Pillou, 2013");
 }

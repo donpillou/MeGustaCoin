@@ -32,7 +32,9 @@ public:
   virtual void loadOrders() = 0;
   virtual void loadBalance() = 0;
   virtual void loadTicker() = 0;
-  virtual void createOrder(const QString& id, bool sell, double amout, double price) = 0;
+  virtual void createOrder(const QString& draftId, bool sell, double amount, double price) = 0;
+  virtual void cancelOrder(const QString& id) = 0;
+  virtual void updateOrder(const QString& id, bool sell, double amount, double price) = 0;
 
   OrderModel& getOrderModel() {return orderModel;};
 

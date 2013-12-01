@@ -30,4 +30,5 @@ private slots:
   void logout();
   void refresh();
   void updateWindowTitle();
+  void about();
 };

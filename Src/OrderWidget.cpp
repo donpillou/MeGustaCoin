@@ -10,7 +10,7 @@ OrderWidget::OrderWidget(QWidget* parent, QSettings& settings) : QWidget(parent)
   QAction* action = toolBar->addAction(QIcon(":/Icons/arrow_refresh.png"), tr("&Refresh"));
   action->setShortcut(QKeySequence(QKeySequence::Refresh));
   connect(action, SIGNAL(triggered()), parent, SLOT(refresh()));
-  /*
+  
   action = toolBar->addAction(QIcon(":/Icons/bitcoin_add.png"), tr("&Buy"));
   action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_B));
   connect(action, SIGNAL(triggered()), this, SLOT(newBuyOrder()));
@@ -25,7 +25,6 @@ OrderWidget::OrderWidget(QWidget* parent, QSettings& settings) : QWidget(parent)
   action = toolBar->addAction(QIcon(":/Icons/cancel.png"), tr("&Cancel"));
   action->setShortcut(QKeySequence(Qt::Key_Delete));
   connect(action, SIGNAL(triggered()), this, SLOT(cancelOrder()));
-  */
 
   orderView = new QTreeView(this);
   orderProxyModel = new QSortFilterProxyModel(this);
@@ -55,7 +54,10 @@ void OrderWidget::setMarket(Market* market)
   }
   else
   {
-    orderProxyModel->setSourceModel(&market->getOrderModel());
+    OrderModel& orderModel = market->getOrderModel();
+    connect(&orderModel, SIGNAL(orderEdited(const QModelIndex&)), this, SLOT(updateOrder(const QModelIndex&)));
+
+    orderProxyModel->setSourceModel(&orderModel);
     orderView->header()->resizeSection(0, 85);
     orderView->header()->resizeSection(1, 85);
     orderView->header()->resizeSection(2, 150);
@@ -91,17 +93,23 @@ void OrderWidget::addOrder(OrderModel::Order::Type type)
   orderView->edit(index);
 }
 
+QList<QModelIndex> OrderWidget::getSelectedRows()
+{ // since orderView->selectionModel(); does not work
+  QList<QModelIndex> result;
+  QItemSelection selection = orderView->selectionModel()->selection();
+  foreach(const QItemSelectionRange& range, selection)
+  {
+    QModelIndex parent = range.parent();
+    for(int i = range.top(), end = range.bottom() + 1; i < end; ++i)
+      result.append(range.model()->index(i, 0, parent));
+  }
+  return result;
+}
+
 void OrderWidget::submitOrder()
 {
-  QItemSelectionModel* selModel = orderView->selectionModel();
-  QList<QModelIndex> seletedIndices = selModel->selectedRows();
-  
-  QTypeInfo<QModelIndex> asds;
-  int k = 32;
-  //seletedIndices.clear();
+  QList<QModelIndex> seletedIndices = getSelectedRows();
 
-
-  /*
   OrderModel& orderModel = market->getOrderModel();
   foreach(const QModelIndex& proxyIndex, seletedIndices)
   {
@@ -109,14 +117,47 @@ void OrderWidget::submitOrder()
     const OrderModel::Order* order = orderModel.getOrder(index);
     if(order->state == OrderModel::Order::State::draft)
     {
-      //market->create
-      // todo
+      market->createOrder(order->id, order->type == OrderModel::Order::Type::sell, order->amount, order->price);
     }
   }
-  */
 }
 
 void OrderWidget::cancelOrder()
 {
+  QList<QModelIndex> seletedIndices = getSelectedRows();
+
+  OrderModel& orderModel = market->getOrderModel();
+  QMap<int, QModelIndex> rowsToRemove;
+  foreach(const QModelIndex& proxyIndex, seletedIndices)
+  {
+    QModelIndex index = orderProxyModel->mapToSource(proxyIndex);
+    const OrderModel::Order* order = orderModel.getOrder(index);
+    switch(order->state)
+    {
+    case OrderModel::Order::State::draft:
+    case OrderModel::Order::State::canceled:
+      rowsToRemove.insert(index.row(), index);
+      break;
+    case OrderModel::Order::State::open:
+      market->cancelOrder(order->id);
+      break;
+    }
+  }
+  while(!rowsToRemove.isEmpty())
+  {
+    QMap<int, QModelIndex>::iterator last = --rowsToRemove.end();
+    orderModel.removeOrder(last.value());
+    rowsToRemove.erase(last);
+  }
 }
 
+void OrderWidget::updateOrder(const QModelIndex& index)
+{
+  OrderModel& orderModel = market->getOrderModel();
+  const OrderModel::Order* order = orderModel.getOrder(index);
+  if(order->state != OrderModel::Order::State::open || (order->newAmount == 0. && order->newPrice == 0.))
+    return;
+  double amount = order->newAmount != 0. ? order->newAmount : order->amount;
+  double price = order->newPrice != 0. ? order->newPrice : order->price;
+  market->updateOrder(order->id, order->type == OrderModel::Order::Type::sell, amount, price);
+}

@@ -8,42 +8,105 @@ BitstampMarket::BitstampMarket(const QString& userName, const QString& key, cons
 
   worker = new BitstampWorker(*this);
   worker->moveToThread(&thread);
-  connect(this, SIGNAL(requestData(int)), worker, SLOT(loadData(int)), Qt::QueuedConnection);
+  connect(this, SIGNAL(requestData(int, QVariant)), worker, SLOT(loadData(int, QVariant)), Qt::QueuedConnection);
   connect(worker, SIGNAL(dataLoaded(int, const QVariant&)), this, SLOT(handleData(int, const QVariant&)), Qt::BlockingQueuedConnection);
   thread.start();
 }
 
 BitstampMarket::~BitstampMarket()
 {
+  QEventLoop loop;
+  connect(&thread, SIGNAL(finished()), &loop, SLOT(quit()));
   thread.quit();
+  loop.exec();
   thread.wait();
   delete worker;
 }
 
 void BitstampMarket::loadOrders()
 {
-  emit requestData((int)BitstampWorker::Request::openOrders);
+  emit requestData((int)BitstampWorker::Request::openOrders, QVariant());
 }
 
 void BitstampMarket::loadBalance()
 {
-  emit requestData((int)BitstampWorker::Request::balance);
+  emit requestData((int)BitstampWorker::Request::balance, QVariant());
 }
 
 void BitstampMarket::loadTicker()
 {
-  emit requestData((int)BitstampWorker::Request::ticker);
+  emit requestData((int)BitstampWorker::Request::ticker, QVariant());
 }
 
-void BitstampMarket::createOrder(const QString& id, bool sell, double amout, double price)
+void BitstampMarket::createOrder(const QString& draftId, bool sell, double amount, double price)
 {
-  // todo
+  orderModel.setOrderState(draftId, OrderModel::Order::State::submitting);
+  QVariantMap args;
+  args["draftid"] = draftId;
+  args["amount"] = amount;
+  args["price"] = price;
+  emit requestData(sell ? (int)BitstampWorker::Request::sell : (int)BitstampWorker::Request::buy, args);
+}
+
+void BitstampMarket::cancelOrder(const QString& id)
+{
+  orderModel.setOrderState(id, OrderModel::Order::State::canceling);
+  QVariantMap args;
+  args["id"] = id;
+  emit requestData((int)BitstampWorker::Request::cancel, args);
+}
+
+void BitstampMarket::updateOrder(const QString& id, bool sell, double amount, double price)
+{
+  orderModel.setOrderState(id, OrderModel::Order::State::canceling);
+  {
+    QVariantMap args;
+    args["id"] = id;
+    args["updating"] = true;
+    emit requestData((int)BitstampWorker::Request::cancel, args);
+  }
+  {
+    QVariantMap args;
+    args["draftid"] = id;
+    args["amount"] = amount;
+    args["price"] = price;
+    emit requestData(sell ? (int)BitstampWorker::Request::sell : (int)BitstampWorker::Request::buy, args);
+  }
 }
 
 void BitstampMarket::handleData(int request, const QVariant& data)
 {
-  switch(request)
+  switch((BitstampWorker::Request)request)
   {
+  case BitstampWorker::Request::sell:
+  case BitstampWorker::Request::buy:
+    {
+      QVariantMap orderData = data.toMap();
+
+      OrderModel::Order order;
+      order.id = orderData["id"].toString();
+      QString type = orderData["type"].toString();
+      if(type == "0")
+        order.type = OrderModel::Order::Type::buy;
+      if(type == "1")
+        order.type = OrderModel::Order::Type::sell;
+      order.date = orderData["datetime"].toString();
+      order.price = orderData["price"].toDouble();
+      order.amount = orderData["amount"].toDouble();
+
+      QString draftId = orderData["draftid"].toString();
+      orderModel.updateOrder(draftId, order);
+    }
+    break;
+  case BitstampWorker::Request::cancel:
+    {
+      QVariantMap cancelData = data.toMap();
+      bool success = cancelData["success"].toBool();
+      QString id = cancelData["id"].toString();
+      bool updating = cancelData["updating"].toBool();
+      orderModel.setOrderState(id, updating ? OrderModel::Order::State::submitting : OrderModel::Order::State::canceled);
+    }
+    break;
   case BitstampWorker::Request::balance:
     {
       QVariantMap balanceData = data.toMap();
@@ -97,7 +160,7 @@ void BitstampMarket::handleData(int request, const QVariant& data)
 
 BitstampWorker::BitstampWorker(const BitstampMarket& market) : market(market) {}
 
-void BitstampWorker::loadData(int request)
+void BitstampWorker::loadData(int request, QVariant params)
 {
   avoidSpamming();
 
@@ -114,6 +177,15 @@ void BitstampWorker::loadData(int request)
   case Request::ticker:
     url = "https://www.bitstamp.net/api/ticker/";
     isPublic = true;
+    break;
+  case Request::buy:
+    url = "https://www.bitstamp.net/api/buy/";
+    break;
+  case Request::sell:
+    url = "https://www.bitstamp.net/api/sell/";
+    break;
+  case Request::cancel:
+    url = "https://www.bitstamp.net/api/cancel_order/";
     break;
   default:
     Q_ASSERT(false);
@@ -139,22 +211,90 @@ void BitstampWorker::loadData(int request)
     QByteArray nonce(QString::number(QDateTime::currentDateTime().toTime_t()).toAscii());
     QByteArray message = nonce + clientId + key;
     QByteArray signature = Sha256::hmac(secret, message).toHex().toUpper();
+    QByteArray amount, price, id;
 
-    const char* fields[] = { "key", "signature", "nonce" };
-    const char* values[] = { key.data(), signature.data(), nonce.data() };
+    const char* fields[10];
+    const char* values[10];
+    int i = 0;
 
-    if(!(dlData = dl.loadPOST(url, fields, values, sizeof(fields) / sizeof(*fields))))
+    fields[i] = "key"; values[i++] = key.data();
+    fields[i] = "signature"; values[i++] = signature.data();
+    fields[i] = "nonce"; values[i++] = nonce.data();
+    if((Request)request == Request::buy || (Request)request == Request::sell)
+    {
+      amount = params.toMap()["amount"].toString().toAscii();
+      price = params.toMap()["price"].toString().toAscii();
+      fields[i] = "amount"; values[i++] = amount.data();
+      fields[i] = "price"; values[i++] = price.data();
+    }
+    if((Request)request == Request::cancel)
+    {
+      id = params.toMap()["id"].toString().toAscii();
+      fields[i] = "id"; values[i++] = id.data();
+    }
+
+    if(!(dlData = dl.loadPOST(url, fields, values, i)))
     {
       // todo
       return;
     }
   }
 
-  QVariant orderData = QxtJSON::parse(dlData);
-  dataLoaded(request, orderData);
-  
-  QVariantList fixStrangeQtBug(orderData.toList());
-  orderData.clear(); 
+  QVariant data = QxtJSON::parse(dlData);
+
+  if((Request)request == Request::buy || (Request)request == Request::sell)
+  {
+    QString draftId = params.toMap()["draftid"].toString();
+    QVariantMap orderData = data.toMap();
+    orderData["draftid"] = draftId;
+    dataLoaded(request, orderData);
+  }
+  else if((Request)request == Request::cancel)
+  {
+    QString id = params.toMap()["id"].toString();
+    bool updating = params.toMap()["updating"].toBool();
+    QVariantMap cancelData;
+    cancelData["id"] = id;
+    cancelData["success"] = QString(dlData) == "true";
+    cancelData["updating"] = updating;
+    dataLoaded(request, cancelData);
+  }
+  else
+    dataLoaded(request, data);
+
+  // something is wrong with qt, the QVariant destructor crashes when it tries to free a variant list.
+  // so, lets prevent the destructor from doing so:
+  struct VariantListDestructorBugfix
+  {
+    static void findLists(QVariant var, QList<QVariantList>& lists)
+    {
+      switch(var.type())
+      {
+      case QVariant::List:
+        {
+          QVariantList list = var.toList();
+          lists.append(list);
+          foreach(const QVariant& var, list)
+            findLists(var, lists);
+        }
+        break;
+      case QVariant::Map:
+        {
+          QVariantMap map = var.toMap();
+          for(QVariantMap::iterator i = map.begin(), end = map.end(); i != end; ++i)
+            findLists(i.value(), lists);
+        }
+        break;
+      }
+    }
+  };
+
+  QList<QVariantList> lists;
+  VariantListDestructorBugfix::findLists(data, lists);
+  data.clear();
+
+  //QVariantList fixStrangeQtBug(data.toList());
+  //data.clear(); 
 }
 
 void BitstampWorker::avoidSpamming()
@@ -166,7 +306,7 @@ void BitstampWorker::avoidSpamming()
   {
     QMutex mutex;
     QWaitCondition condition;
-    condition.wait(&mutex, queryDelay - elapsed);
+    condition.wait(&mutex, queryDelay - elapsed); // wait without processing messages while waiting
     lastRequestTime = now;
     lastRequestTime.addMSecs(queryDelay - elapsed);
   }

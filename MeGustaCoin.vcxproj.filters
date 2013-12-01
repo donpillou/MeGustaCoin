@@ -26,7 +26,7 @@
     <CustomBuild Include="Src\LoginDialog.h" />
     <CustomBuild Include="Src\MainWindow.h" />
     <CustomBuild Include="Src\Market.h" />
-    <ClInclude Include="Src\OrderModel.h" />
+    <CustomBuild Include="Src\OrderModel.h" />
     <CustomBuild Include="Src\OrderWidget.h" />
     <ClInclude Include="Src\Sha256.h" />
     <ClInclude Include="Src\stdafx.h" />
@@ -58,6 +58,12 @@
     <None Include="Src\Icons\cancel.png">
       <Filter>Icons</Filter>
     </None>
+    <None Include="Src\Icons\cancel2.png">
+      <Filter>Icons</Filter>
+    </None>
+    <None Include="Src\Icons\cancelOld.png">
+      <Filter>Icons</Filter>
+    </None>
     <None Include="Src\Icons\money_add.png">
       <Filter>Icons</Filter>
     </None>
@@ -76,6 +82,9 @@
     <ClCompile Include="Build\Debug\moc_OrderWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_OrderModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Release\qrc_MeGustaCoin.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -92,6 +101,9 @@
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_OrderWidget.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_OrderModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
   </ItemGroup>
