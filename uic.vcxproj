@@ -11,7 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{F242C846-ECD2-DD37-3B13-5057DFB8FF81}</ProjectGuid>
+    <ProjectName>uic</ProjectName>
+    <ProjectGuid>{B79DFD1E-23C3-D1B6-C9A1-7C48E20B7322}</ProjectGuid>
     <RootNamespace>uic</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -110,7 +111,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="bootstrap.vcxproj">
-      <Project>{CA4C50B9-05DC-21EA-17A1-0549A6F5944F}</Project>
+      <Project>{F8338D72-3EC6-4BED-9503-8B2FC0D3FB41}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

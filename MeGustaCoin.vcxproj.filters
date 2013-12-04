@@ -58,12 +58,6 @@
     <None Include="Src\Icons\cancel.png">
       <Filter>Icons</Filter>
     </None>
-    <None Include="Src\Icons\cancel2.png">
-      <Filter>Icons</Filter>
-    </None>
-    <None Include="Src\Icons\cancelOld.png">
-      <Filter>Icons</Filter>
-    </None>
     <None Include="Src\Icons\money_add.png">
       <Filter>Icons</Filter>
     </None>

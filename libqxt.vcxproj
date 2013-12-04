@@ -11,7 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{3982E32A-12F7-207B-7C0D-48C8BB39B02C}</ProjectGuid>
+    <ProjectName>libqxt</ProjectName>
+    <ProjectGuid>{C7C37A1E-0554-5616-AB28-3E5DA67BE570}</ProjectGuid>
     <RootNamespace>libqxt</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

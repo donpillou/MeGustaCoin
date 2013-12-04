@@ -11,7 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{D8E11940-BD8D-A744-8CAD-48FC4419C083}</ProjectGuid>
+    <ProjectName>QtCore4</ProjectName>
+    <ProjectGuid>{80C06182-7A3A-9151-C0AC-11FF3C01C6CC}</ProjectGuid>
     <RootNamespace>QtCore4</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -974,7 +975,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="moc.vcxproj">
-      <Project>{1BD86AF0-360B-F008-CAFD-50F83DE3D025}</Project>
+      <Project>{161E132D-F6A4-5BA1-16E0-D2E4C97E89B4}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

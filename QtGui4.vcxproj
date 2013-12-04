@@ -11,7 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{F43335CA-0A86-882E-7C8E-B9DE8AF9AC02}</ProjectGuid>
+    <ProjectName>QtGui4</ProjectName>
+    <ProjectGuid>{6B940812-0EB8-2333-373B-CE55ABCDA4B5}</ProjectGuid>
     <RootNamespace>QtGui4</RootNamespace>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -3033,13 +3034,20 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="moc.vcxproj">
-      <Project>{1BD86AF0-360B-F008-CAFD-50F83DE3D025}</Project>
+      <Project>{161E132D-F6A4-5BA1-16E0-D2E4C97E89B4}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="uic.vcxproj">
-      <Project>{F242C846-ECD2-DD37-3B13-5057DFB8FF81}</Project>
+      <Project>{B79DFD1E-23C3-D1B6-C9A1-7C48E20B7322}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="rcc.vcxproj">
+      <Project>{40449A6F-6DBC-99B8-3EEF-6EA900D10B11}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="QtCore4.vcxproj">
-      <Project>{D8E11940-BD8D-A744-8CAD-48FC4419C083}</Project>
+      <Project>{80C06182-7A3A-9151-C0AC-11FF3C01C6CC}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
