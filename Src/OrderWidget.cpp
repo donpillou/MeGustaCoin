@@ -80,6 +80,9 @@ void OrderWidget::newSellOrder()
 
 void OrderWidget::addOrder(OrderModel::Order::Type type)
 {
+  if(!market)
+    return;
+
   double price = 0;
   const Market::TickerData* tickerData = market->getTickerData();
   if(tickerData)
