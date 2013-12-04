@@ -3,4 +3,7 @@
 	url = https://bitbucket.org/libqxt/libqxt.git
 [submodule "Ext/curl"]
 	path = Ext/curl
-	url = git://github.com/bagder/curl.git
+	url = https://github.com/bagder/curl.git
+[submodule "Ext/libcppqt"]
+	path = Ext/libcppqt
+	url = https://github.com/donpillou/libcppqt.git

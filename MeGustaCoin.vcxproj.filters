@@ -30,10 +30,10 @@
     <CustomBuild Include="Src\OrderWidget.h" />
     <ClInclude Include="Src\Sha256.h" />
     <ClInclude Include="Src\stdafx.h" />
-    <CustomBuild Include="Ext\Qt\bin\QtCore4.dll">
+    <CustomBuild Include="Build\Debug\QtCore4\QtCore4.dll">
       <Filter>.copy</Filter>
     </CustomBuild>
-    <CustomBuild Include="Ext\Qt\bin\QtGui4.dll">
+    <CustomBuild Include="Build\Debug\QtGui4\QtGui4.dll">
       <Filter>.copy</Filter>
     </CustomBuild>
     <CustomBuild Include="Src\MeGustaCoin.qrc" />
@@ -85,6 +85,12 @@
     <ClCompile Include="Build\Debug\moc_OrderModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <CustomBuild Include="Build\Release\QtCore4\QtCore4.dll">
+      <Filter>.copy</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Build\Release\QtGui4\QtGui4.dll">
+      <Filter>.copy</Filter>
+    </CustomBuild>
     <ClCompile Include="Build\Release\qrc_MeGustaCoin.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>

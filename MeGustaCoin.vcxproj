@@ -52,11 +52,11 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
-      <AdditionalIncludeDirectories>Ext/Qt/include;Ext/Qt/include/QtCore;Ext/Qt/include/QtGUI;Ext/libqxt/include;Ext/libqxt/include/QxtCore;Ext/libqxt/src/core;Ext/curl/include;Build/Debug/libcurl/include;Build/Debug/libcurl/include/curl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_STL;QXT_STATIC;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>Ext/libcppqt/include;Ext/libcppqt/include/QtCore;Ext/libcppqt/include/QtGUI;Ext/libqxt/include;Ext/libqxt/include/QxtCore;Ext/libqxt/src/core;Ext/curl/include;Build/Debug/libcurl/include;Build/Debug/libcurl/include/curl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_DEBUG;QXT_STATIC;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_STL;QXT_STATIC;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_DEBUG;QXT_STATIC;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -65,8 +65,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>qtmain.lib;QtGui4.lib;QtCore4.lib;qxt.lib;curl.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>Ext/Qt/lib;Build/Debug/libqxt;Build/Debug/libcurl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmain.lib;QtGui4.lib;QtCore4.lib;qxt.lib;curl.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Build/Debug/winmain;Build/Debug/QtCore4;Build/Debug/QtGui4;Build/Debug/libqxt;Build/Debug/libcurl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -77,11 +77,11 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
-      <AdditionalIncludeDirectories>Ext/Qt/include;Ext/Qt/include/QtCore;Ext/Qt/include/QtGUI;Ext/libqxt/include;Ext/libqxt/include/QxtCore;Ext/libqxt/src/core;Ext/curl/include;Build/Release/libcurl/include;Build/Release/libcurl/include/curl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_STL;QXT_STATIC;CURL_STATICLIB;QT_NO_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>Ext/libcppqt/include;Ext/libcppqt/include/QtCore;Ext/libcppqt/include/QtGUI;Ext/libqxt/include;Ext/libqxt/include/QxtCore;Ext/libqxt/src/core;Ext/curl/include;Build/Release/libcurl/include;Build/Release/libcurl/include/curl;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_DEBUG;QXT_STATIC;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_STL;QXT_STATIC;CURL_STATICLIB;QT_NO_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>QT_SHARED;QT_GUI_LIB;QT_CORE_LIB;QT_NO_DEBUG;QXT_STATIC;CURL_STATICLIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
@@ -91,8 +91,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <SubSystem>Windows</SubSystem>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>qtmain.lib;QtGui4.lib;QtCore4.lib;qxt.lib;curl.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>Ext/Qt/lib;Build/Release/libqxt;Build/Release/libcurl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmain.lib;QtGui4.lib;QtCore4.lib;qxt.lib;curl.lib;ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Build/Release/winmain;Build/Release/QtCore4;Build/Release/QtGui4;Build/Release/libqxt;Build/Release/libcurl;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -110,70 +110,66 @@
     </ClCompile>
     <CustomBuild Include="Src\BitstampMarket.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"BitstampMarket.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/BitstampMarket.h -o Build/Debug/moc_BitstampMarket.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/BitstampMarket.h -o Build/Debug/moc_BitstampMarket.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_BitstampMarket.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"BitstampMarket.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_NO_DEBUG -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/BitstampMarket.h -o Build/Release/moc_BitstampMarket.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/BitstampMarket.h -o Build/Release/moc_BitstampMarket.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_BitstampMarket.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="Src\Download.h" />
     <CustomBuild Include="Src\LoginDialog.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"LoginDialog.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/LoginDialog.h -o Build/Debug/moc_LoginDialog.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/LoginDialog.h -o Build/Debug/moc_LoginDialog.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_LoginDialog.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"LoginDialog.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_NO_DEBUG -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/LoginDialog.h -o Build/Release/moc_LoginDialog.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/LoginDialog.h -o Build/Release/moc_LoginDialog.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_LoginDialog.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="Src\MainWindow.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"MainWindow.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/MainWindow.h -o Build/Debug/moc_MainWindow.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/MainWindow.h -o Build/Debug/moc_MainWindow.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_MainWindow.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"MainWindow.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_NO_DEBUG -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/MainWindow.h -o Build/Release/moc_MainWindow.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/MainWindow.h -o Build/Release/moc_MainWindow.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_MainWindow.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="Src\Market.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"Market.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/Market.h -o Build/Debug/moc_Market.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/Market.h -o Build/Debug/moc_Market.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_Market.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"Market.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_NO_DEBUG -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/Market.h -o Build/Release/moc_Market.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/Market.h -o Build/Release/moc_Market.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_Market.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="Src\OrderModel.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"OrderModel.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/OrderModel.h -o Build/Debug/moc_OrderModel.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/OrderModel.h -o Build/Debug/moc_OrderModel.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_OrderModel.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"OrderModel.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_NO_DEBUG -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/OrderModel.h -o Build/Release/moc_OrderModel.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/OrderModel.h -o Build/Release/moc_OrderModel.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_OrderModel.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <CustomBuild Include="Src\OrderWidget.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"OrderWidget.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/OrderWidget.h -o Build/Debug/moc_OrderWidget.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/OrderWidget.h -o Build/Debug/moc_OrderWidget.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_OrderWidget.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"OrderWidget.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_NO_DEBUG -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_STL -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/Qt/include -IExt/Qt/include/QtCore -IExt/Qt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/OrderWidget.h -o Build/Release/moc_OrderWidget.cpp</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Ext\Qt\bin\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/OrderWidget.h -o Build/Release/moc_OrderWidget.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_OrderWidget.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="Src\Sha256.h" />
     <ClInclude Include="Src\stdafx.h" />
-    <CustomBuild Include="Ext\Qt\bin\QtCore4.dll">
+    <CustomBuild Include="Build\Debug\QtCore4\QtCore4.dll">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"QtCore4.dll (copy)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy Ext\Qt\bin\QtCore4.dll Build\Debug\QtCore4.dll</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy Build\Debug\QtCore4\QtCore4.dll Build\Debug\QtCore4.dll</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/QtCore4.dll;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"QtCore4.dll (copy)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy Ext\Qt\bin\QtCore4.dll Build\Release\QtCore4.dll</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/QtCore4.dll;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
-    <CustomBuild Include="Ext\Qt\bin\QtGui4.dll">
+    <CustomBuild Include="Build\Debug\QtGui4\QtGui4.dll">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"QtGui4.dll (copy)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy Ext\Qt\bin\QtGui4.dll Build\Debug\QtGui4.dll</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy Build\Debug\QtGui4\QtGui4.dll Build\Debug\QtGui4.dll</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/QtGui4.dll;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"QtGui4.dll (copy)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy Ext\Qt\bin\QtGui4.dll Build\Release\QtGui4.dll</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/QtGui4.dll;%(Outputs)</Outputs>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </CustomBuild>
     <CustomBuild Include="Src\MeGustaCoin.qrc">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"MeGustaCoin.qrc (Qt rcc)"</Message>
@@ -216,6 +212,18 @@
     <ClCompile Include="Build\Debug\moc_OrderModel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <CustomBuild Include="Build\Release\QtCore4\QtCore4.dll">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"QtCore4.dll (copy)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy Build\Release\QtCore4\QtCore4.dll Build\Release\QtCore4.dll</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/QtCore4.dll;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="Build\Release\QtGui4\QtGui4.dll">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"QtGui4.dll (copy)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">copy Build\Release\QtGui4\QtGui4.dll Build\Release\QtGui4.dll</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/QtGui4.dll;%(Outputs)</Outputs>
+    </CustomBuild>
     <ClCompile Include="Build\Release\qrc_MeGustaCoin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
@@ -245,6 +253,15 @@
     </ProjectReference>
     <ProjectReference Include="libqxt.vcxproj">
       <Project>{3982E32A-12F7-207B-7C0D-48C8BB39B02C}</Project>
+    </ProjectReference>
+    <ProjectReference Include="QtGui4.vcxproj">
+      <Project>{F43335CA-0A86-882E-7C8E-B9DE8AF9AC02}</Project>
+    </ProjectReference>
+    <ProjectReference Include="QtCore4.vcxproj">
+      <Project>{D8E11940-BD8D-A744-8CAD-48FC4419C083}</Project>
+    </ProjectReference>
+    <ProjectReference Include="winmain.vcxproj">
+      <Project>{E9AAC21A-DCD7-71EA-D22B-7F0BFBF20368}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty">
+      <UniqueIdentifier>{C9DB474E-44AC-A159-D5AE-D7078C547D4C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib">
+      <UniqueIdentifier>{6A1ECF84-1BEE-3C81-03AE-444A62A269AC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib">
+      <UniqueIdentifier>{6B6C452A-6990-EDCB-2259-8B5F26734654}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io">
+      <UniqueIdentifier>{9AC78D4E-A408-B3D6-C95F-324670B1F8EB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools">
+      <UniqueIdentifier>{73420E2B-3CDE-1646-ABFA-1F10758CBB88}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\xml">
+      <UniqueIdentifier>{EF089D23-86D5-BA75-15C4-340662840E47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\xml\dom">
+      <UniqueIdentifier>{1B5E6467-FCC3-28F1-E3C0-1822CF1318A6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\global">
+      <UniqueIdentifier>{EF04D4F7-9C36-72B6-6357-B2BF5177C57E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs">
+      <UniqueIdentifier>{484E500E-C4D0-FF76-E241-A9D4373C73A6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\kernel">
+      <UniqueIdentifier>{50E08B4C-3C6C-48C9-FC29-5FE77FA72596}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\plugin">
+      <UniqueIdentifier>{BBB429CB-4187-999B-B20D-C8462CF1B340}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\xml\sax">
+      <UniqueIdentifier>{A0D2BAD7-A8C2-7A9C-9CEB-F1EDFE871F7A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\xml">
+      <UniqueIdentifier>{45EE77D6-243C-69A4-0007-9950F370E106}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\adler32.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\compress.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\crc32.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\deflate.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\gzclose.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\gzlib.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\gzread.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\gzwrite.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\infback.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\inffast.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\inflate.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\inftrees.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qabstractfileengine.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qbitarray.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qbuffer.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qbytearray.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qbytearraymatcher.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qdatastream.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qdatetime.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qdir.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qdiriterator.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\xml\dom\qdom.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\xml\dom</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qfile.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qfileinfo.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qfilesystemengine.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qfilesystemengine_win.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qfilesystementry.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qfilesystemiterator_win.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qfsfileengine.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qfsfileengine_iterator.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qfsfileengine_win.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\global\qglobal.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\global</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qhash.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qiodevice.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs\qisciicodec.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs\qlatincodec.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qlist.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qlocale.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qlocale_tools.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qlocale_win.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\global\qmalloc.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\global</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qmap.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\kernel\qmetatype.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\global\qnumeric.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\global</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qregexp.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs\qsimplecodec.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qstring.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qstringlist.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\kernel\qsystemerror.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\plugin\qsystemlibrary.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\plugin</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qtemporaryfile.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs\qtextcodec.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io\qtextstream.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\io</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs\qtsciicodec.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs\qutfcodec.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\codecs</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\kernel\qvariant.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\kernel</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qvector.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools\qvsnprintf.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\xml\sax\qxml.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\xml\sax</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\xml\qxmlstream.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\xml</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\xml\qxmlutils.cpp">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\corelib\xml</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\trees.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\uncompr.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib\zutil.c">
+      <Filter>Ext\libcppqt\qt\src\tools\bootstrap\..\..\3rdparty\zlib</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

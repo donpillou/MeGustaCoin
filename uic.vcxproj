@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{F242C846-ECD2-DD37-3B13-5057DFB8FF81}</ProjectGuid>
+    <RootNamespace>uic</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\uic\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\uic\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\uic\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\uic\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">uic</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.exe</TargetExt>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">uic</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.exe</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <AdditionalIncludeDirectories>Ext/libcppqt/qt/src/tools/uic;Ext/libcppqt/qt/src/tools/uic/cpp;Ext/libcppqt/src/tools/uic;Ext/libcppqt/include;Ext/libcppqt/include/QtCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CONSOLE;UNICODE;WIN32;QT_UIC;QT_NO_QT3_SUPPORT;QT_UIC_CPP_GENERATOR;QT_BOOTSTRAPPED;QT_LITE_UNICODE;QT_TEXTCODEC;QT_NO_CAST_FROM_ASCII;QT_NO_CAST_TO_ASCII;QT_NO_CODECS;QT_NO_DATASTREAM;QT_NO_GEOM_VARIANT;QT_NO_LIBRARY;QT_NO_QOBJECT;QT_NO_STL;QT_NO_SYSTEMLOCALE;QT_NO_TEXTSTREAM;QT_NO_THREAD;QT_NO_UNICODETABLES;QT_NO_USING_NAMESPACE;QT_NO_DEPRECATED;QT_NODLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_CONSOLE;UNICODE;WIN32;QT_UIC;QT_NO_QT3_SUPPORT;QT_UIC_CPP_GENERATOR;QT_BOOTSTRAPPED;QT_LITE_UNICODE;QT_TEXTCODEC;QT_NO_CAST_FROM_ASCII;QT_NO_CAST_TO_ASCII;QT_NO_CODECS;QT_NO_DATASTREAM;QT_NO_GEOM_VARIANT;QT_NO_LIBRARY;QT_NO_QOBJECT;QT_NO_STL;QT_NO_SYSTEMLOCALE;QT_NO_TEXTSTREAM;QT_NO_THREAD;QT_NO_UNICODETABLES;QT_NO_USING_NAMESPACE;QT_NO_DEPRECATED;QT_NODLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>bootstrap.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Build/Debug/bootstrap;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <OmitFramePointers>true</OmitFramePointers>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <TreatWChar_tAsBuiltInType>false</TreatWChar_tAsBuiltInType>
+      <AdditionalIncludeDirectories>Ext/libcppqt/qt/src/tools/uic;Ext/libcppqt/qt/src/tools/uic/cpp;Ext/libcppqt/src/tools/uic;Ext/libcppqt/include;Ext/libcppqt/include/QtCore;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_CONSOLE;UNICODE;WIN32;QT_UIC;QT_NO_QT3_SUPPORT;QT_UIC_CPP_GENERATOR;QT_BOOTSTRAPPED;QT_LITE_UNICODE;QT_TEXTCODEC;QT_NO_CAST_FROM_ASCII;QT_NO_CAST_TO_ASCII;QT_NO_CODECS;QT_NO_DATASTREAM;QT_NO_GEOM_VARIANT;QT_NO_LIBRARY;QT_NO_QOBJECT;QT_NO_STL;QT_NO_SYSTEMLOCALE;QT_NO_TEXTSTREAM;QT_NO_THREAD;QT_NO_UNICODETABLES;QT_NO_USING_NAMESPACE;QT_NO_DEPRECATED;QT_NODLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_CONSOLE;UNICODE;WIN32;QT_UIC;QT_NO_QT3_SUPPORT;QT_UIC_CPP_GENERATOR;QT_BOOTSTRAPPED;QT_LITE_UNICODE;QT_TEXTCODEC;QT_NO_CAST_FROM_ASCII;QT_NO_CAST_TO_ASCII;QT_NO_CODECS;QT_NO_DATASTREAM;QT_NO_GEOM_VARIANT;QT_NO_LIBRARY;QT_NO_QOBJECT;QT_NO_STL;QT_NO_SYSTEMLOCALE;QT_NO_TEXTSTREAM;QT_NO_THREAD;QT_NO_UNICODETABLES;QT_NO_USING_NAMESPACE;QT_NO_DEPRECATED;QT_NODLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+    <Link>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <AdditionalDependencies>bootstrap.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>Build/Release/bootstrap;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\main.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\uic.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\customwidgetsinfo.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\databaseinfo.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\driver.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\treewalker.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\ui4.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\validator.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\cpp\cppextractimages.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\cpp\cppwritedeclaration.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\cpp\cppwriteicondata.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\cpp\cppwriteicondeclaration.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\cpp\cppwriteiconinitialization.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\cpp\cppwriteincludes.cpp" />
+    <ClCompile Include="Ext\libcppqt\qt\src\tools\uic\cpp\cppwriteinitialization.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="bootstrap.vcxproj">
+      <Project>{CA4C50B9-05DC-21EA-17A1-0549A6F5944F}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
