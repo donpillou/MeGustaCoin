@@ -35,6 +35,8 @@ public:
   virtual void createOrder(const QString& draftId, bool sell, double amount, double price) = 0;
   virtual void cancelOrder(const QString& id) = 0;
   virtual void updateOrder(const QString& id, bool sell, double amount, double price) = 0;
+  virtual double getMaxSellAmout() const = 0;
+  virtual double getMaxBuyAmout(double price) const = 0;
 
   OrderModel& getOrderModel() {return orderModel;};
 

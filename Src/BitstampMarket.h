@@ -1,7 +1,41 @@
 
 #pragma once
 
-class BitstampMarket;
+class BitstampWorker;
+
+class BitstampMarket : public Market
+{
+  Q_OBJECT
+
+public:
+  BitstampMarket(const QString& userName, const QString& key, const QString& secret);
+  ~BitstampMarket();
+
+  virtual void loadOrders();
+  virtual void loadBalance();
+  virtual void loadTicker();
+  virtual void createOrder(const QString& draftId, bool sell, double amount, double price);
+  virtual void cancelOrder(const QString& id);
+  virtual void updateOrder(const QString& id, bool sell, double amount, double price);
+  virtual double getMaxSellAmout() const;
+  virtual double getMaxBuyAmout(double price) const;
+
+signals:
+  void requestData(int request, QVariant args);
+
+private:
+  QThread thread;
+  BitstampWorker* worker;
+
+  QString userName;
+  QString key;
+  QString secret;
+
+private slots:
+  void handleData(int request, const QVariant& data);
+
+  friend class BitstampWorker;
+};
 
 class BitstampWorker : public QObject
 {
@@ -33,34 +67,3 @@ private:
   void avoidSpamming();
 };
 
-class BitstampMarket : public Market
-{
-  Q_OBJECT
-
-public:
-  BitstampMarket(const QString& userName, const QString& key, const QString& secret);
-  ~BitstampMarket();
-
-  virtual void loadOrders();
-  virtual void loadBalance();
-  virtual void loadTicker();
-  virtual void createOrder(const QString& draftId, bool sell, double amount, double price);
-  virtual void cancelOrder(const QString& id);
-  virtual void updateOrder(const QString& id, bool sell, double amount, double price);
-
-signals:
-  void requestData(int request, QVariant args);
-
-private:
-  QThread thread;
-  BitstampWorker* worker;
-
-  QString userName;
-  QString key;
-  QString secret;
-
-private slots:
-  void handleData(int request, const QVariant& data);
-
-  friend class BitstampWorker;
-};

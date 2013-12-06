@@ -74,6 +74,21 @@ void BitstampMarket::updateOrder(const QString& id, bool sell, double amount, do
   }
 }
 
+double BitstampMarket::getMaxSellAmout() const
+{
+  return balance.availableBtc;
+}
+
+double BitstampMarket::getMaxBuyAmout(double price) const
+{
+  double fee = balance.fee; // e.g. 0.0044
+  double usdAmount = balance.availableUsd;
+  double result = floor(((100. / ( 100. + (fee * 100.))) * usdAmount) * 100.) / 100.;
+  result /= price;
+  result = floor(result * 100000000.) / 100000000.;
+  return result;
+}
+
 void BitstampMarket::handleData(int request, const QVariant& data)
 {
   switch((BitstampWorker::Request)request)

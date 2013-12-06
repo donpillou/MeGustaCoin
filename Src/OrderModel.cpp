@@ -302,11 +302,16 @@ bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int 
   case Column::price:
     {
       double newPrice = value.toDouble();
+      if(newPrice <= 0.)
+        return false;
       if(order.state == OrderModel::Order::State::draft)
         order.price = newPrice;
       else if(newPrice != order.price)
       {
         order.newPrice = newPrice;
+        double maxAmount = order.type == Order::Type::buy ? market.getMaxBuyAmout(newPrice) : market.getMaxSellAmout();
+        if(order.newAmount > maxAmount)
+          order.newAmount = maxAmount;
         emit orderEdited(index);
       }
       return true;
@@ -314,6 +319,12 @@ bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int 
   case Column::amount:
     {
       double newAmount = value.toDouble();
+      if(newAmount <= 0.)
+        return false;
+      double price = order.newPrice != 0. ? order.newPrice : order.price;
+      double maxAmount = order.type == Order::Type::buy ? market.getMaxBuyAmout(price) : market.getMaxSellAmout();
+      if(newAmount > maxAmount)
+        newAmount = maxAmount;
       if(order.state == OrderModel::Order::State::draft)
         order.amount = newAmount;
       else if(newAmount != order.amount)
