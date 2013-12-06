@@ -132,7 +132,7 @@ void MainWindow::updateWindowTitle()
     const Market::Balance* balance = market->getBalance();
     if(balance)
       title.sprintf("%.02f %s, %.02f %s - ", balance->availableUsd + balance->reservedUsd, market->getMarketCurrency(), balance->availableBtc + balance->reservedBtc, market->getCoinCurrency());
-    title += userName + "@" + marketName;
+    title += marketName;
     const Market::TickerData* tickerData = market->getTickerData();
     if(tickerData)
     {

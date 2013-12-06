@@ -7,13 +7,16 @@ LoginDialog::LoginDialog(QWidget* parent, QSettings* settings) : QDialog(parent)
 
   userEdit = new QLineEdit;
   connect(userEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged()));
+  userEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
 
   keyEdit = new QLineEdit;
   connect(keyEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged()));
-  keyEdit->setMinimumWidth(200);
+  keyEdit->setMinimumWidth(240);
+  keyEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
 
   secretEdit = new QLineEdit;
   connect(secretEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged()));
+  secretEdit->setEchoMode(QLineEdit::Password);
 
   marketComboBox = new QComboBox;
   marketComboBox->addItem("Bitstamp/USD");
@@ -55,7 +58,8 @@ LoginDialog::LoginDialog(QWidget* parent, QSettings* settings) : QDialog(parent)
   userEdit->setText(settings->value("User").toString());
   keyEdit->setText(settings->value("Key").toString());
   secretEdit->setText(settings->value("Secret").toString());
-  rememberComboBox->setCurrentIndex(settings->value("Remember", 0).toUInt());
+  unsigned int remember = settings->value("Remember", 0).toUInt();
+  rememberComboBox->setCurrentIndex(remember);
   settings->endGroup();
 }
 
