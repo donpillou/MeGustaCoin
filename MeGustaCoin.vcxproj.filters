@@ -18,7 +18,7 @@
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\MainWindow.cpp" />
     <ClCompile Include="Src\OrderModel.cpp" />
-    <ClCompile Include="Src\OrderWidget.cpp" />
+    <ClCompile Include="Src\OrdersWidget.cpp" />
     <ClCompile Include="Src\Sha256.cpp" />
     <ClCompile Include="Src\stdafx.cpp" />
     <CustomBuild Include="Src\BitstampMarket.h" />
@@ -27,7 +27,7 @@
     <CustomBuild Include="Src\MainWindow.h" />
     <CustomBuild Include="Src\Market.h" />
     <CustomBuild Include="Src\OrderModel.h" />
-    <CustomBuild Include="Src\OrderWidget.h" />
+    <CustomBuild Include="Src\OrdersWidget.h" />
     <ClInclude Include="Src\Sha256.h" />
     <ClInclude Include="Src\stdafx.h" />
     <CustomBuild Include="Build\Debug\QtCore4\QtCore4.dll">
@@ -73,7 +73,7 @@
     <ClCompile Include="Build\Debug\moc_BitstampMarket.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Debug\moc_OrderWidget.cpp">
+    <ClCompile Include="Build\Debug\moc_OrdersWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\moc_OrderModel.cpp">
@@ -100,7 +100,7 @@
     <ClCompile Include="Build\Release\moc_BitstampMarket.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Release\moc_OrderWidget.cpp">
+    <ClCompile Include="Build\Release\moc_OrdersWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_OrderModel.cpp">

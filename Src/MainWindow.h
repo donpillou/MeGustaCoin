@@ -15,7 +15,7 @@ signals:
 private:
   QSettings settings;
 
-  OrderWidget* orderWidget;
+  OrdersWidget* orderWidget;
 
   Market* market;
   QString marketName;

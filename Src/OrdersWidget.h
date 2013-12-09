@@ -1,12 +1,12 @@
 
 #pragma once
 
-class OrderWidget : public QWidget
+class OrdersWidget : public QWidget
 {
   Q_OBJECT
 
 public:
-  OrderWidget(QWidget* parent, QSettings& settings);
+  OrdersWidget(QWidget* parent, QSettings& settings);
 
 private slots:
   void setMarket(Market* market);

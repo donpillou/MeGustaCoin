@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-OrderWidget::OrderWidget(QWidget* parent, QSettings& settings) : QWidget(parent), settings(settings)
+OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings) : QWidget(parent), settings(settings)
 {
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -50,7 +50,7 @@ OrderWidget::OrderWidget(QWidget* parent, QSettings& settings) : QWidget(parent)
   setLayout(layout);
 }
 
-void OrderWidget::setMarket(Market* market)
+void OrdersWidget::setMarket(Market* market)
 {
   this->market = market;
   if(!market)
@@ -75,17 +75,17 @@ void OrderWidget::setMarket(Market* market)
   updateToolBarButtons();
 }
 
-void OrderWidget::newBuyOrder()
+void OrdersWidget::newBuyOrder()
 {
   addOrder(OrderModel::Order::Type::buy);
 }
 
-void OrderWidget::newSellOrder()
+void OrdersWidget::newSellOrder()
 {
   addOrder(OrderModel::Order::Type::sell);
 }
 
-void OrderWidget::addOrder(OrderModel::Order::Type type)
+void OrdersWidget::addOrder(OrderModel::Order::Type type)
 {
   if(!market)
     return;
@@ -103,7 +103,7 @@ void OrderWidget::addOrder(OrderModel::Order::Type type)
   orderView->edit(index);
 }
 
-QList<QModelIndex> OrderWidget::getSelectedRows()
+QList<QModelIndex> OrdersWidget::getSelectedRows()
 { // since orderView->selectionModel()->selectedRows(); does not work
   QList<QModelIndex> result;
   QItemSelection selection = orderView->selectionModel()->selection();
@@ -116,7 +116,7 @@ QList<QModelIndex> OrderWidget::getSelectedRows()
   return result;
 }
 
-void OrderWidget::submitOrder()
+void OrdersWidget::submitOrder()
 {
   QList<QModelIndex> seletedIndices = getSelectedRows();
 
@@ -132,7 +132,7 @@ void OrderWidget::submitOrder()
   }
 }
 
-void OrderWidget::cancelOrder()
+void OrdersWidget::cancelOrder()
 {
   QList<QModelIndex> seletedIndices = getSelectedRows();
 
@@ -161,7 +161,7 @@ void OrderWidget::cancelOrder()
   }
 }
 
-void OrderWidget::updateOrder(const QModelIndex& index)
+void OrdersWidget::updateOrder(const QModelIndex& index)
 {
   OrderModel& orderModel = market->getOrderModel();
   const OrderModel::Order* order = orderModel.getOrder(index);
@@ -172,7 +172,7 @@ void OrderWidget::updateOrder(const QModelIndex& index)
   market->updateOrder(order->id, order->type == OrderModel::Order::Type::sell, amount, price);
 }
 
-void OrderWidget::updateToolBarButtons()
+void OrdersWidget::updateToolBarButtons()
 {
   QList<QModelIndex> selectedRows = getSelectedRows();
   OrderModel& orderModel = market->getOrderModel();

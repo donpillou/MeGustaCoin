@@ -3,7 +3,7 @@
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0)
 {
-  orderWidget = new OrderWidget(this, settings);
+  orderWidget = new OrdersWidget(this, settings);
   connect(this, SIGNAL(marketChanged(Market*)), orderWidget, SLOT(setMarket(Market*)));
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
