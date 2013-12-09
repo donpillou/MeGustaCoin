@@ -34,47 +34,29 @@
     <Filter Include="xml">
       <UniqueIdentifier>{0F635D0E-0F38-74FF-F8B5-81C132E6C7A7}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Ext\libcppqt\qt\src\corelib\..\3rdparty">
-      <UniqueIdentifier>{B8AE50B0-2653-5A6D-5181-2DA0070EBE1E}</UniqueIdentifier>
+    <Filter Include="3rdparty">
+      <UniqueIdentifier>{29ACE2F0-8E85-6148-8F4C-DAC7D3B25C05}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz">
-      <UniqueIdentifier>{8C10F3EE-B37C-4F5B-5387-074C83A3C73D}</UniqueIdentifier>
+    <Filter Include="3rdparty\harfbuzz">
+      <UniqueIdentifier>{35C008B3-2690-F3B5-99AA-B8B4E55BD16B}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src">
-      <UniqueIdentifier>{62567316-67F7-56C8-2B7D-614581CF9417}</UniqueIdentifier>
+    <Filter Include="3rdparty\harfbuzz\src">
+      <UniqueIdentifier>{1227FE97-FC8F-8EE5-01CE-319D9FE3FC7F}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib">
-      <UniqueIdentifier>{A3374FFE-B223-BB9F-E8CF-8770769BA8A4}</UniqueIdentifier>
+    <Filter Include="3rdparty\zlib">
+      <UniqueIdentifier>{CB6F8B4F-1F78-DFE5-C6AF-50FC0F5F80D8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Ext\libcppqt\qt\src\corelib\..\..\tools">
-      <UniqueIdentifier>{2E97FF6B-59CF-1531-EB1A-AA1B100F45A3}</UniqueIdentifier>
+    <Filter Include="tools\shared">
+      <UniqueIdentifier>{EAF58069-D1EC-372F-9EBE-9FEB16E072FE}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Ext\libcppqt\qt\src\corelib\..\..\tools\shared">
-      <UniqueIdentifier>{95F80F6F-4598-0823-CDE0-2F91FE156031}</UniqueIdentifier>
+    <Filter Include="tools\shared\symbian">
+      <UniqueIdentifier>{D5E3E14C-7675-5F38-B2CC-EC7EA50CA80A}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Ext\libcppqt\qt\src\corelib\..\..\tools\shared\symbian">
-      <UniqueIdentifier>{F23C2C70-8DFE-1348-ECAB-514732312524}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Ext\libcppqt\qt\src\corelib\..\..\tools\shared\windows">
-      <UniqueIdentifier>{0E5BBB06-A995-4696-0C21-18B30CE4005B}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Build">
-      <UniqueIdentifier>{C74C1F42-F141-C011-CA6B-D8B1114FC3D0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Build\Debug">
-      <UniqueIdentifier>{C1956EB4-0746-2EE2-02CC-2BD94919D24F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Build\Debug\QtCore4">
-      <UniqueIdentifier>{C33C31C0-E26A-5C5D-FA42-ABB7DF35AD33}</UniqueIdentifier>
+    <Filter Include="tools\shared\windows">
+      <UniqueIdentifier>{44B48C6E-8BF0-AAE9-7E75-0F9F201A445B}</UniqueIdentifier>
     </Filter>
     <Filter Include=".Qt">
       <UniqueIdentifier>{26983797-AD25-9CBF-C563-C317038CED7C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Build\Release">
-      <UniqueIdentifier>{359B3135-AAC9-FC56-6649-BCF94CA5BEB6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Build\Release\QtCore4">
-      <UniqueIdentifier>{67FE28FD-62B2-BF80-AD8F-5B43A42DC313}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -534,359 +516,359 @@
     <ClCompile Include="Ext\libcppqt\qt\src\corelib\tools\qlocale_tools.cpp">
       <Filter>tools</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src\harfbuzz-buffer.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\harfbuzz\src\harfbuzz-buffer.c">
+      <Filter>3rdparty\harfbuzz\src</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src\harfbuzz-gdef.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\harfbuzz\src\harfbuzz-gdef.c">
+      <Filter>3rdparty\harfbuzz\src</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src\harfbuzz-gsub.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\harfbuzz\src\harfbuzz-gsub.c">
+      <Filter>3rdparty\harfbuzz\src</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src\harfbuzz-gpos.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\harfbuzz\src\harfbuzz-gpos.c">
+      <Filter>3rdparty\harfbuzz\src</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src\harfbuzz-impl.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\harfbuzz\src\harfbuzz-impl.c">
+      <Filter>3rdparty\harfbuzz\src</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src\harfbuzz-open.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\harfbuzz\src\harfbuzz-open.c">
+      <Filter>3rdparty\harfbuzz\src</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src\harfbuzz-stream.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\harfbuzz\src\harfbuzz-stream.c">
+      <Filter>3rdparty\harfbuzz\src</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src\harfbuzz-shaper-all.cpp">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\harfbuzz\src</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\harfbuzz\src\harfbuzz-shaper-all.cpp">
+      <Filter>3rdparty\harfbuzz\src</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\adler32.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\adler32.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\compress.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\compress.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\crc32.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\crc32.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\deflate.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\deflate.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\gzclose.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\gzclose.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\gzlib.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\gzlib.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\gzread.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\gzread.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\gzwrite.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\gzwrite.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\infback.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\infback.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\inffast.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\inffast.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\inflate.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\inflate.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\inftrees.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\inftrees.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\trees.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\trees.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\uncompr.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\uncompr.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib\zutil.c">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\3rdparty\zlib</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\zlib\zutil.c">
+      <Filter>3rdparty\zlib</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\..\tools\shared\symbian\epocroot.cpp">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\..\tools\shared\symbian</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\tools\shared\symbian\epocroot.cpp">
+      <Filter>tools\shared\symbian</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\corelib\..\..\tools\shared\windows\registry.cpp">
-      <Filter>Ext\libcppqt\qt\src\corelib\..\..\tools\shared\windows</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\tools\shared\windows\registry.cpp">
+      <Filter>tools\shared\windows</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qabstractanimation_p.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qabstractstate.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qabstracttransition.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qeventtransition.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qfinalstate.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qhistorystate.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qsignaltransition.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qstate.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qabstracteventdispatcher.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qabstractitemmodel.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qcoreapplication.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qcoreevent.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qeventdispatcher_win_p.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qeventloop.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qobjectcleanuphandler.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qmimedata.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qsharedmemory.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qsocketnotifier.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qtimer.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qtranslator.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qwineventnotifier_p.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qeasingcurve.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qlocale.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qtimeline.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qfactoryloader_p.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qlibrary.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qpluginloader.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qfile.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qfilesystemwatcher_p.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qfilesystemwatcher_win_p.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qiodevice.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qnoncontiguousbytedevice_p.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qsettings.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qtemporaryfile.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qwindowspipewriter_p.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qnamespace.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qfuturewatcher.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qthreadpool.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qthread.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtCore4\moc_qtextcodecplugin.cpp">
-      <Filter>Build\Debug\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\statemachine\qstatemachine.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qsignalmapper.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qobject.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\io\qprocess.h">
-      <Filter>.Qt</Filter>
+      <Filter>io</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\io\qfilesystemwatcher.h">
-      <Filter>.Qt</Filter>
+      <Filter>io</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\io\qbuffer.h">
-      <Filter>.Qt</Filter>
+      <Filter>io</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\animation\qvariantanimation.h">
-      <Filter>.Qt</Filter>
+      <Filter>animation</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\animation\qsequentialanimationgroup.h">
-      <Filter>.Qt</Filter>
+      <Filter>animation</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\animation\qpropertyanimation.h">
-      <Filter>.Qt</Filter>
+      <Filter>animation</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\animation\qpauseanimation.h">
-      <Filter>.Qt</Filter>
+      <Filter>animation</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\animation\qparallelanimationgroup.h">
-      <Filter>.Qt</Filter>
+      <Filter>animation</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\animation\qanimationgroup.h">
-      <Filter>.Qt</Filter>
+      <Filter>animation</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\animation\qabstractanimation.h">
-      <Filter>.Qt</Filter>
+      <Filter>animation</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\animation\qabstractanimation_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>animation</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\statemachine\qabstractstate.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\statemachine\qabstracttransition.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\statemachine\qeventtransition.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\statemachine\qfinalstate.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\statemachine\qhistorystate.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\statemachine\qsignaltransition.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\statemachine\qstate.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qabstracteventdispatcher.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qabstractitemmodel.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qcoreapplication.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qcoreevent.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qeventdispatcher_win_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qeventloop.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qobjectcleanuphandler.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qmimedata.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qsharedmemory.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qsocketnotifier.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qtimer.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qtranslator.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\kernel\qwineventnotifier_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\tools\qeasingcurve.h">
-      <Filter>.Qt</Filter>
+      <Filter>tools</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\tools\qlocale.h">
-      <Filter>.Qt</Filter>
+      <Filter>tools</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\tools\qtimeline.h">
-      <Filter>.Qt</Filter>
+      <Filter>tools</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\plugin\qfactoryloader_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>plugin</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\plugin\qlibrary.h">
-      <Filter>.Qt</Filter>
+      <Filter>plugin</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\plugin\qpluginloader.h">
-      <Filter>.Qt</Filter>
+      <Filter>plugin</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\io\qfile.h">
-      <Filter>.Qt</Filter>
+      <Filter>io</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\io\qfilesystemwatcher_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>io</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\io\qfilesystemwatcher_win_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>io</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\io\qiodevice.h">
-      <Filter>.Qt</Filter>
+      <Filter>io</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\io\qnoncontiguousbytedevice_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>io</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\io\qsettings.h">
-      <Filter>.Qt</Filter>
+      <Filter>io</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\io\qtemporaryfile.h">
-      <Filter>.Qt</Filter>
+      <Filter>io</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\io\qwindowspipewriter_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>io</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\global\qnamespace.h">
-      <Filter>.Qt</Filter>
+      <Filter>global</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\concurrent\qfuturewatcher.h">
-      <Filter>.Qt</Filter>
+      <Filter>concurrent</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\concurrent\qthreadpool.h">
-      <Filter>.Qt</Filter>
+      <Filter>concurrent</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\thread\qthread.h">
-      <Filter>.Qt</Filter>
+      <Filter>thread</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\corelib\codecs\qtextcodecplugin.h">
-      <Filter>.Qt</Filter>
+      <Filter>codecs</Filter>
     </CustomBuild>
     <CustomBuild Include="Build\Debug\QtCore4\kernel\qtimer.moc">
       <Filter>.Qt</Filter>
@@ -898,124 +880,124 @@
       <Filter>.Qt</Filter>
     </CustomBuild>
     <ClCompile Include="Build\Release\QtCore4\moc_qabstractanimation_p.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qabstractstate.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qabstracttransition.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qeventtransition.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qfinalstate.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qhistorystate.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qsignaltransition.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qstate.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qabstracteventdispatcher.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qabstractitemmodel.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qcoreapplication.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qcoreevent.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qeventdispatcher_win_p.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qeventloop.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qobjectcleanuphandler.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qmimedata.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qsharedmemory.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qsocketnotifier.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qtimer.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qtranslator.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qwineventnotifier_p.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qeasingcurve.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qlocale.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qtimeline.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qfactoryloader_p.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qlibrary.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qpluginloader.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qfile.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qfilesystemwatcher_p.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qfilesystemwatcher_win_p.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qiodevice.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qnoncontiguousbytedevice_p.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qsettings.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qtemporaryfile.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qwindowspipewriter_p.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qnamespace.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qfuturewatcher.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qthreadpool.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qthread.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtCore4\moc_qtextcodecplugin.cpp">
-      <Filter>Build\Release\QtCore4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <CustomBuild Include="Build\Release\QtCore4\kernel\qtimer.moc">
       <Filter>.Qt</Filter>

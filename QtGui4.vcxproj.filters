@@ -49,29 +49,14 @@
     <Filter Include="widgets">
       <UniqueIdentifier>{3AA652F4-1D8B-4A23-E179-37149C784868}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Ext\libcppqt\qt\src\gui\..\3rdparty">
-      <UniqueIdentifier>{9B5F7430-DA6D-F3A6-AB8B-C411A4354B4B}</UniqueIdentifier>
+    <Filter Include="3rdparty">
+      <UniqueIdentifier>{29ACE2F0-8E85-6148-8F4C-DAC7D3B25C05}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng">
-      <UniqueIdentifier>{B727FE94-370C-5E2F-2F7E-E7389721AEA1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Build">
-      <UniqueIdentifier>{C74C1F42-F141-C011-CA6B-D8B1114FC3D0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Build\Debug">
-      <UniqueIdentifier>{C1956EB4-0746-2EE2-02CC-2BD94919D24F}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Build\Debug\QtGui4">
-      <UniqueIdentifier>{4E641C41-2D2B-511E-9E1F-9C3FA226C9BB}</UniqueIdentifier>
+    <Filter Include="3rdparty\libpng">
+      <UniqueIdentifier>{D1C6B77F-FA3A-E2F8-7198-818273BD1774}</UniqueIdentifier>
     </Filter>
     <Filter Include=".Qt">
       <UniqueIdentifier>{26983797-AD25-9CBF-C563-C317038CED7C}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Build\Release">
-      <UniqueIdentifier>{359B3135-AAC9-FC56-6649-BCF94CA5BEB6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Build\Release\QtGui4">
-      <UniqueIdentifier>{79D63FB8-9325-5586-D316-F30089C4158B}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -1125,968 +1110,968 @@
     <ClCompile Include="Ext\libcppqt\qt\src\gui\widgets\qlineedit_p.cpp">
       <Filter>widgets</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\png.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\png.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngerror.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngerror.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngget.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngget.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngmem.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngmem.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngpread.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngpread.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngread.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngread.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngrio.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngrio.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngrtran.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngrtran.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngrutil.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngrutil.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngset.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngset.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngtrans.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngtrans.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngwio.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngwio.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngwrite.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngwrite.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngwtran.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngwtran.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
-    <ClCompile Include="Ext\libcppqt\qt\src\gui\..\3rdparty\libpng\pngwutil.c">
-      <Filter>Ext\libcppqt\qt\src\gui\..\3rdparty\libpng</Filter>
+    <ClCompile Include="Ext\libcppqt\qt\src\3rdparty\libpng\pngwutil.c">
+      <Filter>3rdparty\libpng</Filter>
     </ClCompile>
     <ClCompile Include="Ext\libcppqt\qt\src\gui\painting\qgrayraster.c">
       <Filter>painting</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qdrag.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qclipboard.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qdnd_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qaccessibleplugin.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qaccessiblebridge.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qframe.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qrubberband.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qfocusframe.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qabstractpagesetupdialog.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qstyle.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qgraphicseffect.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qgraphicseffect_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qpixmapfilter_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qscrollarea.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qabstractbutton.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qpagesetupdialog.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qabstractprintdialog.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qspinbox.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qdesktopwidget.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qlayout.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qboxlayout.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qgridlayout.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qstackedlayout.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qformlayout.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qvalidator.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qabstractslider.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qslider.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qguiplatformplugin_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qerrormessage.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qcheckbox.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qstackedwidget.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qbuttongroup.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qsplitter.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qprogressbar.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qtextdocument.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qtextobject.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qlistview.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qabstractitemdelegate.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qshortcut.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qcommonstyle.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qwindowsstyle.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qfileinfogatherer_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qstringlistmodel.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qimageiohandler.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qmainwindow.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qsidebar_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qgraphicsanchorlayout.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qinputcontext.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qinputcontextplugin.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qgraphicsitemanimation.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qgraphicsscenelinearindex_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qpainter.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qscrollbar.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qiconengineplugin.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qpictureformatplugin.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qcolumnviewgrip_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qitemeditorfactory_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qlistwidget_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qtablewidget_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qtreewidget_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qsessionmanager.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qkeymapper_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qsoftkeymanager_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qsound.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qsound_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qgraphicssystemplugin_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qpaintbuffer_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qbasickeyeventtransition_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qbasicmouseeventtransition_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qkeyeventtransition.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qmouseeventtransition.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qcdestyle.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qmotifstyle.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qcleanlooksstyle.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qplastiquestyle.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qproxystyle.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qstyleplugin.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qwindowsxpstyle.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qwindowsvistastyle.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qradiobutton.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qdial.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qstatusbar.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qcommandlinkbutton.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qlinecontrol_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qfont_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qtextlist.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qtexttable.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qtextimagehandler_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qcompleter_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qsystemtrayicon.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qsystemtrayicon_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qundogroup.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qundostack.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qundostack_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qundoview.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qcalendartextnavigator_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qcombobox_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qdatetimeedit_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qdockwidget_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qwidgetresizehandler_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qlcdnumber.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qfontdatabase.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qmainwindowlayout_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qtoolbarlayout_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qsplashscreen.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qtabbar_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qtoolbarextension_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qtoolbarseparator_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qwidgetanimator_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qwininputcontext_p.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\moc_qsizepolicy.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\qrc_qmessagebox.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\qrc_qprintdialog.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\QtGui4\qrc_qstyle.cpp">
-      <Filter>Build\Debug\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qworkspace.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qtoolbutton.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qtoolbox.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qtoolbar.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qtextedit.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qtextbrowser.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qtabwidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qtabbar.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qsizegrip.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qpushbutton.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qprintpreviewwidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qplaintextedit.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qmenubar.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qmenu.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qmdisubwindow.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qmdiarea.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qlineedit.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qlabel.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qgroupbox.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qfontcombobox.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qplaintextedit_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qdialogbuttonbox.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qdatetimeedit.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qcombobox.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qabstractspinbox.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qabstractscrollarea.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qcalendarwidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qabstractscrollarea_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qdockwidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qprintdialog.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\util\qcompleter.h">
-      <Filter>.Qt</Filter>
+      <Filter>util</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\text\qtextdocumentlayout_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>text</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\text\qtextcontrol_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>text</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\text\qsyntaxhighlighter.h">
-      <Filter>.Qt</Filter>
+      <Filter>text</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\text\qabstracttextdocumentlayout.h">
-      <Filter>.Qt</Filter>
+      <Filter>text</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qstylesheetstyle_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qwidgetaction.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qwidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qgesturemanager_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qgesture.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qapplication.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qactiongroup.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qaction.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qtreewidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qtreeview.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qtablewidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qstyleditemdelegate.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qstandarditemmodel.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qproxymodel.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qitemselectionmodel.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qitemdelegate.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qsortfilterproxymodel.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qidentityproxymodel.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qheaderview.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qdirmodel.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qdatawidgetmapper.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qcolumnview.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qabstractproxymodel.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qabstractitemview.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qtableview.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qlistwidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\image\qmovie.h">
-      <Filter>.Qt</Filter>
+      <Filter>image</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\graphicsview\qgraphicsview.h">
-      <Filter>.Qt</Filter>
+      <Filter>graphicsview</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\graphicsview\qgraphicstransform.h">
-      <Filter>.Qt</Filter>
+      <Filter>graphicsview</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\graphicsview\qgraphicssceneindex_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>graphicsview</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\graphicsview\qgraphicsscenebsptreeindex_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>graphicsview</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\graphicsview\qgraphicsscene.h">
-      <Filter>.Qt</Filter>
+      <Filter>graphicsview</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\graphicsview\qgraphicsproxywidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>graphicsview</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\graphicsview\qgraphicsitem.h">
-      <Filter>.Qt</Filter>
+      <Filter>graphicsview</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\graphicsview\qgraphicswidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>graphicsview</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qwizard.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qprogressdialog.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qprintpreviewdialog.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qmessagebox.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qfilesystemmodel.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qdialog.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qinputdialog.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qfontdialog.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qcolordialog.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qfiledialog.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qdrag.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qclipboard.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qdnd_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\accessible\qaccessibleplugin.h">
-      <Filter>.Qt</Filter>
+      <Filter>accessible</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\accessible\qaccessiblebridge.h">
-      <Filter>.Qt</Filter>
+      <Filter>accessible</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qframe.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qrubberband.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qfocusframe.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qabstractpagesetupdialog.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qstyle.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\effects\qgraphicseffect.h">
-      <Filter>.Qt</Filter>
+      <Filter>effects</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\effects\qgraphicseffect_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>effects</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\image\qpixmapfilter_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>image</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qscrollarea.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qabstractbutton.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qpagesetupdialog.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qabstractprintdialog.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qspinbox.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qdesktopwidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qlayout.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qboxlayout.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qgridlayout.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qstackedlayout.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qformlayout.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qvalidator.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qabstractslider.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qslider.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qguiplatformplugin_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qerrormessage.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qcheckbox.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qstackedwidget.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qbuttongroup.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qsplitter.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qprogressbar.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\text\qtextdocument.h">
-      <Filter>.Qt</Filter>
+      <Filter>text</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\text\qtextobject.h">
-      <Filter>.Qt</Filter>
+      <Filter>text</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qlistview.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qabstractitemdelegate.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qshortcut.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qcommonstyle.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qwindowsstyle.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qfileinfogatherer_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qstringlistmodel.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\image\qimageiohandler.h">
-      <Filter>.Qt</Filter>
+      <Filter>image</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qmainwindow.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qsidebar_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\graphicsview\qgraphicsanchorlayout.h">
-      <Filter>.Qt</Filter>
+      <Filter>graphicsview</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\inputmethod\qinputcontext.h">
-      <Filter>.Qt</Filter>
+      <Filter>inputmethod</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\inputmethod\qinputcontextplugin.h">
-      <Filter>.Qt</Filter>
+      <Filter>inputmethod</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\graphicsview\qgraphicsitemanimation.h">
-      <Filter>.Qt</Filter>
+      <Filter>graphicsview</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\graphicsview\qgraphicsscenelinearindex_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>graphicsview</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\painting\qpainter.h">
-      <Filter>.Qt</Filter>
+      <Filter>painting</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qscrollbar.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\image\qiconengineplugin.h">
-      <Filter>.Qt</Filter>
+      <Filter>image</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\image\qpictureformatplugin.h">
-      <Filter>.Qt</Filter>
+      <Filter>image</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qcolumnviewgrip_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qitemeditorfactory_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qlistwidget_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qtablewidget_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\itemviews\qtreewidget_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>itemviews</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qsessionmanager.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qkeymapper_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qsoftkeymanager_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qsound.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qsound_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\painting\qgraphicssystemplugin_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>painting</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\painting\qpaintbuffer_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>painting</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\statemachine\qbasickeyeventtransition_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\statemachine\qbasicmouseeventtransition_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\statemachine\qkeyeventtransition.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\statemachine\qmouseeventtransition.h">
-      <Filter>.Qt</Filter>
+      <Filter>statemachine</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qcdestyle.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qmotifstyle.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qcleanlooksstyle.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qplastiquestyle.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qproxystyle.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qstyleplugin.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qwindowsxpstyle.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qwindowsvistastyle.h">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qradiobutton.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qdial.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qstatusbar.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qcommandlinkbutton.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qlinecontrol_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\text\qfont_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>text</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\text\qtextlist.h">
-      <Filter>.Qt</Filter>
+      <Filter>text</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\text\qtexttable.h">
-      <Filter>.Qt</Filter>
+      <Filter>text</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\text\qtextimagehandler_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>text</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\util\qcompleter_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>util</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\util\qsystemtrayicon.h">
-      <Filter>.Qt</Filter>
+      <Filter>util</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\util\qsystemtrayicon_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>util</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\util\qundogroup.h">
-      <Filter>.Qt</Filter>
+      <Filter>util</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\util\qundostack.h">
-      <Filter>.Qt</Filter>
+      <Filter>util</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\util\qundostack_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>util</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\util\qundoview.h">
-      <Filter>.Qt</Filter>
+      <Filter>util</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qcalendartextnavigator_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qcombobox_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qdatetimeedit_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qdockwidget_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qwidgetresizehandler_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qlcdnumber.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\text\qfontdatabase.h">
-      <Filter>.Qt</Filter>
+      <Filter>text</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qmainwindowlayout_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qtoolbarlayout_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qsplashscreen.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qtabbar_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qtoolbarextension_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qtoolbarseparator_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\widgets\qwidgetanimator_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>widgets</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\inputmethod\qwininputcontext_p.h">
-      <Filter>.Qt</Filter>
+      <Filter>inputmethod</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\kernel\qsizepolicy.h">
-      <Filter>.Qt</Filter>
+      <Filter>kernel</Filter>
     </CustomBuild>
     <CustomBuild Include="Build\Debug\QtGui4\widgets\qworkspace.moc">
       <Filter>.Qt</Filter>
@@ -2158,361 +2143,361 @@
       <Filter>.Qt</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qfiledialog.ui">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qpagesetupwidget.ui">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qmessagebox.qrc">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\dialogs\qprintdialog.qrc">
-      <Filter>.Qt</Filter>
+      <Filter>dialogs</Filter>
     </CustomBuild>
     <CustomBuild Include="Ext\libcppqt\qt\src\gui\styles\qstyle.qrc">
-      <Filter>.Qt</Filter>
+      <Filter>styles</Filter>
     </CustomBuild>
     <ClCompile Include="Build\Release\QtGui4\moc_qdrag.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qclipboard.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qdnd_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qaccessibleplugin.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qaccessiblebridge.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qframe.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qrubberband.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qfocusframe.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qabstractpagesetupdialog.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qstyle.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qgraphicseffect.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qgraphicseffect_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qpixmapfilter_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qscrollarea.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qabstractbutton.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qpagesetupdialog.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qabstractprintdialog.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qspinbox.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qdesktopwidget.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qlayout.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qboxlayout.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qgridlayout.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qstackedlayout.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qformlayout.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qvalidator.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qabstractslider.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qslider.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qguiplatformplugin_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qerrormessage.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qcheckbox.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qstackedwidget.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qbuttongroup.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qsplitter.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qprogressbar.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qtextdocument.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qtextobject.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qlistview.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qabstractitemdelegate.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qshortcut.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qcommonstyle.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qwindowsstyle.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qfileinfogatherer_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qstringlistmodel.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qimageiohandler.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qmainwindow.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qsidebar_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qgraphicsanchorlayout.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qinputcontext.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qinputcontextplugin.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qgraphicsitemanimation.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qgraphicsscenelinearindex_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qpainter.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qscrollbar.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qiconengineplugin.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qpictureformatplugin.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qcolumnviewgrip_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qitemeditorfactory_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qlistwidget_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qtablewidget_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qtreewidget_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qsessionmanager.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qkeymapper_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qsoftkeymanager_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qsound.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qsound_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qgraphicssystemplugin_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qpaintbuffer_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qbasickeyeventtransition_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qbasicmouseeventtransition_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qkeyeventtransition.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qmouseeventtransition.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qcdestyle.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qmotifstyle.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qcleanlooksstyle.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qplastiquestyle.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qproxystyle.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qstyleplugin.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qwindowsxpstyle.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qwindowsvistastyle.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qradiobutton.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qdial.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qstatusbar.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qcommandlinkbutton.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qlinecontrol_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qfont_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qtextlist.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qtexttable.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qtextimagehandler_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qcompleter_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qsystemtrayicon.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qsystemtrayicon_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qundogroup.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qundostack.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qundostack_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qundoview.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qcalendartextnavigator_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qcombobox_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qdatetimeedit_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qdockwidget_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qwidgetresizehandler_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qlcdnumber.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qfontdatabase.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qmainwindowlayout_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qtoolbarlayout_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qsplashscreen.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qtabbar_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qtoolbarextension_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qtoolbarseparator_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qwidgetanimator_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qwininputcontext_p.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\moc_qsizepolicy.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\qrc_qmessagebox.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\qrc_qprintdialog.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\QtGui4\qrc_qstyle.cpp">
-      <Filter>Build\Release\QtGui4</Filter>
+      <Filter>.Qt</Filter>
     </ClCompile>
     <CustomBuild Include="Build\Release\QtGui4\widgets\qworkspace.moc">
       <Filter>.Qt</Filter>
