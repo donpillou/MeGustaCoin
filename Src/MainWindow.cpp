@@ -11,10 +11,18 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   setDockNestingEnabled(true);
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   //setCentralWidget(orderWidget);
-  QDockWidget* orderDockWidget = new QDockWidget(this);
-  orderDockWidget->setWindowTitle(tr("Orders"));
-  orderDockWidget->setWidget(orderWidget);
-  addDockWidget(Qt::TopDockWidgetArea, orderDockWidget);
+  QDockWidget* ordersDockWidget = new QDockWidget(tr("Orders"), this);
+  //ordersDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  ordersDockWidget->setObjectName("Orders");
+  ordersDockWidget->setWidget(orderWidget);
+  addDockWidget(Qt::TopDockWidgetArea, ordersDockWidget);
+  QDockWidget* transactionsDockWidget = new QDockWidget(tr("Transactions"), this );
+  //transactionsDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  transactionsDockWidget->setObjectName("Orders");
+  //transactionsDockWidget->setWidget(transactionsWidget);
+  addDockWidget(Qt::TopDockWidgetArea, transactionsDockWidget);
+  tabifyDockWidget(ordersDockWidget, transactionsDockWidget);
+  //setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North);
   resize(600, 400);
 
   QMenuBar* menuBar = this->menuBar();
@@ -35,7 +43,8 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   action->setShortcut(QKeySequence(QKeySequence::Refresh));
   connect(action, SIGNAL(triggered()), this, SLOT(refresh()));
   menu->addSeparator();
-  menu->addAction(orderDockWidget->toggleViewAction());
+  menu->addAction(ordersDockWidget->toggleViewAction());
+  menu->addAction(transactionsDockWidget->toggleViewAction());
 
   menu = menuBar->addMenu(tr("&Help"));
   connect(menu->addAction(tr("&About...")), SIGNAL(triggered()), this, SLOT(about()));
