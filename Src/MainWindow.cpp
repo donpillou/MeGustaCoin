@@ -8,7 +8,13 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
   updateWindowTitle();
-  setCentralWidget(orderWidget);
+  setDockNestingEnabled(true);
+  setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
+  //setCentralWidget(orderWidget);
+  QDockWidget* orderDockWidget = new QDockWidget(this);
+  orderDockWidget->setWindowTitle(tr("Orders"));
+  orderDockWidget->setWidget(orderWidget);
+  addDockWidget(Qt::TopDockWidgetArea, orderDockWidget);
   resize(600, 400);
 
   QMenuBar* menuBar = this->menuBar();
@@ -28,6 +34,8 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   action = menu->addAction(tr("&Refresh"));
   action->setShortcut(QKeySequence(QKeySequence::Refresh));
   connect(action, SIGNAL(triggered()), this, SLOT(refresh()));
+  menu->addSeparator();
+  menu->addAction(orderDockWidget->toggleViewAction());
 
   menu = menuBar->addMenu(tr("&Help"));
   connect(menu->addAction(tr("&About...")), SIGNAL(triggered()), this, SLOT(about()));
