@@ -42,14 +42,16 @@ void TransactionsWidget::setMarket(Market* market)
     TransactionModel& transactionModel = market->getTransactionModel();
 
     orderProxyModel->setSourceModel(&transactionModel);
-    transactionView->header()->resizeSection(0, 75);
-    transactionView->header()->resizeSection(1, 140);
-    transactionView->header()->resizeSection(2, 75);
-    transactionView->header()->resizeSection(3, 75);
-    transactionView->header()->resizeSection(4, 75);
-    transactionView->header()->resizeSection(5, 75);
-    transactionView->header()->resizeSection(6, 75);
-    transactionView->header()->restoreState(settings.value("TransactionHeaderState").toByteArray());
+    QHeaderView* headerView = transactionView->header();
+    headerView->resizeSection(0, 35);
+    headerView->resizeSection(1, 110);
+    headerView->resizeSection(2, 85);
+    headerView->resizeSection(3, 100);
+    headerView->resizeSection(4, 85);
+    headerView->resizeSection(5, 75);
+    headerView->resizeSection(6, 85);
+    transactionView->sortByColumn(1);
+    headerView->restoreState(settings.value("TransactionHeaderState").toByteArray());
   }
   updateToolBarButtons();
 }

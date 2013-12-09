@@ -64,13 +64,15 @@ void OrdersWidget::setMarket(Market* market)
     connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
 
     orderProxyModel->setSourceModel(&orderModel);
-    orderView->header()->resizeSection(0, 85);
-    orderView->header()->resizeSection(1, 85);
-    orderView->header()->resizeSection(2, 150);
-    orderView->header()->resizeSection(3, 85);
-    orderView->header()->resizeSection(4, 85);
-    orderView->header()->resizeSection(5, 85);
-    orderView->header()->restoreState(settings.value("OrderHeaderState").toByteArray());
+    QHeaderView* headerView = orderView->header();
+    headerView->resizeSection(0, 80);
+    headerView->resizeSection(1, 85);
+    headerView->resizeSection(2, 145);
+    headerView->resizeSection(3, 85);
+    headerView->resizeSection(4, 100);
+    headerView->resizeSection(5, 85);
+    orderView->sortByColumn(2);
+    headerView->restoreState(settings.value("OrderHeaderState").toByteArray());
   }
   updateToolBarButtons();
 }
