@@ -32,7 +32,6 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings) : QWidget(paren
   connect(cancelAction, SIGNAL(triggered()), this, SLOT(cancelOrder()));
 
   orderView = new QTreeView(this);
-  connect(orderView->selectionModel(), SIGNAL(selectionChanged()), this, SLOT(updateToolBarButtons()));
   orderProxyModel = new QSortFilterProxyModel(this);
   orderProxyModel->setDynamicSortFilter(true);
   orderView->setModel(orderProxyModel);
@@ -62,6 +61,7 @@ void OrdersWidget::setMarket(Market* market)
   {
     OrderModel& orderModel = market->getOrderModel();
     connect(&orderModel, SIGNAL(orderEdited(const QModelIndex&)), this, SLOT(updateOrder(const QModelIndex&)));
+    connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
 
     orderProxyModel->setSourceModel(&orderModel);
     orderView->header()->resizeSection(0, 85);

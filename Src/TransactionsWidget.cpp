@@ -39,16 +39,16 @@ void TransactionsWidget::setMarket(Market* market)
   }
   else
   {
-    OrderModel& orderModel = market->getOrderModel();
-    connect(&orderModel, SIGNAL(orderEdited(const QModelIndex&)), this, SLOT(updateOrder(const QModelIndex&)));
+    TransactionModel& transactionModel = market->getTransactionModel();
 
-    orderProxyModel->setSourceModel(&orderModel);
-    transactionView->header()->resizeSection(0, 85);
-    transactionView->header()->resizeSection(1, 85);
-    transactionView->header()->resizeSection(2, 150);
-    transactionView->header()->resizeSection(3, 85);
-    transactionView->header()->resizeSection(4, 85);
-    transactionView->header()->resizeSection(5, 85);
+    orderProxyModel->setSourceModel(&transactionModel);
+    transactionView->header()->resizeSection(0, 75);
+    transactionView->header()->resizeSection(1, 140);
+    transactionView->header()->resizeSection(2, 75);
+    transactionView->header()->resizeSection(3, 75);
+    transactionView->header()->resizeSection(4, 75);
+    transactionView->header()->resizeSection(5, 75);
+    transactionView->header()->resizeSection(6, 75);
     transactionView->header()->restoreState(settings.value("TransactionHeaderState").toByteArray());
   }
   updateToolBarButtons();

@@ -65,7 +65,6 @@ signals:
 private:
   const Market& market;
   QList<Order*> orders;
-  QHash<QString, Order*> ordersById;
   QString draftStr;
   QString submittingStr;
   QString openStr;

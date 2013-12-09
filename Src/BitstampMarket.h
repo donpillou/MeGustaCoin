@@ -14,6 +14,7 @@ public:
   virtual void loadOrders();
   virtual void loadBalance();
   virtual void loadTicker();
+  virtual void loadTransactions();
   virtual void createOrder(const QString& draftId, bool sell, double amount, double price);
   virtual void cancelOrder(const QString& id);
   virtual void updateOrder(const QString& id, bool sell, double amount, double price);
@@ -52,6 +53,7 @@ public:
     buy,
     sell,
     cancel,
+    transactions,
   };
 
 public slots:

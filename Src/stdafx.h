@@ -10,6 +10,7 @@
 class Market;
 
 #include "OrderModel.h"
+#include "TransactionModel.h"
 
 #include "Market.h"
 #include "BitstampMarket.h"

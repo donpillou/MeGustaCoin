@@ -38,6 +38,11 @@ void BitstampMarket::loadTicker()
   emit requestData((int)BitstampWorker::Request::ticker, QVariant());
 }
 
+void BitstampMarket::loadTransactions()
+{
+  emit requestData((int)BitstampWorker::Request::transactions, QVariant());
+}
+
 void BitstampMarket::createOrder(const QString& draftId, bool sell, double amount, double price)
 {
   orderModel.setOrderState(draftId, OrderModel::Order::State::submitting);
@@ -170,6 +175,32 @@ void BitstampMarket::handleData(int request, const QVariant& data)
       orderModel.setData(orders);
     }
     break;
+  case BitstampWorker::Request::transactions:
+    {
+      QList<TransactionModel::Transaction> transactions;
+      QVariantList transactionData = data.toList();
+      foreach(const QVariant& transactionDataVar, transactionData)
+      {
+        QVariantMap transactionData = transactionDataVar.toMap();
+        transactions.append(TransactionModel::Transaction());
+        TransactionModel::Transaction& transaction = transactions.back();
+    
+        transaction.id = transactionData["id"].toString();
+        QString type = transactionData["type"].toString();
+        if(type != "2")
+          continue;
+        transaction.date = transactionData["datetime"].toString();
+        double value = transactionData["usd"].toDouble();
+        transaction.type = value > 0. ? TransactionModel::Transaction::Type::sell : TransactionModel::Transaction::Type::buy;
+        transaction.amount = transactionData["btc"].toDouble();
+        transaction.price = fabs(value) / transaction.amount;
+        transaction.fee = transactionData["fee"].toDouble();
+        transaction.balanceChange = value > 0. ? (fabs(value) - transaction.fee) : -(fabs(value) + transaction.fee);
+      }
+
+      transactionModel.setData(transactions);
+    }
+    break;
   }
 }
 
@@ -201,6 +232,9 @@ void BitstampWorker::loadData(int request, QVariant params)
     break;
   case Request::cancel:
     url = "https://www.bitstamp.net/api/cancel_order/";
+    break;
+  case Request::transactions:
+    url = "https://www.bitstamp.net/api/user_transactions/";
     break;
   default:
     Q_ASSERT(false);

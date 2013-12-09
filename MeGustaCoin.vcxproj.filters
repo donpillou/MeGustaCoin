@@ -21,6 +21,7 @@
     <ClCompile Include="Src\OrdersWidget.cpp" />
     <ClCompile Include="Src\Sha256.cpp" />
     <ClCompile Include="Src\stdafx.cpp" />
+    <ClCompile Include="Src\TransactionModel.cpp" />
     <ClCompile Include="Src\TransactionsWidget.cpp" />
     <CustomBuild Include="Src\BitstampMarket.h" />
     <ClInclude Include="Src\Download.h" />
@@ -31,6 +32,7 @@
     <CustomBuild Include="Src\OrdersWidget.h" />
     <ClInclude Include="Src\Sha256.h" />
     <ClInclude Include="Src\stdafx.h" />
+    <ClInclude Include="Src\TransactionModel.h" />
     <CustomBuild Include="Src\TransactionsWidget.h" />
     <CustomBuild Include="Build\Debug\QtCore4\QtCore4.dll">
       <Filter>.copy</Filter>

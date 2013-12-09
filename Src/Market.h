@@ -26,12 +26,13 @@ public:
     TickerData() : lastTradePrice(0.), highestBuyOrder(0.), lowestSellOrder(0.) {}
   };
 
-  Market() : orderModel(*this) {};
+  Market() : orderModel(*this), transactionModel(*this) {};
   virtual ~Market() {};
 
   virtual void loadOrders() = 0;
   virtual void loadBalance() = 0;
   virtual void loadTicker() = 0;
+  virtual void loadTransactions() = 0;
   virtual void createOrder(const QString& draftId, bool sell, double amount, double price) = 0;
   virtual void cancelOrder(const QString& id) = 0;
   virtual void updateOrder(const QString& id, bool sell, double amount, double price) = 0;
@@ -39,6 +40,7 @@ public:
   virtual double getMaxBuyAmout(double price) const = 0;
 
   OrderModel& getOrderModel() {return orderModel;};
+  TransactionModel& getTransactionModel() {return transactionModel;};
 
   const Balance* getBalance() const {return balance.fee == 0. ? 0 : &balance;}
   const TickerData* getTickerData() const {return tickerData.lastTradePrice == 0. ? 0 : &tickerData;}
@@ -52,6 +54,7 @@ signals:
 
 protected:
   OrderModel orderModel;
+  TransactionModel transactionModel;
   const char* marketCurrency; // USD
   const char* coinCurrency; // BTC
   Balance balance;

@@ -108,6 +108,7 @@ void MainWindow::refresh()
   market->loadOrders();
   market->loadBalance();
   market->loadTicker();
+  market->loadTransactions();
 }
 
 void MainWindow::open(const QString& marketName, const QString& userName, const QString& key, const QString& secret)
