@@ -7,26 +7,32 @@ OrderWidget::OrderWidget(QWidget* parent, QSettings& settings) : QWidget(parent)
   toolBar->setStyleSheet("QToolBar { border: 0px }");
   toolBar->setIconSize(QSize(16, 16));
   toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-  QAction* action = toolBar->addAction(QIcon(":/Icons/arrow_refresh.png"), tr("&Refresh"));
-  action->setShortcut(QKeySequence(QKeySequence::Refresh));
-  connect(action, SIGNAL(triggered()), parent, SLOT(refresh()));
+  refreshAction = toolBar->addAction(QIcon(":/Icons/arrow_refresh.png"), tr("&Refresh"));
+  refreshAction->setEnabled(false);
+  refreshAction->setShortcut(QKeySequence(QKeySequence::Refresh));
+  connect(refreshAction, SIGNAL(triggered()), parent, SLOT(refresh()));
   
-  action = toolBar->addAction(QIcon(":/Icons/bitcoin_add.png"), tr("&Buy"));
-  action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_B));
-  connect(action, SIGNAL(triggered()), this, SLOT(newBuyOrder()));
-  action = toolBar->addAction(QIcon(":/Icons/money_add.png"), tr("&Sell"));
-  action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
-  connect(action, SIGNAL(triggered()), this, SLOT(newSellOrder()));
+  buyAction = toolBar->addAction(QIcon(":/Icons/bitcoin_add.png"), tr("&Buy"));
+  buyAction->setEnabled(false);
+  buyAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_B));
+  connect(buyAction, SIGNAL(triggered()), this, SLOT(newBuyOrder()));
+  sellAction = toolBar->addAction(QIcon(":/Icons/money_add.png"), tr("&Sell"));
+  sellAction->setEnabled(false);
+  sellAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_S));
+  connect(sellAction, SIGNAL(triggered()), this, SLOT(newSellOrder()));
 
-  action = toolBar->addAction(QIcon(":/Icons/bullet_go.png"), tr("S&ubmit"));
-  action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_U));
-  connect(action, SIGNAL(triggered()), this, SLOT(submitOrder()));
+  submitAction = toolBar->addAction(QIcon(":/Icons/bullet_go.png"), tr("S&ubmit"));
+  submitAction->setEnabled(false);
+  submitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_U));
+  connect(submitAction, SIGNAL(triggered()), this, SLOT(submitOrder()));
 
-  action = toolBar->addAction(QIcon(":/Icons/cancel.png"), tr("&Cancel"));
-  action->setShortcut(QKeySequence(Qt::Key_Delete));
-  connect(action, SIGNAL(triggered()), this, SLOT(cancelOrder()));
+  cancelAction = toolBar->addAction(QIcon(":/Icons/cancel.png"), tr("&Cancel"));
+  cancelAction->setEnabled(false);
+  cancelAction->setShortcut(QKeySequence(Qt::Key_Delete));
+  connect(cancelAction, SIGNAL(triggered()), this, SLOT(cancelOrder()));
 
   orderView = new QTreeView(this);
+  connect(orderView->selectionModel(), SIGNAL(selectionChanged()), this, SLOT(updateToolBarButtons()));
   orderProxyModel = new QSortFilterProxyModel(this);
   orderProxyModel->setDynamicSortFilter(true);
   orderView->setModel(orderProxyModel);
@@ -66,6 +72,7 @@ void OrderWidget::setMarket(Market* market)
     orderView->header()->resizeSection(5, 85);
     orderView->header()->restoreState(settings.value("OrderHeaderState").toByteArray());
   }
+  updateToolBarButtons();
 }
 
 void OrderWidget::newBuyOrder()
@@ -97,7 +104,7 @@ void OrderWidget::addOrder(OrderModel::Order::Type type)
 }
 
 QList<QModelIndex> OrderWidget::getSelectedRows()
-{ // since orderView->selectionModel(); does not work
+{ // since orderView->selectionModel()->selectedRows(); does not work
   QList<QModelIndex> result;
   QItemSelection selection = orderView->selectionModel()->selection();
   foreach(const QItemSelectionRange& range, selection)
@@ -163,4 +170,31 @@ void OrderWidget::updateOrder(const QModelIndex& index)
   double amount = order->newAmount != 0. ? order->newAmount : order->amount;
   double price = order->newPrice != 0. ? order->newPrice : order->price;
   market->updateOrder(order->id, order->type == OrderModel::Order::Type::sell, amount, price);
+}
+
+void OrderWidget::updateToolBarButtons()
+{
+  QList<QModelIndex> selectedRows = getSelectedRows();
+  OrderModel& orderModel = market->getOrderModel();
+
+  bool hasMarket = market != 0;
+  bool canCancel = getSelectedRows().size() > 0;
+  bool canSubmit = false;
+
+  if(hasMarket)
+    foreach(const QModelIndex& index, selectedRows)
+    {
+      const OrderModel::Order* order = orderModel.getOrder(index);
+      if(order->state == OrderModel::Order::State::draft)
+      {
+        canSubmit = true;
+        break;
+      }
+    }
+
+  refreshAction->setEnabled(hasMarket);
+  buyAction->setEnabled(hasMarket);
+  sellAction->setEnabled(hasMarket);
+  submitAction->setEnabled(canSubmit);
+  cancelAction->setEnabled(canCancel);
 }
