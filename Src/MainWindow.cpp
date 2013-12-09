@@ -3,8 +3,10 @@
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0)
 {
-  orderWidget = new OrdersWidget(this, settings);
-  connect(this, SIGNAL(marketChanged(Market*)), orderWidget, SLOT(setMarket(Market*)));
+  OrdersWidget* ordersWidget = new OrdersWidget(this, settings);
+  connect(this, SIGNAL(marketChanged(Market*)), ordersWidget, SLOT(setMarket(Market*)));
+  TransactionsWidget* transactionsWidget = new TransactionsWidget(this, settings);
+  connect(this, SIGNAL(marketChanged(Market*)), transactionsWidget, SLOT(setMarket(Market*)));
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
   updateWindowTitle();
@@ -14,12 +16,12 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   QDockWidget* ordersDockWidget = new QDockWidget(tr("Orders"), this);
   //ordersDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   ordersDockWidget->setObjectName("Orders");
-  ordersDockWidget->setWidget(orderWidget);
+  ordersDockWidget->setWidget(ordersWidget);
   addDockWidget(Qt::TopDockWidgetArea, ordersDockWidget);
   QDockWidget* transactionsDockWidget = new QDockWidget(tr("Transactions"), this );
   //transactionsDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   transactionsDockWidget->setObjectName("Orders");
-  //transactionsDockWidget->setWidget(transactionsWidget);
+  transactionsDockWidget->setWidget(transactionsWidget);
   addDockWidget(Qt::TopDockWidgetArea, transactionsDockWidget);
   tabifyDockWidget(ordersDockWidget, transactionsDockWidget);
   //setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North);

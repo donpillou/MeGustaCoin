@@ -15,5 +15,6 @@ class Market;
 #include "BitstampMarket.h"
 
 #include "OrdersWidget.h"
+#include "TransactionsWidget.h"
 #include "MainWindow.h"
 #include "LoginDialog.h"

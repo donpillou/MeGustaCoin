@@ -21,6 +21,7 @@
     <ClCompile Include="Src\OrdersWidget.cpp" />
     <ClCompile Include="Src\Sha256.cpp" />
     <ClCompile Include="Src\stdafx.cpp" />
+    <ClCompile Include="Src\TransactionsWidget.cpp" />
     <CustomBuild Include="Src\BitstampMarket.h" />
     <ClInclude Include="Src\Download.h" />
     <CustomBuild Include="Src\LoginDialog.h" />
@@ -30,6 +31,7 @@
     <CustomBuild Include="Src\OrdersWidget.h" />
     <ClInclude Include="Src\Sha256.h" />
     <ClInclude Include="Src\stdafx.h" />
+    <CustomBuild Include="Src\TransactionsWidget.h" />
     <CustomBuild Include="Build\Debug\QtCore4\QtCore4.dll">
       <Filter>.copy</Filter>
     </CustomBuild>
@@ -76,6 +78,9 @@
     <ClCompile Include="Build\Debug\moc_OrdersWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_TransactionsWidget.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_OrderModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -101,6 +106,9 @@
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_OrdersWidget.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_TransactionsWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_OrderModel.cpp">

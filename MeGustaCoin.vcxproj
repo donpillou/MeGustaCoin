@@ -109,6 +109,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Src\TransactionsWidget.cpp" />
     <CustomBuild Include="Src\BitstampMarket.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"BitstampMarket.h (Qt moc)"</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/BitstampMarket.h -o Build/Debug/moc_BitstampMarket.cpp</Command>
@@ -160,6 +161,14 @@
     </CustomBuild>
     <ClInclude Include="Src\Sha256.h" />
     <ClInclude Include="Src\stdafx.h" />
+    <CustomBuild Include="Src\TransactionsWidget.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"TransactionsWidget.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/TransactionsWidget.h -o Build/Debug/moc_TransactionsWidget.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_TransactionsWidget.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"TransactionsWidget.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/TransactionsWidget.h -o Build/Release/moc_TransactionsWidget.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_TransactionsWidget.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <CustomBuild Include="Build\Debug\QtCore4\QtCore4.dll">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"QtCore4.dll (copy)"</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">copy Build\Debug\QtCore4\QtCore4.dll Build\Debug\QtCore4.dll</Command>
@@ -208,6 +217,9 @@
     <ClCompile Include="Build\Debug\moc_OrdersWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_TransactionsWidget.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_OrderModel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -240,6 +252,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_OrdersWidget.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_TransactionsWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_OrderModel.cpp">
