@@ -148,6 +148,7 @@ void OrdersWidget::cancelOrder()
     {
     case OrderModel::Order::State::draft:
     case OrderModel::Order::State::canceled:
+    case OrderModel::Order::State::closed:
       rowsToRemove.insert(index.row(), index);
       break;
     case OrderModel::Order::State::open:

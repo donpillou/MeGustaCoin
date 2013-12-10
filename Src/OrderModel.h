@@ -31,6 +31,7 @@ public:
       open,
       canceling,
       canceled,
+      closed,
     } state;
 
     Order() : type(Type::unknown), amount(0.), price(0.), newAmount(0.), newPrice(0.), state(State::open) {}
@@ -70,6 +71,7 @@ private:
   QString openStr;
   QString cancelingStr;
   QString canceledStr;
+  QString closedStr;
   QString buyStr;
   QString sellStr;
   QString format;

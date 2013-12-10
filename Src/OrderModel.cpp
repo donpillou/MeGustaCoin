@@ -3,7 +3,7 @@
 
 OrderModel::OrderModel(const Market& market) : market(market), 
 draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), 
-canceledStr(tr("canceled")), buyStr(tr("buy")), sellStr(tr("sell")), nextDraftId(0)
+canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), nextDraftId(0)
 {
   italicFont.setItalic(true);
 }
@@ -25,7 +25,7 @@ void OrderModel::setData(const QList<Order>& updatedOrders)
     QHash<QString, const Order*>::iterator openIt = openOrders.find(order->id);
     if(order->state == Order::State::open && openIt == openOrders.end())
     {
-      order->state = Order::State::canceled;
+      order->state = Order::State::closed;
       QModelIndex index = createIndex(i, (int)Column::state, 0);
       emit dataChanged(index, index);
       openOrders.erase(openIt);
@@ -242,6 +242,8 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
         return cancelingStr;
       case Order::State::canceled:
         return canceledStr;
+      case Order::State::closed:
+        return closedStr;
       }
     }
   }
