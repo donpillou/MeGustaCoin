@@ -124,7 +124,7 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
     case Column::fee:
       return QString().sprintf("%.02f %s", transaction.fee, market.getMarketCurrency());
     case Column::balance:
-      return QString().sprintf("%.02f %s", transaction.balanceChange, market.getMarketCurrency());
+      return QString().sprintf("%+.02f %s", transaction.balanceChange, market.getMarketCurrency());
     }
   }
   return QVariant();
@@ -164,7 +164,7 @@ QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, 
       case Column::fee:
         return tr("Fee");
       case Column::balance:
-        return tr("Balance");
+        return tr("Total");
     }
   }
   return QVariant();
