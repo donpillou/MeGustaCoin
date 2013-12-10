@@ -192,7 +192,7 @@ void BitstampMarket::handleData(int request, const QVariant& data)
         transaction.date = transactionData["datetime"].toString();
         double value = transactionData["usd"].toDouble();
         transaction.type = value > 0. ? TransactionModel::Transaction::Type::sell : TransactionModel::Transaction::Type::buy;
-        transaction.amount = transactionData["btc"].toDouble();
+        transaction.amount = fabs(transactionData["btc"].toDouble());
         transaction.price = fabs(value) / transaction.amount;
         transaction.fee = transactionData["fee"].toDouble();
         transaction.balanceChange = value > 0. ? (fabs(value) - transaction.fee) : -(fabs(value) + transaction.fee);
