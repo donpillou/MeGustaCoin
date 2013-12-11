@@ -9,7 +9,8 @@ BitstampMarket::BitstampMarket(DataModel& dataModel, const QString& userName, co
   worker = new BitstampWorker(*this);
   worker->moveToThread(&thread);
   connect(this, SIGNAL(requestData(int, QVariant)), worker, SLOT(loadData(int, QVariant)), Qt::QueuedConnection);
-  connect(worker, SIGNAL(dataLoaded(int, const QVariant&)), this, SLOT(handleData(int, const QVariant&)), Qt::BlockingQueuedConnection);
+  connect(worker, SIGNAL(dataLoaded(int, const QVariant&, const QVariant&)), this, SLOT(handleData(int, const QVariant&, const QVariant&)), Qt::BlockingQueuedConnection);
+  connect(worker, SIGNAL(error(int, const QVariant&)), this, SLOT(handleError(int, const QVariant&)), Qt::BlockingQueuedConnection);
   thread.start();
 }
 
@@ -55,6 +56,8 @@ void BitstampMarket::createOrder(const QString& draftId, bool sell, double amoun
 
 void BitstampMarket::cancelOrder(const QString& id)
 {
+//  dataModel.logModel.addMessage(LogModel::Type::information,
+//    QString().sprintf("Canceling %s order (%.08f %s @ %.02f %s)...", ));
   dataModel.orderModel.setOrderState(id, OrderModel::Order::State::canceling);
   QVariantMap args;
   args["id"] = id;
@@ -94,7 +97,35 @@ double BitstampMarket::getMaxBuyAmout(double price) const
   return result;
 }
 
-void BitstampMarket::handleData(int request, const QVariant& data)
+void BitstampMarket::handleError(int request, const QVariant& args)
+{
+  switch((BitstampWorker::Request)request)
+  {
+  case BitstampWorker::Request::openOrders:
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load orders");
+    break;
+  case BitstampWorker::Request::balance:
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load balance");
+    break;
+  case BitstampWorker::Request::ticker:
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load ticker data");
+    break;
+  case BitstampWorker::Request::buy:
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not submit buy order");
+    break;
+  case BitstampWorker::Request::sell:
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not submit sell order");
+    break;
+  case BitstampWorker::Request::cancel:
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not cancel order");
+    break;
+  case BitstampWorker::Request::transactions:
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load transactions");
+    break;
+  }
+}
+
+void BitstampMarket::handleData(int request, const QVariant& args, const QVariant& data)
 {
   switch((BitstampWorker::Request)request)
   {
@@ -114,17 +145,18 @@ void BitstampMarket::handleData(int request, const QVariant& data)
       order.price = orderData["price"].toDouble();
       order.amount = orderData["amount"].toDouble();
 
-      QString draftId = orderData["draftid"].toString();
+      QString draftId = args.toMap()["draftid"].toString();
       dataModel.orderModel.updateOrder(draftId, order);
+      dataModel.logModel.addMessage(LogModel::Type::information, QString("Submitted %1 order").arg((BitstampWorker::Request)request == BitstampWorker::Request::sell ? "sell" : "buy"));
     }
     break;
   case BitstampWorker::Request::cancel:
     {
-      QVariantMap cancelData = data.toMap();
-      bool success = cancelData["success"].toBool();
-      QString id = cancelData["id"].toString();
-      bool updating = cancelData["updating"].toBool();
+      QVariantMap cancelArgs = args.toMap();
+      QString id = cancelArgs["id"].toString();
+      bool updating = cancelArgs["updating"].toBool();
       dataModel.orderModel.setOrderState(id, updating ? OrderModel::Order::State::submitting : OrderModel::Order::State::canceled);
+      dataModel.logModel.addMessage(LogModel::Type::information, "Canceled order");
     }
     break;
   case BitstampWorker::Request::balance:
@@ -251,7 +283,7 @@ void BitstampWorker::loadData(int request, QVariant params)
   {
     if(!(dlData = dl.load(url)))
     {
-      // todo
+      emit error(request, params);
       return;
     }
   }
@@ -288,32 +320,13 @@ void BitstampWorker::loadData(int request, QVariant params)
 
     if(!(dlData = dl.loadPOST(url, fields, values, i)))
     {
-      // todo
+      emit error(request, params);
       return;
     }
   }
 
   QVariant data = QxtJSON::parse(dlData);
-
-  if((Request)request == Request::buy || (Request)request == Request::sell)
-  {
-    QString draftId = params.toMap()["draftid"].toString();
-    QVariantMap orderData = data.toMap();
-    orderData["draftid"] = draftId;
-    dataLoaded(request, orderData);
-  }
-  else if((Request)request == Request::cancel)
-  {
-    QString id = params.toMap()["id"].toString();
-    bool updating = params.toMap()["updating"].toBool();
-    QVariantMap cancelData;
-    cancelData["id"] = id;
-    cancelData["success"] = QString(dlData) == "true";
-    cancelData["updating"] = updating;
-    dataLoaded(request, cancelData);
-  }
-  else
-    dataLoaded(request, data);
+  dataLoaded(request, params, data);
 
   // something is wrong with qt, the QVariant destructor crashes when it tries to free a variant list.
   // so, lets prevent the destructor from doing so:
