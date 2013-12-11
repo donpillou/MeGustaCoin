@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BitstampMarket::BitstampMarket(const QString& userName, const QString& key, const QString& secret) : userName(userName), key(key), secret(secret)
+BitstampMarket::BitstampMarket(DataModel& dataModel, const QString& userName, const QString& key, const QString& secret) : Market(dataModel), userName(userName), key(key), secret(secret)
 {
   marketCurrency = "USD";
   coinCurrency = "BTC";
@@ -45,7 +45,7 @@ void BitstampMarket::loadTransactions()
 
 void BitstampMarket::createOrder(const QString& draftId, bool sell, double amount, double price)
 {
-  orderModel.setOrderState(draftId, OrderModel::Order::State::submitting);
+  dataModel.orderModel.setOrderState(draftId, OrderModel::Order::State::submitting);
   QVariantMap args;
   args["draftid"] = draftId;
   args["amount"] = amount;
@@ -55,7 +55,7 @@ void BitstampMarket::createOrder(const QString& draftId, bool sell, double amoun
 
 void BitstampMarket::cancelOrder(const QString& id)
 {
-  orderModel.setOrderState(id, OrderModel::Order::State::canceling);
+  dataModel.orderModel.setOrderState(id, OrderModel::Order::State::canceling);
   QVariantMap args;
   args["id"] = id;
   emit requestData((int)BitstampWorker::Request::cancel, args);
@@ -63,7 +63,7 @@ void BitstampMarket::cancelOrder(const QString& id)
 
 void BitstampMarket::updateOrder(const QString& id, bool sell, double amount, double price)
 {
-  orderModel.setOrderState(id, OrderModel::Order::State::canceling);
+  dataModel.orderModel.setOrderState(id, OrderModel::Order::State::canceling);
   {
     QVariantMap args;
     args["id"] = id;
@@ -115,7 +115,7 @@ void BitstampMarket::handleData(int request, const QVariant& data)
       order.amount = orderData["amount"].toDouble();
 
       QString draftId = orderData["draftid"].toString();
-      orderModel.updateOrder(draftId, order);
+      dataModel.orderModel.updateOrder(draftId, order);
     }
     break;
   case BitstampWorker::Request::cancel:
@@ -124,7 +124,7 @@ void BitstampMarket::handleData(int request, const QVariant& data)
       bool success = cancelData["success"].toBool();
       QString id = cancelData["id"].toString();
       bool updating = cancelData["updating"].toBool();
-      orderModel.setOrderState(id, updating ? OrderModel::Order::State::submitting : OrderModel::Order::State::canceled);
+      dataModel.orderModel.setOrderState(id, updating ? OrderModel::Order::State::submitting : OrderModel::Order::State::canceled);
     }
     break;
   case BitstampWorker::Request::balance:
@@ -138,6 +138,7 @@ void BitstampMarket::handleData(int request, const QVariant& data)
       balance.fee =  balanceData["fee"].toDouble() * 0.01;
 
       emit balanceUpdated();
+      dataModel.logModel.addMessage(LogModel::Type::information, "Loaded balance");
     }
     break;
   case BitstampWorker::Request::ticker:
@@ -149,6 +150,7 @@ void BitstampMarket::handleData(int request, const QVariant& data)
       this->tickerData.lowestSellOrder = tickerData["ask"].toDouble();
 
       emit tickerUpdated();
+      dataModel.logModel.addMessage(LogModel::Type::information, "Loaded ticker data");
     }
     break;
   case BitstampWorker::Request::openOrders:
@@ -172,7 +174,8 @@ void BitstampMarket::handleData(int request, const QVariant& data)
         order.amount = orderData["amount"].toDouble();
       }
 
-      orderModel.setData(orders);
+      dataModel.orderModel.setData(orders);
+      dataModel.logModel.addMessage(LogModel::Type::information, "Loaded orders");
     }
     break;
   case BitstampWorker::Request::transactions:
@@ -198,7 +201,8 @@ void BitstampMarket::handleData(int request, const QVariant& data)
         transaction.balanceChange = value > 0. ? (fabs(value) - transaction.fee) : -(fabs(value) + transaction.fee);
       }
 
-      transactionModel.setData(transactions);
+      dataModel.transactionModel.setData(transactions);
+      dataModel.logModel.addMessage(LogModel::Type::information, "Loaded transactions");
     }
     break;
   }
@@ -337,13 +341,9 @@ void BitstampWorker::loadData(int request, QVariant params)
       }
     }
   };
-
   QList<QVariantList> lists;
   VariantListDestructorBugfix::findLists(data, lists);
   data.clear();
-
-  //QVariantList fixStrangeQtBug(data.toList());
-  //data.clear(); 
 }
 
 void BitstampWorker::avoidSpamming()

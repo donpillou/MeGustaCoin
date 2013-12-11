@@ -15,6 +15,11 @@ signals:
 private:
   QSettings settings;
 
+  OrdersWidget* ordersWidget;
+  TransactionsWidget* transactionsWidget;
+  LogWidget* logWidget;
+
+  DataModel dataModel;
   Market* market;
   QString marketName;
   QString userName;

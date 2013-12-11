@@ -1,8 +1,7 @@
 
 #include "stdafx.h"
 
-OrderModel::OrderModel(const Market& market) : market(market), 
-draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), 
+OrderModel::OrderModel() : draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), 
 canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), nextDraftId(0)
 {
   italicFont.setItalic(true);
@@ -11,6 +10,19 @@ canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr
 OrderModel::~OrderModel()
 {
   qDeleteAll(orders);
+}
+
+void OrderModel::setCurrencies(const QString& market, const QString& coin)
+{
+  marketCurrency = market.toUtf8();
+  coinCurrency = coin.toUtf8();
+}
+
+void OrderModel::reset()
+{
+  beginResetModel();
+  orders.clear();
+  endResetModel();
 }
 
 void OrderModel::setData(const QList<Order>& updatedOrders)
@@ -89,6 +101,21 @@ void OrderModel::setOrderState(const QString& id, Order::State state)
     {
       order->state = state;
       QModelIndex index = createIndex(i, (int)Column::state, 0);
+      emit dataChanged(index, index);
+      return;
+    }
+  }
+}
+
+void OrderModel::setOrderNewAmount(const QString& id, double newAmount)
+{
+  for(int i = 0, count = orders.size(); i < count; ++i)
+  {
+    Order* order = orders[i];
+    if(order->id == id)
+    {
+      order->newAmount = newAmount;
+      QModelIndex index = createIndex(i, (int)Column::amount, 0);
       emit dataChanged(index, index);
       return;
     }
@@ -222,13 +249,13 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
     case Column::amount:
       if(role == Qt::EditRole)
         return order.newAmount != 0. ? order.newAmount : order.amount;
-      return QString().sprintf("%.08f %s", order.amount, market.getCoinCurrency());
+      return QString().sprintf("%.08f %s", order.amount, coinCurrency.constData());
     case Column::price:
       if(role == Qt::EditRole)
         return order.newPrice != 0. ? order.newPrice : order.price;
-      return QString().sprintf("%.02f %s", order.price, market.getMarketCurrency());
+      return QString().sprintf("%.02f %s", order.price, marketCurrency.constData());
     case Column::value:
-      return QString().sprintf("%.02f %s", order.amount * order.price, market.getMarketCurrency());
+      return QString().sprintf("%.02f %s", order.amount * order.price, marketCurrency.constData());
     case Column::state:
       switch(order.state)
       {
@@ -311,9 +338,6 @@ bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int 
       else if(newPrice != order.price)
       {
         order.newPrice = newPrice;
-        double maxAmount = order.type == Order::Type::buy ? market.getMaxBuyAmout(newPrice) : market.getMaxSellAmout();
-        if(order.newAmount > maxAmount)
-          order.newAmount = maxAmount;
         emit orderEdited(index);
       }
       return true;
@@ -323,10 +347,6 @@ bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int 
       double newAmount = value.toDouble();
       if(newAmount <= 0.)
         return false;
-      double price = order.newPrice != 0. ? order.newPrice : order.price;
-      double maxAmount = order.type == Order::Type::buy ? market.getMaxBuyAmout(price) : market.getMaxSellAmout();
-      if(newAmount > maxAmount)
-        newAmount = maxAmount;
       if(order.state == OrderModel::Order::State::draft)
         order.amount = newAmount;
       else if(newAmount != order.amount)

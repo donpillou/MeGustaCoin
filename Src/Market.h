@@ -26,7 +26,7 @@ public:
     TickerData() : lastTradePrice(0.), highestBuyOrder(0.), lowestSellOrder(0.) {}
   };
 
-  Market() : orderModel(*this), transactionModel(*this) {};
+  Market(DataModel& dataModel) : dataModel(dataModel) {};
   virtual ~Market() {};
 
   virtual void loadOrders() = 0;
@@ -39,9 +39,6 @@ public:
   virtual double getMaxSellAmout() const = 0;
   virtual double getMaxBuyAmout(double price) const = 0;
 
-  OrderModel& getOrderModel() {return orderModel;};
-  TransactionModel& getTransactionModel() {return transactionModel;};
-
   const Balance* getBalance() const {return balance.fee == 0. ? 0 : &balance;}
   const TickerData* getTickerData() const {return tickerData.lastTradePrice == 0. ? 0 : &tickerData;}
 
@@ -53,8 +50,7 @@ signals:
   void tickerUpdated();
 
 protected:
-  OrderModel orderModel;
-  TransactionModel transactionModel;
+  DataModel& dataModel;
   const char* marketCurrency; // USD
   const char* coinCurrency; // BTC
   Balance balance;

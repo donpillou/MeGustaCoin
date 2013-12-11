@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include=".copy">
@@ -15,6 +15,8 @@
     <ClCompile Include="Src\BitstampMarket.cpp" />
     <ClCompile Include="Src\Download.cpp" />
     <ClCompile Include="Src\LoginDialog.cpp" />
+    <ClCompile Include="Src\LogModel.cpp" />
+    <ClCompile Include="Src\LogWidget.cpp" />
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\MainWindow.cpp" />
     <ClCompile Include="Src\OrderModel.cpp" />
@@ -26,6 +28,8 @@
     <CustomBuild Include="Src\BitstampMarket.h" />
     <ClInclude Include="Src\Download.h" />
     <CustomBuild Include="Src\LoginDialog.h" />
+    <ClInclude Include="Src\LogModel.h" />
+    <CustomBuild Include="Src\LogWidget.h" />
     <CustomBuild Include="Src\MainWindow.h" />
     <CustomBuild Include="Src\Market.h" />
     <CustomBuild Include="Src\OrderModel.h" />
@@ -83,6 +87,9 @@
     <ClCompile Include="Build\Debug\moc_TransactionsWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_LogWidget.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_OrderModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -113,8 +120,14 @@
     <ClCompile Include="Build\Release\moc_TransactionsWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Release\moc_LogWidget.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Release\moc_OrderModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\DataModel.h" />
   </ItemGroup>
 </Project>

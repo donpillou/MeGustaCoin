@@ -3,29 +3,38 @@
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0)
 {
-  OrdersWidget* ordersWidget = new OrdersWidget(this, settings);
+  ordersWidget = new OrdersWidget(this, settings, dataModel.orderModel);
   connect(this, SIGNAL(marketChanged(Market*)), ordersWidget, SLOT(setMarket(Market*)));
-  TransactionsWidget* transactionsWidget = new TransactionsWidget(this, settings);
+  transactionsWidget = new TransactionsWidget(this, settings, dataModel.transactionModel);
   connect(this, SIGNAL(marketChanged(Market*)), transactionsWidget, SLOT(setMarket(Market*)));
+  logWidget = new LogWidget(this, settings, dataModel.logModel);
+  connect(this, SIGNAL(marketChanged(Market*)), logWidget, SLOT(setMarket(Market*)));
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
   updateWindowTitle();
   setDockNestingEnabled(true);
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
-  //setCentralWidget(orderWidget);
+  //setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North);
+  resize(600, 400);
+
+  QDockWidget* transactionsDockWidget = new QDockWidget(tr("Transactions"), this);
+  //transactionsDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  transactionsDockWidget->setObjectName("Orders");
+  transactionsDockWidget->setWidget(transactionsWidget);
+  addDockWidget(Qt::TopDockWidgetArea, transactionsDockWidget);
+
   QDockWidget* ordersDockWidget = new QDockWidget(tr("Orders"), this);
   //ordersDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   ordersDockWidget->setObjectName("Orders");
   ordersDockWidget->setWidget(ordersWidget);
   addDockWidget(Qt::TopDockWidgetArea, ordersDockWidget);
-  QDockWidget* transactionsDockWidget = new QDockWidget(tr("Transactions"), this );
-  //transactionsDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-  transactionsDockWidget->setObjectName("Orders");
-  transactionsDockWidget->setWidget(transactionsWidget);
-  addDockWidget(Qt::TopDockWidgetArea, transactionsDockWidget);
-  tabifyDockWidget(ordersDockWidget, transactionsDockWidget);
-  //setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North);
-  resize(600, 400);
+  tabifyDockWidget(transactionsDockWidget, ordersDockWidget);
+
+  QDockWidget* logDockWidget = new QDockWidget(tr("Log"), this);
+  logDockWidget->setObjectName("Log");
+  logDockWidget->setWidget(logWidget);
+  logDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  addDockWidget(Qt::TopDockWidgetArea, logDockWidget, Qt::Vertical);
 
   QMenuBar* menuBar = this->menuBar();
   QMenu* menu = menuBar->addMenu(tr("&Market"));
@@ -47,14 +56,15 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   menu->addSeparator();
   menu->addAction(ordersDockWidget->toggleViewAction());
   menu->addAction(transactionsDockWidget->toggleViewAction());
+  menu->addAction(logDockWidget->toggleViewAction());
 
   menu = menuBar->addMenu(tr("&Help"));
   connect(menu->addAction(tr("&About...")), SIGNAL(triggered()), this, SLOT(about()));
   connect(menu->addAction(tr("About &Qt...")), SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
 
-  restoreGeometry(settings.value("Geometry").toByteArray());
-  restoreState(settings.value("WindowState").toByteArray());
+  //restoreGeometry(settings.value("Geometry").toByteArray());
+  //restoreState(settings.value("WindowState").toByteArray());
 
   settings.beginGroup("Login");
   if(settings.value("Remember", 0).toUInt() >= 2)
@@ -78,6 +88,19 @@ MainWindow::~MainWindow()
   logout();
 }
 
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+  logout();
+
+  settings.setValue("Geometry", saveGeometry());
+  settings.setValue("WindowState", saveState());
+  ordersWidget->saveState(settings);
+  transactionsWidget->saveState(settings);
+  logWidget->saveState(settings);
+
+  QMainWindow::closeEvent(event);
+}
+
 void MainWindow::login()
 {
   LoginDialog loginDialog(this, &settings);
@@ -92,8 +115,10 @@ void MainWindow::logout()
   if(!market)
     return;
 
-  settings.setValue("Geometry", saveGeometry());
-  settings.setValue("WindowState", saveState());
+  dataModel.logModel.addMessage(LogModel::Type::information, QString("Closed %1").arg(marketName));
+
+  dataModel.orderModel.reset();
+  dataModel.transactionModel.reset();
 
   emit marketChanged(0);
   delete market;
@@ -105,6 +130,7 @@ void MainWindow::refresh()
 {
   if(!market)
     return;
+  dataModel.logModel.addMessage(LogModel::Type::information, "Refreshing...");
   market->loadOrders();
   market->loadBalance();
   market->loadTicker();
@@ -120,12 +146,19 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
   this->userName = userName;
   if(marketName == "Bitstamp/USD")
   {
-    market = new BitstampMarket(userName, key, secret);
+    market = new BitstampMarket(dataModel, userName, key, secret);
   }
   if(!market)
     return;
+
+  QString marketCurrency(market->getMarketCurrency());
+  QString coinCurrency(market->getCoinCurrency());
+  dataModel.orderModel.setCurrencies(marketCurrency, coinCurrency);
+  dataModel.transactionModel.setCurrencies(marketCurrency, coinCurrency);
+
   connect(market, SIGNAL(balanceUpdated()), this, SLOT(updateWindowTitle()));
   connect(market, SIGNAL(tickerUpdated()), this, SLOT(updateWindowTitle()));
+  dataModel.logModel.addMessage(LogModel::Type::information, QString("Opened %1").arg(marketName));
 
   // update gui
   updateWindowTitle();
@@ -133,13 +166,6 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
 
   // request data
   refresh();
-}
-
-void MainWindow::closeEvent(QCloseEvent* event)
-{
-  logout();
-
-  QMainWindow::closeEvent(event);
 }
 
 void MainWindow::updateWindowTitle()

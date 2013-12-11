@@ -1,14 +1,26 @@
 
 #include "stdafx.h"
 
-TransactionModel::TransactionModel(const Market& market) : market(market), 
-buyStr(tr("buy")), sellStr(tr("sell"))
+TransactionModel::TransactionModel() : buyStr(tr("buy")), sellStr(tr("sell"))
 {
 }
 
 TransactionModel::~TransactionModel()
 {
   qDeleteAll(transactions);
+}
+
+void TransactionModel::setCurrencies(const QString& market, const QString& coin)
+{
+  marketCurrency = market.toUtf8();
+  coinCurrency = coin.toUtf8();
+}
+
+void TransactionModel::reset()
+{
+  beginResetModel();
+  transactions.clear();
+  endResetModel();
 }
 
 void TransactionModel::setData(const QList<Transaction>& updatedTransactions)
@@ -116,15 +128,15 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
     case Column::date:
       return transaction.date;
     case Column::amount:
-      return QString().sprintf("%.08f %s", transaction.amount, market.getCoinCurrency());
+      return QString().sprintf("%.08f %s", transaction.amount, coinCurrency.constData());
     case Column::price:
-      return QString().sprintf("%.02f %s", transaction.price, market.getMarketCurrency());
+      return QString().sprintf("%.02f %s", transaction.price, marketCurrency.constData());
     case Column::value:
-      return QString().sprintf("%.02f %s", transaction.amount * transaction.price, market.getMarketCurrency());
+      return QString().sprintf("%.02f %s", transaction.amount * transaction.price, marketCurrency.constData());
     case Column::fee:
-      return QString().sprintf("%.02f %s", transaction.fee, market.getMarketCurrency());
+      return QString().sprintf("%.02f %s", transaction.fee, marketCurrency.constData());
     case Column::balance:
-      return QString().sprintf("%+.02f %s", transaction.balanceChange, market.getMarketCurrency());
+      return QString().sprintf("%+.02f %s", transaction.balanceChange, marketCurrency.constData());
     }
   }
   return QVariant();

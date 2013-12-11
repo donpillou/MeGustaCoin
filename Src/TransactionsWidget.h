@@ -6,17 +6,20 @@ class TransactionsWidget : public QWidget
   Q_OBJECT
 
 public:
-  TransactionsWidget(QWidget* parent, QSettings& settings);
+  TransactionsWidget(QWidget* parent, QSettings& settings, TransactionModel& transactionModel);
+
+  void saveState(QSettings& settings);
 
 private slots:
   void setMarket(Market* market);
   void updateToolBarButtons();
 
 private:
+  TransactionModel& transactionModel;
   QSettings& settings;
   Market* market;
   QTreeView* transactionView;
-  QSortFilterProxyModel* orderProxyModel;
+  QSortFilterProxyModel* proxyModel;
 
   QAction* refreshAction;
 };

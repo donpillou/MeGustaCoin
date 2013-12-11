@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings) : QWidget(parent), settings(settings)
+TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, TransactionModel& transactionModel) : QWidget(parent), transactionModel(transactionModel), settings(settings)
 {
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -13,9 +13,9 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings) : Q
   connect(refreshAction, SIGNAL(triggered()), parent, SLOT(refresh()));
 
   transactionView = new QTreeView(this);
-  orderProxyModel = new QSortFilterProxyModel(this);
-  orderProxyModel->setDynamicSortFilter(true);
-  transactionView->setModel(orderProxyModel);
+  proxyModel = new QSortFilterProxyModel(this);
+  proxyModel->setDynamicSortFilter(true);
+  transactionView->setModel(proxyModel);
   transactionView->setSortingEnabled(true);
   transactionView->setRootIsDecorated(false);
   transactionView->setAlternatingRowColors(true);
@@ -27,32 +27,28 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings) : Q
   layout->addWidget(toolBar);
   layout->addWidget(transactionView);
   setLayout(layout);
+
+  proxyModel->setSourceModel(&transactionModel);
+  QHeaderView* headerView = transactionView->header();
+  headerView->resizeSection(0, 35);
+  headerView->resizeSection(1, 110);
+  headerView->resizeSection(2, 85);
+  headerView->resizeSection(3, 100);
+  headerView->resizeSection(4, 85);
+  headerView->resizeSection(5, 75);
+  headerView->resizeSection(6, 85);
+  transactionView->sortByColumn(1);
+  headerView->restoreState(settings.value("TransactionHeaderState").toByteArray());
+}
+
+void TransactionsWidget::saveState(QSettings& settings)
+{
+  settings.setValue("TransactionHeaderState", transactionView->header()->saveState());
 }
 
 void TransactionsWidget::setMarket(Market* market)
 {
   this->market = market;
-  if(!market)
-  {
-    settings.setValue("TransactionHeaderState", transactionView->header()->saveState());
-    orderProxyModel->setSourceModel(0);
-  }
-  else
-  {
-    TransactionModel& transactionModel = market->getTransactionModel();
-
-    orderProxyModel->setSourceModel(&transactionModel);
-    QHeaderView* headerView = transactionView->header();
-    headerView->resizeSection(0, 35);
-    headerView->resizeSection(1, 110);
-    headerView->resizeSection(2, 85);
-    headerView->resizeSection(3, 100);
-    headerView->resizeSection(4, 85);
-    headerView->resizeSection(5, 75);
-    headerView->resizeSection(6, 85);
-    transactionView->sortByColumn(1);
-    headerView->restoreState(settings.value("TransactionHeaderState").toByteArray());
-  }
   updateToolBarButtons();
 }
 

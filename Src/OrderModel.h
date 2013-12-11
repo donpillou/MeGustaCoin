@@ -6,7 +6,7 @@ class OrderModel : public QAbstractItemModel
   Q_OBJECT
 
 public:
-  OrderModel(const Market& market);
+  OrderModel();
   ~OrderModel();
 
   class Order
@@ -49,9 +49,14 @@ public:
       last = price,
   };
 
+  void setCurrencies(const QString& market, const QString& coin);
+
+  void reset();
+
   void setData(const QList<Order>& order);
   void updateOrder(const QString& id, const Order& order);
   void setOrderState(const QString& id, Order::State state);
+  void setOrderNewAmount(const QString& id, double newAmount);
 
   int addOrder(Order::Type type, double price);
 
@@ -64,8 +69,9 @@ signals:
   void orderEdited(const QModelIndex& index);
 
 private:
-  const Market& market;
   QList<Order*> orders;
+  QByteArray marketCurrency;
+  QByteArray coinCurrency;
   QString draftStr;
   QString submittingStr;
   QString openStr;

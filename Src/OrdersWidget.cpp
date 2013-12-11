@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings) : QWidget(parent), settings(settings)
+OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, OrderModel& orderModel) : QWidget(parent), orderModel(orderModel)
 {
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -32,9 +32,9 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings) : QWidget(paren
   connect(cancelAction, SIGNAL(triggered()), this, SLOT(cancelOrder()));
 
   orderView = new QTreeView(this);
-  orderProxyModel = new QSortFilterProxyModel(this);
-  orderProxyModel->setDynamicSortFilter(true);
-  orderView->setModel(orderProxyModel);
+  proxyModel = new QSortFilterProxyModel(this);
+  proxyModel->setDynamicSortFilter(true);
+  orderView->setModel(proxyModel);
   orderView->setSortingEnabled(true);
   orderView->setRootIsDecorated(false);
   orderView->setAlternatingRowColors(true);
@@ -47,33 +47,30 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings) : QWidget(paren
   layout->addWidget(toolBar);
   layout->addWidget(orderView);
   setLayout(layout);
+
+  connect(&orderModel, SIGNAL(orderEdited(const QModelIndex&)), this, SLOT(updateOrder(const QModelIndex&)));
+  connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
+
+  proxyModel->setSourceModel(&orderModel);
+  QHeaderView* headerView = orderView->header();
+  headerView->resizeSection(0, 80);
+  headerView->resizeSection(1, 85);
+  headerView->resizeSection(2, 145);
+  headerView->resizeSection(3, 85);
+  headerView->resizeSection(4, 100);
+  headerView->resizeSection(5, 85);
+  orderView->sortByColumn(2);
+  headerView->restoreState(settings.value("OrderHeaderState").toByteArray());
+}
+
+void OrdersWidget::saveState(QSettings& settings)
+{
+  settings.setValue("OrderHeaderState", orderView->header()->saveState());
 }
 
 void OrdersWidget::setMarket(Market* market)
 {
   this->market = market;
-  if(!market)
-  {
-    settings.setValue("OrderHeaderState", orderView->header()->saveState());
-    orderProxyModel->setSourceModel(0);
-  }
-  else
-  {
-    OrderModel& orderModel = market->getOrderModel();
-    connect(&orderModel, SIGNAL(orderEdited(const QModelIndex&)), this, SLOT(updateOrder(const QModelIndex&)));
-    connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
-
-    orderProxyModel->setSourceModel(&orderModel);
-    QHeaderView* headerView = orderView->header();
-    headerView->resizeSection(0, 80);
-    headerView->resizeSection(1, 85);
-    headerView->resizeSection(2, 145);
-    headerView->resizeSection(3, 85);
-    headerView->resizeSection(4, 100);
-    headerView->resizeSection(5, 85);
-    orderView->sortByColumn(2);
-    headerView->restoreState(settings.value("OrderHeaderState").toByteArray());
-  }
   updateToolBarButtons();
 }
 
@@ -97,10 +94,9 @@ void OrdersWidget::addOrder(OrderModel::Order::Type type)
   if(tickerData)
     price = type == OrderModel::Order::Type::buy ? (tickerData->highestBuyOrder + 0.01) : (tickerData->lowestSellOrder - 0.01);
 
-  OrderModel& orderModel = market->getOrderModel();
   int row = orderModel.addOrder(type, price);
 
-  QModelIndex index = orderProxyModel->mapFromSource(orderModel.index(row, (int)OrderModel::Column::amount));
+  QModelIndex index = proxyModel->mapFromSource(orderModel.index(row, (int)OrderModel::Column::amount));
   orderView->setCurrentIndex(index);
   orderView->edit(index);
 }
@@ -122,10 +118,9 @@ void OrdersWidget::submitOrder()
 {
   QList<QModelIndex> seletedIndices = getSelectedRows();
 
-  OrderModel& orderModel = market->getOrderModel();
   foreach(const QModelIndex& proxyIndex, seletedIndices)
   {
-    QModelIndex index = orderProxyModel->mapToSource(proxyIndex);
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
     const OrderModel::Order* order = orderModel.getOrder(index);
     if(order->state == OrderModel::Order::State::draft)
     {
@@ -138,11 +133,10 @@ void OrdersWidget::cancelOrder()
 {
   QList<QModelIndex> seletedIndices = getSelectedRows();
 
-  OrderModel& orderModel = market->getOrderModel();
   QMap<int, QModelIndex> rowsToRemove;
   foreach(const QModelIndex& proxyIndex, seletedIndices)
   {
-    QModelIndex index = orderProxyModel->mapToSource(proxyIndex);
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
     const OrderModel::Order* order = orderModel.getOrder(index);
     switch(order->state)
     {
@@ -166,19 +160,24 @@ void OrdersWidget::cancelOrder()
 
 void OrdersWidget::updateOrder(const QModelIndex& index)
 {
-  OrderModel& orderModel = market->getOrderModel();
   const OrderModel::Order* order = orderModel.getOrder(index);
   if(order->state != OrderModel::Order::State::open || (order->newAmount == 0. && order->newPrice == 0.))
     return;
   double amount = order->newAmount != 0. ? order->newAmount : order->amount;
   double price = order->newPrice != 0. ? order->newPrice : order->price;
+
+  double maxAmount = order->type == OrderModel::Order::Type::buy ? market->getMaxBuyAmout(price) : market->getMaxSellAmout();
+  if(order->newAmount > maxAmount)
+  {
+    orderModel.setOrderNewAmount(order->id, maxAmount);
+    amount = maxAmount;
+  }
   market->updateOrder(order->id, order->type == OrderModel::Order::Type::sell, amount, price);
 }
 
 void OrdersWidget::updateToolBarButtons()
 {
   QList<QModelIndex> selectedRows = getSelectedRows();
-  OrderModel& orderModel = market->getOrderModel();
 
   bool hasMarket = market != 0;
   bool canCancel = getSelectedRows().size() > 0;

@@ -4,7 +4,7 @@
 class TransactionModel : public QAbstractItemModel
 {
 public:
-  TransactionModel(const Market& market);
+  TransactionModel();
   ~TransactionModel();
 
   class Transaction
@@ -39,13 +39,18 @@ public:
       last = balance,
   };
 
+  void setCurrencies(const QString& market, const QString& coin);
+
+  void reset();
+
   void setData(const QList<Transaction>& order);
 
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
 private:
-  const Market& market;
   QList<Transaction*> transactions;
+  QByteArray marketCurrency;
+  QByteArray coinCurrency;
   QString buyStr;
   QString sellStr;
 

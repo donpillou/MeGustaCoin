@@ -8,7 +8,7 @@ class BitstampMarket : public Market
   Q_OBJECT
 
 public:
-  BitstampMarket(const QString& userName, const QString& key, const QString& secret);
+  BitstampMarket(DataModel& dataModel, const QString& userName, const QString& key, const QString& secret);
   ~BitstampMarket();
 
   virtual void loadOrders();
