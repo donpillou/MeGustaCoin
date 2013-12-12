@@ -26,7 +26,7 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, OrderModel& ord
   submitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_U));
   connect(submitAction, SIGNAL(triggered()), this, SLOT(submitOrder()));
 
-  cancelAction = toolBar->addAction(QIcon(":/Icons/cancel.png"), tr("&Cancel"));
+  cancelAction = toolBar->addAction(QIcon(":/Icons/cancel2.png"), tr("&Cancel"));
   cancelAction->setEnabled(false);
   cancelAction->setShortcut(QKeySequence(Qt::Key_Delete));
   connect(cancelAction, SIGNAL(triggered()), this, SLOT(cancelOrder()));
