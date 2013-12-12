@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) : QWidget(parent), logModel(logModel)
+LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) : QWidget(parent), logModel(logModel)//, autoScrollEnabled(true)
 {
   logView = new QTreeView(this);
   proxyModel = new QSortFilterProxyModel(this);
@@ -18,6 +18,7 @@ LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) :
   setLayout(layout);
 
   proxyModel->setSourceModel(&logModel);
+  connect(proxyModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
   QHeaderView* headerView = logView->header();
   headerView->resizeSection(0, 22);
   headerView->resizeSection(1, 110);
@@ -35,3 +36,15 @@ void LogWidget::setMarket(Market* market)
 {
 }
 
+void LogWidget::checkAutoScroll(const QModelIndex& index, int, int)
+{
+  QScrollBar* scrollBar = logView->verticalScrollBar();
+  if(scrollBar->value() == scrollBar->maximum())
+    QTimer::singleShot(1, this, SLOT(autoScroll()));
+}
+
+void LogWidget::autoScroll()
+{
+  QScrollBar* scrollBar = logView->verticalScrollBar();
+  scrollBar->setValue(scrollBar->maximum());
+}

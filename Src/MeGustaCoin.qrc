@@ -7,5 +7,8 @@
   <file>Icons/bitcoin_add.png</file>
   <file>Icons/bullet_go.png</file>
   <file>Icons/cancel2.png</file>
+  <file>Icons/cancel.png</file>
+  <file>Icons/error.png</file>
+  <file>Icons/information.png</file>
 </qresource>
 </RCC>

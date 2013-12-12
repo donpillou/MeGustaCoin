@@ -12,6 +12,8 @@ public:
 
 private slots:
   void setMarket(Market* market);
+  void checkAutoScroll(const QModelIndex&, int, int);
+  void autoScroll();
 
 private:
   LogModel& logModel;
