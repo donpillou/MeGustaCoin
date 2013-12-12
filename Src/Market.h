@@ -26,6 +26,12 @@ public:
     TickerData() : lastTradePrice(0.), highestBuyOrder(0.), lowestSellOrder(0.) {}
   };
 
+  enum class OrderType
+  {
+    sell,
+    buy,
+  };
+
   Market(DataModel& dataModel) : dataModel(dataModel) {};
   virtual ~Market() {};
 
@@ -33,9 +39,9 @@ public:
   virtual void loadBalance() = 0;
   virtual void loadTicker() = 0;
   virtual void loadTransactions() = 0;
-  virtual void createOrder(const QString& draftId, bool sell, double amount, double price) = 0;
-  virtual void cancelOrder(const QString& id) = 0;
-  virtual void updateOrder(const QString& id, bool sell, double amount, double price) = 0;
+  virtual void createOrder(const QString& draftId, OrderType orderType, double amount, double price) = 0;
+  virtual void cancelOrder(const QString& id, OrderType oldOrderType, double oldAmount, double oldPrice) = 0;
+  virtual void updateOrder(const QString& id, OrderType orderType, double amount, double price, double oldAmount, double oldPrice) = 0;
   virtual double getMaxSellAmout() const = 0;
   virtual double getMaxBuyAmout(double price) const = 0;
 

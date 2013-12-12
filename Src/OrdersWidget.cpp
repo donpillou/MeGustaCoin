@@ -124,7 +124,8 @@ void OrdersWidget::submitOrder()
     const OrderModel::Order* order = orderModel.getOrder(index);
     if(order->state == OrderModel::Order::State::draft)
     {
-      market->createOrder(order->id, order->type == OrderModel::Order::Type::sell, order->amount, order->price);
+      Market::OrderType orderType = order->type == OrderModel::Order::Type::sell ? Market::OrderType::sell : Market::OrderType::buy;
+      market->createOrder(order->id, orderType, order->amount, order->price);
     }
   }
 }
@@ -146,8 +147,11 @@ void OrdersWidget::cancelOrder()
       rowsToRemove.insert(index.row(), index);
       break;
     case OrderModel::Order::State::open:
-      market->cancelOrder(order->id);
-      break;
+      {
+        Market::OrderType orderType = order->type == OrderModel::Order::Type::sell ? Market::OrderType::sell : Market::OrderType::buy;
+        market->cancelOrder(order->id, orderType, order->amount, order->price);
+        break;
+      }
     }
   }
   while(!rowsToRemove.isEmpty())
@@ -172,7 +176,8 @@ void OrdersWidget::updateOrder(const QModelIndex& index)
     orderModel.setOrderNewAmount(order->id, maxAmount);
     amount = maxAmount;
   }
-  market->updateOrder(order->id, order->type == OrderModel::Order::Type::sell, amount, price);
+  Market::OrderType orderType = order->type == OrderModel::Order::Type::sell ? Market::OrderType::sell : Market::OrderType::buy;
+  market->updateOrder(order->id, orderType, amount, price, order->amount, order->price);
 }
 
 void OrdersWidget::updateToolBarButtons()
