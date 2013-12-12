@@ -171,7 +171,7 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
 void MainWindow::updateWindowTitle()
 {
   if(!market)
-    setWindowTitle(tr("MeGustaCoin Trading Client"));
+    setWindowTitle(tr("MeGustaCoin Market Client"));
   else
   {
     QString title;
@@ -192,5 +192,5 @@ void MainWindow::updateWindowTitle()
 
 void MainWindow::about()
 {
-  QMessageBox::about(this, "About", "MeGustaCoin - Bitcoin Trading Client<br><br>Donald Pillou, 2013");
+  QMessageBox::about(this, "About", "MeGustaCoin - Bitcoin Market Client<br><a href=\"https://github.com/donpillou/MeGustaCoin\">https://github.com/donpillou/MeGustaCoin</a><br><br>Released under the GNU General Public License Version 3<br><br>MeGustaCoin uses the following third-party libraries and components:<br>&nbsp;&nbsp;- Qt (GUI)<br>&nbsp;&nbsp;- libcurl (HTTPS)<br>&nbsp;&nbsp;- LibQxt (JSON)<br>&nbsp;&nbsp;- <a href=\"http://www.famfamfam.com/lab/icons/silk/\">silk icons</a> (by Mark James)<br><br>-- Donald Pillou, 2013");
 }
