@@ -14,7 +14,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   updateWindowTitle();
   setDockNestingEnabled(true);
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
-  //setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::North);
+  //setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::East);
   resize(600, 400);
 
   QDockWidget* transactionsDockWidget = new QDockWidget(tr("Transactions"), this);
@@ -33,7 +33,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   QDockWidget* logDockWidget = new QDockWidget(tr("Log"), this);
   logDockWidget->setObjectName("Log");
   logDockWidget->setWidget(logWidget);
-  logDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+  //logDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   addDockWidget(Qt::TopDockWidgetArea, logDockWidget, Qt::Vertical);
 
   QMenuBar* menuBar = this->menuBar();
