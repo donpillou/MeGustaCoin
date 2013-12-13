@@ -95,10 +95,12 @@ double BitstampMarket::getMaxSellAmout() const
   return balance.availableBtc;
 }
 
-double BitstampMarket::getMaxBuyAmout(double price) const
+double BitstampMarket::getMaxBuyAmout(double price, double canceledAmount, double canceledPrice) const
 {
   double fee = balance.fee; // e.g. 0.0044
-  double usdAmount = balance.availableUsd;
+  double availableUsd = balance.availableUsd;
+  double additionalAvailableUsd = floor(canceledAmount * canceledPrice * (1. + fee) * 100.) / 100.;
+  double usdAmount = availableUsd + additionalAvailableUsd;
   double result = floor(((100. / ( 100. + (fee * 100.))) * usdAmount) * 100.) / 100.;
   result /= price;
   result = floor(result * 100000000.) / 100000000.;
@@ -156,6 +158,8 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       QString draftId = args.toMap()["draftid"].toString();
       dataModel.orderModel.updateOrder(draftId, order);
       dataModel.logModel.addMessage(LogModel::Type::information, QString("Submitted %1 order").arg((BitstampWorker::Request)request == BitstampWorker::Request::sell ? "sell" : "buy"));
+
+      emit requestData((int)BitstampWorker::Request::balance, QVariant());
     }
     break;
   case BitstampWorker::Request::cancel:
@@ -178,6 +182,8 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
         BitstampWorker::Request request = sell ? BitstampWorker::Request::sell : BitstampWorker::Request::buy;
         emit requestData((int)request, args);
       }
+      else
+        emit requestData((int)BitstampWorker::Request::balance, QVariant());
     }
     break;
   case BitstampWorker::Request::balance:
@@ -346,8 +352,23 @@ void BitstampWorker::loadData(int request, QVariant params)
     }
   }
 
-  QVariant data = QxtJSON::parse(dlData);
-  dataLoaded(request, params, data);
+  QVariant data;
+  if((Request)request == Request::cancel)
+  {
+    QVariantMap cancelData;
+    cancelData["success"] = QString(dlData) != "true";
+    data = cancelData;
+  }
+  else
+    data = QxtJSON::parse(dlData);
+
+  QVariantMap dataMap = data.toMap();
+  if(!dataMap["error"].isNull())
+  {
+    emit error(request, params);
+  }
+  else
+    dataLoaded(request, params, data);
 
   // something is wrong with qt, the QVariant destructor crashes when it tries to free a variant list.
   // so, lets prevent the destructor from doing so:

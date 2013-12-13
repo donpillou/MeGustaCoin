@@ -124,8 +124,17 @@ void OrdersWidget::submitOrder()
     const OrderModel::Order* order = orderModel.getOrder(index);
     if(order->state == OrderModel::Order::State::draft)
     {
+      double amount = order->newAmount != 0. ? order->newAmount : order->amount;
+      double price = order->newPrice != 0. ? order->newPrice : order->price;
+      double maxAmount = order->type == OrderModel::Order::Type::buy ? market->getMaxBuyAmout(price) : market->getMaxSellAmout();
+      if(amount > maxAmount)
+      {
+        orderModel.setOrderNewAmount(order->id, maxAmount);
+        amount = maxAmount;
+      }
+
       Market::OrderType orderType = order->type == OrderModel::Order::Type::sell ? Market::OrderType::sell : Market::OrderType::buy;
-      market->createOrder(order->id, orderType, order->amount, order->price);
+      market->createOrder(order->id, orderType, amount, price);
     }
   }
 }
@@ -170,8 +179,8 @@ void OrdersWidget::updateOrder(const QModelIndex& index)
   double amount = order->newAmount != 0. ? order->newAmount : order->amount;
   double price = order->newPrice != 0. ? order->newPrice : order->price;
 
-  double maxAmount = order->type == OrderModel::Order::Type::buy ? market->getMaxBuyAmout(price) : market->getMaxSellAmout();
-  if(order->newAmount > maxAmount)
+  double maxAmount = order->type == OrderModel::Order::Type::buy ? market->getMaxBuyAmout(price, order->amount, order->price) : market->getMaxSellAmout() + order->amount;
+  if(amount > maxAmount)
   {
     orderModel.setOrderNewAmount(order->id, maxAmount);
     amount = maxAmount;

@@ -19,7 +19,7 @@ public:
   virtual void cancelOrder(const QString& id, OrderType oldOrderType, double oldAmount, double oldPrice);
   virtual void updateOrder(const QString& id, OrderType orderType, double amount, double price, double oldAmount, double oldPrice);
   virtual double getMaxSellAmout() const;
-  virtual double getMaxBuyAmout(double price) const;
+  virtual double getMaxBuyAmout(double price, double canceledAmount, double canceledPrice) const;
 
 signals:
   void requestData(int request, QVariant args);
