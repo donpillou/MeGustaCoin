@@ -6,9 +6,12 @@ class OrdersWidget : public QWidget
   Q_OBJECT
 
 public:
-  OrdersWidget(QWidget* parent, QSettings& settings, OrderModel& orderModel);
+  OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel);
 
   void saveState(QSettings& settings);
+
+public slots:
+  void refresh();
 
 private slots:
   void setMarket(Market* market);
@@ -20,6 +23,7 @@ private slots:
   void updateToolBarButtons();
 
 private:
+  DataModel& dataModel;
   OrderModel& orderModel;
   Market* market;
   QTreeView* orderView;

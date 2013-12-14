@@ -3,9 +3,9 @@
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0)
 {
-  ordersWidget = new OrdersWidget(this, settings, dataModel.orderModel);
+  ordersWidget = new OrdersWidget(this, settings, dataModel);
   connect(this, SIGNAL(marketChanged(Market*)), ordersWidget, SLOT(setMarket(Market*)));
-  transactionsWidget = new TransactionsWidget(this, settings, dataModel.transactionModel);
+  transactionsWidget = new TransactionsWidget(this, settings, dataModel);
   connect(this, SIGNAL(marketChanged(Market*)), transactionsWidget, SLOT(setMarket(Market*)));
   logWidget = new LogWidget(this, settings, dataModel.logModel);
   connect(this, SIGNAL(marketChanged(Market*)), logWidget, SLOT(setMarket(Market*)));
@@ -128,13 +128,8 @@ void MainWindow::logout()
 
 void MainWindow::refresh()
 {
-  if(!market)
-    return;
-  dataModel.logModel.addMessage(LogModel::Type::information, "Refreshing...");
-  market->loadOrders();
-  market->loadBalance();
-  market->loadTicker();
-  market->loadTransactions();
+  ordersWidget->refresh();
+  transactionsWidget->refresh();
 }
 
 void MainWindow::open(const QString& marketName, const QString& userName, const QString& key, const QString& secret)

@@ -168,7 +168,10 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
 
       QString draftId = args.toMap()["draftid"].toString();
       dataModel.orderModel.updateOrder(draftId, order);
-      dataModel.logModel.addMessage(LogModel::Type::information, QString("Submitted %1 order").arg((BitstampWorker::Request)request == BitstampWorker::Request::sell ? "sell" : "buy"));
+      if ((BitstampWorker::Request)request == BitstampWorker::Request::sell)
+        dataModel.logModel.addMessage(LogModel::Type::information, tr("Submitted sell order"));
+      else
+        dataModel.logModel.addMessage(LogModel::Type::information, tr("Submitted buy order"));
 
       emit requestData((int)BitstampWorker::Request::balance, QVariant());
     }
@@ -179,7 +182,7 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       QString id = cancelArgs["id"].toString();
       bool updating = cancelArgs["updating"].toBool();
       dataModel.orderModel.setOrderState(id, updating ? OrderModel::Order::State::submitting : OrderModel::Order::State::canceled);
-      dataModel.logModel.addMessage(LogModel::Type::information, "Canceled order");
+      dataModel.logModel.addMessage(LogModel::Type::information, tr("Canceled order"));
 
       if (updating)
       {
@@ -208,7 +211,7 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       balance.fee =  balanceData["fee"].toDouble() * 0.01;
 
       emit balanceUpdated();
-      dataModel.logModel.addMessage(LogModel::Type::information, "Loaded balance");
+      dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved balance"));
     }
     break;
   case BitstampWorker::Request::ticker:
@@ -220,7 +223,7 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       this->tickerData.lowestSellOrder = tickerData["ask"].toDouble();
 
       emit tickerUpdated();
-      dataModel.logModel.addMessage(LogModel::Type::information, "Loaded ticker data");
+      dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved ticker data"));
     }
     break;
   case BitstampWorker::Request::openOrders:
@@ -245,7 +248,7 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       }
 
       dataModel.orderModel.setData(orders);
-      dataModel.logModel.addMessage(LogModel::Type::information, "Loaded orders");
+      dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved orders"));
     }
     break;
   case BitstampWorker::Request::transactions:
@@ -272,7 +275,7 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       }
 
       dataModel.transactionModel.setData(transactions);
-      dataModel.logModel.addMessage(LogModel::Type::information, "Loaded transactions");
+      dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved transactions"));
     }
     break;
   }

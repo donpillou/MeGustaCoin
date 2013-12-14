@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, TransactionModel& transactionModel) : QWidget(parent), transactionModel(transactionModel), settings(settings)
+TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), transactionModel(dataModel.transactionModel)
 {
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -10,7 +10,7 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Tra
   refreshAction = toolBar->addAction(QIcon(":/Icons/arrow_refresh.png"), tr("&Refresh"));
   refreshAction->setEnabled(false);
   refreshAction->setShortcut(QKeySequence(QKeySequence::Refresh));
-  connect(refreshAction, SIGNAL(triggered()), parent, SLOT(refresh()));
+  connect(refreshAction, SIGNAL(triggered()), this, SLOT(refresh()));
 
   transactionView = new QTreeView(this);
   proxyModel = new QSortFilterProxyModel(this);
@@ -57,4 +57,12 @@ void TransactionsWidget::updateToolBarButtons()
   bool hasMarket = market != 0;
 
   refreshAction->setEnabled(hasMarket);
+}
+
+void TransactionsWidget::refresh()
+{
+  if(!market)
+    return;
+  dataModel.logModel.addMessage(LogModel::Type::information, "Refreshing transactions...");
+  market->loadTransactions();
 }

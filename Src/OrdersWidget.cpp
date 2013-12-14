@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, OrderModel& orderModel) : QWidget(parent), orderModel(orderModel)
+OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), orderModel(dataModel.orderModel)
 {
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -10,7 +10,7 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, OrderModel& ord
   refreshAction = toolBar->addAction(QIcon(":/Icons/arrow_refresh.png"), tr("&Refresh"));
   refreshAction->setEnabled(false);
   refreshAction->setShortcut(QKeySequence(QKeySequence::Refresh));
-  connect(refreshAction, SIGNAL(triggered()), parent, SLOT(refresh()));
+  connect(refreshAction, SIGNAL(triggered()), this, SLOT(refresh()));
   
   buyAction = toolBar->addAction(QIcon(":/Icons/bitcoin_add.png"), tr("&Buy"));
   buyAction->setEnabled(false);
@@ -214,4 +214,14 @@ void OrdersWidget::updateToolBarButtons()
   sellAction->setEnabled(hasMarket);
   submitAction->setEnabled(canSubmit);
   cancelAction->setEnabled(canCancel);
+}
+
+void OrdersWidget::refresh()
+{
+  if(!market)
+    return;
+  dataModel.logModel.addMessage(LogModel::Type::information, "Refreshing orders...");
+  market->loadOrders();
+  market->loadBalance();
+  market->loadTicker();
 }
