@@ -34,7 +34,7 @@ private:
 
 private slots:
   void handleData(int request, const QVariant& args, const QVariant& data);
-  void handleError(int request, const QVariant& args);
+  void handleError(int request, const QVariant& args, const QStringList& errors);
 
   friend class BitstampWorker;
 };
@@ -62,7 +62,7 @@ public slots:
 
 signals:
   void dataLoaded(int request, const QVariant& args, const QVariant& data);
-  void error(int request, const QVariant& args);
+  void error(int request, const QVariant& args, const QStringList& errors);
 
 private:
   const BitstampMarket& market;

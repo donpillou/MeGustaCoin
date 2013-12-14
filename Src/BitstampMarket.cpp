@@ -10,7 +10,7 @@ BitstampMarket::BitstampMarket(DataModel& dataModel, const QString& userName, co
   worker->moveToThread(&thread);
   connect(this, SIGNAL(requestData(int, QVariant)), worker, SLOT(loadData(int, QVariant)), Qt::QueuedConnection);
   connect(worker, SIGNAL(dataLoaded(int, const QVariant&, const QVariant&)), this, SLOT(handleData(int, const QVariant&, const QVariant&)), Qt::BlockingQueuedConnection);
-  connect(worker, SIGNAL(error(int, const QVariant&)), this, SLOT(handleError(int, const QVariant&)), Qt::BlockingQueuedConnection);
+  connect(worker, SIGNAL(error(int, const QVariant&, const QStringList&)), this, SLOT(handleError(int, const QVariant&, const QStringList&)), Qt::BlockingQueuedConnection);
   thread.start();
 }
 
@@ -107,32 +107,34 @@ double BitstampMarket::getMaxBuyAmout(double price, double canceledAmount, doubl
   return result;
 }
 
-void BitstampMarket::handleError(int request, const QVariant& args)
+void BitstampMarket::handleError(int request, const QVariant& args, const QStringList& errors)
 {
   switch((BitstampWorker::Request)request)
   {
   case BitstampWorker::Request::openOrders:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load orders");
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load orders:");
     break;
   case BitstampWorker::Request::balance:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load balance");
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load balance:");
     break;
   case BitstampWorker::Request::ticker:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load ticker data");
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load ticker data:");
     break;
   case BitstampWorker::Request::buy:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not submit buy order");
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not submit buy order:");
     break;
   case BitstampWorker::Request::sell:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not submit sell order");
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not submit sell order:");
     break;
   case BitstampWorker::Request::cancel:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not cancel order");
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not cancel order:");
     break;
   case BitstampWorker::Request::transactions:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load transactions");
+    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load transactions:");
     break;
   }
+  foreach(const QString& error, errors)
+    dataModel.logModel.addMessage(LogModel::Type::error, error);
 }
 
 void BitstampMarket::handleData(int request, const QVariant& args, const QVariant& data)
@@ -310,7 +312,9 @@ void BitstampWorker::loadData(int request, QVariant params)
   {
     if(!(dlData = dl.load(url)))
     {
-      emit error(request, params);
+      QStringList errors;
+      errors.push_back(dl.getErrorString());
+      emit error(request, params, errors);
       return;
     }
   }
@@ -347,7 +351,9 @@ void BitstampWorker::loadData(int request, QVariant params)
 
     if(!(dlData = dl.loadPOST(url, fields, values, i)))
     {
-      emit error(request, params);
+      QStringList errors;
+      errors.push_back(dl.getErrorString());
+      emit error(request, params, errors);
       return;
     }
   }
@@ -365,7 +371,35 @@ void BitstampWorker::loadData(int request, QVariant params)
   QVariantMap dataMap = data.toMap();
   if(!dataMap["error"].isNull())
   {
-    emit error(request, params);
+    QStringList errors;
+    struct ErrorStringCollector
+    {
+      static void collect(QVariant var, QStringList& errors)
+      {
+        switch(var.type())
+        {
+        case QVariant::String:
+          errors.push_back(var.toString());
+          break;
+        case QVariant::List:
+          {
+            QVariantList list = var.toList();
+            foreach(const QVariant& var, list)
+              collect(var, errors);
+          }
+          break;
+        case QVariant::Map:
+          {
+            QVariantMap map = var.toMap();
+            for(QVariantMap::iterator i = map.begin(), end = map.end(); i != end; ++i)
+              collect(i.value(), errors);
+          }
+          break;
+        }
+      }
+    };
+    ErrorStringCollector::collect(data, errors);
+    emit error(request, params, errors);
   }
   else
     dataLoaded(request, params, data);

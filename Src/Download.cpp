@@ -15,9 +15,14 @@ Download::~Download()
 
 char* Download::load(const char* url)
 {
+  error.clear();
+
   CURL* curl = curl_easy_init();
   if(!curl)
-    return false;
+  {
+    error = "Could not initialize curl.";
+    return 0;
+  }
 
   struct WriteResult
   {
@@ -50,6 +55,7 @@ char* Download::load(const char* url)
   {
     //fprintf(stderr, "error: unable to request data from %s:\n", url);
     //fprintf(stderr, "%s\n", curl_easy_strerror(status));
+    error = curl_easy_strerror(status);
     goto error;
   }
 
@@ -58,12 +64,14 @@ char* Download::load(const char* url)
   if(code != 200)
   {
     //fprintf(stderr, "error: server responded with code %ld\n", code);
+    error.sprintf("Server responsed with code %d.", code);
     goto error;
   }
 
   if(!writeResult.data)
   {
     //printf(stderr, "error: not enough memory\n");
+    error = "Could not allocate enough memory.";
     goto error;
   }
 
@@ -84,6 +92,8 @@ error:
 
 char* Download::loadPOST(const char* url, const char** fields, const char** values, unsigned int fieldCount)
 {
+  error.clear();
+
   curl_global_init(CURL_GLOBAL_ALL);
 
   struct curl_httppost *formpost=NULL;
@@ -100,6 +110,7 @@ char* Download::loadPOST(const char* url, const char** fields, const char** valu
   if(!curl)
   {
     curl_global_cleanup();
+    error = "Could not initialize curl.";
     return 0;
   }
 
@@ -135,6 +146,7 @@ char* Download::loadPOST(const char* url, const char** fields, const char** valu
   {
     //fprintf(stderr, "error: unable to request data from %s:\n", url);
     //fprintf(stderr, "%s\n", curl_easy_strerror(status));
+    error = curl_easy_strerror(status);
     goto error;
   }
 
@@ -143,12 +155,14 @@ char* Download::loadPOST(const char* url, const char** fields, const char** valu
   if(code != 200)
   {
     //fprintf(stderr, "error: server responded with code %ld\n", code);
+    error.sprintf("Server responsed with code %d.", code);
     goto error;
   }
 
   if(!writeResult.data)
   {
     //printf(stderr, "error: not enough memory\n");
+    error = "Could not allocate enough memory.";
     goto error;
   }
 
