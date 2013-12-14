@@ -18,7 +18,7 @@ LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) :
   setLayout(layout);
 
   proxyModel->setSourceModel(&logModel);
-  connect(proxyModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
+  connect(proxyModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
   QHeaderView* headerView = logView->header();
   headerView->resizeSection(0, 22);
   headerView->resizeSection(1, 110);
