@@ -62,9 +62,8 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(menu->addAction(tr("&About...")), SIGNAL(triggered()), this, SLOT(about()));
   connect(menu->addAction(tr("About &Qt...")), SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
-
-  //restoreGeometry(settings.value("Geometry").toByteArray());
-  //restoreState(settings.value("WindowState").toByteArray());
+  restoreGeometry(settings.value("Geometry").toByteArray());
+  restoreState(settings.value("WindowState").toByteArray());
 
   settings.beginGroup("Login");
   if(settings.value("Remember", 0).toUInt() >= 2)
