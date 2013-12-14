@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) : QWidget(parent), logModel(logModel)//, autoScrollEnabled(true)
+LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) : QWidget(parent), logModel(logModel), autoScrollEnabled(true)
 {
   logView = new QTreeView(this);
   proxyModel = new QSortFilterProxyModel(this);
@@ -19,6 +19,7 @@ LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) :
 
   proxyModel->setSourceModel(&logModel);
   connect(proxyModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
+  connect(logView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
   QHeaderView* headerView = logView->header();
   headerView->resizeSection(0, 22);
   headerView->resizeSection(1, 110);
@@ -39,12 +40,15 @@ void LogWidget::setMarket(Market* market)
 void LogWidget::checkAutoScroll(const QModelIndex& index, int, int)
 {
   QScrollBar* scrollBar = logView->verticalScrollBar();
-  if(scrollBar->value() == scrollBar->maximum())
-    QTimer::singleShot(1, this, SLOT(autoScroll()));
+  autoScrollEnabled = proxyModel->sortColumn() == (int)LogModel::Column::date && 
+    proxyModel->sortOrder() == Qt::AscendingOrder &&
+    scrollBar->value() == scrollBar->maximum();
 }
 
-void LogWidget::autoScroll()
+void LogWidget::autoScroll(int, int)
 {
+  if(!autoScrollEnabled)
+    return;
   QScrollBar* scrollBar = logView->verticalScrollBar();
   scrollBar->setValue(scrollBar->maximum());
 }

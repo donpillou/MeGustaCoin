@@ -13,10 +13,11 @@ public:
 private slots:
   void setMarket(Market* market);
   void checkAutoScroll(const QModelIndex&, int, int);
-  void autoScroll();
+  void autoScroll(int, int);
 
 private:
   LogModel& logModel;
   QTreeView* logView;
   QSortFilterProxyModel* proxyModel;
+  bool autoScrollEnabled;
 };
