@@ -46,10 +46,11 @@ public:
       value,
       amount,
       price,
-      last = price,
+      total,
+      last = total,
   };
 
-  void setCurrencies(const QString& market, const QString& coin);
+  void setMarket(Market* market);
 
   void reset();
 
@@ -70,8 +71,7 @@ signals:
 
 private:
   QList<Order*> orders;
-  QByteArray marketCurrency;
-  QByteArray coinCurrency;
+  Market* market;
   QString draftStr;
   QString submittingStr;
   QString openStr;

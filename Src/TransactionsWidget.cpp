@@ -30,13 +30,15 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Dat
 
   proxyModel->setSourceModel(&transactionModel);
   QHeaderView* headerView = transactionView->header();
-  headerView->resizeSection(0, 35);
+  headerView->resizeSection(0, 50);
   headerView->resizeSection(1, 110);
   headerView->resizeSection(2, 85);
   headerView->resizeSection(3, 100);
   headerView->resizeSection(4, 85);
   headerView->resizeSection(5, 75);
   headerView->resizeSection(6, 85);
+  headerView->setStretchLastSection(false);
+  headerView->setResizeMode(0, QHeaderView::Stretch);
   transactionView->sortByColumn(1);
   headerView->restoreState(settings.value("TransactionHeaderState").toByteArray());
 }

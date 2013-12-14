@@ -39,7 +39,7 @@ public:
       last = total,
   };
 
-  void setCurrencies(const QString& market, const QString& coin);
+  void setMarket(Market* market);
 
   void reset();
 
@@ -49,8 +49,7 @@ public:
 
 private:
   QList<Transaction*> transactions;
-  QByteArray marketCurrency;
-  QByteArray coinCurrency;
+  Market* market;
   QString buyStr;
   QString sellStr;
 

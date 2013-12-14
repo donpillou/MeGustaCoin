@@ -44,6 +44,7 @@ public:
   virtual void updateOrder(const QString& id, OrderType orderType, double amount, double price, double oldAmount, double oldPrice) = 0;
   virtual double getMaxSellAmout() const = 0;
   virtual double getMaxBuyAmout(double price, double canceledAmount = 0., double canceledPrice = 0.) const = 0;
+  virtual double getOrderCharge(double amount, double price) const = 0;
 
   const Balance* getBalance() const {return balance.fee == 0. ? 0 : &balance;}
   const TickerData* getTickerData() const {return tickerData.lastTradePrice == 0. ? 0 : &tickerData;}

@@ -107,6 +107,14 @@ double BitstampMarket::getMaxBuyAmout(double price, double canceledAmount, doubl
   return result;
 }
 
+double BitstampMarket::getOrderCharge(double amount, double price) const
+{
+  if(amount < 0.) // sell order
+    return floor(-amount * price / (1. + balance.fee) * 100.) / 100.;
+  else // buy order
+    return floor(amount * price * (1. + balance.fee) * -100.) / 100.;
+}
+
 void BitstampMarket::handleError(int request, const QVariant& args, const QStringList& errors)
 {
   switch((BitstampWorker::Request)request)

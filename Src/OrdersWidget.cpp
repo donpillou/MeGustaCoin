@@ -53,12 +53,15 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& data
 
   proxyModel->setSourceModel(&orderModel);
   QHeaderView* headerView = orderView->header();
-  headerView->resizeSection(0, 80);
-  headerView->resizeSection(1, 85);
-  headerView->resizeSection(2, 145);
+  headerView->resizeSection(0, 50);
+  headerView->resizeSection(1, 60);
+  headerView->resizeSection(2, 110);
   headerView->resizeSection(3, 85);
   headerView->resizeSection(4, 100);
   headerView->resizeSection(5, 85);
+  headerView->resizeSection(5, 85);
+  headerView->setStretchLastSection(false);
+  headerView->setResizeMode(0, QHeaderView::Stretch);
   orderView->sortByColumn(2);
   headerView->restoreState(settings.value("OrderHeaderState").toByteArray());
 }
@@ -221,7 +224,7 @@ void OrdersWidget::refresh()
   if(!market)
     return;
   dataModel.logModel.addMessage(LogModel::Type::information, "Refreshing orders...");
+  market->loadBalance(); // load fee
   market->loadOrders();
-  market->loadBalance();
   market->loadTicker();
 }

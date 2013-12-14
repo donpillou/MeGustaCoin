@@ -15,7 +15,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   setDockNestingEnabled(true);
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   //setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::East);
-  resize(600, 400);
+  resize(620, 400);
 
   QDockWidget* transactionsDockWidget = new QDockWidget(tr("Transactions"), this);
   //transactionsDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
@@ -144,14 +144,12 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
   if(!market)
     return;
 
-  QString marketCurrency(market->getMarketCurrency());
-  QString coinCurrency(market->getCoinCurrency());
-  dataModel.orderModel.setCurrencies(marketCurrency, coinCurrency);
-  dataModel.transactionModel.setCurrencies(marketCurrency, coinCurrency);
+  dataModel.orderModel.setMarket(market);
+  dataModel.transactionModel.setMarket(market);
 
   connect(market, SIGNAL(balanceUpdated()), this, SLOT(updateWindowTitle()));
   connect(market, SIGNAL(tickerUpdated()), this, SLOT(updateWindowTitle()));
-  dataModel.logModel.addMessage(LogModel::Type::information, QString("Opened %1").arg(marketName));
+  dataModel.logModel.addMessage(LogModel::Type::information, QString(tr("Opened %1")).arg(marketName));
 
   // update gui
   updateWindowTitle();

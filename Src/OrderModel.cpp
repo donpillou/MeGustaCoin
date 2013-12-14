@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-OrderModel::OrderModel() : draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), 
+OrderModel::OrderModel() : market(0), draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), 
 canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), nextDraftId(0)
 {
   italicFont.setItalic(true);
@@ -12,15 +12,15 @@ OrderModel::~OrderModel()
   qDeleteAll(orders);
 }
 
-void OrderModel::setCurrencies(const QString& market, const QString& coin)
+void OrderModel::setMarket(Market* market)
 {
-  marketCurrency = market.toUtf8();
-  coinCurrency = coin.toUtf8();
+  this->market = market;
 }
 
 void OrderModel::reset()
 {
   beginResetModel();
+  market = 0;
   orders.clear();
   endResetModel();
 }
@@ -172,7 +172,7 @@ int OrderModel::rowCount(const QModelIndex& parent) const
 
 int OrderModel::columnCount(const QModelIndex& parent) const
 {
-  return 6;
+  return (int)Column::last + 1;
 }
 
 Qt::ItemFlags OrderModel::flags(const QModelIndex &index) const
@@ -206,6 +206,7 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
     case Column::price:
     case Column::value:
     case Column::amount:
+    case Column::total:
       return Qt::AlignRight;
     default:
       return Qt::AlignLeft;
@@ -249,13 +250,13 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
     case Column::amount:
       if(role == Qt::EditRole)
         return order.newAmount != 0. ? order.newAmount : order.amount;
-      return QString().sprintf("%.08f %s", order.amount, coinCurrency.constData());
+      return QString().sprintf("%.08f %s", order.amount, market->getCoinCurrency());
     case Column::price:
       if(role == Qt::EditRole)
         return order.newPrice != 0. ? order.newPrice : order.price;
-      return QString().sprintf("%.02f %s", order.price, marketCurrency.constData());
+      return QString().sprintf("%.02f %s", order.price, market->getMarketCurrency());
     case Column::value:
-      return QString().sprintf("%.02f %s", order.amount * order.price, marketCurrency.constData());
+      return QString().sprintf("%.02f %s", order.amount * order.price, market->getMarketCurrency());
     case Column::state:
       switch(order.state)
       {
@@ -272,6 +273,9 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
       case Order::State::closed:
         return closedStr;
       }
+      break;
+    case Column::total:
+      return QString().sprintf("%+.02f %s", market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price), market->getMarketCurrency());
     }
   }
   return QVariant();
@@ -289,6 +293,7 @@ QVariant OrderModel::headerData(int section, Qt::Orientation orientation, int ro
     case Column::price:
     case Column::value:
     case Column::amount:
+    case Column::total:
       return Qt::AlignRight;
     default:
       return Qt::AlignLeft;
@@ -308,6 +313,8 @@ QVariant OrderModel::headerData(int section, Qt::Orientation orientation, int ro
         return tr("Value");
       case Column::state:
         return tr("Status");
+      case Column::total:
+        return tr("Total");
     }
   }
   return QVariant();
