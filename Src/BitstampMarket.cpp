@@ -112,25 +112,34 @@ void BitstampMarket::handleError(int request, const QVariant& args, const QStrin
   switch((BitstampWorker::Request)request)
   {
   case BitstampWorker::Request::openOrders:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load orders:");
+    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load orders:"));
     break;
   case BitstampWorker::Request::balance:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load balance:");
+    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load balance:"));
     break;
   case BitstampWorker::Request::ticker:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load ticker data:");
+    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load ticker data:"));
     break;
   case BitstampWorker::Request::buy:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not submit buy order:");
-    break;
   case BitstampWorker::Request::sell:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not submit sell order:");
+    {
+      if((BitstampWorker::Request)request == BitstampWorker::Request::buy)
+        dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not submit buy order:"));
+      else
+        dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not submit sell order:"));
+      QString draftId = args.toMap()["draftid"].toString();
+      dataModel.orderModel.setOrderState(draftId, OrderModel::Order::State::draft);
+    }
     break;
   case BitstampWorker::Request::cancel:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not cancel order:");
+    {
+      dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not cancel order:"));
+      QString id = args.toMap()["id"].toString();
+      dataModel.orderModel.setOrderState(id, OrderModel::Order::State::open);
+    }
     break;
   case BitstampWorker::Request::transactions:
-    dataModel.logModel.addMessage(LogModel::Type::error, "Could not load transactions:");
+    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load transactions:"));
     break;
   }
   foreach(const QString& error, errors)
