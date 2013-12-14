@@ -101,7 +101,7 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
     case Column::value:
     case Column::amount:
     case Column::fee:
-    case Column::balance:
+    case Column::total:
       return Qt::AlignRight;
     default:
       return Qt::AlignLeft;
@@ -135,7 +135,7 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
       return QString().sprintf("%.02f %s", transaction.amount * transaction.price, marketCurrency.constData());
     case Column::fee:
       return QString().sprintf("%.02f %s", transaction.fee, marketCurrency.constData());
-    case Column::balance:
+    case Column::total:
       return QString().sprintf("%+.02f %s", transaction.balanceChange, marketCurrency.constData());
     }
   }
@@ -155,7 +155,7 @@ QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, 
     case Column::value:
     case Column::amount:
     case Column::fee:
-    case Column::balance:
+    case Column::total:
       return Qt::AlignRight;
     default:
       return Qt::AlignLeft;
@@ -175,7 +175,7 @@ QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, 
         return tr("Value");
       case Column::fee:
         return tr("Fee");
-      case Column::balance:
+      case Column::total:
         return tr("Total");
     }
   }

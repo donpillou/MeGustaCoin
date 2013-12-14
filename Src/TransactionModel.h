@@ -35,8 +35,8 @@ public:
       amount,
       price,
       fee,
-      balance,
-      last = balance,
+      total,
+      last = total,
   };
 
   void setCurrencies(const QString& market, const QString& coin);
