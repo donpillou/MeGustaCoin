@@ -67,6 +67,7 @@ signals:
 private:
   const BitstampMarket& market;
   QDateTime lastRequestTime;
+  quint64 lastNonce;
 
   void avoidSpamming();
 };

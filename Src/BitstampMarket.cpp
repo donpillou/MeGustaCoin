@@ -278,7 +278,7 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
   }
 }
 
-BitstampWorker::BitstampWorker(const BitstampMarket& market) : market(market) {}
+BitstampWorker::BitstampWorker(const BitstampMarket& market) : market(market), lastNonce(QDateTime::currentDateTime().toTime_t()) {}
 
 void BitstampWorker::loadData(int request, QVariant params)
 {
@@ -333,7 +333,12 @@ void BitstampWorker::loadData(int request, QVariant params)
     QByteArray key(market.key.toUtf8());
     QByteArray secret(market.secret.toUtf8());
 
-    QByteArray nonce(QString::number(QDateTime::currentDateTime().toTime_t()).toAscii());
+    quint64 newNonce = QDateTime::currentDateTime().toTime_t();
+    if(newNonce <= lastNonce)
+      newNonce = lastNonce + 1;
+    lastNonce = newNonce;
+
+    QByteArray nonce(QString::number(newNonce).toAscii());
     QByteArray message = nonce + clientId + key;
     QByteArray signature = Sha256::hmac(secret, message).toHex().toUpper();
     QByteArray amount, price, id;
