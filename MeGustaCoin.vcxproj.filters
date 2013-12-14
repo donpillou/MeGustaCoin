@@ -76,6 +76,9 @@
     <None Include="Src\Icons\information.png">
       <Filter>Icons</Filter>
     </None>
+    <None Include="Src\Icons\money.png">
+      <Filter>Icons</Filter>
+    </None>
     <None Include="Src\Icons\money_add.png">
       <Filter>Icons</Filter>
     </None>

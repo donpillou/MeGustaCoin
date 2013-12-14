@@ -50,8 +50,10 @@ public:
 private:
   QList<Transaction*> transactions;
   Market* market;
-  QString buyStr;
-  QString sellStr;
+  QVariant buyStr;
+  QVariant sellStr;
+  QVariant sellIcon;
+  QVariant buyIcon;
 
   virtual QModelIndex parent(const QModelIndex& child) const;
   virtual int rowCount(const QModelIndex& parent) const;

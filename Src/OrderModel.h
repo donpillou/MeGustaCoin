@@ -72,16 +72,18 @@ signals:
 private:
   QList<Order*> orders;
   Market* market;
-  QString draftStr;
-  QString submittingStr;
-  QString openStr;
-  QString cancelingStr;
-  QString canceledStr;
-  QString closedStr;
-  QString buyStr;
-  QString sellStr;
-  QString format;
+  QVariant draftStr;
+  QVariant submittingStr;
+  QVariant openStr;
+  QVariant cancelingStr;
+  QVariant canceledStr;
+  QVariant closedStr;
+  QVariant buyStr;
+  QVariant sellStr;
+  QVariant format;
   QFont italicFont;
+  QVariant sellIcon;
+  QVariant buyIcon;
   unsigned int nextDraftId;
 
   virtual QModelIndex parent(const QModelIndex& child) const;

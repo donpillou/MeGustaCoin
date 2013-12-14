@@ -198,11 +198,11 @@
     <CustomBuild Include="Src\MeGustaCoin.qrc">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"MeGustaCoin.qrc (Qt rcc)"</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\rcc\rcc.exe -name MeGustaCoin Src/MeGustaCoin.qrc -o Build/Debug/qrc_MeGustaCoin.cpp</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Src/Icons/arrow_refresh.png;Src/Icons/bitcoin.png;Src/Icons/bitcoin_add.png;Src/Icons/bitcoin_big.png;Src/Icons/bullet_go.png;Src/Icons/cancel.png;Src/Icons/cancel2.png;Src/Icons/error.png;Src/Icons/information.png;Src/Icons/money_add.png;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Src/Icons/arrow_refresh.png;Src/Icons/bitcoin.png;Src/Icons/bitcoin_add.png;Src/Icons/bitcoin_big.png;Src/Icons/bullet_go.png;Src/Icons/cancel.png;Src/Icons/cancel2.png;Src/Icons/error.png;Src/Icons/information.png;Src/Icons/money.png;Src/Icons/money_add.png;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/qrc_MeGustaCoin.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"MeGustaCoin.qrc (Qt rcc)"</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\rcc\rcc.exe -name MeGustaCoin Src/MeGustaCoin.qrc -o Build/Release/qrc_MeGustaCoin.cpp</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Src/Icons/arrow_refresh.png;Src/Icons/bitcoin.png;Src/Icons/bitcoin_add.png;Src/Icons/bitcoin_big.png;Src/Icons/bullet_go.png;Src/Icons/cancel.png;Src/Icons/cancel2.png;Src/Icons/error.png;Src/Icons/information.png;Src/Icons/money_add.png;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Src/Icons/arrow_refresh.png;Src/Icons/bitcoin.png;Src/Icons/bitcoin_add.png;Src/Icons/bitcoin_big.png;Src/Icons/bullet_go.png;Src/Icons/cancel.png;Src/Icons/cancel2.png;Src/Icons/error.png;Src/Icons/information.png;Src/Icons/money.png;Src/Icons/money_add.png;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/qrc_MeGustaCoin.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClCompile Include="Build\Debug\qrc_MeGustaCoin.cpp">
@@ -218,6 +218,7 @@
     <None Include="Src\Icons\cancel2.png" />
     <None Include="Src\Icons\error.png" />
     <None Include="Src\Icons\information.png" />
+    <None Include="Src\Icons\money.png" />
     <None Include="Src\Icons\money_add.png" />
     <ClCompile Include="Build\Debug\moc_MainWindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>

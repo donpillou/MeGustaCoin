@@ -2,7 +2,9 @@
 #include "stdafx.h"
 
 OrderModel::OrderModel() : market(0), draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), 
-canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), nextDraftId(0)
+canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), 
+sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
+nextDraftId(0)
 {
   italicFont.setItalic(true);
 }
@@ -207,9 +209,9 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
     case Column::value:
     case Column::amount:
     case Column::total:
-      return Qt::AlignRight;
+      return (int)Qt::AlignRight | (int)Qt::AlignVCenter;
     default:
-      return Qt::AlignLeft;
+      return (int)Qt::AlignLeft | (int)Qt::AlignVCenter;
     }
 
   int row = index.row();
@@ -233,6 +235,16 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
     default:
       return QVariant();
     }
+  case Qt::DecorationRole:
+    if((Column)index.column() == Column::type)
+      switch(order.type)
+      {
+      case Order::Type::sell:
+        return sellIcon;
+      case Order::Type::buy:
+        return buyIcon;
+      }
+    break;
   case Qt::DisplayRole:
   case Qt::EditRole:
     switch((Column)index.column())

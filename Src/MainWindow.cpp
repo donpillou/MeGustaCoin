@@ -15,7 +15,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   setDockNestingEnabled(true);
   setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
   //setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::East);
-  resize(620, 400);
+  resize(625, 400);
 
   QDockWidget* transactionsDockWidget = new QDockWidget(tr("Transactions"), this);
   //transactionsDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);

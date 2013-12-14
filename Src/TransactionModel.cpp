@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
 
-TransactionModel::TransactionModel() : market(0), buyStr(tr("buy")), sellStr(tr("sell"))
+TransactionModel::TransactionModel() : market(0), buyStr(tr("buy")), sellStr(tr("sell")),
+sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png"))
 {
 }
 
@@ -102,9 +103,9 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
     case Column::amount:
     case Column::fee:
     case Column::total:
-      return Qt::AlignRight;
+      return (int)Qt::AlignRight | (int)Qt::AlignVCenter;
     default:
-      return Qt::AlignLeft;
+      return (int)Qt::AlignLeft | (int)Qt::AlignVCenter;
     }
 
   int row = index.row();
@@ -114,6 +115,16 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
 
   switch(role)
   {
+  case Qt::DecorationRole:
+    if((Column)index.column() == Column::type)
+      switch(transaction.type)
+      {
+      case Transaction::Type::sell:
+        return sellIcon;
+      case Transaction::Type::buy:
+        return buyIcon;
+      }
+    break;
   case Qt::DisplayRole:
     switch((Column)index.column())
     {
