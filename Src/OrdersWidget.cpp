@@ -198,8 +198,9 @@ void OrdersWidget::updateToolBarButtons()
   bool canSubmit = false;
 
   if(hasMarket)
-    foreach(const QModelIndex& index, selectedRows)
+    foreach(const QModelIndex& proxyIndex, selectedRows)
     {
+      QModelIndex index = proxyModel->mapToSource(proxyIndex);
       const OrderModel::Order* order = orderModel.getOrder(index);
       if(order->state == OrderModel::Order::State::draft)
       {
