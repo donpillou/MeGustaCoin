@@ -51,5 +51,5 @@ FAQ
 ===
 
 Q: Where do I get the login key and secret?<br>
-A: In order to use MeGustaCoin, you have to create an API key/secret pair for your Bitstamp account on the 
+A: In order to use MeGustaCoin, you have to create an API key/secret pair for your Bitstamp account on
 Bitstamp's website (Account -> Security -> API Access). https://www.bitstamp.net/account/security/api/
