@@ -127,6 +127,7 @@ void MainWindow::logout()
   emit marketChanged(0);
   dataModel.orderModel.reset();
   dataModel.transactionModel.reset();
+  dataModel.tradeModel.reset();
   updateWindowTitle();
 
   dataModel.logModel.addMessage(LogModel::Type::information, QString("Closed %1").arg(marketName));

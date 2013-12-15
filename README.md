@@ -7,7 +7,7 @@ place, withdraw and (especially) edit orders on Bitstamp.
 ![MeGustaCoin Screenshot](/MeGustaCoin.png)
 
 Although the key features (listing, editing, adding and canceling orders) are functional, MeGustaCoin is in an
-early state of development and may require some testing and feedback. Feel free to report issues and to provide
+early stage of development and may require some testing and feedback. Feel free to report issues and to provide
 pull requests and ideas. If you are desperate for a feature, request it, but keep in mind that my time to work
 on MeGustaCoin is limited.
 
