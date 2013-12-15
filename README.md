@@ -28,10 +28,10 @@ Windows
 -------
 
 Compiling MeGustaCoin will require the following steps:
-1. Get and install Git and Visual Studio 2013 (its free, the Express version is sufficient)
-2. Using Git, clone https://github.com/donpillou/MeGustaCoin onto you hard drive
-3. In your working copy, initialize submodules (recursively!!) 
-4. Open MeGustaCoin.sln in Visual Studio and compile the MeGustaCoin project
+ 1. Get and install Git and Visual Studio 2013 (its free, the Express version is sufficient)
+ 2. Using Git, clone https://github.com/donpillou/MeGustaCoin onto you hard drive
+ 3. In your working copy, initialize submodules (recursively!!) 
+ 4. Open MeGustaCoin.sln in Visual Studio and compile the MeGustaCoin project
 
 Linux
 -----
@@ -48,6 +48,6 @@ could use for development/testing.
 FAQ
 ===
 
-Q: Where do I get the login key and secret?
+Q: Where do I get the login key and secret?<br>
 A: In order to use MeGustaCoin, you have to create an API key/secret pair for your Bitstamp account on the 
 Bitstamp's website (Account -> Security -> API Access). https://www.bitstamp.net/account/security/api/
