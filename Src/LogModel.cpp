@@ -51,7 +51,7 @@ QVariant LogModel::data(const QModelIndex& index, int role) const
   switch(role)
   {
   case Qt::DecorationRole:
-    if ((Column)index.column() == Column::type)
+    if ((Column)index.column() == Column::message)
       switch(item.type)
       {
       case Type::error:
@@ -65,8 +65,6 @@ QVariant LogModel::data(const QModelIndex& index, int role) const
   case Qt::DisplayRole:
     switch((Column)index.column())
     {
-    case Column::type:
-      break;
     case Column::date:
       return item.date;
     case Column::message:

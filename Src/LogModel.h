@@ -9,8 +9,7 @@ public:
   enum class Column
   {
       first,
-      type = first,
-      date,
+      date = first,
       message,
       last = message,
   };

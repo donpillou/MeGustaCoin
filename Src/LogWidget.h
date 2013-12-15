@@ -18,6 +18,5 @@ private slots:
 private:
   LogModel& logModel;
   QTreeView* logView;
-  QSortFilterProxyModel* proxyModel;
   bool autoScrollEnabled;
 };

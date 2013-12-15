@@ -3,11 +3,12 @@
 
 LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) : QWidget(parent), logModel(logModel), autoScrollEnabled(true)
 {
+  connect(&logModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
+
   logView = new QTreeView(this);
-  proxyModel = new QSortFilterProxyModel(this);
-  proxyModel->setDynamicSortFilter(true);
-  logView->setModel(proxyModel);
-  logView->setSortingEnabled(true);
+  connect(logView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
+  logView->setModel(&logModel);
+  //logView->setSortingEnabled(true);
   logView->setRootIsDecorated(false);
   logView->setAlternatingRowColors(true);
 
@@ -17,15 +18,11 @@ LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) :
   layout->addWidget(logView);
   setLayout(layout);
 
-  proxyModel->setSourceModel(&logModel);
-  connect(proxyModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
-  connect(logView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
   QHeaderView* headerView = logView->header();
-  headerView->resizeSection(0, 22);
-  headerView->resizeSection(1, 110);
-  headerView->resizeSection(2, 200);
-  logView->sortByColumn(1, Qt::AscendingOrder);
-  headerView->restoreState(settings.value("LogHeaderState").toByteArray());
+  headerView->resizeSection(0, 110);
+  headerView->resizeSection(1, 200);
+  logView->sortByColumn(0, Qt::AscendingOrder);
+  //headerView->restoreState(settings.value("LogHeaderState").toByteArray());
 }
 
 void LogWidget::saveState(QSettings& settings)
@@ -40,9 +37,7 @@ void LogWidget::setMarket(Market* market)
 void LogWidget::checkAutoScroll(const QModelIndex& index, int, int)
 {
   QScrollBar* scrollBar = logView->verticalScrollBar();
-  autoScrollEnabled = proxyModel->sortColumn() == (int)LogModel::Column::date && 
-    proxyModel->sortOrder() == Qt::AscendingOrder &&
-    scrollBar->value() == scrollBar->maximum();
+  autoScrollEnabled = scrollBar->value() == scrollBar->maximum();
 }
 
 void LogWidget::autoScroll(int, int)
