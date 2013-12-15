@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0)
+MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0), liveTradeUpdatesEnabled(false)
 {
   ordersWidget = new OrdersWidget(this, settings, dataModel);
   connect(this, SIGNAL(marketChanged(Market*)), ordersWidget, SLOT(setMarket(Market*)));
@@ -168,6 +168,7 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
   // request data
   refresh();
   market->loadLiveTrades();
+  market->enableLiveTradeUpdates(liveTradeUpdatesEnabled);
 }
 
 void MainWindow::updateWindowTitle()
@@ -206,6 +207,7 @@ void MainWindow::about()
 
 void MainWindow::enableLiveUpdates(bool enable)
 {
+  liveTradeUpdatesEnabled = enable;
   if(!market)
     return;
   market->enableLiveTradeUpdates(enable);

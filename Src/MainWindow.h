@@ -25,6 +25,8 @@ private:
   QString marketName;
   QString userName;
 
+  bool liveTradeUpdatesEnabled;
+
   void open(const QString& market, const QString& userName, const QString& key, const QString& secret);
 
   virtual void closeEvent(QCloseEvent* event);
