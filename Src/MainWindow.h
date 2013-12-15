@@ -17,6 +17,7 @@ private:
 
   OrdersWidget* ordersWidget;
   TransactionsWidget* transactionsWidget;
+  TradesWidget* tradesWidget;
   LogWidget* logWidget;
 
   DataModel dataModel;
@@ -34,4 +35,5 @@ private slots:
   void refresh();
   void updateWindowTitle();
   void about();
+  void enableLiveUpdates(bool enable);
 };

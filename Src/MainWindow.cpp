@@ -7,6 +7,8 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(this, SIGNAL(marketChanged(Market*)), ordersWidget, SLOT(setMarket(Market*)));
   transactionsWidget = new TransactionsWidget(this, settings, dataModel);
   connect(this, SIGNAL(marketChanged(Market*)), transactionsWidget, SLOT(setMarket(Market*)));
+  tradesWidget = new TradesWidget(this, settings, dataModel);
+  connect(this, SIGNAL(marketChanged(Market*)), tradesWidget, SLOT(setMarket(Market*)));
   logWidget = new LogWidget(this, settings, dataModel.logModel);
   connect(this, SIGNAL(marketChanged(Market*)), logWidget, SLOT(setMarket(Market*)));
 
@@ -18,13 +20,11 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   resize(625, 400);
 
   QDockWidget* transactionsDockWidget = new QDockWidget(tr("Transactions"), this);
-  //transactionsDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   transactionsDockWidget->setObjectName("Orders");
   transactionsDockWidget->setWidget(transactionsWidget);
   addDockWidget(Qt::TopDockWidgetArea, transactionsDockWidget);
 
   QDockWidget* ordersDockWidget = new QDockWidget(tr("Orders"), this);
-  //ordersDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   ordersDockWidget->setObjectName("Orders");
   ordersDockWidget->setWidget(ordersWidget);
   addDockWidget(Qt::TopDockWidgetArea, ordersDockWidget);
@@ -33,8 +33,15 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   QDockWidget* logDockWidget = new QDockWidget(tr("Log"), this);
   logDockWidget->setObjectName("Log");
   logDockWidget->setWidget(logWidget);
-  //logDockWidget->setFeatures(QDockWidget::DockWidgetVerticalTitleBar | QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
   addDockWidget(Qt::TopDockWidgetArea, logDockWidget, Qt::Vertical);
+
+  QDockWidget* tradesDockWidget = new QDockWidget(tr("Live Trades"), this);
+  connect(tradesDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableLiveUpdates(bool)));
+  tradesDockWidget->setObjectName("LiveTrades");
+  tradesDockWidget->setWidget(tradesWidget);
+  addDockWidget(Qt::TopDockWidgetArea, tradesDockWidget); //, Qt::Horizontal);
+  tradesDockWidget->hide();
+
 
   QMenuBar* menuBar = this->menuBar();
   QMenu* menu = menuBar->addMenu(tr("&Market"));
@@ -56,6 +63,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   menu->addSeparator();
   menu->addAction(ordersDockWidget->toggleViewAction());
   menu->addAction(transactionsDockWidget->toggleViewAction());
+  menu->addAction(tradesDockWidget->toggleViewAction());
   menu->addAction(logDockWidget->toggleViewAction());
 
   menu = menuBar->addMenu(tr("&Help"));
@@ -146,6 +154,7 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
 
   dataModel.orderModel.setMarket(market);
   dataModel.transactionModel.setMarket(market);
+  dataModel.tradeModel.setMarket(market);
 
   connect(market, SIGNAL(balanceUpdated()), this, SLOT(updateWindowTitle()));
   connect(market, SIGNAL(tickerUpdated()), this, SLOT(updateWindowTitle()));
@@ -157,6 +166,7 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
 
   // request data
   refresh();
+  market->loadLiveTrades();
 }
 
 void MainWindow::updateWindowTitle()
@@ -191,4 +201,11 @@ void MainWindow::updateWindowTitle()
 void MainWindow::about()
 {
   QMessageBox::about(this, "About", "MeGustaCoin - Bitcoin Market Client<br><a href=\"https://github.com/donpillou/MeGustaCoin\">https://github.com/donpillou/MeGustaCoin</a><br><br>Released under the GNU General Public License Version 3<br><br>MeGustaCoin uses the following third-party libraries and components:<br>&nbsp;&nbsp;- Qt (GUI)<br>&nbsp;&nbsp;- libcurl (HTTPS)<br>&nbsp;&nbsp;- LibQxt (JSON)<br>&nbsp;&nbsp;- <a href=\"http://www.famfamfam.com/lab/icons/silk/\">silk icons</a> (by Mark James)<br><br>-- Donald Pillou, 2013");
+}
+
+void MainWindow::enableLiveUpdates(bool enable)
+{
+  if(!market)
+    return;
+  market->enableLiveTradeUpdates(enable);
 }

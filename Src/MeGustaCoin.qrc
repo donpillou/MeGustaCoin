@@ -11,5 +11,8 @@
   <file>Icons/cancel.png</file>
   <file>Icons/error.png</file>
   <file>Icons/information.png</file>
+  <file>Icons/bullet_grey.png</file>
+  <file>Icons/arrow_diag_red.png</file>
+  <file>Icons/arrow_diag.png</file>
 </qresource>
 </RCC>

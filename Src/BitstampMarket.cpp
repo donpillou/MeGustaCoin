@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
 
-BitstampMarket::BitstampMarket(DataModel& dataModel, const QString& userName, const QString& key, const QString& secret) : Market(dataModel), userName(userName), key(key), secret(secret)
+BitstampMarket::BitstampMarket(DataModel& dataModel, const QString& userName, const QString& key, const QString& secret) : Market(dataModel), userName(userName), key(key), secret(secret),
+liveTradeUpdatesEnabled(false), liveTradeUpdateTimerStarted(false)
 {
   marketCurrency = tr("USD");
   coinCurrency = tr("BTC");
@@ -42,6 +43,23 @@ void BitstampMarket::loadTicker()
 void BitstampMarket::loadTransactions()
 {
   emit requestData((int)BitstampWorker::Request::transactions, QVariant());
+}
+
+void BitstampMarket::loadLiveTrades()
+{
+  emit requestData((int)BitstampWorker::Request::liveTrades, QVariant());
+}
+
+void BitstampMarket::enableLiveTradeUpdates(bool enable)
+{
+  if(enable == liveTradeUpdatesEnabled)
+    return;
+  liveTradeUpdatesEnabled = enable;
+  if(enable && !liveTradeUpdateTimerStarted)
+  {
+    liveTradeUpdateTimerStarted = true;
+    QTimer::singleShot(0, this, SLOT(updateLiveTrades()));
+  }
 }
 
 void BitstampMarket::createOrder(const QString& draftId, double amount, double price)
@@ -132,6 +150,15 @@ void BitstampMarket::handleError(int request, const QVariant& args, const QStrin
     break;
   case BitstampWorker::Request::ticker:
     dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load ticker data:"));
+    break;
+  case BitstampWorker::Request::liveTrades:
+  case BitstampWorker::Request::liveTradesUpdate:
+    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load live trades:"));
+    if(liveTradeUpdatesEnabled && (BitstampWorker::Request)request == BitstampWorker::Request::liveTradesUpdate && !liveTradeUpdateTimerStarted)
+    {
+      liveTradeUpdateTimerStarted = true;
+      QTimer::singleShot(1337 * 10, this, SLOT(updateLiveTrades()));
+    }
     break;
   case BitstampWorker::Request::buy:
   case BitstampWorker::Request::sell:
@@ -247,10 +274,40 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved ticker data"));
     }
     break;
+  case BitstampWorker::Request::liveTrades:
+  case BitstampWorker::Request::liveTradesUpdate:
+    {
+      QList<TradeModel::Trade> liveTrades;
+      QVariantList tradesData = data.toList();
+      liveTrades.reserve(tradesData.size());
+      foreach(const QVariant& tradeDataVar, tradesData)
+      {
+        QVariantMap tradeData = tradeDataVar.toMap();
+
+        liveTrades.prepend(TradeModel::Trade());
+        TradeModel::Trade& trade = liveTrades.front();
+
+        trade.id = tradeData["tid"].toString();
+        trade.date = tradeData["date"].toULongLong();
+        trade.price = tradeData["price"].toDouble();
+        trade.amount = tradeData["amount"].toDouble();
+      }
+
+      dataModel.tradeModel.addData(liveTrades);
+      if((BitstampWorker::Request)request == BitstampWorker::Request::liveTrades)
+        dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved live trades"));
+      if(liveTradeUpdatesEnabled && (BitstampWorker::Request)request == BitstampWorker::Request::liveTradesUpdate && !liveTradeUpdateTimerStarted)
+      {
+        liveTradeUpdateTimerStarted = true;
+        QTimer::singleShot(1337 * 10, this, SLOT(updateLiveTrades()));
+      }
+    }
+    break;
   case BitstampWorker::Request::openOrders:
     {
       QList<OrderModel::Order> orders;
       QVariantList ordersData = data.toList();
+      orders.reserve(ordersData.size());
       foreach(const QVariant& orderDataVar, ordersData)
       {
         QVariantMap orderData = orderDataVar.toMap();
@@ -281,6 +338,7 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
     {
       QList<TransactionModel::Transaction> transactions;
       QVariantList transactionData = data.toList();
+      transactions.reserve(transactionData.size());
       foreach(const QVariant& transactionDataVar, transactionData)
       {
         QVariantMap transactionData = transactionDataVar.toMap();
@@ -312,6 +370,12 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
   }
 }
 
+void BitstampMarket::updateLiveTrades()
+{
+  liveTradeUpdateTimerStarted = false;
+  emit requestData((int)BitstampWorker::Request::liveTradesUpdate, QVariant());
+}
+
 BitstampWorker::BitstampWorker(const BitstampMarket& market) : market(market), lastNonce(QDateTime::currentDateTime().toTime_t()) {}
 
 void BitstampWorker::loadData(int request, QVariant params)
@@ -331,6 +395,22 @@ void BitstampWorker::loadData(int request, QVariant params)
   case Request::ticker:
     url = "https://www.bitstamp.net/api/ticker/";
     isPublic = true;
+    break;
+  case Request::liveTrades:
+    url = "https://www.bitstamp.net/api/transactions/";
+    isPublic = true;
+    lastLiveTradeUpdateTime = QDateTime::currentDateTime();
+    break;
+  case Request::liveTradesUpdate:
+    url = "https://www.bitstamp.net/api/transactions/?time=minute";
+    isPublic = true;
+    {
+      QDateTime now = QDateTime::currentDateTime();
+      qint64 elapsed = lastRequestTime.isNull() ? 60 * 60 : lastLiveTradeUpdateTime.secsTo(now);
+      if(elapsed > 60 - 10)
+        url = "https://www.bitstamp.net/api/transactions/";
+      lastLiveTradeUpdateTime = now;
+    }
     break;
   case Request::buy:
     url = "https://www.bitstamp.net/api/buy/";

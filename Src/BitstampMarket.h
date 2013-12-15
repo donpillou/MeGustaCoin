@@ -15,6 +15,8 @@ public:
   virtual void loadBalance();
   virtual void loadTicker();
   virtual void loadTransactions();
+  virtual void loadLiveTrades();
+  virtual void enableLiveTradeUpdates(bool enable);
   virtual void createOrder(const QString& draftId, double amount, double price);
   virtual void cancelOrder(const QString& id, double oldAmount, double oldPrice);
   virtual void updateOrder(const QString& id, double amount, double price, double oldAmount, double oldPrice);
@@ -27,6 +29,9 @@ public:
 signals:
   void requestData(int request, QVariant args);
 
+private slots:
+  void updateLiveTrades();
+
 private:
   QThread thread;
   BitstampWorker* worker;
@@ -37,6 +42,9 @@ private:
   QString userName;
   QString key;
   QString secret;
+
+  bool liveTradeUpdatesEnabled;
+  bool liveTradeUpdateTimerStarted;
 
 private slots:
   void handleData(int request, const QVariant& args, const QVariant& data);
@@ -61,6 +69,8 @@ public:
     sell,
     cancel,
     transactions,
+    liveTrades,
+    liveTradesUpdate,
   };
 
 public slots:
@@ -74,6 +84,7 @@ private:
   const BitstampMarket& market;
   QDateTime lastRequestTime;
   quint64 lastNonce;
+  QDateTime lastLiveTradeUpdateTime;
 
   void avoidSpamming();
 };

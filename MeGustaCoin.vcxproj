@@ -111,6 +111,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Src\TradeModel.cpp" />
+    <ClCompile Include="Src\TradesWidget.cpp" />
     <ClCompile Include="Src\TransactionModel.cpp" />
     <ClCompile Include="Src\TransactionsWidget.cpp" />
     <CustomBuild Include="Src\BitstampMarket.h">
@@ -174,6 +176,15 @@
     </CustomBuild>
     <ClInclude Include="Src\Sha256.h" />
     <ClInclude Include="Src\stdafx.h" />
+    <ClInclude Include="Src\TradeModel.h" />
+    <CustomBuild Include="Src\TradesWidget.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"TradesWidget.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl Src/TradesWidget.h -o Build/Debug/moc_TradesWidget.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_TradesWidget.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"TradesWidget.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/TradesWidget.h -o Build/Release/moc_TradesWidget.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_TradesWidget.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <ClInclude Include="Src\TransactionModel.h" />
     <CustomBuild Include="Src\TransactionsWidget.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"TransactionsWidget.h (Qt moc)"</Message>
@@ -198,22 +209,27 @@
     <CustomBuild Include="Src\MeGustaCoin.qrc">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"MeGustaCoin.qrc (Qt rcc)"</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\rcc\rcc.exe -name MeGustaCoin Src/MeGustaCoin.qrc -o Build/Debug/qrc_MeGustaCoin.cpp</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Src/Icons/arrow_refresh.png;Src/Icons/bitcoin.png;Src/Icons/bitcoin_add.png;Src/Icons/bitcoin_big.png;Src/Icons/bullet_go.png;Src/Icons/cancel.png;Src/Icons/cancel2.png;Src/Icons/error.png;Src/Icons/information.png;Src/Icons/money.png;Src/Icons/money_add.png;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Src/Icons/arrow_diag.png;Src/Icons/arrow_diag_red.png;Src/Icons/arrow_down_red.png;Src/Icons/arrow_refresh.png;Src/Icons/arrow_up.png;Src/Icons/bitcoin.png;Src/Icons/bitcoin_add.png;Src/Icons/bitcoin_big.png;Src/Icons/bullet_go.png;Src/Icons/bullet_grey.png;Src/Icons/cancel.png;Src/Icons/cancel2.png;Src/Icons/error.png;Src/Icons/information.png;Src/Icons/money.png;Src/Icons/money_add.png;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/qrc_MeGustaCoin.cpp;%(Outputs)</Outputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"MeGustaCoin.qrc (Qt rcc)"</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\rcc\rcc.exe -name MeGustaCoin Src/MeGustaCoin.qrc -o Build/Release/qrc_MeGustaCoin.cpp</Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Src/Icons/arrow_refresh.png;Src/Icons/bitcoin.png;Src/Icons/bitcoin_add.png;Src/Icons/bitcoin_big.png;Src/Icons/bullet_go.png;Src/Icons/cancel.png;Src/Icons/cancel2.png;Src/Icons/error.png;Src/Icons/information.png;Src/Icons/money.png;Src/Icons/money_add.png;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Src/Icons/arrow_diag.png;Src/Icons/arrow_diag_red.png;Src/Icons/arrow_down_red.png;Src/Icons/arrow_refresh.png;Src/Icons/arrow_up.png;Src/Icons/bitcoin.png;Src/Icons/bitcoin_add.png;Src/Icons/bitcoin_big.png;Src/Icons/bullet_go.png;Src/Icons/bullet_grey.png;Src/Icons/cancel.png;Src/Icons/cancel2.png;Src/Icons/error.png;Src/Icons/information.png;Src/Icons/money.png;Src/Icons/money_add.png;%(AdditionalInputs)</AdditionalInputs>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/qrc_MeGustaCoin.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClCompile Include="Build\Debug\qrc_MeGustaCoin.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <None Include="Src\Icons\arrow_diag.png" />
+    <None Include="Src\Icons\arrow_diag_red.png" />
+    <None Include="Src\Icons\arrow_down_red.png" />
     <None Include="Src\Icons\arrow_refresh.png" />
+    <None Include="Src\Icons\arrow_up.png" />
     <None Include="Src\Icons\bitcoin.png" />
     <None Include="Src\Icons\bitcoin_add.png" />
     <None Include="Src\Icons\bitcoin_big.png" />
     <None Include="Src\Icons\bullet_go.png" />
+    <None Include="Src\Icons\bullet_grey.png" />
     <None Include="Src\Icons\cancel.png" />
     <None Include="Src\Icons\cancel2.png" />
     <None Include="Src\Icons\error.png" />
@@ -236,6 +252,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Debug\moc_TransactionsWidget.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_TradesWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Debug\moc_LogWidget.cpp">
@@ -276,6 +295,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_TransactionsWidget.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_TradesWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_LogWidget.cpp">
