@@ -165,7 +165,15 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
         order.type = OrderModel::Order::Type::buy;
       if(type == "1")
         order.type = OrderModel::Order::Type::sell;
+
       order.date = orderData["datetime"].toString();
+      int lastDot = order.date.lastIndexOf('.');
+      if(lastDot >= 0)
+        order.date.resize(lastDot);
+      QDateTime date = QDateTime::fromString(order.date, "yyyy-MM-dd hh:mm:ss");
+      date.setTimeSpec(Qt::UTC);
+      order.date = date.toLocalTime().toString("yyyy-MM-dd hh:mm:ss");
+
       order.price = orderData["price"].toDouble();
       order.amount = orderData["amount"].toDouble();
 
@@ -245,7 +253,12 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
           order.type = OrderModel::Order::Type::buy;
         if(type == "1")
           order.type = OrderModel::Order::Type::sell;
+
         order.date = orderData["datetime"].toString();
+        QDateTime date = QDateTime::fromString(order.date, "yyyy-MM-dd hh:mm:ss");
+        date.setTimeSpec(Qt::UTC);
+        order.date = date.toLocalTime().toString("yyyy-MM-dd hh:mm:ss");
+
         order.price = orderData["price"].toDouble();
         order.amount = orderData["amount"].toDouble();
       }
@@ -268,7 +281,12 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
         QString type = transactionData["type"].toString();
         if(type != "2")
           continue;
+
         transaction.date = transactionData["datetime"].toString();
+        QDateTime date = QDateTime::fromString(transaction.date, "yyyy-MM-dd hh:mm:ss");
+        date.setTimeSpec(Qt::UTC);
+        transaction.date = date.toLocalTime().toString("yyyy-MM-dd hh:mm:ss");
+
         double value = transactionData["usd"].toDouble();
         transaction.type = value > 0. ? TransactionModel::Transaction::Type::sell : TransactionModel::Transaction::Type::buy;
         transaction.amount = fabs(transactionData["btc"].toDouble());
