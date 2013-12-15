@@ -5,6 +5,31 @@
 #include <cstdlib>
 #include <cstring>
 
+class Curl
+{
+public:
+  static CURL* curl;
+  static CURL* curlPOST;
+  Curl()
+  {
+    curl_global_init(CURL_GLOBAL_ALL);
+    curl = curl_easy_init();
+    curlPOST = curl_easy_init();
+  }
+  ~Curl()
+  {
+    if(curl)
+      curl_easy_cleanup(curl);
+    if(curlPOST)
+      curl_easy_cleanup(curlPOST);
+    curl_global_cleanup();
+  }
+
+} curl;
+
+CURL* Curl::curl = 0;
+CURL* Curl::curlPOST = 0;
+
 Download::Download() : data(0) {}
 
 Download::~Download()
@@ -17,7 +42,7 @@ char* Download::load(const char* url)
 {
   error.clear();
 
-  CURL* curl = curl_easy_init();
+  CURL* curl = Curl::curl;
   if(!curl)
   {
     error = "Could not initialize curl.";
@@ -78,23 +103,15 @@ char* Download::load(const char* url)
   writeResult.data[writeResult.size] = '\0';
   this->data = writeResult.data;
 
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
-
   return writeResult.data;
 
 error:
-  if(curl)
-    curl_easy_cleanup(curl);
-  curl_global_cleanup();
   return 0;
 }
 
 char* Download::loadPOST(const char* url, const char** fields, const char** values, unsigned int fieldCount)
 {
   error.clear();
-
-  curl_global_init(CURL_GLOBAL_ALL);
 
   struct curl_httppost *formpost=NULL;
   struct curl_httppost *lastptr=NULL;
@@ -106,10 +123,9 @@ char* Download::loadPOST(const char* url, const char** fields, const char** valu
                  CURLFORM_COPYCONTENTS, values[i],
                  CURLFORM_END);
 
-  CURL* curl = curl_easy_init();
+  CURL* curl = Curl::curlPOST;
   if(!curl)
   {
-    curl_global_cleanup();
     error = "Could not initialize curl.";
     return 0;
   }
@@ -170,17 +186,11 @@ char* Download::loadPOST(const char* url, const char** fields, const char** valu
   this->data = writeResult.data;
 
   curl_formfree(formpost);
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
 
   return writeResult.data;
 
 error:
   if(formpost)
     curl_formfree(formpost);
-  if(curl)
-    curl_easy_cleanup(curl);
-
-  curl_global_cleanup();
   return 0;
 }
