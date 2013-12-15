@@ -136,8 +136,7 @@ void OrdersWidget::submitOrder()
         amount = maxAmount;
       }
 
-      Market::OrderType orderType = order->type == OrderModel::Order::Type::sell ? Market::OrderType::sell : Market::OrderType::buy;
-      market->createOrder(order->id, orderType, amount, price);
+      market->createOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
     }
   }
 }
@@ -160,8 +159,7 @@ void OrdersWidget::cancelOrder()
       break;
     case OrderModel::Order::State::open:
       {
-        Market::OrderType orderType = order->type == OrderModel::Order::Type::sell ? Market::OrderType::sell : Market::OrderType::buy;
-        market->cancelOrder(order->id, orderType, order->amount, order->price);
+        market->cancelOrder(order->id, order->type == OrderModel::Order::Type::buy ? order->amount : -order->amount, order->price);
         break;
       }
     }
@@ -188,8 +186,11 @@ void OrdersWidget::updateOrder(const QModelIndex& index)
     orderModel.setOrderNewAmount(order->id, maxAmount);
     amount = maxAmount;
   }
-  Market::OrderType orderType = order->type == OrderModel::Order::Type::sell ? Market::OrderType::sell : Market::OrderType::buy;
-  market->updateOrder(order->id, orderType, amount, price, order->amount, order->price);
+
+  if(order->type == OrderModel::Order::Type::buy)
+    market->updateOrder(order->id, amount, price, order->amount, order->price);
+  else
+    market->updateOrder(order->id, -amount, price, -order->amount, order->price);
 }
 
 void OrdersWidget::updateToolBarButtons()

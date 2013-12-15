@@ -15,9 +15,9 @@ public:
   virtual void loadBalance();
   virtual void loadTicker();
   virtual void loadTransactions();
-  virtual void createOrder(const QString& draftId, OrderType orderType, double amount, double price);
-  virtual void cancelOrder(const QString& id, OrderType oldOrderType, double oldAmount, double oldPrice);
-  virtual void updateOrder(const QString& id, OrderType orderType, double amount, double price, double oldAmount, double oldPrice);
+  virtual void createOrder(const QString& draftId, double amount, double price);
+  virtual void cancelOrder(const QString& id, double oldAmount, double oldPrice);
+  virtual void updateOrder(const QString& id, double amount, double price, double oldAmount, double oldPrice);
   virtual double getMaxSellAmout() const;
   virtual double getMaxBuyAmout(double price, double canceledAmount, double canceledPrice) const;
   virtual double getOrderCharge(double amount, double price) const;
