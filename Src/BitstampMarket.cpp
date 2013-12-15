@@ -47,7 +47,7 @@ void BitstampMarket::loadTransactions()
 void BitstampMarket::createOrder(const QString& draftId, double amount, double price)
 {
   const char* format = amount > 0. ? "Submitting buy order (%.08f %s @ %.02f %s)..." : "Submitting sell order (%.08f %s @ %.02f %s)...";
-  dataModel.logModel.addMessage(LogModel::Type::information, QString().sprintf(tr(format).toUtf8().constData(), amount, coinCurrency, price, marketCurrency));
+  dataModel.logModel.addMessage(LogModel::Type::information, QString().sprintf(tr(format).toUtf8().constData(), fabs(amount), coinCurrency, price, marketCurrency));
   dataModel.orderModel.setOrderState(draftId, OrderModel::Order::State::submitting);
 
   QVariantMap args;
@@ -61,7 +61,7 @@ void BitstampMarket::createOrder(const QString& draftId, double amount, double p
 void BitstampMarket::cancelOrder(const QString& id, double oldAmount, double oldPrice)
 {
   const char* format = oldAmount > 0. ? "Canceling buy order (%.08f %s @ %.02f %s)..." : "Canceling sell order (%.08f %s @ %.02f %s)...";
-  dataModel.logModel.addMessage(LogModel::Type::information, QString().sprintf(tr(format).toUtf8().constData(), oldAmount, coinCurrency, oldPrice, marketCurrency));
+  dataModel.logModel.addMessage(LogModel::Type::information, QString().sprintf(tr(format).toUtf8().constData(), fabs(oldAmount), coinCurrency, oldPrice, marketCurrency));
   dataModel.orderModel.setOrderState(id, OrderModel::Order::State::canceling);
 
   QVariantMap args;
@@ -72,7 +72,7 @@ void BitstampMarket::cancelOrder(const QString& id, double oldAmount, double old
 void BitstampMarket::updateOrder(const QString& id, double amount, double price, double oldAmount, double oldPrice)
 {
   const char* format = oldAmount > 0. ? "Canceling buy order (%.08f %s @ %.02f %s)..." : "Canceling sell order (%.08f %s @ %.02f %s)...";
-  dataModel.logModel.addMessage(LogModel::Type::information, QString().sprintf(tr(format).toUtf8().constData(), oldAmount, coinCurrency, oldPrice, marketCurrency));
+  dataModel.logModel.addMessage(LogModel::Type::information, QString().sprintf(tr(format).toUtf8().constData(), fabs(oldAmount), coinCurrency, oldPrice, marketCurrency));
   dataModel.orderModel.setOrderState(id, OrderModel::Order::State::canceling);
 
   QVariantMap args;
@@ -201,9 +201,9 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
         double amount = cancelArgs["amount"].toDouble();
         double price = cancelArgs["price"].toDouble();
 
-        dataModel.logModel.addMessage(LogModel::Type::information,
-          QString().sprintf("Submitting %s order (%.08f %s @ %.02f %s)...", 
-          sell ? "sell" : "buy", amount, coinCurrency, price, marketCurrency));
+        const char* format = !sell ? "Submitting buy order (%.08f %s @ %.02f %s)..." : "Submitting sell order (%.08f %s @ %.02f %s)...";
+        dataModel.logModel.addMessage(LogModel::Type::information, QString().sprintf(tr(format).toUtf8().constData(), fabs(amount), coinCurrency, price, marketCurrency));
+
         BitstampWorker::Request request = sell ? BitstampWorker::Request::sell : BitstampWorker::Request::buy;
         emit requestData((int)request, args);
       }
