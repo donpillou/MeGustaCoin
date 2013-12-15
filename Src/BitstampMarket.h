@@ -21,6 +21,8 @@ public:
   virtual double getMaxSellAmout() const;
   virtual double getMaxBuyAmout(double price, double canceledAmount, double canceledPrice) const;
   virtual double getOrderCharge(double amount, double price) const;
+  virtual QString formatAmount(double amount) const;
+  virtual QString formatPrice(double price) const;
 
 signals:
   void requestData(int request, QVariant args);
@@ -28,6 +30,9 @@ signals:
 private:
   QThread thread;
   BitstampWorker* worker;
+
+  QString marketCurrency; // USD
+  QString coinCurrency; // BTC
 
   QString userName;
   QString key;

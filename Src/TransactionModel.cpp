@@ -139,15 +139,25 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
     case Column::date:
       return transaction.date;
     case Column::amount:
-      return QString().sprintf("%.08f %s", transaction.amount, market->getCoinCurrency());
+      return market->formatAmount(transaction.amount);
+      //return QString("%1 %2").arg(QLocale::system().toString(transaction.amount, 'f', 8), market->getCoinCurrency());
+      //return QString().sprintf("%.08f %s", transaction.amount, market->getCoinCurrency());
     case Column::price:
-      return QString().sprintf("%.02f %s", transaction.price, market->getMarketCurrency());
+      return market->formatPrice(transaction.price);
+      //return QString("%1 %2").arg(QLocale::system().toString(transaction.price, 'f', 2), market->getMarketCurrency());
+      //return QString().sprintf("%.02f %s", transaction.price, market->getMarketCurrency());
     case Column::value:
-      return QString().sprintf("%.02f %s", transaction.amount * transaction.price, market->getMarketCurrency());
+      return market->formatPrice(transaction.amount * transaction.price);
+      //return QString("%1 %2").arg(QLocale::system().toString(transaction.amount * transaction.price, 'f', 2), market->getMarketCurrency());
+      //return QString().sprintf("%.02f %s", transaction.amount * transaction.price, market->getMarketCurrency());
     case Column::fee:
-      return QString().sprintf("%.02f %s", transaction.fee, market->getMarketCurrency());
+      return market->formatPrice(transaction.fee);
+      //return QString("%1 %2").arg(QLocale::system().toString(transaction.fee, 'f', 2), market->getMarketCurrency());
+      //return QString().sprintf("%.02f %s", transaction.fee, market->getMarketCurrency());
     case Column::total:
-      return QString().sprintf("%+.02f %s", transaction.balanceChange, market->getMarketCurrency());
+      return transaction.balanceChange > 0 ? (QString("+") + market->formatPrice(transaction.balanceChange)) : market->formatPrice(transaction.balanceChange);
+      //return QString(transaction.balanceChange > 0 ? "+%1 %2" : "%1 %2").arg(QLocale::system().toString(transaction.balanceChange, 'f', 2), market->getMarketCurrency());
+      //return QString().sprintf("%+.02f %s", transaction.balanceChange, market->getMarketCurrency());
     }
   }
   return QVariant();

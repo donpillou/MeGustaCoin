@@ -39,12 +39,11 @@ public:
   virtual double getMaxSellAmout() const = 0;
   virtual double getMaxBuyAmout(double price, double canceledAmount = 0., double canceledPrice = 0.) const = 0;
   virtual double getOrderCharge(double amount, double price) const = 0;
+  virtual QString formatAmount(double amount) const = 0;
+  virtual QString formatPrice(double price) const = 0;
 
   const Balance* getBalance() const {return balance.fee == 0. ? 0 : &balance;}
   const TickerData* getTickerData() const {return tickerData.lastTradePrice == 0. ? 0 : &tickerData;}
-
-  const char* getMarketCurrency() const {return marketCurrency;}
-  const char* getCoinCurrency() const {return coinCurrency;}
 
 signals:
   void balanceUpdated();
@@ -52,8 +51,6 @@ signals:
 
 protected:
   DataModel& dataModel;
-  const char* marketCurrency; // USD
-  const char* coinCurrency; // BTC
   Balance balance;
   TickerData tickerData;
 };

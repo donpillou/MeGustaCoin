@@ -262,13 +262,19 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
     case Column::amount:
       if(role == Qt::EditRole)
         return order.newAmount != 0. ? order.newAmount : order.amount;
-      return QString().sprintf("%.08f %s", order.amount, market->getCoinCurrency());
+      return market->formatAmount(order.amount);
+      //return QString("%1 %2").arg(QLocale::system().toString(order.amount, 'f', 8), market->getCoinCurrency());
+      //return QString().sprintf("%.08f %s", order.amount, market->getCoinCurrency());
     case Column::price:
       if(role == Qt::EditRole)
         return order.newPrice != 0. ? order.newPrice : order.price;
-      return QString().sprintf("%.02f %s", order.price, market->getMarketCurrency());
+      return market->formatPrice(order.price);
+      //return QString("%1 %2").arg(QLocale::system().toString(order.price, 'f', 2), market->getMarketCurrency());
+      //return QString().sprintf("%.02f %s", order.price, market->getMarketCurrency());
     case Column::value:
-      return QString().sprintf("%.02f %s", order.amount * order.price, market->getMarketCurrency());
+      return market->formatPrice(order.amount * order.price);
+      //return QString("%1 %2").arg(QLocale::system().toString(order.amount * order.price, 'f', 2), market->getMarketCurrency());
+      //return QString().sprintf("%.02f %s", order.amount * order.price, market->getMarketCurrency());
     case Column::state:
       switch(order.state)
       {
@@ -287,7 +293,12 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
       }
       break;
     case Column::total:
-      return QString().sprintf("%+.02f %s", market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price), market->getMarketCurrency());
+      {
+        double charge = market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price);
+        return order.amount > 0 ? (QString("+") + market->formatPrice(charge)) : market->formatPrice(charge);
+      }
+      //return QString(order.type == Order::Type::buy ? "+%1 %2" : "%1 %2").arg(QLocale::system().toString(market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price), 'f', 2), market->getMarketCurrency());
+      //return QString().sprintf("%+.02f %s", market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price), market->getMarketCurrency());
     }
   }
   return QVariant();

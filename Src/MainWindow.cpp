@@ -168,14 +168,21 @@ void MainWindow::updateWindowTitle()
     QString title;
     const Market::Balance* balance = market->getBalance();
     if(balance)
-      title.sprintf("%.02f %s, %.02f %s - ", balance->availableUsd + balance->reservedUsd, market->getMarketCurrency(), balance->availableBtc + balance->reservedBtc, market->getCoinCurrency());
+    {
+      double usd = balance->availableUsd + balance->reservedUsd;
+      double btc = balance->availableBtc + balance->reservedBtc;
+      title = QString("%1 / %2 - ").arg(market->formatPrice(usd), market->formatAmount(btc));
+      //title = QString("%1 %2 / %3 %4 - ").arg(QLocale::system().toString(usd, 'f', 2), market->getMarketCurrency(), QLocale::system().toString(btc, 'f', 2), market->getCoinCurrency());
+      //title.sprintf("%.02f %s, %.02f %s - ", usd, market->getMarketCurrency(), btc, market->getCoinCurrency());
+    }
     title += marketName;
     const Market::TickerData* tickerData = market->getTickerData();
     if(tickerData)
     {
-      QString tickerInfo;
-      tickerInfo.sprintf(" - %.02f, %.02f bid, %.02f ask", tickerData->lastTradePrice, tickerData->highestBuyOrder, tickerData->lowestSellOrder);
-      title += tickerInfo;
+      title += QString(" - %1 / %2 bid / %3 ask").arg(market->formatPrice(tickerData->lastTradePrice), market->formatPrice(tickerData->highestBuyOrder), market->formatPrice(tickerData->lowestSellOrder));
+      //QString tickerInfo;
+      //tickerInfo.sprintf(" - %.02f, %.02f bid, %.02f ask", tickerData->lastTradePrice, tickerData->highestBuyOrder, tickerData->lowestSellOrder);
+      //title += QString(" - %1 / %2 bid / %3 ask").arg(QLocale::system().toString(tickerData->lastTradePrice, 'f', 2), QLocale::system().toString(tickerData->highestBuyOrder, 'f', 2), QLocale::system().toString(tickerData->lowestSellOrder, 'f', 2));
     }
     setWindowTitle(title);
   }
