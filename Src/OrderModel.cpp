@@ -295,7 +295,7 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
     case Column::total:
       {
         double charge = market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price);
-        return order.amount > 0 ? (QString("+") + market->formatPrice(charge)) : market->formatPrice(charge);
+        return charge > 0 ? (QString("+") + market->formatPrice(charge)) : market->formatPrice(charge);
       }
       //return QString(order.type == Order::Type::buy ? "+%1 %2" : "%1 %2").arg(QLocale::system().toString(market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price), 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%+.02f %s", market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price), market->getMarketCurrency());
