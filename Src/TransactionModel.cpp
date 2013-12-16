@@ -41,6 +41,7 @@ void TransactionModel::setData(const QList<Transaction>& updatedTransactions)
       transactions.removeAt(i);
       endRemoveRows();
       --i;
+      count = transactions.size();
       continue;
     }
     else
