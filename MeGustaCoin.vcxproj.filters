@@ -13,6 +13,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\BitstampMarket.cpp" />
+    <ClCompile Include="Src\BookModel.cpp" />
+    <ClCompile Include="Src\BookWidget.cpp" />
     <ClCompile Include="Src\Download.cpp" />
     <ClCompile Include="Src\LoginDialog.cpp" />
     <ClCompile Include="Src\LogModel.cpp" />
@@ -28,6 +30,8 @@
     <ClCompile Include="Src\TransactionModel.cpp" />
     <ClCompile Include="Src\TransactionsWidget.cpp" />
     <CustomBuild Include="Src\BitstampMarket.h" />
+    <ClInclude Include="Src\BookModel.h" />
+    <CustomBuild Include="Src\BookWidget.h" />
     <ClInclude Include="Src\DataModel.h" />
     <ClInclude Include="Src\Download.h" />
     <CustomBuild Include="Src\LoginDialog.h" />
@@ -59,13 +63,7 @@
     <None Include="Src\Icons\arrow_diag_red.png">
       <Filter>Icons</Filter>
     </None>
-    <None Include="Src\Icons\arrow_down_red.png">
-      <Filter>Icons</Filter>
-    </None>
     <None Include="Src\Icons\arrow_refresh.png">
-      <Filter>Icons</Filter>
-    </None>
-    <None Include="Src\Icons\arrow_up.png">
       <Filter>Icons</Filter>
     </None>
     <None Include="Src\Icons\bitcoin.png">
@@ -122,6 +120,9 @@
     <ClCompile Include="Build\Debug\moc_TradesWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_BookWidget.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_LogWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -156,6 +157,9 @@
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_TradesWidget.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_BookWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_LogWidget.cpp">

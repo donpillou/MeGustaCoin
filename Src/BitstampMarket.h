@@ -16,7 +16,9 @@ public:
   virtual void loadTicker();
   virtual void loadTransactions();
   virtual void loadLiveTrades();
+  virtual void loadOrderBook();
   virtual void enableLiveTradeUpdates(bool enable);
+  virtual void enableOrderBookUpdates(bool enable);
   virtual void createOrder(const QString& draftId, double amount, double price);
   virtual void cancelOrder(const QString& id, double oldAmount, double oldPrice);
   virtual void updateOrder(const QString& id, double amount, double price, double oldAmount, double oldPrice);
@@ -31,6 +33,7 @@ signals:
 
 private slots:
   void updateLiveTrades();
+  void updateOrderBook();
 
 private:
   QThread thread;
@@ -43,8 +46,16 @@ private:
   QString key;
   QString secret;
 
+  QDateTime lastLiveTradesLoad;
+  QDateTime lastOrderBookLoad;
+
   bool liveTradeUpdatesEnabled;
+  bool orderBookUpdatesEnabled;
   bool liveTradeUpdateTimerStarted;
+  bool orderBookUpdateTimerStarted;
+
+  static const quint64 liveTradesUpdateRate = 1337 * 10;
+  static const quint64 orderBookUpdateRate = 1000 * 30;
 
 private slots:
   void handleData(int request, const QVariant& args, const QVariant& data);
@@ -71,6 +82,8 @@ public:
     transactions,
     liveTrades,
     liveTradesUpdate,
+    orderBook,
+    orderBookUpdate,
   };
 
 public slots:

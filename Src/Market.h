@@ -34,7 +34,9 @@ public:
   virtual void loadTicker() = 0;
   virtual void loadTransactions() = 0;
   virtual void loadLiveTrades() = 0;
+  virtual void loadOrderBook() = 0;
   virtual void enableLiveTradeUpdates(bool enable) = 0;
+  virtual void enableOrderBookUpdates(bool enable) = 0;
   virtual void createOrder(const QString& draftId, double amount, double price) = 0;
   virtual void cancelOrder(const QString& id, double oldAmount, double oldPrice) = 0;
   virtual void updateOrder(const QString& id, double amount, double price, double oldAmount, double oldPrice) = 0;

@@ -18,6 +18,7 @@ private:
   OrdersWidget* ordersWidget;
   TransactionsWidget* transactionsWidget;
   TradesWidget* tradesWidget;
+  BookWidget* bookWidget;
   LogWidget* logWidget;
 
   DataModel dataModel;
@@ -26,6 +27,7 @@ private:
   QString userName;
 
   bool liveTradeUpdatesEnabled;
+  bool bookUpdatesEnabled;
 
   void open(const QString& market, const QString& userName, const QString& key, const QString& secret);
 
@@ -38,4 +40,5 @@ private slots:
   void updateWindowTitle();
   void about();
   void enableLiveUpdates(bool enable);
+  void enableBookUpdates(bool enable);
 };

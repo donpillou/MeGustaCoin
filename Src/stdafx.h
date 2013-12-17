@@ -13,6 +13,7 @@ class DataModel;
 #include "OrderModel.h"
 #include "TransactionModel.h"
 #include "TradeModel.h"
+#include "BookModel.h"
 #include "LogModel.h"
 #include "DataModel.h"
 
@@ -22,6 +23,7 @@ class DataModel;
 #include "OrdersWidget.h"
 #include "TransactionsWidget.h"
 #include "TradesWidget.h"
+#include "BookWidget.h"
 #include "LogWidget.h"
 #include "MainWindow.h"
 #include "LoginDialog.h"

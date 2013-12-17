@@ -2,7 +2,8 @@
 #include "stdafx.h"
 
 BitstampMarket::BitstampMarket(DataModel& dataModel, const QString& userName, const QString& key, const QString& secret) : Market(dataModel), userName(userName), key(key), secret(secret),
-liveTradeUpdatesEnabled(false), liveTradeUpdateTimerStarted(false)
+liveTradeUpdatesEnabled(false), liveTradeUpdateTimerStarted(false),
+orderBookUpdatesEnabled(false), orderBookUpdateTimerStarted(false)
 {
   marketCurrency = tr("USD");
   coinCurrency = tr("BTC");
@@ -47,7 +48,14 @@ void BitstampMarket::loadTransactions()
 
 void BitstampMarket::loadLiveTrades()
 {
+  lastLiveTradesLoad = QDateTime::currentDateTime();
   emit requestData((int)BitstampWorker::Request::liveTrades, QVariant());
+}
+
+void BitstampMarket::loadOrderBook()
+{
+  lastOrderBookLoad = QDateTime::currentDateTime();
+  emit requestData((int)BitstampWorker::Request::orderBook, QVariant());
 }
 
 void BitstampMarket::enableLiveTradeUpdates(bool enable)
@@ -58,7 +66,21 @@ void BitstampMarket::enableLiveTradeUpdates(bool enable)
   if(enable && !liveTradeUpdateTimerStarted)
   {
     liveTradeUpdateTimerStarted = true;
-    QTimer::singleShot(0, this, SLOT(updateLiveTrades()));
+    qint64 timer = QDateTime::currentDateTime().msecsTo(lastLiveTradesLoad.addMSecs(liveTradesUpdateRate));
+    QTimer::singleShot(qMax(0LL, timer), this, SLOT(updateLiveTrades()));
+  }
+}
+
+void BitstampMarket::enableOrderBookUpdates(bool enable)
+{
+  if(enable == orderBookUpdatesEnabled)
+    return;
+  orderBookUpdatesEnabled = enable;
+  if(enable && !orderBookUpdateTimerStarted)
+  {
+    orderBookUpdateTimerStarted = true;
+    qint64 timer = QDateTime::currentDateTime().msecsTo(lastOrderBookLoad.addMSecs(orderBookUpdateRate));
+    QTimer::singleShot(qMax(0LL, timer), this, SLOT(updateOrderBook()));
   }
 }
 
@@ -151,13 +173,22 @@ void BitstampMarket::handleError(int request, const QVariant& args, const QStrin
   case BitstampWorker::Request::ticker:
     dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load ticker data:"));
     break;
+  case BitstampWorker::Request::orderBook:
+  case BitstampWorker::Request::orderBookUpdate:
+    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load order book:"));
+    if(orderBookUpdatesEnabled && !orderBookUpdateTimerStarted)
+    {
+      orderBookUpdateTimerStarted = true;
+      QTimer::singleShot(orderBookUpdateRate, this, SLOT(updateOrderBook()));
+    }
+    break;
   case BitstampWorker::Request::liveTrades:
   case BitstampWorker::Request::liveTradesUpdate:
     dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load live trades:"));
-    if(liveTradeUpdatesEnabled && (BitstampWorker::Request)request == BitstampWorker::Request::liveTradesUpdate && !liveTradeUpdateTimerStarted)
+    if(liveTradeUpdatesEnabled && !liveTradeUpdateTimerStarted)
     {
       liveTradeUpdateTimerStarted = true;
-      QTimer::singleShot(1337 * 10, this, SLOT(updateLiveTrades()));
+      QTimer::singleShot(liveTradesUpdateRate, this, SLOT(updateLiveTrades()));
     }
     break;
   case BitstampWorker::Request::buy:
@@ -274,6 +305,47 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved ticker data"));
     }
     break;
+  case BitstampWorker::Request::orderBook:
+  case BitstampWorker::Request::orderBookUpdate:
+    {
+      QVariantMap orderBookData = data.toMap();
+      QVariantList askData = orderBookData["asks"].toList();
+      QVariantList bidData = orderBookData["bids"].toList();
+      QList<BookModel::Item> items;
+      items.reserve(askData.size());
+      QVariantList dataList;
+      for(int i = qMin(askData.size() - 1, 99); i >= 0; --i)
+      {
+        items.append(BookModel::Item());
+        BookModel::Item& item = items.back();
+        dataList = askData[i].toList();
+        item.price = dataList[0].toDouble();
+        item.amount = dataList[1].toDouble();
+      }
+      dataModel.bookModel.askModel.setData(items);
+      items.clear();
+      items.reserve(bidData.size());
+      for(int i = qMin(bidData.size() - 1, 99); i >= 0; --i)
+      {
+        items.append(BookModel::Item());
+        BookModel::Item& item = items.back();
+        dataList = bidData[i].toList();
+        item.price = dataList[0].toDouble();
+        item.amount = dataList[1].toDouble();
+      }
+      dataModel.bookModel.bidModel.setData(items);
+      if((BitstampWorker::Request)request == BitstampWorker::Request::orderBook)
+        dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved order book"));
+      //else
+        //dataModel.logModel.addMessage(LogModel::Type::information, tr("Updated order book")); // todo: remove this
+      if(orderBookUpdatesEnabled && !orderBookUpdateTimerStarted)
+      {
+        orderBookUpdateTimerStarted = true;
+        QTimer::singleShot(orderBookUpdateRate, this, SLOT(updateOrderBook()));
+      }
+
+    }
+    break;
   case BitstampWorker::Request::liveTrades:
   case BitstampWorker::Request::liveTradesUpdate:
     {
@@ -296,10 +368,10 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       dataModel.tradeModel.addData(liveTrades);
       if((BitstampWorker::Request)request == BitstampWorker::Request::liveTrades)
         dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved live trades"));
-      if(liveTradeUpdatesEnabled && (BitstampWorker::Request)request == BitstampWorker::Request::liveTradesUpdate && !liveTradeUpdateTimerStarted)
+      if(liveTradeUpdatesEnabled && !liveTradeUpdateTimerStarted)
       {
         liveTradeUpdateTimerStarted = true;
-        QTimer::singleShot(1337 * 10, this, SLOT(updateLiveTrades()));
+        QTimer::singleShot(liveTradesUpdateRate, this, SLOT(updateLiveTrades()));
       }
     }
     break;
@@ -376,6 +448,12 @@ void BitstampMarket::updateLiveTrades()
   emit requestData((int)BitstampWorker::Request::liveTradesUpdate, QVariant());
 }
 
+void BitstampMarket::updateOrderBook()
+{
+  orderBookUpdateTimerStarted = false;
+  emit requestData((int)BitstampWorker::Request::orderBookUpdate, QVariant());
+}
+
 BitstampWorker::BitstampWorker(const BitstampMarket& market) : market(market), lastNonce(QDateTime::currentDateTime().toTime_t()) {}
 
 void BitstampWorker::loadData(int request, QVariant params)
@@ -423,6 +501,11 @@ void BitstampWorker::loadData(int request, QVariant params)
     break;
   case Request::transactions:
     url = "https://www.bitstamp.net/api/user_transactions/";
+    break;
+  case Request::orderBook:
+  case Request::orderBookUpdate:
+    url = "https://www.bitstamp.net/api/order_book/";
+    isPublic = true;
     break;
   default:
     Q_ASSERT(false);
@@ -574,7 +657,7 @@ void BitstampWorker::avoidSpamming()
     QWaitCondition condition;
     condition.wait(&mutex, queryDelay - elapsed); // wait without processing messages while waiting
     lastRequestTime = now;
-    lastRequestTime.addMSecs(queryDelay - elapsed);
+    lastRequestTime  = lastRequestTime.addMSecs(queryDelay - elapsed);
   }
   else
     lastRequestTime = now;

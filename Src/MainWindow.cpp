@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0), liveTradeUpdatesEnabled(false)
+MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0), liveTradeUpdatesEnabled(false), bookUpdatesEnabled(false)
 {
   ordersWidget = new OrdersWidget(this, settings, dataModel);
   connect(this, SIGNAL(marketChanged(Market*)), ordersWidget, SLOT(setMarket(Market*)));
@@ -9,6 +9,8 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(this, SIGNAL(marketChanged(Market*)), transactionsWidget, SLOT(setMarket(Market*)));
   tradesWidget = new TradesWidget(this, settings, dataModel);
   connect(this, SIGNAL(marketChanged(Market*)), tradesWidget, SLOT(setMarket(Market*)));
+  bookWidget = new BookWidget(this, settings, dataModel);
+  connect(this, SIGNAL(marketChanged(Market*)), bookWidget, SLOT(setMarket(Market*)));
   logWidget = new LogWidget(this, settings, dataModel.logModel);
   connect(this, SIGNAL(marketChanged(Market*)), logWidget, SLOT(setMarket(Market*)));
 
@@ -30,6 +32,13 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addDockWidget(Qt::TopDockWidgetArea, ordersDockWidget);
   tabifyDockWidget(transactionsDockWidget, ordersDockWidget);
 
+  QDockWidget* bookDockWidget = new QDockWidget(tr("Order Book"), this);
+  connect(bookDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableBookUpdates(bool)));
+  bookDockWidget->setObjectName("OrderBook");
+  bookDockWidget->setWidget(bookWidget);
+  addDockWidget(Qt::TopDockWidgetArea, bookDockWidget, Qt::Vertical);
+  bookDockWidget->hide();
+
   QDockWidget* logDockWidget = new QDockWidget(tr("Log"), this);
   logDockWidget->setObjectName("Log");
   logDockWidget->setWidget(logWidget);
@@ -41,7 +50,6 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   tradesDockWidget->setWidget(tradesWidget);
   addDockWidget(Qt::TopDockWidgetArea, tradesDockWidget); //, Qt::Horizontal);
   tradesDockWidget->hide();
-
 
   QMenuBar* menuBar = this->menuBar();
   QMenu* menu = menuBar->addMenu(tr("&Market"));
@@ -64,6 +72,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   menu->addAction(ordersDockWidget->toggleViewAction());
   menu->addAction(transactionsDockWidget->toggleViewAction());
   menu->addAction(tradesDockWidget->toggleViewAction());
+  menu->addAction(bookDockWidget->toggleViewAction());
   menu->addAction(logDockWidget->toggleViewAction());
 
   menu = menuBar->addMenu(tr("&Help"));
@@ -128,6 +137,7 @@ void MainWindow::logout()
   dataModel.orderModel.reset();
   dataModel.transactionModel.reset();
   dataModel.tradeModel.reset();
+  dataModel.bookModel.reset();
   updateWindowTitle();
 
   dataModel.logModel.addMessage(LogModel::Type::information, QString("Closed %1").arg(marketName));
@@ -156,6 +166,7 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
   dataModel.orderModel.setMarket(market);
   dataModel.transactionModel.setMarket(market);
   dataModel.tradeModel.setMarket(market);
+  dataModel.bookModel.setMarket(market);
 
   connect(market, SIGNAL(balanceUpdated()), this, SLOT(updateWindowTitle()));
   connect(market, SIGNAL(tickerUpdated()), this, SLOT(updateWindowTitle()));
@@ -168,7 +179,9 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
   // request data
   refresh();
   market->loadLiveTrades();
+  market->loadOrderBook();
   market->enableLiveTradeUpdates(liveTradeUpdatesEnabled);
+  market->enableOrderBookUpdates(bookUpdatesEnabled);
 }
 
 void MainWindow::updateWindowTitle()
@@ -211,4 +224,12 @@ void MainWindow::enableLiveUpdates(bool enable)
   if(!market)
     return;
   market->enableLiveTradeUpdates(enable);
+}
+
+void MainWindow::enableBookUpdates(bool enable)
+{
+  bookUpdatesEnabled = enable;
+  if(!market)
+    return;
+  market->enableOrderBookUpdates(enable);
 }
