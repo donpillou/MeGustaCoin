@@ -74,6 +74,7 @@ char* Download::load(const char* url)
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteResult::writeResponse);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeResult);
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20);
 
   CURLcode status = curl_easy_perform(curl);
   if(status != 0)
@@ -156,6 +157,7 @@ char* Download::loadPOST(const char* url, const char** fields, const char** valu
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteResult::writeResponse);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeResult);
   curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20);
 
   CURLcode status = curl_easy_perform(curl);
   if(status != 0)
