@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BookWidget::BookWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), bookModel(dataModel.bookModel), askAutoScrollEnabled(false), bidAutoScrollEnabled(false)
+BookWidget::BookWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), bookModel(dataModel.bookModel), market(0), askAutoScrollEnabled(false), bidAutoScrollEnabled(false)
 {
   connect(&bookModel.askModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
   connect(&bookModel.bidModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));

@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), tradeModel(dataModel.tradeModel), autoScrollEnabled(false)
+TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), tradeModel(dataModel.tradeModel), market(0), autoScrollEnabled(false)
 {
   connect(&tradeModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
 

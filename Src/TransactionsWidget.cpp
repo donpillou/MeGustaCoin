@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), transactionModel(dataModel.transactionModel)
+TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), transactionModel(dataModel.transactionModel), market(0)
 {
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");

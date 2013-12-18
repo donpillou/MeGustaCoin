@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), orderModel(dataModel.orderModel)
+OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), orderModel(dataModel.orderModel), market(0)
 {
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
