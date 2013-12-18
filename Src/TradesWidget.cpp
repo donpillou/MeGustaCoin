@@ -42,6 +42,7 @@ void TradesWidget::checkAutoScroll(const QModelIndex& index, int, int)
 {
   QScrollBar* scrollBar = tradeView->verticalScrollBar();
   autoScrollEnabled = scrollBar->value() == scrollBar->maximum();
+  QTimer::singleShot(100, this, SLOT(clearAbove()));
 }
 
 void TradesWidget::autoScroll(int, int)
@@ -50,4 +51,9 @@ void TradesWidget::autoScroll(int, int)
     return;
   QScrollBar* scrollBar = tradeView->verticalScrollBar();
   scrollBar->setValue(scrollBar->maximum());
+}
+
+void TradesWidget::clearAbove()
+{
+  tradeModel.clearAbove(500);
 }

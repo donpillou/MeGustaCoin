@@ -39,6 +39,8 @@ public:
 
   void addData(const QList<Trade>& trades);
 
+  void clearAbove(int tradeCount);
+
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
 private:
