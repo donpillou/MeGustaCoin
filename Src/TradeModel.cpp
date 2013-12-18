@@ -35,6 +35,18 @@ void TradeModel::addData(const QList<Trade>& newTrades)
       tradesToAdd.append(&trade);
   }
 
+  int maxCount = qMax(500 - tradesToAdd.size(), 0);
+  if (trades.size() > maxCount)
+  {
+    beginRemoveRows(QModelIndex(), 0, (trades.size() - maxCount) - 1);
+    for(int i = 0, count = trades.size() - maxCount; i < count; ++i)
+    {
+      delete trades[0];
+      trades.removeAt(0);
+    }
+    endRemoveRows();
+  }
+
   int oldCount = trades.size();
   double lastPrice = trades.size() > 0 ? trades.back()->price : 0.;
 
@@ -57,17 +69,7 @@ void TradeModel::addData(const QList<Trade>& newTrades)
 
   endInsertRows();
 
-  const int maxCount = 500;
-  if (trades.size() > maxCount)
-  {
-    beginRemoveRows(QModelIndex(), 0, (trades.size() - maxCount) - 1);
-    for(int i = 0, count = trades.size() - maxCount; i < count; ++i)
-    {
-      delete trades[0];
-      trades.removeAt(0);
-    }
-    endRemoveRows();
-  }
+
 }
 
 QModelIndex TradeModel::index(int row, int column, const QModelIndex& parent) const
