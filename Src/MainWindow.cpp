@@ -112,6 +112,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
   settings.setValue("WindowState", saveState());
   ordersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
+  tradesWidget->saveState(settings);
+  bookWidget->saveState(settings);
   logWidget->saveState(settings);
 
   QMainWindow::closeEvent(event);
