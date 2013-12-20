@@ -11,6 +11,8 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(this, SIGNAL(marketChanged(Market*)), tradesWidget, SLOT(setMarket(Market*)));
   bookWidget = new BookWidget(this, settings, dataModel);
   connect(this, SIGNAL(marketChanged(Market*)), bookWidget, SLOT(setMarket(Market*)));
+  graphWidget = new GraphWidget(this, settings, dataModel);
+  connect(this, SIGNAL(marketChanged(Market*)), graphWidget, SLOT(setMarket(Market*)));
   logWidget = new LogWidget(this, settings, dataModel.logModel);
   connect(this, SIGNAL(marketChanged(Market*)), logWidget, SLOT(setMarket(Market*)));
 
@@ -31,6 +33,12 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   ordersDockWidget->setWidget(ordersWidget);
   addDockWidget(Qt::TopDockWidgetArea, ordersDockWidget);
   tabifyDockWidget(transactionsDockWidget, ordersDockWidget);
+
+  QDockWidget* graphDockWidget = new QDockWidget(tr("Live Graph"), this);
+  graphDockWidget->setObjectName("LiveGraph");
+  graphDockWidget->setWidget(graphWidget);
+  addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
+  tabifyDockWidget(transactionsDockWidget, graphDockWidget);
 
   QDockWidget* bookDockWidget = new QDockWidget(tr("Order Book"), this);
   connect(bookDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableBookUpdates(bool)));
@@ -114,6 +122,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   transactionsWidget->saveState(settings);
   tradesWidget->saveState(settings);
   bookWidget->saveState(settings);
+  graphWidget->saveState(settings);
   logWidget->saveState(settings);
 
   QMainWindow::closeEvent(event);

@@ -16,6 +16,8 @@
     <ClCompile Include="Src\BookModel.cpp" />
     <ClCompile Include="Src\BookWidget.cpp" />
     <ClCompile Include="Src\Download.cpp" />
+    <ClCompile Include="Src\GraphModel.cpp" />
+    <ClCompile Include="Src\GraphWidget.cpp" />
     <ClCompile Include="Src\LoginDialog.cpp" />
     <ClCompile Include="Src\LogModel.cpp" />
     <ClCompile Include="Src\LogWidget.cpp" />
@@ -34,6 +36,8 @@
     <CustomBuild Include="Src\BookWidget.h" />
     <ClInclude Include="Src\DataModel.h" />
     <ClInclude Include="Src\Download.h" />
+    <CustomBuild Include="Src\GraphModel.h" />
+    <CustomBuild Include="Src\GraphWidget.h" />
     <CustomBuild Include="Src\LoginDialog.h" />
     <ClInclude Include="Src\LogModel.h" />
     <CustomBuild Include="Src\LogWidget.h" />
@@ -126,7 +130,13 @@
     <ClCompile Include="Build\Debug\moc_LogWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_GraphWidget.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_OrderModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_GraphModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <CustomBuild Include="Build\Release\QtCore4\QtCore4.dll">
@@ -165,7 +175,13 @@
     <ClCompile Include="Build\Release\moc_LogWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Release\moc_GraphWidget.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Release\moc_OrderModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_GraphModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
   </ItemGroup>

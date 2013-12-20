@@ -363,6 +363,8 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
         trade.date = tradeData["date"].toULongLong();
         trade.price = tradeData["price"].toDouble();
         trade.amount = tradeData["amount"].toDouble();
+
+        dataModel.graphModel.addTrade(trade.date, trade.price);
       }
 
       dataModel.tradeModel.addData(liveTrades);

@@ -15,6 +15,7 @@ class DataModel;
 #include "TradeModel.h"
 #include "BookModel.h"
 #include "LogModel.h"
+#include "GraphModel.h"
 #include "DataModel.h"
 
 #include "Market.h"
@@ -24,6 +25,7 @@ class DataModel;
 #include "TransactionsWidget.h"
 #include "TradesWidget.h"
 #include "BookWidget.h"
+#include "GraphWidget.h"
 #include "LogWidget.h"
 #include "MainWindow.h"
 #include "LoginDialog.h"

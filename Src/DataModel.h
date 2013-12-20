@@ -9,4 +9,5 @@ public:
   TradeModel tradeModel;
   BookModel bookModel;
   LogModel logModel;
+  GraphModel graphModel;
 };
