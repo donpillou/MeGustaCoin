@@ -19,5 +19,8 @@ void GraphModel::addTrade(quint64 time, double price)
   else if(price > entry.max)
     entry.max = price;
 
+  while(!trades.isEmpty() && time - trades.begin().key() > 7 * 24 * 60 * 60)
+    trades.erase(trades.begin());
+
   emit dataAdded();
 }
