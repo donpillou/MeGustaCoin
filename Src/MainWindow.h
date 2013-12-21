@@ -28,7 +28,8 @@ private:
   QString userName;
 
   bool liveTradeUpdatesEnabled;
-  bool bookUpdatesEnabled;
+  bool orderBookUpdatesEnabled;
+  bool graphUpdatesEnabled;
 
   void open(const QString& market, const QString& userName, const QString& key, const QString& secret);
 
@@ -40,6 +41,7 @@ private slots:
   void refresh();
   void updateWindowTitle();
   void about();
-  void enableLiveUpdates(bool enable);
-  void enableBookUpdates(bool enable);
+  void enableLiveTradesUpdates(bool enable);
+  void enableOrderBookUpdates(bool enable);
+  void enableGraphUpdates(bool enable);
 };

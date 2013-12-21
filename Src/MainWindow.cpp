@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
 
-MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0), liveTradeUpdatesEnabled(false), bookUpdatesEnabled(false)
+MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0), 
+liveTradeUpdatesEnabled(false), orderBookUpdatesEnabled(false), graphUpdatesEnabled(false)
 {
   ordersWidget = new OrdersWidget(this, settings, dataModel);
   connect(this, SIGNAL(marketChanged(Market*)), ordersWidget, SLOT(setMarket(Market*)));
@@ -35,13 +36,14 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   tabifyDockWidget(transactionsDockWidget, ordersDockWidget);
 
   QDockWidget* graphDockWidget = new QDockWidget(tr("Live Graph"), this);
+  connect(graphDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableGraphUpdates(bool)));
   graphDockWidget->setObjectName("LiveGraph");
   graphDockWidget->setWidget(graphWidget);
   addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
   tabifyDockWidget(transactionsDockWidget, graphDockWidget);
 
   QDockWidget* bookDockWidget = new QDockWidget(tr("Order Book"), this);
-  connect(bookDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableBookUpdates(bool)));
+  connect(bookDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableOrderBookUpdates(bool)));
   bookDockWidget->setObjectName("OrderBook");
   bookDockWidget->setWidget(bookWidget);
   addDockWidget(Qt::TopDockWidgetArea, bookDockWidget, Qt::Vertical);
@@ -53,7 +55,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addDockWidget(Qt::TopDockWidgetArea, logDockWidget, Qt::Vertical);
 
   QDockWidget* tradesDockWidget = new QDockWidget(tr("Live Trades"), this);
-  connect(tradesDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableLiveUpdates(bool)));
+  connect(tradesDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableLiveTradesUpdates(bool)));
   tradesDockWidget->setObjectName("LiveTrades");
   tradesDockWidget->setWidget(tradesWidget);
   addDockWidget(Qt::TopDockWidgetArea, tradesDockWidget); //, Qt::Horizontal);
@@ -192,8 +194,8 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
   refresh();
   market->loadLiveTrades();
   market->loadOrderBook();
-  market->enableLiveTradeUpdates(liveTradeUpdatesEnabled);
-  market->enableOrderBookUpdates(bookUpdatesEnabled);
+  market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
+  market->enableOrderBookUpdates(orderBookUpdatesEnabled /*|| graphUpdatesEnabled*/);
 }
 
 void MainWindow::updateWindowTitle()
@@ -230,18 +232,27 @@ void MainWindow::about()
   QMessageBox::about(this, "About", "MeGustaCoin - Bitcoin Market Client<br><a href=\"https://github.com/donpillou/MeGustaCoin\">https://github.com/donpillou/MeGustaCoin</a><br><br>Released under the GNU General Public License Version 3<br><br>MeGustaCoin uses the following third-party libraries and components:<br>&nbsp;&nbsp;- Qt (GUI)<br>&nbsp;&nbsp;- libcurl (HTTPS)<br>&nbsp;&nbsp;- LibQxt (JSON)<br>&nbsp;&nbsp;- <a href=\"http://www.famfamfam.com/lab/icons/silk/\">silk icons</a> (by Mark James)<br><br>-- Donald Pillou, 2013");
 }
 
-void MainWindow::enableLiveUpdates(bool enable)
+void MainWindow::enableLiveTradesUpdates(bool enable)
 {
   liveTradeUpdatesEnabled = enable;
   if(!market)
     return;
-  market->enableLiveTradeUpdates(enable);
+  market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
 }
 
-void MainWindow::enableBookUpdates(bool enable)
+void MainWindow::enableOrderBookUpdates(bool enable)
 {
-  bookUpdatesEnabled = enable;
+  orderBookUpdatesEnabled = enable;
   if(!market)
     return;
-  market->enableOrderBookUpdates(enable);
+  market->enableOrderBookUpdates(orderBookUpdatesEnabled /*|| graphUpdatesEnabled */);
+}
+
+void MainWindow::enableGraphUpdates(bool enable)
+{
+  graphUpdatesEnabled = enable;
+  if(!market)
+    return;
+  market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
+  market->enableOrderBookUpdates(orderBookUpdatesEnabled /*|| graphUpdatesEnabled */);
 }
