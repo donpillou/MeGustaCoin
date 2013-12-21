@@ -80,6 +80,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   menu->addAction(ordersDockWidget->toggleViewAction());
   menu->addAction(transactionsDockWidget->toggleViewAction());
   menu->addAction(tradesDockWidget->toggleViewAction());
+  menu->addAction(graphDockWidget->toggleViewAction());
   menu->addAction(bookDockWidget->toggleViewAction());
   menu->addAction(logDockWidget->toggleViewAction());
 

@@ -25,6 +25,7 @@ class DataModel;
 #include "TransactionsWidget.h"
 #include "TradesWidget.h"
 #include "BookWidget.h"
+#include "GraphView.h"
 #include "GraphWidget.h"
 #include "LogWidget.h"
 #include "MainWindow.h"

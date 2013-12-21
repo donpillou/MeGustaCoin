@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -102,6 +102,7 @@
     <ClCompile Include="Src\BookWidget.cpp" />
     <ClCompile Include="Src\Download.cpp" />
     <ClCompile Include="Src\GraphModel.cpp" />
+    <ClCompile Include="Src\GraphView.cpp" />
     <ClCompile Include="Src\GraphWidget.cpp" />
     <ClCompile Include="Src\LoginDialog.cpp" />
     <ClCompile Include="Src\LogModel.cpp" />
@@ -162,6 +163,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl Src/LoginDialog.h -o Build/Release/moc_LoginDialog.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_LoginDialog.cpp;%(Outputs)</Outputs>
     </CustomBuild>
+    <ClInclude Include="Src\GraphView.h" />
     <ClInclude Include="Src\LogModel.h" />
     <CustomBuild Include="Src\LogWidget.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"LogWidget.h (Qt moc)"</Message>

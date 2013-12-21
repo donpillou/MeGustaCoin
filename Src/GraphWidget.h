@@ -1,7 +1,7 @@
 
 #pragma once
 
-class GraphWidget : public QFrame
+class GraphWidget : public QWidget
 {
   Q_OBJECT
 
@@ -12,16 +12,16 @@ public:
 
 private slots:
   void setMarket(Market* market);
+  void setZoom(int maxTime);
 
 private:
   Market* market;
   DataModel& dataModel;
   GraphModel& graphModel;
+  GraphView* graphView;
 
-  virtual void paintEvent(QPaintEvent* );
-
-  void drawBox(QPainter& painter, const QRect& rect);
-  void drawAxisLables(QPainter& painter, const QRect& rect, double& hmin, double& hmax, const QSize& priceSize);
-  void drawTradePolyline(QPainter& painter, const QRect& rect, double hmin, double hmax);
+  QAction* zoomAction;
+  QSignalMapper* zoomSignalMapper;
+  int zoom;
 };
 
