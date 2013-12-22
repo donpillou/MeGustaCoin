@@ -18,7 +18,7 @@ public:
     TradeSample() : min(0), max(0), last(0), amount(0) {}
   };
 
-  class BookSummary
+  class BookSample
   {
   public:
     quint64 time;
@@ -38,10 +38,10 @@ public:
   };
 
   QList<TradeSample> tradeSamples;
-  QList<BookSummary> bookSummaries;
+  QList<BookSample> bookSamples;
 
   void addTrade(quint64 time, double price, double amount);
-  void addBookSummary(const BookSummary& bookSummary);
+  void addBookSample(const BookSample& bookSummary);
 
 signals:
   void dataAdded();

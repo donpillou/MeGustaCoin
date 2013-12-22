@@ -12,7 +12,8 @@ void LogModel::addMessage(Type type, const QString& message)
   LogModel::Item item;
   item.type = type;
   item.message = message;
-  item.date = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+  QString dateFormat = QLocale::system().dateTimeFormat(QLocale::ShortFormat);
+  item.date = QDateTime::currentDateTime().toString(dateFormat);
   messages.append(item);
 
   endInsertRows();

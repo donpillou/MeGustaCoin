@@ -33,15 +33,15 @@ void GraphView::paintEvent(QPaintEvent* event)
       time = tradeSample.time;
   }
 
-  if(!graphModel.bookSummaries.isEmpty())
+  if(!graphModel.bookSamples.isEmpty())
   {
-    GraphModel::BookSummary& bookSummary = graphModel.bookSummaries.back();
-    addToMinMax(bookSummary.ask);
-    addToMinMax(bookSummary.bid);
-    for(int i = 0; i < (int)GraphModel::BookSummary::ComPrice::numOfComPrice; ++i)
-      addToMinMax(bookSummary.comPrice[i]);
-    if(bookSummary.time > time)
-      time = bookSummary.time;
+    GraphModel::BookSample& bookSample = graphModel.bookSamples.back();
+    addToMinMax(bookSample.ask);
+    addToMinMax(bookSample.bid);
+    for(int i = 0; i < (int)GraphModel::BookSample::ComPrice::numOfComPrice; ++i)
+      addToMinMax(bookSample.comPrice[i]);
+    if(bookSample.time > time)
+      time = bookSample.time;
   }
 
   double lastTotalMin = totalMin;
@@ -62,10 +62,10 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   if(lastTotalMax != 0.)
     drawAxesLables(painter, plotRect, hmin, hmax, priceSize);
+  if(!graphModel.bookSamples.isEmpty())
+    drawBookPolyline(painter, plotRect, hmin, hmax);
   if(!graphModel.tradeSamples.isEmpty())
     drawTradePolyline(painter, plotRect, hmin, hmax, lastVolumeMax);
-  if(!graphModel.bookSummaries.isEmpty())
-    drawBookPolyline(painter, plotRect, hmin, hmax);
 
   if((totalMin != lastTotalMin || totalMax != lastTotalMax || volumeMax != lastVolumeMax) && totalMax != 0.)
     update();
@@ -122,7 +122,7 @@ void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin
       painter.drawLine(QPoint(bottom.x(), rect.top() - 4), bottom);
       painter.setPen(textPen);
       date = QDateTime::fromTime_t(hmax - hstep * i);
-      date.setTimeSpec(Qt::UTC);
+      //date.setTimeSpec(Qt::UTC);
       formatedTime = date.toLocalTime().time().toString(timeFormat);
       const QSize timeSize = painter.fontMetrics().size(Qt::TextSingleLine, formatedTime);
       QPoint textPos(bottom.x() - timeSize.width() * 0.5, rect.bottom() + 2 + timeSize.height());
@@ -275,11 +275,11 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
     painter.setPen(volumePen);
     painter.drawLines(volumeData, (currentVolumePoint - volumeData) / 2);
     //painter.setPen(Qt::darkGray);
-    painter.setPen(Qt::black);
+    //painter.setPen(Qt::black);
+    QPen rangePen(Qt::black);
+    rangePen.setWidth(2);
+    painter.setPen(rangePen);
     painter.drawPolyline(polyData, currentPoint - polyData);
-    //QPen rangePen(Qt::black);
-    //rangePen.setWidth(2);
-    //painter.setPen(rangePen);
     painter.drawLines(rangeData, (currentRangePoint - rangeData) / 2);
   }
 }
@@ -297,16 +297,16 @@ void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double hm
 
   QPointF* polyData = (QPointF*)alloca(rect.width() * sizeof(QPointF));
 
-  for (int type = 0; type < (int)GraphModel::BookSummary::ComPrice::numOfComPrice; ++type)
+  for (int type = 0; type < (int)GraphModel::BookSample::ComPrice::numOfComPrice; ++type)
   {
     int pixelX = 0;
     QPointF* currentPoint = polyData;
     quint64 currentTimeMax = vmin + vrange / rect.width();
-    double currentVal = graphModel.bookSummaries.front().comPrice[type];
+    double currentVal = graphModel.bookSamples.front().comPrice[type];
     int currentEntryCount = 0;
 
-    const QList<GraphModel::BookSummary>& bookSummaries = graphModel.bookSummaries;
-    const GraphModel::BookSummary* sample;
+    const QList<GraphModel::BookSample>& bookSummaries = graphModel.bookSamples;
+    const GraphModel::BookSample* sample;
     int i = 0, count = bookSummaries.size();
     for(; i < count; ++i) // todo: optimize this
       if(bookSummaries.at(i).time >= vmin) 
@@ -347,7 +347,7 @@ void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double hm
       }
     }
 
-    int color = type * 0xff / (int)GraphModel::BookSummary::ComPrice::numOfComPrice;
+    int color = type * 0xff / (int)GraphModel::BookSample::ComPrice::numOfComPrice;
     painter.setPen(QColor(0xff - color, 0, color));
     painter.drawPolyline(polyData, currentPoint - polyData);
   }

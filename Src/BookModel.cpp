@@ -68,15 +68,15 @@ void BookModel::setData(quint64 time, const QList<Item>& askItems, const QList<I
   }
 
 
-  GraphModel::BookSummary summary;
+  GraphModel::BookSample summary;
   summary.time = time;
   summary.ask = askItems.isEmpty() ? 0 : askItems.back().price;
   summary.bid = bidItems.isEmpty() ? 0 : bidItems.back().price;
-  summary.comPrice[(int)GraphModel::BookSummary::ComPrice::comPrice100] = askSum[sum50] >= sumMax[sum50] && bidSum[sum50] >= sumMax[sum50] ? (askSumMass[sum50] + bidSumMass[sum50]) / (askSum[sum50] + bidSum[sum50]) : 0;
-  summary.comPrice[(int)GraphModel::BookSummary::ComPrice::comPrice200] = askSum[sum100] >= sumMax[sum100] && bidSum[sum100] >= sumMax[sum100] ? (askSumMass[sum100] + bidSumMass[sum100]) / (askSum[sum100] + bidSum[sum100]) : summary.comPrice[(int)GraphModel::BookSummary::ComPrice::comPrice100];
-  summary.comPrice[(int)GraphModel::BookSummary::ComPrice::comPrice500] = askSum[sum250] >= sumMax[sum250] && bidSum[sum250] >= sumMax[sum250] ? (askSumMass[sum250] + bidSumMass[sum250]) / (askSum[sum250] + bidSum[sum250]) : summary.comPrice[(int)GraphModel::BookSummary::ComPrice::comPrice200];
-  summary.comPrice[(int)GraphModel::BookSummary::ComPrice::comPrice1000] = askSum[sum500] >= sumMax[sum500] && bidSum[sum500] >= sumMax[sum500] ? (askSumMass[sum500] + bidSumMass[sum500]) / (askSum[sum500] + bidSum[sum500]) : summary.comPrice[(int)GraphModel::BookSummary::ComPrice::comPrice500];
-  graphModel.addBookSummary(summary);
+  summary.comPrice[(int)GraphModel::BookSample::ComPrice::comPrice100] = askSum[sum50] >= sumMax[sum50] && bidSum[sum50] >= sumMax[sum50] ? (askSumMass[sum50] + bidSumMass[sum50]) / (askSum[sum50] + bidSum[sum50]) : 0;
+  summary.comPrice[(int)GraphModel::BookSample::ComPrice::comPrice200] = askSum[sum100] >= sumMax[sum100] && bidSum[sum100] >= sumMax[sum100] ? (askSumMass[sum100] + bidSumMass[sum100]) / (askSum[sum100] + bidSum[sum100]) : summary.comPrice[(int)GraphModel::BookSample::ComPrice::comPrice100];
+  summary.comPrice[(int)GraphModel::BookSample::ComPrice::comPrice500] = askSum[sum250] >= sumMax[sum250] && bidSum[sum250] >= sumMax[sum250] ? (askSumMass[sum250] + bidSumMass[sum250]) / (askSum[sum250] + bidSum[sum250]) : summary.comPrice[(int)GraphModel::BookSample::ComPrice::comPrice200];
+  summary.comPrice[(int)GraphModel::BookSample::ComPrice::comPrice1000] = askSum[sum500] >= sumMax[sum500] && bidSum[sum500] >= sumMax[sum500] ? (askSumMass[sum500] + bidSumMass[sum500]) / (askSum[sum500] + bidSum[sum500]) : summary.comPrice[(int)GraphModel::BookSample::ComPrice::comPrice500];
+  graphModel.addBookSample(summary);
 }
 
 void BookModel::reset()

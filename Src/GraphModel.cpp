@@ -24,13 +24,13 @@ void GraphModel::addTrade(quint64 time, double price, double amount)
   emit dataAdded();
 }
 
-void GraphModel::addBookSummary(const BookSummary& bookSummary)
+void GraphModel::addBookSample(const BookSample& bookSample)
 {
-  bookSummaries.append(bookSummary);
+  bookSamples.append(bookSample);
 
-  quint64 time = bookSummary.time;
-  while(!bookSummaries.isEmpty() && time - bookSummaries.front().time > 7 * 24 * 60 * 60)
-    bookSummaries.pop_front();
+  quint64 time = bookSample.time;
+  while(!bookSamples.isEmpty() && time - bookSamples.front().time > 7 * 24 * 60 * 60)
+    bookSamples.pop_front();
 
   emit dataAdded();
 }
