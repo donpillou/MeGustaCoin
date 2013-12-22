@@ -26,6 +26,10 @@ void GraphView::paintEvent(QPaintEvent* event)
   if (graphModel.trades.size() <= 0)
     return; // no data
 
+//  if ((--graphModel.trades.end())->
+//  double lastHMin = hmin, lastHMax = hmax;
+
+
   double hmin = floor(graphModel.totalMin);
   double hmax = -floor(-qMax(graphModel.totalMax, hmin + 1.));
   const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, market->formatPrice(hmax));
@@ -241,7 +245,7 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
         ++currentPoint;
       }
 
-      painter.setPen(Qt::red);
+      painter.setPen(QColor(0xff, i * 0xa5 / (int)GraphModel::BookSummary::ComPrice::numOfComPrice, 0));
       painter.drawPolyline(polyData, currentPoint - polyData);
     }
   }
