@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
+#include <cfloat>
 
-GraphView::GraphView(QWidget* parent, GraphModel& graphModel) : QWidget(parent), graphModel(graphModel), maxAge(60 * 60)
+GraphView::GraphView(QWidget* parent, GraphModel& graphModel) : QWidget(parent), graphModel(graphModel), time(0), maxAge(60 * 60), totalMin(0.), totalMax(0.), volumeMax(0.)
 {
   connect(&graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
 }
@@ -23,32 +24,54 @@ void GraphView::paintEvent(QPaintEvent* event)
   painter.setRenderHint(QPainter::Antialiasing);
   painter.setPen(Qt::black);
 
-  if (graphModel.trades.size() <= 0)
-    return; // no data
+  if(!graphModel.tradeSamples.isEmpty())
+  {
+    GraphModel::TradeSample& tradeSample = graphModel.tradeSamples.back();
+    addToMinMax(tradeSample.max);
+    addToMinMax(tradeSample.min);
+    if(tradeSample.time > time)
+      time = tradeSample.time;
+  }
 
-//  if ((--graphModel.trades.end())->
-//  double lastHMin = hmin, lastHMax = hmax;
+  if(!graphModel.bookSummaries.isEmpty())
+  {
+    GraphModel::BookSummary& bookSummary = graphModel.bookSummaries.back();
+    addToMinMax(bookSummary.ask);
+    addToMinMax(bookSummary.bid);
+    for(int i = 0; i < (int)GraphModel::BookSummary::ComPrice::numOfComPrice; ++i)
+      addToMinMax(bookSummary.comPrice[i]);
+    if(bookSummary.time > time)
+      time = bookSummary.time;
+  }
 
+  double lastTotalMin = totalMin;
+  double lastTotalMax = totalMax;
+  double lastVolumeMax = volumeMax;
 
-  double hmin = floor(graphModel.totalMin);
-  double hmax = -floor(-qMax(graphModel.totalMax, hmin + 1.));
-  const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, market->formatPrice(hmax));
+  totalMin = DBL_MAX;
+  totalMax = 0.;
+  volumeMax = 0.;
+
+  double hmin = floor(lastTotalMin);
+  double hmax = ceil(qMax(lastTotalMax, hmin + 1.));
+  const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, market->formatPrice(hmax == DBL_MAX ? 0. : hmax));
 
   QRect plotRect(10, 12, rect.width() - (10 + priceSize.width() + 8), rect.height() - 22);
-  if (plotRect.width() <= 0 || plotRect.height() <= 0)
+  if(plotRect.width() <= 0 || plotRect.height() <= 0)
     return; // too small
 
-  //drawBox(painter, plotRect);
-  drawAxisLables(painter, plotRect, hmin, hmax, priceSize);
-  drawTradePolyline(painter, plotRect, hmin, hmax);
+  if(lastTotalMax != 0.)
+    drawAxisLables(painter, plotRect, hmin, hmax, priceSize);
+  if(!graphModel.tradeSamples.isEmpty())
+    drawTradePolyline(painter, plotRect, hmin, hmax, lastVolumeMax);
+  if(!graphModel.bookSummaries.isEmpty())
+    drawBookPolyline(painter, plotRect, hmin, hmax);
+
+  if((totalMin != lastTotalMin || totalMax != lastTotalMax || volumeMax != lastVolumeMax) && totalMax != 0.)
+    update();
 }
 
-void GraphView::drawBox(QPainter& painter, const QRect& rect)
-{
-  painter.drawRect(rect);
-}
-
-void GraphView::drawAxisLables(QPainter& painter, const QRect& rect, double& hmin, double& hmax, const QSize& priceSize)
+void GraphView::drawAxisLables(QPainter& painter, const QRect& rect, double hmin, double hmax, const QSize& priceSize)
 {
   double hrange = hmax - hmin;
   double height = rect.height();
@@ -57,30 +80,10 @@ void GraphView::drawAxisLables(QPainter& painter, const QRect& rect, double& hmi
     hstep *= 0.5;
   if(hstep * height / hrange >= 40.f)
     hstep *= 0.5;
-  /*
-  hmax += hstep * 1.5;
-  hrange = hmax - hmin;
-  
-  hstep = pow(10., ceil(log10(hrange * 20. / height)));
-  if(hstep * height / hrange >= 40.f)
-    hstep *= 0.5;
-  if(hstep * height / hrange >= 40.f)
-    hstep *= 0.5;
-    */
-
-  /*
-  int pixelHStep = hstep * height / hrange;
-  int steps = rect.height() / pixelHStep;
-  int bottomOffset = rect.height() - set * pixelHStep;
-    */
-
-  //painter.drawText(QPointF(rect.right() + 5, rect.top() + priceSize.height() * 0.5 - 2), market->formatPrice(hmax));
-  //painter.drawText(QPointF(rect.right() + 5, rect.bottom() + priceSize.height() * 0.5 - 2), market->formatPrice(hmin));
 
   QPen linePen(Qt::gray);
   linePen.setStyle(Qt::DotLine);
   QPen textPen(Qt::darkGray);
-  
 
   for(int i = 0, count = (int)(hrange / hstep); i <= count; ++i)
   {
@@ -93,161 +96,216 @@ void GraphView::drawAxisLables(QPainter& painter, const QRect& rect, double& hmi
   }
 }
 
-void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double hmin, double hmax)
+void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double hmin, double hmax, double lastVolumeMax)
 {
   double hrange = hmax - hmin;
-  quint64 vmax = (--graphModel.trades.end()).key();
-  if(!graphModel.bookSummaries.isEmpty())
-    vmax = qMax(vmax, graphModel.bookSummaries.back().time);
+  quint64 vmax = time;
+  quint64 vmin = vmax - maxAge;
+  quint64 vrange = vmax - vmin;
+  int left = rect.left();
+  double bottom = rect.bottom();
+  int bottomInt = rect.bottom();
+  double height = rect.height();
+  quint64 width = rect.width();
+
+
+  QPointF* polyData = (QPointF*)alloca(rect.width() * sizeof(QPointF));
+  QPoint* volumeData = (QPoint*)alloca(rect.width() * 2* sizeof(QPoint));
+  {
+    int pixelX = 0;
+    QPointF* currentPoint = polyData;
+    QPoint* currentVolumePoint = volumeData;
+    quint64 currentTimeMax = vmin + vrange / rect.width();
+    double currentMin = graphModel.tradeSamples.begin()->min;
+    double currentVolume = 0;
+    int currentEntryCount = 0;
+    double currentLast = 0.;
+
+    foreach(const GraphModel::TradeSample& sample, graphModel.tradeSamples)
+    {
+      if(sample.time < vmin) // todo: optimize this
+        continue;
+      while(sample.time > currentTimeMax)
+      {
+        Q_ASSERT(currentPoint - polyData < rect.width());
+        if(currentEntryCount > 0)
+        {
+          currentPoint->setX(left + pixelX);
+          currentPoint->setY(bottom - (currentMin - hmin) * height / hrange);
+          ++currentPoint;
+          currentVolumePoint->setX(left + pixelX);
+          currentVolumePoint->setY(bottomInt);
+          ++currentVolumePoint;
+          currentVolumePoint->setX(left + pixelX);
+          currentVolumePoint->setY(bottomInt - currentVolume * (height / 3) / lastVolumeMax);
+          ++currentVolumePoint;
+          if(currentVolume > volumeMax)
+            volumeMax = currentVolume;
+        }
+        else if(currentLast != 0.)
+        {
+          currentPoint->setX(left + pixelX);
+          currentPoint->setY(bottom - (currentLast - hmin) * height / hrange);
+          ++currentPoint;
+        }
+        ++pixelX;
+        currentTimeMax = vmin + vrange * (pixelX + 1) / width;
+        currentMin = sample.min;
+        currentEntryCount = 0;
+        currentVolume = 0;
+      }
+      if(sample.min < currentMin)
+        currentMin = sample.min;
+      currentLast = sample.min;
+      currentVolume += sample.amount;
+      ++currentEntryCount;
+      if(sample.min < totalMin)
+        totalMin = sample.min;
+    }
+    Q_ASSERT(currentPoint - polyData < rect.width());
+    currentPoint->setX(left + pixelX);
+    currentPoint->setY(bottom - (currentMin - hmin) * height / hrange);
+    if(currentEntryCount > 0)
+    {
+      currentPoint->setX(left + pixelX);
+      currentPoint->setY(bottom - (currentMin - hmin) * height / hrange);
+      ++currentPoint;
+      currentVolumePoint->setX(left + pixelX);
+      currentVolumePoint->setY(bottomInt);
+      ++currentVolumePoint;
+      currentVolumePoint->setX(left + pixelX);
+      currentVolumePoint->setY(bottomInt - currentVolume * (height / 3) / lastVolumeMax);
+      ++currentVolumePoint;
+      if(currentVolume > volumeMax)
+        volumeMax = currentVolume;
+
+    }
+    else if(currentLast != 0.)
+    {
+      currentPoint->setX(left + pixelX);
+      currentPoint->setY(bottom - (currentLast - hmin) * height / hrange);
+      ++currentPoint;
+    }
+
+    painter.setPen(Qt::darkGreen);
+    painter.drawLines(volumeData, (currentVolumePoint - volumeData) / 2);
+    painter.setPen(Qt::black);
+    painter.drawPolyline(polyData, currentPoint - polyData);
+  }
+  {
+    int pixelX = 0;
+    QPointF* currentPoint = polyData;
+    quint64 currentTimeMax = vmin + vrange / rect.width();
+    double currentMax = graphModel.tradeSamples.begin()->max;
+    int currentEntryCount = 0;
+    double currentLast = 0.;
+
+    foreach(const GraphModel::TradeSample& sample, graphModel.tradeSamples)
+    {
+      if(sample.time < vmin) // todo: optimize this
+        continue;
+      while(sample.time > currentTimeMax)
+      {
+        Q_ASSERT(currentPoint - polyData < rect.width());
+        if(currentEntryCount > 0)
+        {
+          currentPoint->setX(left + pixelX);
+          currentPoint->setY(bottom - (currentMax - hmin) * height / hrange);
+          ++currentPoint;
+        }
+        else if(currentLast != 0.)
+        {
+          currentPoint->setX(left + pixelX);
+          currentPoint->setY(bottom - (currentLast - hmin) * height / hrange);
+          ++currentPoint;
+        }
+        ++pixelX;
+        currentTimeMax = vmin + vrange * (pixelX + 1) / width;
+        currentMax = sample.max;
+        currentEntryCount = 0;
+      }
+      if(sample.max > currentMax)
+        currentMax = sample.max;
+      currentLast = sample.max;
+      ++currentEntryCount;
+      if(sample.max > totalMax)
+        totalMax = sample.max;
+    }
+    Q_ASSERT(currentPoint - polyData < rect.width());
+    if(currentEntryCount > 0)
+    {
+      currentPoint->setX(left + pixelX);
+      currentPoint->setY(bottom - (currentMax - hmin) * height / hrange);
+      ++currentPoint;
+    }
+    else if(currentLast != 0.)
+    {
+      currentPoint->setX(left + pixelX);
+      currentPoint->setY(bottom - (currentLast - hmin) * height / hrange);
+      ++currentPoint;
+    }
+
+    painter.drawPolyline(polyData, currentPoint - polyData);
+  }
+  }
+
+void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double hmin, double hmax)
+{
+  double hrange = hmax - hmin;
+  quint64 vmax = time;
   quint64 vmin = vmax - maxAge;
   quint64 vrange = vmax - vmin;
   int left = rect.left();
   double bottom = rect.bottom();
   double height = rect.height();
   quint64 width = rect.width();
-  // if(vrange > xx) // todo
-
-  painter.setPen(Qt::black);
 
   QPointF* polyData = (QPointF*)alloca(rect.width() * sizeof(QPointF));
+
+  for (int i = 0; i < (int)GraphModel::BookSummary::ComPrice::numOfComPrice; ++i)
   {
     int pixelX = 0;
     QPointF* currentPoint = polyData;
     quint64 currentTimeMax = vmin + vrange / rect.width();
-    double currentMin = graphModel.trades.begin()->min;
+    double currentVal = graphModel.bookSummaries.front().comPrice[i];
     int currentEntryCount = 0;
-    double currentLast = 0.;
 
-    foreach(const GraphModel::Entry& entry, graphModel.trades)
+    foreach(const GraphModel::BookSummary& summary, graphModel.bookSummaries)
     {
-      if(entry.time < vmin)
+      if(summary.time < vmin) // todo: optimize this
         continue;
-      while(entry.time > currentTimeMax)
+      while(summary.time > currentTimeMax)
       {
         Q_ASSERT(currentPoint - polyData < rect.width());
-        currentPoint->setX(left + pixelX);
-        currentPoint->setY(bottom - (currentMin - hmin) * height / hrange);
-        if(currentEntryCount > 0)
-          ++currentPoint;
-        else if(currentLast != 0.)
-        {
-          currentPoint->setY(bottom - (currentLast - hmin) * height / hrange);
-          ++currentPoint;
-        }
-        ++pixelX;
-        currentTimeMax = vmin + vrange * (pixelX + 1) / width;
-        currentMin = entry.min;
-        currentEntryCount = 0;
-      }
-      if(entry.min < currentMin)
-        currentMin = entry.min;
-      currentLast = entry.min;
-      ++currentEntryCount;
-    }
-    Q_ASSERT(currentPoint - polyData < rect.width());
-    currentPoint->setX(left + pixelX);
-    currentPoint->setY(bottom - (currentMin - hmin) * height / hrange);
-    if(currentEntryCount > 0)
-      ++currentPoint;
-    else if(currentLast != 0.)
-    {
-      currentPoint->setY(bottom - (currentLast - hmin) * height / hrange);
-      ++currentPoint;
-    }
-
-    painter.drawPolyline(polyData, currentPoint - polyData);
-  }
-  {
-    int pixelX = 0;
-    QPointF* currentPoint = polyData;
-    quint64 currentTimeMax = vmin + vrange / rect.width();
-    double currentMax = graphModel.trades.begin()->max;
-    int currentEntryCount = 0;
-    double currentLast = 0.;
-
-    foreach(const GraphModel::Entry& entry, graphModel.trades)
-    {
-      if(entry.time < vmin)
-        continue;
-      while(entry.time > currentTimeMax)
-      {
-        Q_ASSERT(currentPoint - polyData < rect.width());
-        currentPoint->setX(left + pixelX);
-        currentPoint->setY(bottom - (currentMax - hmin) * height / hrange);
-        if(currentEntryCount > 0)
-          ++currentPoint;
-        else if(currentLast != 0.)
-        {
-          currentPoint->setY(bottom - (currentLast - hmin) * height / hrange);
-          ++currentPoint;
-        }
-        ++pixelX;
-        currentTimeMax = vmin + vrange * (pixelX + 1) / width;
-        currentMax = entry.max;
-        currentEntryCount = 0;
-      }
-      if(entry.max > currentMax)
-        currentMax = entry.max;
-      currentLast = entry.max;
-      ++currentEntryCount;
-    }
-    Q_ASSERT(currentPoint - polyData < rect.width());
-    currentPoint->setX(left + pixelX);
-    currentPoint->setY(bottom - (currentMax - hmin) * height / hrange);
-    if(currentEntryCount > 0)
-      ++currentPoint;
-    else if(currentLast != 0.)
-    {
-      currentPoint->setY(bottom - (currentLast - hmin) * height / hrange);
-      ++currentPoint;
-    }
-
-    painter.drawPolyline(polyData, currentPoint - polyData);
-  }
-
-  if(!graphModel.bookSummaries.isEmpty())
-  {
-    for (int i = 0; i < (int)GraphModel::BookSummary::ComPrice::numOfComPrice; ++i)
-    {
-      int pixelX = 0;
-      QPointF* currentPoint = polyData;
-      quint64 currentTimeMax = vmin + vrange / rect.width();
-      double currentVal = graphModel.bookSummaries.front().comPrice[i];
-      int currentEntryCount = 0;
-
-      foreach(const GraphModel::BookSummary& summary, graphModel.bookSummaries)
-      {
-        if(summary.time < vmin)
-          continue;
-        while(summary.time > currentTimeMax)
-        {
-          Q_ASSERT(currentPoint - polyData < rect.width());
         
-          if(currentEntryCount > 0)
-          {
-            currentPoint->setX(left + pixelX);
-            currentPoint->setY(bottom - (currentVal - hmin) * height / hrange);
-            ++currentPoint;
-          }
-          ++pixelX;
-          currentTimeMax = vmin + vrange * (pixelX + 1) / width;
-          currentVal = summary.comPrice[i];
-          currentEntryCount = 0;
+        if(currentEntryCount > 0)
+        {
+          currentPoint->setX(left + pixelX);
+          currentPoint->setY(bottom - (currentVal - hmin) * height / hrange);
+          ++currentPoint;
         }
+        ++pixelX;
+        currentTimeMax = vmin + vrange * (pixelX + 1) / width;
         currentVal = summary.comPrice[i];
-        ++currentEntryCount;
+        currentEntryCount = 0;
       }
-      Q_ASSERT(currentPoint - polyData < rect.width());
-      if(currentEntryCount > 0)
-      {
-        currentPoint->setX(left + pixelX);
-        currentPoint->setY(bottom - (currentVal - hmin) * height / hrange);
-        ++currentPoint;
-      }
-
-      painter.setPen(QColor(0xff, i * 0xa5 / (int)GraphModel::BookSummary::ComPrice::numOfComPrice, 0));
-      painter.drawPolyline(polyData, currentPoint - polyData);
+      currentVal = summary.comPrice[i];
+      ++currentEntryCount;
+      if(currentVal > totalMax)
+        totalMax = currentVal;
+      if(currentVal < totalMin)
+        totalMin = currentVal;
     }
-  }
+    Q_ASSERT(currentPoint - polyData < rect.width());
+    if(currentEntryCount > 0)
+    {
+      currentPoint->setX(left + pixelX);
+      currentPoint->setY(bottom - (currentVal - hmin) * height / hrange);
+      ++currentPoint;
+    }
 
+    int color = i * 0xff / (int)GraphModel::BookSummary::ComPrice::numOfComPrice;
+    painter.setPen(QColor(0xff - color, 0, color));
+    painter.drawPolyline(polyData, currentPoint - polyData);
+  }
 }

@@ -11,5 +11,5 @@ public:
   BookModel bookModel;
   LogModel logModel;
 
-  DataModel() : /*tradeModel(graphModel),*/ bookModel(graphModel) {}
+  DataModel() : tradeModel(graphModel), bookModel(graphModel) {}
 };

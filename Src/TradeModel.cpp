@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-TradeModel::TradeModel() : market(0),
+TradeModel::TradeModel(GraphModel& graphModel) : graphModel(graphModel), market(0),
 upIcon(QIcon(":/Icons/arrow_diag.png")), downIcon(QIcon(":/Icons/arrow_diag_red.png")), neutralIcon(QIcon(":/Icons/bullet_grey.png"))
 {
 }
@@ -50,8 +50,6 @@ void TradeModel::addData(const QList<Trade>& newTrades)
       tradesToAdd.append(&trade);
   }
 
-
-
   int oldCount = trades.size();
   double lastPrice = trades.size() > 0 ? trades.back()->price : 0.;
 
@@ -70,6 +68,8 @@ void TradeModel::addData(const QList<Trade>& newTrades)
     lastPrice = newTrade->price;
     trades.append(newTrade);
     ids.insert(newTrade->id, 0);
+
+    graphModel.addTrade(trade->date, trade->price, trade->amount);
   }
 
   endInsertRows();

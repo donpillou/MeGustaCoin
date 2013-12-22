@@ -1,26 +1,24 @@
 
 #include "stdafx.h"
 
-void GraphModel::addTrade(quint64 time, double price)
+void GraphModel::addTrade(quint64 time, double price, double amount)
 {
-  if(totalMin == 0.)
-    totalMin = totalMax = price;
-  else if(price < totalMin)
-    totalMin = price;
-  else if(price > totalMax)
-    totalMax = price;
+  TradeSample* tradeSample;
+  if(tradeSamples.isEmpty() || tradeSamples.last().time != time)
+    tradeSamples.append(TradeSample());
+  tradeSample =  &tradeSamples.last();
 
-  Entry& entry = trades[time];
-  entry.time = time;
-  if(entry.min == 0.)
-    entry.min = entry.max = price;
-  else if(price < entry.min)
-    entry.min = price;
-  else if(price > entry.max)
-    entry.max = price;
+  tradeSample->time = time;
+  tradeSample->amount += amount;
+  if(tradeSample->min == 0.)
+    tradeSample->min = tradeSample->max = price;
+  else if(price < tradeSample->min)
+    tradeSample->min = price;
+  else if(price > tradeSample->max)
+    tradeSample->max = price;
 
-  while(!trades.isEmpty() && time - trades.begin().key() > 7 * 24 * 60 * 60)
-    trades.erase(trades.begin());
+  while(!tradeSamples.isEmpty() && time - tradeSamples.front().time > 7 * 24 * 60 * 60)
+    tradeSamples.pop_front();
 
   emit dataAdded();
 }

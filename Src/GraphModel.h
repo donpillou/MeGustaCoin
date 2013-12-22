@@ -6,14 +6,15 @@ class GraphModel : public QObject
   Q_OBJECT
 
 public:
-  class Entry
+  class TradeSample
   {
   public:
     quint64 time;
     double min;
     double max;
+    double amount;
 
-    Entry() : min(0), max(0) {}
+    TradeSample() : min(0), max(0), amount(0) {}
   };
 
   class BookSummary
@@ -32,18 +33,13 @@ public:
       numOfComPrice
     };
 
-    double comPrice[ComPrice::numOfComPrice]; // order book center of mass limited to 50, 100, ... btc
+    double comPrice[(int)ComPrice::numOfComPrice]; // order book center of mass limited to 50, 100, ... btc
   };
 
-  double totalMin; // todo: do i really need this?
-  double totalMax;
-
-  QMap<quint64, Entry> trades;
+  QList<TradeSample> tradeSamples;
   QList<BookSummary> bookSummaries;
 
-  GraphModel() : totalMin(0), totalMax(0) {}
-
-  void addTrade(quint64 time, double price);
+  void addTrade(quint64 time, double price, double amount);
   void addBookSummary(const BookSummary& bookSummary);
 
 signals:

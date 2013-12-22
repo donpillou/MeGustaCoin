@@ -4,7 +4,7 @@
 class TradeModel : public QAbstractItemModel
 {
 public:
-  TradeModel();
+  TradeModel(GraphModel& graphModel);
   ~TradeModel();
 
   class Trade
@@ -44,6 +44,7 @@ public:
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
 private:
+  GraphModel& graphModel;
   QList<Trade*> trades;
   QHash<QString, void*> ids;
   Market* market;
