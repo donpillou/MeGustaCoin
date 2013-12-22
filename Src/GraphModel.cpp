@@ -9,6 +9,7 @@ void GraphModel::addTrade(quint64 time, double price, double amount)
   tradeSample =  &tradeSamples.last();
 
   tradeSample->time = time;
+  tradeSample->last = price;
   tradeSample->amount += amount;
   if(tradeSample->min == 0.)
     tradeSample->min = tradeSample->max = price;
