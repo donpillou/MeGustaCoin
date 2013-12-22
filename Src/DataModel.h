@@ -6,8 +6,10 @@ class DataModel
 public:
   OrderModel orderModel;
   TransactionModel transactionModel;
+  GraphModel graphModel;
   TradeModel tradeModel;
   BookModel bookModel;
   LogModel logModel;
-  GraphModel graphModel;
+
+  DataModel() : /*tradeModel(graphModel),*/ bookModel(graphModel) {}
 };

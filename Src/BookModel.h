@@ -4,7 +4,7 @@
 class BookModel
 {
 public:
-  BookModel();
+  BookModel(GraphModel& graphModel);
 
   class Item
   {
@@ -17,8 +17,8 @@ public:
 
   class ItemModel : public QAbstractItemModel
   {
-  public:
-
+  //public:
+  private:
     ItemModel();
     ~ItemModel();
 
@@ -50,9 +50,14 @@ public:
   };
 
   void setMarket(Market* market);
+  void setData(quint64 time, const QList<Item>& askItems, const QList<Item>& bidItems);
 
   void reset();
 
   ItemModel askModel;
   ItemModel bidModel;
+
+private:
+  GraphModel& graphModel;
+  quint64 time;
 };

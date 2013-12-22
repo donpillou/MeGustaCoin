@@ -309,31 +309,31 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
   case BitstampWorker::Request::orderBookUpdate:
     {
       QVariantMap orderBookData = data.toMap();
+      quint64 date = orderBookData["timestamp"].toULongLong();
       QVariantList askData = orderBookData["asks"].toList();
       QVariantList bidData = orderBookData["bids"].toList();
-      QList<BookModel::Item> items;
-      items.reserve(askData.size());
+      QList<BookModel::Item> askItems;
+      askItems.reserve(askData.size());
       QVariantList dataList;
-      for(int i = qMin(askData.size() - 1, 99); i >= 0; --i)
+      for(int i = askData.size() - 1; i >= 0; --i)
       {
-        items.append(BookModel::Item());
-        BookModel::Item& item = items.back();
+        askItems.append(BookModel::Item());
+        BookModel::Item& item = askItems.back();
         dataList = askData[i].toList();
         item.price = dataList[0].toDouble();
         item.amount = dataList[1].toDouble();
       }
-      dataModel.bookModel.askModel.setData(items);
-      items.clear();
-      items.reserve(bidData.size());
-      for(int i = qMin(bidData.size() - 1, 99); i >= 0; --i)
+      QList<BookModel::Item> bidItems;
+      bidItems.reserve(bidData.size());
+      for(int i = bidData.size() - 1; i >= 0; --i)
       {
-        items.append(BookModel::Item());
-        BookModel::Item& item = items.back();
+        bidItems.append(BookModel::Item());
+        BookModel::Item& item = bidItems.back();
         dataList = bidData[i].toList();
         item.price = dataList[0].toDouble();
         item.amount = dataList[1].toDouble();
       }
-      dataModel.bookModel.bidModel.setData(items);
+      dataModel.bookModel.setData(date, askItems, bidItems);
       if((BitstampWorker::Request)request == BitstampWorker::Request::orderBook)
         dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved order book"));
       //else

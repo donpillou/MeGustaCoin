@@ -10,12 +10,12 @@
 class Market;
 class DataModel;
 
+#include "GraphModel.h"
 #include "OrderModel.h"
 #include "TransactionModel.h"
 #include "TradeModel.h"
 #include "BookModel.h"
 #include "LogModel.h"
-#include "GraphModel.h"
 #include "DataModel.h"
 
 #include "Market.h"

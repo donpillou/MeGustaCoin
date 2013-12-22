@@ -24,3 +24,14 @@ void GraphModel::addTrade(quint64 time, double price)
 
   emit dataAdded();
 }
+
+void GraphModel::addBookSummary(const BookSummary& bookSummary)
+{
+  bookSummaries.append(bookSummary);
+
+  quint64 time = bookSummary.time;
+  while(!bookSummaries.isEmpty() && time - bookSummaries.front().time > 7 * 24 * 60 * 60)
+    bookSummaries.pop_front();
+
+  emit dataAdded();
+}

@@ -93,6 +93,8 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
 {
   double hrange = hmax - hmin;
   quint64 vmax = (--graphModel.trades.end()).key();
+  if(!graphModel.bookSummaries.isEmpty())
+    vmax = qMax(vmax, graphModel.bookSummaries.back().time);
   quint64 vmin = vmax - maxAge;
   quint64 vrange = vmax - vmin;
   int left = rect.left();
@@ -198,4 +200,50 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
 
     painter.drawPolyline(polyData, currentPoint - polyData);
   }
+
+  if(!graphModel.bookSummaries.isEmpty())
+  {
+    for (int i = 0; i < (int)GraphModel::BookSummary::ComPrice::numOfComPrice; ++i)
+    {
+      int pixelX = 0;
+      QPointF* currentPoint = polyData;
+      quint64 currentTimeMax = vmin + vrange / rect.width();
+      double currentVal = graphModel.bookSummaries.front().comPrice[i];
+      int currentEntryCount = 0;
+
+      foreach(const GraphModel::BookSummary& summary, graphModel.bookSummaries)
+      {
+        if(summary.time < vmin)
+          continue;
+        while(summary.time > currentTimeMax)
+        {
+          Q_ASSERT(currentPoint - polyData < rect.width());
+        
+          if(currentEntryCount > 0)
+          {
+            currentPoint->setX(left + pixelX);
+            currentPoint->setY(bottom - (currentVal - hmin) * height / hrange);
+            ++currentPoint;
+          }
+          ++pixelX;
+          currentTimeMax = vmin + vrange * (pixelX + 1) / width;
+          currentVal = summary.comPrice[i];
+          currentEntryCount = 0;
+        }
+        currentVal = summary.comPrice[i];
+        ++currentEntryCount;
+      }
+      Q_ASSERT(currentPoint - polyData < rect.width());
+      if(currentEntryCount > 0)
+      {
+        currentPoint->setX(left + pixelX);
+        currentPoint->setY(bottom - (currentVal - hmin) * height / hrange);
+        ++currentPoint;
+      }
+
+      painter.setPen(Qt::red);
+      painter.drawPolyline(polyData, currentPoint - polyData);
+    }
+  }
+
 }
