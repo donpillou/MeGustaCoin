@@ -56,12 +56,12 @@ void GraphView::paintEvent(QPaintEvent* event)
   double hmax = ceil(qMax(lastTotalMax, hmin + 1.));
   const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, market->formatPrice(hmax == DBL_MAX ? 0. : hmax));
 
-  QRect plotRect(10, 12, rect.width() - (10 + priceSize.width() + 8), rect.height() - 22);
+  QRect plotRect(10, 10, rect.width() - (10 + priceSize.width() + 8), rect.height() - 20 - priceSize.height() + 5);
   if(plotRect.width() <= 0 || plotRect.height() <= 0)
     return; // too small
 
   if(lastTotalMax != 0.)
-    drawAxisLables(painter, plotRect, hmin, hmax, priceSize);
+    drawAxesLables(painter, plotRect, hmin, hmax, priceSize);
   if(!graphModel.tradeSamples.isEmpty())
     drawTradePolyline(painter, plotRect, hmin, hmax, lastVolumeMax);
   if(!graphModel.bookSummaries.isEmpty())
@@ -71,28 +71,64 @@ void GraphView::paintEvent(QPaintEvent* event)
     update();
 }
 
-void GraphView::drawAxisLables(QPainter& painter, const QRect& rect, double hmin, double hmax, const QSize& priceSize)
+void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin, double vmax, const QSize& priceSize)
 {
-  double hrange = hmax - hmin;
-  double height = rect.height();
-  double hstep = pow(10., ceil(log10(hrange * 20. / height)));
-  if(hstep * height / hrange >= 40.f)
-    hstep *= 0.5;
-  if(hstep * height / hrange >= 40.f)
-    hstep *= 0.5;
-
   QPen linePen(Qt::gray);
   linePen.setStyle(Qt::DotLine);
   QPen textPen(Qt::darkGray);
 
-  for(int i = 0, count = (int)(hrange / hstep); i <= count; ++i)
   {
-    QPoint right(rect.right(), rect.bottom() - hstep * i * height / hrange);
+    double vrange = vmax - vmin;
+    double height = rect.height();
+    double vstep = pow(10., ceil(log10(vrange * 20. / height)));
+    if(vstep * height / vrange >= 40.f)
+      vstep *= 0.5;
+    if(vstep * height / vrange >= 40.f)
+      vstep *= 0.5;
 
-    painter.setPen(linePen);
-    painter.drawLine(QPoint(rect.left(), right.y()), right);
-    painter.setPen(textPen);
-    painter.drawText(QPoint(rect.right() + 5, right.y() + priceSize.height() * 0.5 - 3), market->formatPrice(hmin + i * hstep));
+    for(int i = 0, count = (int)(vrange / vstep); i <= count; ++i)
+    {
+      QPoint right(rect.right() + 4, rect.bottom() - vstep * i * height / vrange);
+
+      painter.setPen(linePen);
+      painter.drawLine(QPoint(rect.left() - 4, right.y()), right);
+      painter.setPen(textPen);
+      painter.drawText(QPoint(right.x() + 2, right.y() + priceSize.height() * 0.5 - 3), market->formatPrice(vmin + i * vstep));
+    }
+  }
+
+  {
+    quint64 hmax = time;
+    quint64 hmin = hmax - maxAge;
+
+    double hrange = hmax - hmin;
+    double width = rect.width();
+    double hstep = pow(10., ceil(log10(hrange * 50. / width)));
+    if(hstep * width / hrange >= 100.f)
+      hstep *= 0.5;
+    if(hstep * width / hrange >= 100.f)
+      hstep *= 0.5;
+    if(hstep < 1.)
+      hstep = 1.;
+
+    QString timeFormat = QLocale::system().timeFormat(QLocale::ShortFormat).replace(":ss", "");
+    QString formatedTime;
+    QDateTime date;
+    for(int i = 0, count = (int)(hrange / hstep); i <= count; ++i)
+    {
+      QPoint bottom(rect.right() - hstep * i * width / hrange, rect.bottom() + 4);
+
+      painter.setPen(linePen);
+      painter.drawLine(QPoint(bottom.x(), rect.top() - 4), bottom);
+      painter.setPen(textPen);
+      date = QDateTime::fromTime_t(hmax - hstep * i);
+      date.setTimeSpec(Qt::UTC);
+      formatedTime = date.toLocalTime().time().toString(timeFormat);
+      const QSize timeSize = painter.fontMetrics().size(Qt::TextSingleLine, formatedTime);
+      QPoint textPos(bottom.x() - timeSize.width() * 0.5, rect.bottom() + 2 + timeSize.height());
+      if(textPos.x() > 2)
+        painter.drawText(textPos, formatedTime);
+    }
   }
 }
 

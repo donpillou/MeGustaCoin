@@ -22,7 +22,7 @@ private:
 
   virtual void paintEvent(QPaintEvent* );
 
-  void drawAxisLables(QPainter& painter, const QRect& rect, double hmin, double hmax, const QSize& priceSize);
+  void drawAxesLables(QPainter& painter, const QRect& rect, double hmin, double hmax, const QSize& priceSize);
   void drawTradePolyline(QPainter& painter, const QRect& rect, double hmin, double hmax, double lastVolumeMax);
   void drawBookPolyline(QPainter& painter, const QRect& rect, double hmin, double hmax);
 
