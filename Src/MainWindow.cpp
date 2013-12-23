@@ -210,7 +210,7 @@ void MainWindow::updateWindowTitle()
     {
       double usd = balance->availableUsd + balance->reservedUsd;
       double btc = balance->availableBtc + balance->reservedBtc;
-      title = QString("%1 / %2 - ").arg(market->formatPrice(usd), market->formatAmount(btc));
+      title = QString("%1 %2 / %3 %4 - ").arg(market->formatPrice(usd), market->getMarketCurrency(), market->formatAmount(btc), market->getCoinCurrency());
       //title = QString("%1 %2 / %3 %4 - ").arg(QLocale::system().toString(usd, 'f', 2), market->getMarketCurrency(), QLocale::system().toString(btc, 'f', 2), market->getCoinCurrency());
       //title.sprintf("%.02f %s, %.02f %s - ", usd, market->getMarketCurrency(), btc, market->getCoinCurrency());
     }

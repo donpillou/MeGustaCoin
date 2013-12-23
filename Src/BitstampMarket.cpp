@@ -346,14 +346,18 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       dataModel.bookModel.setData(date, askItems, bidItems);
       if((BitstampWorker::Request)request == BitstampWorker::Request::orderBook)
         dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved order book"));
-      //else
-        //dataModel.logModel.addMessage(LogModel::Type::information, tr("Updated order book")); // todo: remove this
+
+      if(!bidItems.isEmpty())
+        tickerData.highestBuyOrder = bidItems.back().price;
+      if(!askItems.isEmpty())
+        tickerData.lowestSellOrder = askItems.back().price;
+      emit tickerUpdated();
+
       if(orderBookUpdatesEnabled && !orderBookUpdateTimerStarted)
       {
         orderBookUpdateTimerStarted = true;
         QTimer::singleShot(orderBookUpdateRate, this, SLOT(updateOrderBook()));
       }
-
     }
     break;
   case BitstampWorker::Request::liveTrades:
@@ -378,6 +382,13 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       dataModel.tradeModel.addData(liveTrades);
       if((BitstampWorker::Request)request == BitstampWorker::Request::liveTrades)
         dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved live trades"));
+
+      if(!liveTrades.isEmpty())
+      {
+        tickerData.lastTradePrice = liveTrades.back().price;
+        emit tickerUpdated();
+      }
+
       if(liveTradeUpdatesEnabled && !liveTradeUpdateTimerStarted)
       {
         liveTradeUpdateTimerStarted = true;
