@@ -18,6 +18,14 @@ void GraphModel::addTrade(quint64 time, double price, double amount)
   else if(price > tradeSample->max)
     tradeSample->max = price;
 
+  double depths[] = {10., 20., 50., 100., 200., 500., 1000.};
+  for (int i = 0; i < (int)RegressionDepth::numOfRegressionDepths; ++i)
+  {
+    averager[i].add(time, amount, price);
+    averager[i].limitTo(depths[i]);
+    averager[i].getLine(regressionLines[i].a, regressionLines[i].b, regressionLines[i].startTime, regressionLines[i].endTime);
+  }
+
   while(!tradeSamples.isEmpty() && time - tradeSamples.front().time > 7 * 24 * 60 * 60)
     tradeSamples.pop_front();
 

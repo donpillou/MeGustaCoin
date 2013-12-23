@@ -507,7 +507,7 @@ void BitstampWorker::loadData(int request, QVariant params)
     isPublic = true;
     {
       QDateTime now = QDateTime::currentDateTime();
-      qint64 elapsed = lastRequestTime.isNull() ? 60 * 60 : lastLiveTradeUpdateTime.secsTo(now);
+      qint64 elapsed = lastLiveTradeUpdateTime.isNull() ? 60 * 60 : lastLiveTradeUpdateTime.secsTo(now);
       if(elapsed > 60 - 10)
         url = "https://www.bitstamp.net/api/transactions/";
       lastLiveTradeUpdateTime = now;

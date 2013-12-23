@@ -15,6 +15,7 @@ public:
     trades = 0x01,
     tradeVolume = 0x02,
     orderBook = 0x04,
+    regressionLines = 0x08,
     all = 0xffff,
   };
 
@@ -38,6 +39,7 @@ private:
   void drawAxesLables(QPainter& painter, const QRect& rect, double hmin, double hmax, const QSize& priceSize);
   void drawTradePolyline(QPainter& painter, const QRect& rect, double hmin, double hmax, double lastVolumeMax);
   void drawBookPolyline(QPainter& painter, const QRect& rect, double hmin, double hmax);
+  void drawRegressionLines(QPainter& painter, const QRect& rect, double hmin, double hmax);
 
   inline void addToMinMax(double price)
   {

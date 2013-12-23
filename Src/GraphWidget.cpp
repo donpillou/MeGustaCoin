@@ -13,7 +13,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   toolBar->setIconSize(QSize(16, 16));
   toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-  zoomAction = toolBar->addAction(tr("1 Hour"));
+  zoomAction = toolBar->addAction(QIcon(":/Icons/zoom.png"), tr("1 Hour"));
   //zoomAction->setEnabled(false);
   QMenu* zoomMenu = new QMenu(this);
   QActionGroup* zoomActionGroup = new QActionGroup(zoomMenu);
@@ -30,10 +30,20 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   zoomActionGroup->addAction(action);
   zoomSignalMapper->setMapping(action, 60 * 60);
   connect(action, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
+  action = zoomMenu->addAction(tr("2 Hour"));
+  action->setCheckable(true);
+  zoomActionGroup->addAction(action);
+  zoomSignalMapper->setMapping(action, 2 * 60 * 60);
+  connect(action, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
   action = zoomMenu->addAction(tr("3 Hours"));
   action->setCheckable(true);
   zoomActionGroup->addAction(action);
   zoomSignalMapper->setMapping(action, 3 * 60 * 60);
+  connect(action, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
+  action = zoomMenu->addAction(tr("6 Hours"));
+  action->setCheckable(true);
+  zoomActionGroup->addAction(action);
+  zoomSignalMapper->setMapping(action, 6 * 60 * 60);
   connect(action, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
   action = zoomMenu->addAction(tr("12 Hours"));
   action->setCheckable(true);
@@ -45,6 +55,11 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   zoomActionGroup->addAction(action);
   zoomSignalMapper->setMapping(action, 24 * 60 * 60);
   connect(action, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
+  action = zoomMenu->addAction(tr("2 Days"));
+  action->setCheckable(true);
+  zoomActionGroup->addAction(action);
+  zoomSignalMapper->setMapping(action, 2 * 24 * 60 * 60);
+  connect(action, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
   action = zoomMenu->addAction(tr("3 Days"));
   action->setCheckable(true);
   zoomActionGroup->addAction(action);
@@ -53,7 +68,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   zoomAction->setMenu(zoomMenu);  
   qobject_cast<QToolButton*>(toolBar->widgetForAction(zoomAction))->setPopupMode(QToolButton::InstantPopup);
   
-  QAction* dataAction = toolBar->addAction(tr("Data"));
+  QAction* dataAction = toolBar->addAction(QIcon(":/Icons/chart_curve.png"), tr("Data"));
   QMenu* dataMenu = new QMenu(this);
   QSignalMapper* dataSignalMapper = new QSignalMapper(dataMenu);
   connect(dataSignalMapper, SIGNAL(mapped(int)), SLOT(setEnabledData(int)));
@@ -68,6 +83,10 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   action = dataMenu->addAction(tr("Order Book"));
   action->setCheckable(true);
   dataSignalMapper->setMapping(action, (int)GraphView::Data::orderBook);
+  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  action = dataMenu->addAction(tr("Regression Lines"));
+  action->setCheckable(true);
+  dataSignalMapper->setMapping(action, (int)GraphView::Data::regressionLines);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
   dataAction->setMenu(dataMenu);
   qobject_cast<QToolButton*>(toolBar->widgetForAction(dataAction))->setPopupMode(QToolButton::InstantPopup);

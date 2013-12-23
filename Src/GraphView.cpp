@@ -71,6 +71,8 @@ void GraphView::paintEvent(QPaintEvent* event)
     drawBookPolyline(painter, plotRect, hmin, hmax);
   if(enabledData & ((int)Data::trades | (int)Data::tradeVolume) && !graphModel.tradeSamples.isEmpty())
     drawTradePolyline(painter, plotRect, hmin, hmax, lastVolumeMax);
+  if(enabledData & (int)Data::regressionLines)
+    drawRegressionLines(painter, plotRect, hmin, hmax);
 
   if((totalMin != lastTotalMin || totalMax != lastTotalMax || volumeMax != lastVolumeMax) && totalMax != 0.)
     update();
@@ -150,11 +152,13 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
   quint64 width = rect.width();
 
   QPointF* polyData = (QPointF*)alloca(rect.width() * 2 * sizeof(QPointF));
+  //QPointF* polyData2 = (QPointF*)alloca(rect.width() * sizeof(QPointF));
   QPoint* rangeData = (QPoint*)alloca(rect.width() * 2 * sizeof(QPoint));
   QPoint* volumeData = (QPoint*)alloca(rect.width() * 2* sizeof(QPoint));
 
   {
     QPointF* currentPoint = polyData;
+    //QPointF* currentRegPoint = polyData2;
     QPoint* currentRangePoint = rangeData;
     QPoint* currentVolumePoint = volumeData;
 
@@ -178,6 +182,7 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
       double currentLast = 0.;
       double lastLast = 0.;
       int lastLeftPixelX = 0;
+      //double currentReg = 0.;
 
       for(;;)
       {
@@ -192,6 +197,7 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
           currentMax = sample->max;
         currentVolume += sample->amount;
         currentLast = sample->last;
+        //currentReg = sample->weightedLeastSquare;
         ++currentEntryCount;
 
         if(++i >= count)
@@ -203,6 +209,10 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
         Q_ASSERT(currentRangePoint - rangeData < rect.width() * 2);
         if(currentEntryCount > 0)
         {
+          //currentRegPoint->setX(left + pixelX);
+          //currentRegPoint->setY(bottom - (currentReg - hmin) * height / hrange);
+          //++currentRegPoint;
+
           if (currentMax != currentMin)
           {
             currentRangePoint->setX(left + pixelX);
@@ -282,6 +292,10 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
       painter.setPen(volumePen);
       painter.drawLines(volumeData, (currentVolumePoint - volumeData) / 2);
     }
+    
+    //painter.setPen(Qt::darkCyan);
+    //painter.drawPolyline(polyData2, currentRegPoint - polyData2);
+
     if(enabledData & (int)Data::trades)
     {
       QPen rangePen(Qt::black);
@@ -360,5 +374,36 @@ void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double hm
     int color = type * 0xff / (int)GraphModel::BookSample::ComPrice::numOfComPrice;
     painter.setPen(QColor(0xff - color, 0, color));
     painter.drawPolyline(polyData, currentPoint - polyData);
+  }
+}
+
+void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax)
+{
+  double vrange = vmax - vmin;
+  quint64 hmax = time;
+  quint64 hmin = hmax - maxAge;
+  quint64 hrange = hmax - hmin;
+  quint64 width = rect.width();
+  double height = rect.height();
+
+  for(int i = 0; i < (int)GraphModel::RegressionDepth::numOfRegressionDepths; ++i)
+  {
+    const GraphModel::RegressionLine& rl = graphModel.regressionLines[i];
+    quint64 startTime = qMax(rl.startTime, hmin);
+    quint64 endTime = rl.endTime;
+    double val = rl.a - rl.b * (endTime - startTime);
+    QPointF a(rect.left() + (startTime - hmin) * width / hrange, rect.bottom() - (val -  vmin) * height / vrange);
+    QPointF b(rect.right() - (time - endTime) * width / hrange, rect.bottom() - (rl.a -  vmin) * height / vrange);
+
+    double s = (a.y() - b.y()) / (b.x() - a.x());
+    //double angle = atan2(rl.b, 1.) / (M_PI / 2);
+    //int color = angle * (0xff - 0x44);
+    //QPen pen(QColor(qMax(0x44 - color, 0), qMax(0x44 + color, 0), 0x99));
+    int color = qMin((int)(0xaa * fabs(s)), 0xaa);
+    QPen pen(s >= 0 ? QColor(0xaa - color, 0xaa, 0xaa - color) : QColor(0xaa, 0xaa - color, 0xaa - color));
+    pen.setWidth(2);
+    painter.setPen(pen);
+
+    painter.drawLine(a, b);
   }
 }

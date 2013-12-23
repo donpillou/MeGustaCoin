@@ -14,5 +14,7 @@
   <file>Icons/bullet_grey.png</file>
   <file>Icons/arrow_diag_red.png</file>
   <file>Icons/arrow_diag.png</file>
+  <file>Icons/chart_curve.png</file>
+  <file>Icons/zoom.png</file>
 </qresource>
 </RCC>
