@@ -149,30 +149,31 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
   QPoint* volumeData = (QPoint*)alloca(rect.width() * 2* sizeof(QPoint));
 
   {
-    int pixelX = 0;
     QPointF* currentPoint = polyData;
     QPoint* currentRangePoint = rangeData;
     QPoint* currentVolumePoint = volumeData;
-    quint64 currentTimeMax = vmin + vrange / rect.width();
-    double currentMin = graphModel.tradeSamples.begin()->min;
-    double currentMax = graphModel.tradeSamples.begin()->max;
-    double currentVolume = 0;
-    int currentEntryCount = 0;
-    //double currentLastMin = 0.;
-    //double currentLastMax = 0.;
-    double currentLast = 0.;
-    double lastLast = 0.;
-    int lastLeftPixelX = 0;
 
     const QList<GraphModel::TradeSample>& tradeSamples = graphModel.tradeSamples;
-    const GraphModel::TradeSample* sample;
     int i = 0, count = tradeSamples.size();
     for(; i < count; ++i) // todo: optimize this
       if(tradeSamples.at(i).time >= vmin) 
         break;
     if(i < count)
     {
-      sample = &tradeSamples.at(i);
+      const GraphModel::TradeSample* sample = &tradeSamples.at(i);
+
+      int pixelX = 0;
+      quint64 currentTimeMax = vmin + vrange / rect.width();
+      double currentMin = sample->min;
+      double currentMax = sample->max;
+      double currentVolume = 0;
+      int currentEntryCount = 0;
+      //double currentLastMin = 0.;
+      //double currentLastMax = 0.;
+      double currentLast = 0.;
+      double lastLast = 0.;
+      int lastLeftPixelX = 0;
+
       for(;;)
       {
         if(sample->time > currentTimeMax)
@@ -299,21 +300,22 @@ void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double hm
 
   for (int type = 0; type < (int)GraphModel::BookSample::ComPrice::numOfComPrice; ++type)
   {
-    int pixelX = 0;
     QPointF* currentPoint = polyData;
-    quint64 currentTimeMax = vmin + vrange / rect.width();
-    double currentVal = graphModel.bookSamples.front().comPrice[type];
-    int currentEntryCount = 0;
 
     const QList<GraphModel::BookSample>& bookSummaries = graphModel.bookSamples;
-    const GraphModel::BookSample* sample;
     int i = 0, count = bookSummaries.size();
     for(; i < count; ++i) // todo: optimize this
       if(bookSummaries.at(i).time >= vmin) 
         break;
     if(i < count)
     {
-      sample = &bookSummaries.at(i);
+      const GraphModel::BookSample* sample = &bookSummaries.at(i);
+
+      int pixelX = 0;
+      quint64 currentTimeMax = vmin + vrange / rect.width();
+      double currentVal = sample->comPrice[type];
+      int currentEntryCount = 0;
+
       for(;;)
       {
         if(sample->time > currentTimeMax)
