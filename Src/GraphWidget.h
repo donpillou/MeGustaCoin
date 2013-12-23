@@ -13,6 +13,7 @@ public:
 private slots:
   void setMarket(Market* market);
   void setZoom(int maxTime);
+  void setEnabledData(int data);
 
 private:
   Market* market;

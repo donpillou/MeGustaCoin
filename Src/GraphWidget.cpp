@@ -12,12 +12,13 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   toolBar->setStyleSheet("QToolBar { border: 0px }");
   toolBar->setIconSize(QSize(16, 16));
   toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
   zoomAction = toolBar->addAction(tr("1 Hour"));
   //zoomAction->setEnabled(false);
   QMenu* zoomMenu = new QMenu(this);
   QActionGroup* zoomActionGroup = new QActionGroup(zoomMenu);
   zoomSignalMapper = new QSignalMapper(zoomMenu);
-  connect(zoomAction, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
+  //connect(zoomAction, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
   connect(zoomSignalMapper, SIGNAL(mapped(int)), SLOT(setZoom(int)));
   QAction* action = zoomMenu->addAction(tr("10 Minutes"));
   action->setCheckable(true);
@@ -51,9 +52,26 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   connect(action, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
   zoomAction->setMenu(zoomMenu);  
   qobject_cast<QToolButton*>(toolBar->widgetForAction(zoomAction))->setPopupMode(QToolButton::InstantPopup);
-
-  connect(action, SIGNAL(triggered()), this, SLOT(refresh()));
-
+  
+  QAction* dataAction = toolBar->addAction(tr("Data"));
+  QMenu* dataMenu = new QMenu(this);
+  QSignalMapper* dataSignalMapper = new QSignalMapper(dataMenu);
+  connect(dataSignalMapper, SIGNAL(mapped(int)), SLOT(setEnabledData(int)));
+  action = dataMenu->addAction(tr("Trades"));
+  action->setCheckable(true);
+  dataSignalMapper->setMapping(action, (int)GraphView::Data::trades);
+  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  action = dataMenu->addAction(tr("Trade Volume"));
+  action->setCheckable(true);
+  dataSignalMapper->setMapping(action, (int)GraphView::Data::tradeVolume);
+  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  action = dataMenu->addAction(tr("Order Book"));
+  action->setCheckable(true);
+  dataSignalMapper->setMapping(action, (int)GraphView::Data::orderBook);
+  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  dataAction->setMenu(dataMenu);
+  qobject_cast<QToolButton*>(toolBar->widgetForAction(dataAction))->setPopupMode(QToolButton::InstantPopup);
+  
   QFrame* frame = new QFrame(this);
   frame->setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
   frame->setBackgroundRole(QPalette::Base);
@@ -77,6 +95,18 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   action = qobject_cast<QAction*>(zoomSignalMapper->mapping(settings.value("Zoom", 60 * 60).toUInt()));
   action->setChecked(true);
   zoomSignalMapper->map(action);
+  unsigned int enabledData = settings.value("EnabledData", (unsigned int)graphView->getEnabledData()).toUInt();
+  graphView->setEnabledData(enabledData);
+  for(int i = 0; i < 16; ++i)
+    if(enabledData & (1 << i))
+    {
+      QObject* obj = dataSignalMapper->mapping(1 << i);
+      if(obj)
+      {
+        action = qobject_cast<QAction*>(obj);
+        action->setChecked(true);
+      }
+    }
   settings.endGroup();
 }
 
@@ -84,6 +114,7 @@ void GraphWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("LiveGraph");
   settings.setValue("Zoom", zoom);
+  settings.setValue("EnabledData", graphView->getEnabledData());
   settings.endGroup();
 }
 
@@ -102,3 +133,13 @@ void GraphWidget::setZoom(int maxTime)
   graphView->update();
 }
 
+void GraphWidget::setEnabledData(int data)
+{
+  unsigned int enabledData = graphView->getEnabledData();
+  bool enable = (enabledData & data) == 0;
+  if(enable)
+    graphView->setEnabledData(enabledData | data);
+  else
+    graphView->setEnabledData(enabledData & ~data);
+  graphView->update();
+}

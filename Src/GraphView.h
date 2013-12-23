@@ -10,9 +10,22 @@ public:
   void setMarket(Market* market);
   void setMaxAge(int maxAge);
 
+  enum class Data
+  {
+    trades = 0x01,
+    tradeVolume = 0x02,
+    orderBook = 0x04,
+    all = 0xffff,
+  };
+
+  void setEnabledData(unsigned int data);
+  unsigned int getEnabledData() const {return enabledData;}
+
 private:
   Market* market;
   GraphModel& graphModel;
+
+  unsigned int enabledData;
 
   quint64 time;
   int maxAge;

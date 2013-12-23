@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include <cfloat>
 
-GraphView::GraphView(QWidget* parent, GraphModel& graphModel) : QWidget(parent), graphModel(graphModel), time(0), maxAge(60 * 60), totalMin(0.), totalMax(0.), volumeMax(0.)
+GraphView::GraphView(QWidget* parent, GraphModel& graphModel) : QWidget(parent), graphModel(graphModel), enabledData((unsigned int)Data::all), time(0), maxAge(60 * 60), totalMin(0.), totalMax(0.), volumeMax(0.)
 {
   connect(&graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
 }
@@ -15,6 +15,11 @@ void GraphView::setMarket(Market* market)
 void GraphView::setMaxAge(int maxAge)
 {
   this->maxAge = maxAge;
+}
+
+void GraphView::setEnabledData(unsigned int data)
+{
+  this->enabledData = data;
 }
 
 void GraphView::paintEvent(QPaintEvent* event)
@@ -62,9 +67,9 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   if(lastTotalMax != 0.)
     drawAxesLables(painter, plotRect, hmin, hmax, priceSize);
-  if(!graphModel.bookSamples.isEmpty())
+  if(enabledData & (int)Data::orderBook && !graphModel.bookSamples.isEmpty())
     drawBookPolyline(painter, plotRect, hmin, hmax);
-  if(!graphModel.tradeSamples.isEmpty())
+  if(enabledData & ((int)Data::trades | (int)Data::tradeVolume) && !graphModel.tradeSamples.isEmpty())
     drawTradePolyline(painter, plotRect, hmin, hmax, lastVolumeMax);
 
   if((totalMin != lastTotalMin || totalMax != lastTotalMax || volumeMax != lastVolumeMax) && totalMax != 0.)
@@ -271,17 +276,20 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
     Q_ASSERT(currentRangePoint - rangeData <= rect.width() * 2);
     Q_ASSERT(currentVolumePoint - volumeData <= rect.width() * 2);
 
-    QPen volumePen(Qt::darkGreen);
-    //volumePen.setWidth(2);
-    painter.setPen(volumePen);
-    painter.drawLines(volumeData, (currentVolumePoint - volumeData) / 2);
-    //painter.setPen(Qt::darkGray);
-    //painter.setPen(Qt::black);
-    QPen rangePen(Qt::black);
-    rangePen.setWidth(2);
-    painter.setPen(rangePen);
-    painter.drawPolyline(polyData, currentPoint - polyData);
-    painter.drawLines(rangeData, (currentRangePoint - rangeData) / 2);
+    if(enabledData & (int)Data::tradeVolume)
+    {
+      QPen volumePen(Qt::darkGreen);
+      painter.setPen(volumePen);
+      painter.drawLines(volumeData, (currentVolumePoint - volumeData) / 2);
+    }
+    if(enabledData & (int)Data::trades)
+    {
+      QPen rangePen(Qt::black);
+      rangePen.setWidth(2);
+      painter.setPen(rangePen);
+      painter.drawPolyline(polyData, currentPoint - polyData);
+      painter.drawLines(rangeData, (currentRangePoint - rangeData) / 2);
+    }
   }
 }
 
