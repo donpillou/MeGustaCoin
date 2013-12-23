@@ -17,14 +17,16 @@ OrderModel::~OrderModel()
 void OrderModel::setMarket(Market* market)
 {
   this->market = market;
+  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
 void OrderModel::reset()
 {
-  beginResetModel();
+  emit beginResetModel();
   market = 0;
   orders.clear();
-  endResetModel();
+  emit endResetModel();
+  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
 void OrderModel::setData(const QList<Order>& updatedOrders)
@@ -329,15 +331,15 @@ QVariant OrderModel::headerData(int section, Qt::Orientation orientation, int ro
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount");
+        return tr("Amount %1").arg(market ? market->getCoinCurrency() : "");
       case Column::price:
-        return tr("Price");
+        return tr("Price %1").arg(market ? market->getMarketCurrency() : "");
       case Column::value:
-        return tr("Value");
+        return tr("Value %1").arg(market ? market->getMarketCurrency() : "");
       case Column::state:
         return tr("Status");
       case Column::total:
-        return tr("Total");
+        return tr("Total %1").arg(market ? market->getMarketCurrency() : "");
     }
   }
   return QVariant();

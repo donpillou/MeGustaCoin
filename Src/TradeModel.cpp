@@ -14,6 +14,7 @@ TradeModel::~TradeModel()
 void TradeModel::setMarket(Market* market)
 {
   this->market = market;
+  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
 void TradeModel::reset()
@@ -23,6 +24,7 @@ void TradeModel::reset()
   trades.clear();
   ids.clear();
   endResetModel();
+  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
 void TradeModel::clearAbove(int tradeCount)
@@ -177,9 +179,9 @@ QVariant TradeModel::headerData(int section, Qt::Orientation orientation, int ro
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount");
+        return tr("Amount %1").arg(market ? market->getCoinCurrency() : "");
       case Column::price:
-        return tr("Price");
+        return tr("Price %1").arg(market ? market->getMarketCurrency() : "");
     }
   }
   return QVariant();

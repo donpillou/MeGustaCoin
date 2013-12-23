@@ -12,8 +12,8 @@ BookModel::ItemModel::~ItemModel()
 
 void BookModel::setMarket(Market* market)
 {
-  askModel.market = market;
-  bidModel.market = market;
+  askModel.setMarket(market);
+  bidModel.setMarket(market);
 }
 
 void BookModel::setData(quint64 time, const QList<Item>& askItems, const QList<Item>& bidItems)
@@ -81,17 +81,23 @@ void BookModel::setData(quint64 time, const QList<Item>& askItems, const QList<I
 
 void BookModel::reset()
 {
-  askModel.market = 0;
-  bidModel.market = 0;
   askModel.reset();
   bidModel.reset();
 }
 
+void BookModel::ItemModel::setMarket(Market* market)
+{
+  this->market = market;
+  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
+}
+
 void BookModel::ItemModel::reset()
 {
-  beginResetModel();
+  emit beginResetModel();
   items.clear();
-  endResetModel();
+  market = 0;
+  emit endResetModel();
+  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
 void BookModel::ItemModel::setData(const QList<Item>& newData)
@@ -203,9 +209,9 @@ QVariant BookModel::ItemModel::headerData(int section, Qt::Orientation orientati
     switch((Column)section)
     {
       case Column::amount:
-        return tr("Amount");
+        return tr("Amount %1").arg(market ? market->getCoinCurrency() : "");
       case Column::price:
-        return tr("Price");
+        return tr("Price %1").arg(market ? market->getMarketCurrency() : "");
     }
   }
   return QVariant();

@@ -14,14 +14,16 @@ TransactionModel::~TransactionModel()
 void TransactionModel::setMarket(Market* market)
 {
   this->market = market;
+  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
 void TransactionModel::reset()
 {
-  beginResetModel();
+  emit beginResetModel();
   market = 0;
   transactions.clear();
-  endResetModel();
+  emit endResetModel();
+  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
 void TransactionModel::setData(const QList<Transaction>& updatedTransactions)
@@ -190,15 +192,15 @@ QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, 
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount");
+        return tr("Amount %1").arg(market ? market->getCoinCurrency() : "");
       case Column::price:
-        return tr("Price");
+        return tr("Price %1").arg(market ? market->getMarketCurrency() : "");
       case Column::value:
-        return tr("Value");
+        return tr("Value %1").arg(market ? market->getMarketCurrency() : "");
       case Column::fee:
-        return tr("Fee");
+        return tr("Fee %1").arg(market ? market->getMarketCurrency() : "");
       case Column::total:
-        return tr("Total");
+        return tr("Total %1").arg(market ? market->getMarketCurrency() : "");
     }
   }
   return QVariant();

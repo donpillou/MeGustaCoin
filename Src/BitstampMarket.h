@@ -27,6 +27,8 @@ public:
   virtual double getOrderCharge(double amount, double price) const;
   virtual QString formatAmount(double amount) const;
   virtual QString formatPrice(double price) const;
+  virtual const QString& getCoinCurrency() const;
+  virtual const QString& getMarketCurrency() const;
 
 signals:
   void requestData(int request, QVariant args);

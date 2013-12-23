@@ -45,6 +45,8 @@ public:
   virtual double getOrderCharge(double amount, double price) const = 0;
   virtual QString formatAmount(double amount) const = 0;
   virtual QString formatPrice(double price) const = 0;
+  virtual const QString& getCoinCurrency() const = 0;
+  virtual const QString& getMarketCurrency() const = 0;
 
   const Balance* getBalance() const {return balance.fee == 0. ? 0 : &balance;}
   const TickerData* getTickerData() const {return tickerData.lastTradePrice == 0. ? 0 : &tickerData;}

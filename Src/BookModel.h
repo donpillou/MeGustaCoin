@@ -17,14 +17,16 @@ public:
 
   class ItemModel : public QAbstractItemModel
   {
-  //public:
-  private:
+  public:
+  //private:
     ItemModel();
     ~ItemModel();
 
     void reset();
 
     void setData(const QList<Item>& items);
+
+    void setMarket(Market* market);
 
     virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
@@ -38,7 +40,7 @@ public:
     virtual QVariant data(const QModelIndex& index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
-    friend class BookModel;
+    //friend class BookModel;
   };
 
   enum class Column

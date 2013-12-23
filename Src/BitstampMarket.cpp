@@ -152,12 +152,22 @@ double BitstampMarket::getOrderCharge(double amount, double price) const
 
 QString BitstampMarket::formatAmount(double amount) const
 {
-  return QString("%1 %2").arg(QLocale::system().toString(fabs(amount), 'f', 8), coinCurrency);
+  return QLocale::system().toString(fabs(amount), 'f', 8);
 }
 
 QString BitstampMarket::formatPrice(double price) const
 {
-  return QString("%1 %2").arg(QLocale::system().toString(price, 'f', 2), marketCurrency);
+  return QLocale::system().toString(price, 'f', 2);
+}
+
+const QString& BitstampMarket::getCoinCurrency() const
+{
+  return coinCurrency;
+}
+
+const QString& BitstampMarket::getMarketCurrency() const
+{
+  return marketCurrency;
 }
 
 void BitstampMarket::handleError(int request, const QVariant& args, const QStringList& errors)
