@@ -17,13 +17,13 @@ public:
       buy,
       sell,
     } type;
-    QString date;
+    QDateTime date;
     double amount;
     double price;
     double fee;
-    double balanceChange;
+    double total;
 
-    Transaction() : type(Type::unknown), amount(0.), price(0.), fee(0.), balanceChange(0.) {}
+    Transaction() : type(Type::unknown), amount(0.), price(0.), fee(0.), total(0.) {}
   };
 
   enum class Column
@@ -46,6 +46,8 @@ public:
   void setData(const QList<Transaction>& order);
 
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
+ 
+  const Transaction* getTransaction(const QModelIndex& index) const;
 
 private:
   QList<Transaction*> transactions;
@@ -54,6 +56,7 @@ private:
   QVariant sellStr;
   QVariant sellIcon;
   QVariant buyIcon;
+  QString dateFormat;
 
   virtual QModelIndex parent(const QModelIndex& child) const;
   virtual int rowCount(const QModelIndex& parent) const;

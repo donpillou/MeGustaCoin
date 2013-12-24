@@ -24,7 +24,7 @@ public:
   virtual void updateOrder(const QString& id, double amount, double price, double oldAmount, double oldPrice);
   virtual double getMaxSellAmout() const;
   virtual double getMaxBuyAmout(double price, double canceledAmount, double canceledPrice) const;
-  virtual double getOrderCharge(double amount, double price) const;
+  
   virtual QString formatAmount(double amount) const;
   virtual QString formatPrice(double price) const;
   virtual const QString& getCoinCurrency() const;
@@ -58,6 +58,8 @@ private:
 
   static const quint64 liveTradesUpdateRate = 1337 * 10;
   static const quint64 orderBookUpdateRate = 1000 * 30;
+
+  double getOrderCharge(double amount, double price) const;
 
 private slots:
   void handleData(int request, const QVariant& args, const QVariant& data);

@@ -4,6 +4,7 @@
 OrderModel::OrderModel() : market(0), draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), 
 canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), 
 sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
+dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat)),
 nextDraftId(0)
 {
   italicFont.setItalic(true);
@@ -260,7 +261,7 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
         return sellStr;
       }
     case Column::date:
-      return order.date;
+      return order.date.toString(dateFormat);
     case Column::amount:
       if(role == Qt::EditRole)
         return order.newAmount != 0. ? order.newAmount : order.amount;
@@ -296,8 +297,8 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
       break;
     case Column::total:
       {
-        double charge = market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price);
-        return charge > 0 ? (QString("+") + market->formatPrice(charge)) : market->formatPrice(charge);
+        //double charge = market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price);
+        return order.total > 0 ? (QString("+") + market->formatPrice(order.total)) : market->formatPrice(order.total);
       }
       //return QString(order.type == Order::Type::buy ? "+%1 %2" : "%1 %2").arg(QLocale::system().toString(market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price), 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%+.02f %s", market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price), market->getMarketCurrency());

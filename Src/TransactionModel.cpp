@@ -2,7 +2,8 @@
 #include "stdafx.h"
 
 TransactionModel::TransactionModel() : market(0), buyStr(tr("buy")), sellStr(tr("sell")),
-sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png"))
+sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
+dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
 }
 
@@ -73,6 +74,14 @@ void TransactionModel::setData(const QList<Transaction>& updatedTransactions)
   }
 }
 
+const TransactionModel::Transaction* TransactionModel::getTransaction(const QModelIndex& index) const
+{
+  int row = index.row();
+  if(row < 0 || row >= transactions.size())
+    return 0;
+  return transactions[row];
+}
+
 QModelIndex TransactionModel::index(int row, int column, const QModelIndex& parent) const
 {
   return createIndex(row, column, 0);
@@ -140,7 +149,7 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
         return sellStr;
       }
     case Column::date:
-      return transaction.date;
+      return transaction.date.toString(dateFormat);
     case Column::amount:
       return market->formatAmount(transaction.amount);
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.amount, 'f', 8), market->getCoinCurrency());
@@ -158,7 +167,7 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.fee, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%.02f %s", transaction.fee, market->getMarketCurrency());
     case Column::total:
-      return transaction.balanceChange > 0 ? (QString("+") + market->formatPrice(transaction.balanceChange)) : market->formatPrice(transaction.balanceChange);
+      return transaction.total > 0 ? (QString("+") + market->formatPrice(transaction.total)) : market->formatPrice(transaction.total);
       //return QString(transaction.balanceChange > 0 ? "+%1 %2" : "%1 %2").arg(QLocale::system().toString(transaction.balanceChange, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%+.02f %s", transaction.balanceChange, market->getMarketCurrency());
     }

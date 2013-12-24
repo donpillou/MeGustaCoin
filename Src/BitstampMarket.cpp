@@ -244,16 +244,17 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       if(type == "1")
         order.type = OrderModel::Order::Type::sell;
 
-      order.date = orderData["datetime"].toString();
-      int lastDot = order.date.lastIndexOf('.');
+      QString dateStr = orderData["datetime"].toString();
+      int lastDot = dateStr.lastIndexOf('.');
       if(lastDot >= 0)
-        order.date.resize(lastDot);
-      QDateTime date = QDateTime::fromString(order.date, "yyyy-MM-dd hh:mm:ss");
+        dateStr.resize(lastDot);
+      QDateTime date = QDateTime::fromString(dateStr, "yyyy-MM-dd hh:mm:ss");
       date.setTimeSpec(Qt::UTC);
-      order.date = date.toLocalTime().toString(QLocale::system().dateTimeFormat(QLocale::ShortFormat));
+      order.date = date.toLocalTime();
 
       order.price = orderData["price"].toDouble();
       order.amount = orderData["amount"].toDouble();
+      order.total = getOrderCharge(order.type == OrderModel::Order::Type::buy ? order.amount : -order.amount, order.price);
 
       QString draftId = args.toMap()["draftid"].toString();
       dataModel.orderModel.updateOrder(draftId, order);
@@ -401,7 +402,6 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
       QList<OrderModel::Order> orders;
       QVariantList ordersData = data.toList();
       orders.reserve(ordersData.size());
-      QString dateFormat = QLocale::system().dateTimeFormat(QLocale::ShortFormat);
       foreach(const QVariant& orderDataVar, ordersData)
       {
         QVariantMap orderData = orderDataVar.toMap();
@@ -415,13 +415,14 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
         if(type == "1")
           order.type = OrderModel::Order::Type::sell;
 
-        order.date = orderData["datetime"].toString();
-        QDateTime date = QDateTime::fromString(order.date, "yyyy-MM-dd hh:mm:ss");
+        QString dateStr = orderData["datetime"].toString();
+        QDateTime date = QDateTime::fromString(dateStr, "yyyy-MM-dd hh:mm:ss");
         date.setTimeSpec(Qt::UTC);
-        order.date = date.toLocalTime().toString(dateFormat);
+        order.date = date.toLocalTime();
 
         order.price = orderData["price"].toDouble();
         order.amount = orderData["amount"].toDouble();
+        order.total = getOrderCharge(order.type == OrderModel::Order::Type::buy ? order.amount : -order.amount, order.price);
       }
 
       dataModel.orderModel.setData(orders);
@@ -445,17 +446,17 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
         if(type != "2")
           continue;
 
-        transaction.date = transactionData["datetime"].toString();
-        QDateTime date = QDateTime::fromString(transaction.date, "yyyy-MM-dd hh:mm:ss");
+        QString dateStr = transactionData["datetime"].toString();
+        QDateTime date = QDateTime::fromString(dateStr, "yyyy-MM-dd hh:mm:ss");
         date.setTimeSpec(Qt::UTC);
-        transaction.date = date.toLocalTime().toString(dateFormat);
+        transaction.date = date.toLocalTime();
 
         double value = transactionData["usd"].toDouble();
         transaction.type = value > 0. ? TransactionModel::Transaction::Type::sell : TransactionModel::Transaction::Type::buy;
         transaction.amount = fabs(transactionData["btc"].toDouble());
         transaction.price = fabs(value) / transaction.amount;
         transaction.fee = transactionData["fee"].toDouble();
-        transaction.balanceChange = value > 0. ? (fabs(value) - transaction.fee) : -(fabs(value) + transaction.fee);
+        transaction.total = value > 0. ? (fabs(value) - transaction.fee) : -(fabs(value) + transaction.fee);
       }
 
       dataModel.transactionModel.setData(transactions);

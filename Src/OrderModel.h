@@ -19,9 +19,10 @@ public:
       buy,
       sell,
     } type;
-    QString date;
+    QDateTime date;
     double amount;
     double price;
+    double total;
     double newAmount;
     double newPrice;
     enum class State
@@ -84,6 +85,7 @@ private:
   QFont italicFont;
   QVariant sellIcon;
   QVariant buyIcon;
+  QString dateFormat;
   unsigned int nextDraftId;
 
   virtual QModelIndex parent(const QModelIndex& child) const;

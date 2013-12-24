@@ -42,7 +42,6 @@ public:
   virtual void updateOrder(const QString& id, double amount, double price, double oldAmount, double oldPrice) = 0;
   virtual double getMaxSellAmout() const = 0;
   virtual double getMaxBuyAmout(double price, double canceledAmount = 0., double canceledPrice = 0.) const = 0;
-  virtual double getOrderCharge(double amount, double price) const = 0;
   virtual QString formatAmount(double amount) const = 0;
   virtual QString formatPrice(double price) const = 0;
   virtual const QString& getCoinCurrency() const = 0;
