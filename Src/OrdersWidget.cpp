@@ -168,6 +168,7 @@ void OrdersWidget::submitOrder()
       market->createOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
     }
   }
+  updateToolBarButtons();
 }
 
 void OrdersWidget::cancelOrder()
@@ -199,6 +200,7 @@ void OrdersWidget::cancelOrder()
     orderModel.removeOrder(last.value());
     rowsToRemove.erase(last);
   }
+  updateToolBarButtons();
 }
 
 void OrdersWidget::updateOrder(const QModelIndex& index)
@@ -220,6 +222,7 @@ void OrdersWidget::updateOrder(const QModelIndex& index)
     market->updateOrder(order->id, amount, price, order->amount, order->price);
   else
     market->updateOrder(order->id, -amount, price, -order->amount, order->price);
+  updateToolBarButtons();
 }
 
 void OrdersWidget::updateToolBarButtons()
