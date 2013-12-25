@@ -197,7 +197,6 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
         if(sample->max > currentMax)
           currentMax = sample->max;
         currentVolume += sample->amount;
-        currentFirst = sample->first;
         currentLast = sample->last;
         //currentReg = sample->weightedLeastSquare;
         ++currentEntryCount;
@@ -337,6 +336,7 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
         currentMax = sample->max;
         currentEntryCount = 0;
         currentVolume = 0;
+        currentFirst = sample->first;
       }
     }
 
