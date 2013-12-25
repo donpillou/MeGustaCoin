@@ -98,7 +98,7 @@ void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin
       QPoint right(rect.right() + 4, rect.bottom() - vstep * i * height / vrange);
 
       painter.setPen(linePen);
-      painter.drawLine(QPoint(rect.left() - 4, right.y()), right);
+      painter.drawLine(QPoint(0, right.y()), right);
       painter.setPen(textPen);
       painter.drawText(QPoint(right.x() + 2, right.y() + priceSize.height() * 0.5 - 3), market->formatPrice(vmin + i * vstep));
     }
@@ -110,25 +110,48 @@ void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin
 
     double hrange = hmax - hmin;
     double width = rect.width();
-    double hstep = pow(10., ceil(log10(hrange * 50. / width)));
-    if(hstep * width / hrange >= 100.f)
+    double hstep = pow(10., ceil(log10(hrange * 35. / width)));
+    if(hstep * width / hrange >= 70.f)
       hstep *= 0.5;
-    if(hstep * width / hrange >= 100.f)
+    if(hstep * width / hrange >= 70.f)
       hstep *= 0.5;
-    if(hstep < 1.)
-      hstep = 1.;
+    if(hstep < 60.)
+      hstep = 60.;
+    else if(hstep > 60. && hstep < (5. * 60.))
+      hstep = ceil(hstep / (5. * 60.)) * (5. * 60.);
+    else if(hstep > (5. * 60.) && hstep < (15. * 60.))
+      hstep = ceil(hstep / (15. * 60.)) * (15. * 60.);
+    else if(hstep > (15. * 60.) && hstep < (30. * 60.))
+      hstep = ceil(hstep / (30. * 60.)) * (30. * 60.);
+    else if(hstep > (30. * 60.) && hstep < (60. * 60.))
+      hstep = ceil(hstep / (60. * 60.)) * (60. * 60.);
+    else if(hstep > (60. * 60.) && hstep < 2. * 60. * 60.)
+      hstep = ceil(hstep / (2. * 60. * 60.)) * (2. * 60. * 60.);
+    else if(hstep > (2. * 60. * 60.) && hstep < 3. * 60. * 60.)
+      hstep = ceil(hstep / (3. * 60. * 60.)) * (3. * 60. * 60.);
+    else if(hstep > (3. * 60. * 60.) && hstep < 6. * 60. * 60.)
+      hstep = ceil(hstep / (6. * 60. * 60.)) * (6. * 60. * 60.);
+    else if(hstep > (6 * 60. * 60.) && hstep < 12. * 60. * 60.)
+      hstep = ceil(hstep / (12. * 60. * 60.)) * (12. * 60. * 60.);
+    else if(hstep > (12. * 60. * 60.) && hstep < 24. * 60. * 60.)
+      hstep = ceil(hstep / (24. * 60. * 60.)) * (24. * 60. * 60.);
+
+    double hstart = hmax - floor(hmax / hstep) * hstep;
 
     QString timeFormat = QLocale::system().timeFormat(QLocale::ShortFormat).replace(":ss", "");
     QString formatedTime;
     QDateTime date;
-    for(int i = 0, count = (int)(hrange / hstep); i <= count; ++i)
+    for(int i = 0; ; ++i)
     {
-      QPoint bottom(rect.right() - hstep * i * width / hrange, rect.bottom() + 4);
+      QPoint bottom(rect.right() - (hstart + hstep * i) * width / hrange, rect.bottom() + 4);
+
+      if(bottom.x() < rect.left())
+        break;
 
       painter.setPen(linePen);
-      painter.drawLine(QPoint(bottom.x(), rect.top() - 4), bottom);
+      painter.drawLine(QPoint(bottom.x(), 0), bottom);
       painter.setPen(textPen);
-      date = QDateTime::fromTime_t(hmax - hstep * i);
+      date = QDateTime::fromTime_t(hmax - (hstart + hstep * i));
       //date.setTimeSpec(Qt::UTC);
       formatedTime = date.toLocalTime().time().toString(timeFormat);
       const QSize timeSize = painter.fontMetrics().size(Qt::TextSingleLine, formatedTime);
