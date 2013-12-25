@@ -396,11 +396,11 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
     QPointF b(rect.right() - (time - endTime) * width / hrange, rect.bottom() - (rl.a -  vmin) * height / vrange);
 
     double s = (a.y() - b.y()) / (b.x() - a.x());
-    //double angle = atan2(rl.b, 1.) / (M_PI / 2);
-    //int color = angle * (0xff - 0x44);
-    //QPen pen(QColor(qMax(0x44 - color, 0), qMax(0x44 + color, 0), 0x99));
+
+    //int color = qMin((int)(0xaa * fabs(s)), 0xaa);
+    //QPen pen(s >= 0 ? QColor(0xaa - color, 0xaa, 0xaa - color) : QColor(0xaa, 0xaa - color, 0xaa - color));
     int color = qMin((int)(0xaa * fabs(s)), 0xaa);
-    QPen pen(s >= 0 ? QColor(0xaa - color, 0xaa, 0xaa - color) : QColor(0xaa, 0xaa - color, 0xaa - color));
+    QPen pen(s >= 0 ? QColor(0, color, 0xaa - color) : QColor(color, 0, 0xaa - color));
     pen.setWidth(2);
     painter.setPen(pen);
 
