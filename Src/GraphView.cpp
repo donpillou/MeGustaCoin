@@ -453,12 +453,8 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
     QPointF a(rect.left() + (startTime - hmin) * width / hrange, rect.bottom() - (val -  vmin) * height / vrange);
     QPointF b(rect.right() - (time - endTime) * width / hrange, rect.bottom() - (rl.a -  vmin) * height / vrange);
 
-    double s = (a.y() - b.y()) / (b.x() - a.x());
-
-    //int color = qMin((int)(0xaa * fabs(s)), 0xaa);
-    //QPen pen(s >= 0 ? QColor(0xaa - color, 0xaa, 0xaa - color) : QColor(0xaa, 0xaa - color, 0xaa - color));
-    int color = qMin((int)(0xaa * fabs(s)), 0xaa);
-    QPen pen(s >= 0 ? QColor(0, color, 0xaa - color) : QColor(color, 0, 0xaa - color));
+    int color = qMin((int)((0xdd - 0x44) * fabs(rl.b / 0.005)), 0xdd - 0x44);
+    QPen pen(rl.b >= 0 ? QColor(0, color + 0x44, 0) : QColor(color + 0x44, 0, 0));
     pen.setWidth(2);
     painter.setPen(pen);
 
