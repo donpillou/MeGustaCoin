@@ -10,13 +10,13 @@ void GraphModel::addTrade(quint64 time, double price, double amount)
 
   tradeSample->time = time;
   tradeSample->last = price;
-  tradeSample->amount += amount;
-  if(tradeSample->min == 0.)
-    tradeSample->min = tradeSample->max = price;
+  if(tradeSample->amount == 0.)
+    tradeSample->min = tradeSample->max = tradeSample->first = price;
   else if(price < tradeSample->min)
     tradeSample->min = price;
   else if(price > tradeSample->max)
     tradeSample->max = price;
+  tradeSample->amount += amount;
 
   double depths[] = {10., 20., 50., 100., 200., 500., 1000.};
   for (int i = 0; i < (int)RegressionDepth::numOfRegressionDepths; ++i)

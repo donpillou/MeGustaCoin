@@ -12,10 +12,11 @@ public:
     quint64 time;
     double min;
     double max;
+    double first;
     double last;
     double amount;
 
-    TradeSample() : min(0), max(0), last(0), amount(0) {}
+    TradeSample() : amount(0) {}
   };
 
   class BookSample
