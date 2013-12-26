@@ -195,7 +195,7 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
   market->loadLiveTrades();
   market->loadOrderBook();
   market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
-  market->enableOrderBookUpdates(orderBookUpdatesEnabled /*|| graphUpdatesEnabled*/);
+  market->enableOrderBookUpdates(orderBookUpdatesEnabled || graphUpdatesEnabled);
 }
 
 void MainWindow::updateWindowTitle()
@@ -245,7 +245,7 @@ void MainWindow::enableOrderBookUpdates(bool enable)
   orderBookUpdatesEnabled = enable;
   if(!market)
     return;
-  market->enableOrderBookUpdates(orderBookUpdatesEnabled /*|| graphUpdatesEnabled */);
+  market->enableOrderBookUpdates(orderBookUpdatesEnabled || graphUpdatesEnabled);
 }
 
 void MainWindow::enableGraphUpdates(bool enable)
@@ -254,5 +254,5 @@ void MainWindow::enableGraphUpdates(bool enable)
   if(!market)
     return;
   market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
-  market->enableOrderBookUpdates(orderBookUpdatesEnabled /*|| graphUpdatesEnabled */);
+  market->enableOrderBookUpdates(orderBookUpdatesEnabled || graphUpdatesEnabled);
 }
