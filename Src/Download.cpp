@@ -90,7 +90,7 @@ char* Download::load(const char* url)
   if(code != 200)
   {
     //fprintf(stderr, "error: server responded with code %ld\n", code);
-    error.sprintf("Server responsed with code %d.", code);
+    error.sprintf("Server responded with code %d.", code);
     goto error;
   }
 
@@ -173,7 +173,7 @@ char* Download::loadPOST(const char* url, const char** fields, const char** valu
   if(code != 200)
   {
     //fprintf(stderr, "error: server responded with code %ld\n", code);
-    error.sprintf("Server responsed with code %d.", code);
+    error.sprintf("Server responded with code %d.", code);
     goto error;
   }
 
