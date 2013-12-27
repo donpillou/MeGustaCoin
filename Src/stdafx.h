@@ -4,29 +4,30 @@
 #include <QtGUI>
 #include <QxtCore/QxtJSON>
 
-#include "Download.h"
-#include "Sha256.h"
+#include "Tools/Download.h"
+#include "Tools/Sha256.h"
 
 class Market;
 class DataModel;
 
-#include "GraphModel.h"
-#include "OrderModel.h"
-#include "TransactionModel.h"
-#include "TradeModel.h"
-#include "BookModel.h"
-#include "LogModel.h"
-#include "DataModel.h"
+#include "Models/GraphModel.h"
+#include "Models/OrderModel.h"
+#include "Models/TransactionModel.h"
+#include "Models/TradeModel.h"
+#include "Models/BookModel.h"
+#include "Models/LogModel.h"
+#include "Models/DataModel.h"
 
-#include "Market.h"
-#include "BitstampMarket.h"
+#include "Markets/Market.h"
+#include "Markets/BitstampMarket.h"
 
-#include "OrdersWidget.h"
-#include "TransactionsWidget.h"
-#include "TradesWidget.h"
-#include "BookWidget.h"
-#include "GraphView.h"
-#include "GraphWidget.h"
-#include "LogWidget.h"
-#include "MainWindow.h"
+#include "Widgets/OrdersWidget.h"
+#include "Widgets/TransactionsWidget.h"
+#include "Widgets/TradesWidget.h"
+#include "Widgets/BookWidget.h"
+#include "Widgets/GraphView.h"
+#include "Widgets/GraphWidget.h"
+#include "Widgets/LogWidget.h"
+
 #include "LoginDialog.h"
+#include "MainWindow.h"

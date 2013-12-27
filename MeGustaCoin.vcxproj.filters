@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Markets">
+      <UniqueIdentifier>{52C37B61-2A40-8D42-0A70-BF7858AF6636}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models">
+      <UniqueIdentifier>{25AC429F-9072-293D-27A8-36EE2A148F47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tools">
+      <UniqueIdentifier>{8625E1DE-7BE1-4C39-B1D1-4DC03D822497}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Widgets">
+      <UniqueIdentifier>{FA07652C-B6A5-517C-5DFF-B407C8ECA014}</UniqueIdentifier>
+    </Filter>
     <Filter Include=".copy">
       <UniqueIdentifier>{AD269A76-186A-33DE-C895-9E96D65A2CF7}</UniqueIdentifier>
     </Filter>
@@ -12,47 +24,115 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\BitstampMarket.cpp" />
-    <ClCompile Include="Src\BookModel.cpp" />
-    <ClCompile Include="Src\BookWidget.cpp" />
-    <ClCompile Include="Src\Download.cpp" />
-    <ClCompile Include="Src\GraphModel.cpp" />
-    <ClCompile Include="Src\GraphView.cpp" />
-    <ClCompile Include="Src\GraphWidget.cpp" />
     <ClCompile Include="Src\LoginDialog.cpp" />
-    <ClCompile Include="Src\LogModel.cpp" />
-    <ClCompile Include="Src\LogWidget.cpp" />
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\MainWindow.cpp" />
-    <ClCompile Include="Src\OrderModel.cpp" />
-    <ClCompile Include="Src\OrdersWidget.cpp" />
-    <ClCompile Include="Src\Sha256.cpp" />
     <ClCompile Include="Src\stdafx.cpp" />
-    <ClCompile Include="Src\TradeModel.cpp" />
-    <ClCompile Include="Src\TradesWidget.cpp" />
-    <ClCompile Include="Src\TransactionModel.cpp" />
-    <ClCompile Include="Src\TransactionsWidget.cpp" />
-    <CustomBuild Include="Src\BitstampMarket.h" />
-    <ClInclude Include="Src\BookModel.h" />
-    <CustomBuild Include="Src\BookWidget.h" />
-    <ClInclude Include="Src\DataModel.h" />
-    <ClInclude Include="Src\Download.h" />
-    <CustomBuild Include="Src\GraphModel.h" />
-    <ClInclude Include="Src\GraphView.h" />
-    <CustomBuild Include="Src\GraphWidget.h" />
+    <ClCompile Include="Src\Markets\BitstampMarket.cpp">
+      <Filter>Markets</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Models\BookModel.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Models\GraphModel.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Models\LogModel.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Models\OrderModel.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Models\TradeModel.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Models\TransactionModel.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Tools\Download.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Tools\Sha256.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Widgets\BookWidget.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Widgets\GraphView.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Widgets\GraphWidget.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Widgets\LogWidget.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Widgets\OrdersWidget.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Widgets\TradesWidget.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Widgets\TransactionsWidget.cpp">
+      <Filter>Widgets</Filter>
+    </ClCompile>
     <CustomBuild Include="Src\LoginDialog.h" />
-    <ClInclude Include="Src\LogModel.h" />
-    <CustomBuild Include="Src\LogWidget.h" />
     <CustomBuild Include="Src\MainWindow.h" />
-    <CustomBuild Include="Src\Market.h" />
-    <CustomBuild Include="Src\OrderModel.h" />
-    <CustomBuild Include="Src\OrdersWidget.h" />
-    <ClInclude Include="Src\Sha256.h" />
     <ClInclude Include="Src\stdafx.h" />
-    <ClInclude Include="Src\TradeModel.h" />
-    <CustomBuild Include="Src\TradesWidget.h" />
-    <ClInclude Include="Src\TransactionModel.h" />
-    <CustomBuild Include="Src\TransactionsWidget.h" />
+    <CustomBuild Include="Src\Markets\BitstampMarket.h">
+      <Filter>Markets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\Markets\Market.h">
+      <Filter>Markets</Filter>
+    </CustomBuild>
+    <ClInclude Include="Src\Models\BookModel.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Models\DataModel.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <CustomBuild Include="Src\Models\GraphModel.h">
+      <Filter>Models</Filter>
+    </CustomBuild>
+    <ClInclude Include="Src\Models\LogModel.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <CustomBuild Include="Src\Models\OrderModel.h">
+      <Filter>Models</Filter>
+    </CustomBuild>
+    <ClInclude Include="Src\Models\TradeModel.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Models\TransactionModel.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Tools\Download.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Tools\Sha256.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <CustomBuild Include="Src\Widgets\BookWidget.h">
+      <Filter>Widgets</Filter>
+    </CustomBuild>
+    <ClInclude Include="Src\Widgets\GraphView.h">
+      <Filter>Widgets</Filter>
+    </ClInclude>
+    <CustomBuild Include="Src\Widgets\GraphWidget.h">
+      <Filter>Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\Widgets\LogWidget.h">
+      <Filter>Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\Widgets\OrdersWidget.h">
+      <Filter>Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\Widgets\TradesWidget.h">
+      <Filter>Widgets</Filter>
+    </CustomBuild>
+    <CustomBuild Include="Src\Widgets\TransactionsWidget.h">
+      <Filter>Widgets</Filter>
+    </CustomBuild>
     <CustomBuild Include="Build\Debug\QtCore4\QtCore4.dll">
       <Filter>.copy</Filter>
     </CustomBuild>
@@ -111,18 +191,6 @@
     <None Include="Src\Icons\zoom.png">
       <Filter>Icons</Filter>
     </None>
-    <ClCompile Include="Build\Debug\moc_MainWindow.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\Debug\moc_LoginDialog.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\Debug\moc_Market.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\Debug\moc_BitstampMarket.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
     <ClCompile Include="Build\Debug\moc_OrdersWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -147,6 +215,18 @@
     <ClCompile Include="Build\Debug\moc_GraphModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_Market.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_BitstampMarket.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_MainWindow.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_LoginDialog.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <CustomBuild Include="Build\Release\QtCore4\QtCore4.dll">
       <Filter>.copy</Filter>
     </CustomBuild>
@@ -154,18 +234,6 @@
       <Filter>.copy</Filter>
     </CustomBuild>
     <ClCompile Include="Build\Release\qrc_MeGustaCoin.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\Release\moc_MainWindow.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\Release\moc_LoginDialog.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\Release\moc_Market.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\Release\moc_BitstampMarket.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_OrdersWidget.cpp">
@@ -190,6 +258,18 @@
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_GraphModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_Market.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_BitstampMarket.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_MainWindow.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_LoginDialog.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
   </ItemGroup>
