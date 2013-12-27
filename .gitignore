@@ -1,0 +1,9 @@
+Build/
+icons/
+Marefile
+*.sdf
+*.suo
+*.vcxproj.user
+*.bat
+ipch/
+mare.exe
