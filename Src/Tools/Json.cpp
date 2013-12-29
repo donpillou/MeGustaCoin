@@ -272,7 +272,7 @@ QVariantList Json::parseList(const QByteArray& byteArray)
     return result;
   while(token.token != '\0')
   {
-    var = parseObject(data, token);
+    var = parseValue(data, token);
     if(!var.isValid())
       continue;
     result.push_back(var);
@@ -286,7 +286,7 @@ QVariant Json::parse(const QByteArray& byteArray)
   Token token;
   if(!nextToken(data, token))
     return QVariant();
-  QVariant var = parseObject(data, token);
+  QVariant var = parseValue(data, token);
   if(!var.isValid())
     return var;
   return var;
