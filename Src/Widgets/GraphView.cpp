@@ -2,13 +2,18 @@
 #include "stdafx.h"
 #include <cfloat>
 
-GraphView::GraphView(QWidget* parent, DataModel& dataModel) :
+GraphView::GraphView(QWidget* parent, PublicDataModel& publicDataModel) :
   QWidget(parent),
-  dataModel(dataModel), graphModel(dataModel.graphModel),
+  publicDataModel(publicDataModel), graphModel(publicDataModel.graphModel),
   enabledData((unsigned int)Data::all), time(0), maxAge(60 * 60),
   totalMin(0.), totalMax(0.), volumeMax(0.)
 {
   connect(&graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
+}
+
+QSize GraphView::sizeHint() const
+{
+  return QSize(400, 300);
 }
 
 void GraphView::setMaxAge(int maxAge)
@@ -58,7 +63,7 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   double hmin = floor(lastTotalMin);
   double hmax = ceil(qMax(lastTotalMax, hmin + 1.));
-  const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, dataModel.formatPrice(hmax == DBL_MAX ? 0. : hmax));
+  const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, publicDataModel.formatPrice(hmax == DBL_MAX ? 0. : hmax));
 
   QRect plotRect(10, 10, rect.width() - (10 + priceSize.width() + 8), rect.height() - 20 - priceSize.height() + 5);
   if(plotRect.width() <= 0 || plotRect.height() <= 0)
@@ -70,7 +75,7 @@ void GraphView::paintEvent(QPaintEvent* event)
     drawBookPolyline(painter, plotRect, hmin, hmax);
   if(enabledData & ((int)Data::trades | (int)Data::tradeVolume) && !graphModel.tradeSamples.isEmpty())
     drawTradePolyline(painter, plotRect, hmin, hmax, lastVolumeMax);
-  if(enabledData & (int)Data::regressionLines)
+  if(enabledData & (int)Data::regressionLines && !graphModel.tradeSamples.isEmpty())
     drawRegressionLines(painter, plotRect, hmin, hmax);
 
   if((totalMin != lastTotalMin || totalMax != lastTotalMax || volumeMax != lastVolumeMax) && totalMax != 0.)
@@ -99,7 +104,7 @@ void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin
       painter.setPen(linePen);
       painter.drawLine(QPoint(0, right.y()), right);
       painter.setPen(textPen);
-      painter.drawText(QPoint(right.x() + 2, right.y() + priceSize.height() * 0.5 - 3), dataModel.formatPrice(vmin + i * vstep));
+      painter.drawText(QPoint(right.x() + 2, right.y() + priceSize.height() * 0.5 - 3), publicDataModel.formatPrice(vmin + i * vstep));
     }
   }
 

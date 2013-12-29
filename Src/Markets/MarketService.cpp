@@ -49,10 +49,8 @@ void MarketService::logout()
 
   dataModel.orderModel.reset();
   dataModel.transactionModel.reset();
-  dataModel.tradeModel.reset();
-  dataModel.bookModel.reset();
 
-  QString marketName = dataModel.marketName;
+  QString marketName = dataModel.getMarketName();
   dataModel.setMarket(QString(), QString(), QString());
   dataModel.logModel.addMessage(LogModel::Type::information, QString("Closed %1").arg(marketName));
 }
@@ -170,7 +168,7 @@ void MarketService::processJob(Job* job)
       success = market->loadTicker(loadTickerDataJob->tickerData);
     }
     break;
-  case Job::Type::loadOrderBook:
+  /*case Job::Type::loadOrderBook:
     {
       LoadOrderBookJob* loadOrderBookJob = (LoadOrderBookJob*)job;
       success = market->loadOrderBook(loadOrderBookJob->date, loadOrderBookJob->bids, loadOrderBookJob->asks);
@@ -181,7 +179,7 @@ void MarketService::processJob(Job* job)
       LoadTradesJob* loadTradesJob = (LoadTradesJob*)job;
       success = market->loadTrades(loadTradesJob->trades);
     }
-    break;
+    break;*/
   case Job::Type::createOrder:
     {
       CreateOrderJob* createOrderJob = (CreateOrderJob*)job;
@@ -260,7 +258,7 @@ void MarketService::finalizeJobs()
           dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved ticker data"));
         }
         break;
-      case Job::Type::loadOrderBook:
+      /*case Job::Type::loadOrderBook:
         {
           const LoadOrderBookJob* loadOrderBookJob = (LoadOrderBookJob*)job;
           const QList<Market::OrderBookEntry>& bids = loadOrderBookJob->bids;
@@ -295,7 +293,7 @@ void MarketService::finalizeJobs()
             dataModel.setTickerData(tickerData);
           }
         }
-        break;
+        break;*/
       case Job::Type::loadOrders:
         {
           const LoadOrdersJob* loadOrdersJob = (LoadOrdersJob*)job;
@@ -325,12 +323,12 @@ void MarketService::finalizeJobs()
       case Job::Type::loadTickerData:
         dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load ticker data: %1").arg(job->errorMessage));
         break;
-      case Job::Type::loadOrderBook:
+      /*case Job::Type::loadOrderBook:
         dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load order book: %1").arg(job->errorMessage));
         break;
       case Job::Type::loadTrades:
         dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load live trades: %1").arg(job->errorMessage));
-        break;
+        break;*/
       case Job::Type::createOrder:
         {
           const CreateOrderJob* createOrderJob = (CreateOrderJob*)job;

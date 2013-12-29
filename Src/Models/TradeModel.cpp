@@ -1,11 +1,11 @@
 
 #include "stdafx.h"
 
-TradeModel::TradeModel(DataModel& dataModel) :
-  dataModel(dataModel), graphModel(dataModel.graphModel),
+TradeModel::TradeModel(PublicDataModel& publicDataModel) :
+  publicDataModel(publicDataModel),
   upIcon(QIcon(":/Icons/arrow_diag.png")), downIcon(QIcon(":/Icons/arrow_diag_red.png")), neutralIcon(QIcon(":/Icons/bullet_grey.png"))
 {
-  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateHeader()));
+  connect(&publicDataModel, SIGNAL(changedMarket()), this, SLOT(updateHeader()));
 }
 
 TradeModel::~TradeModel()
@@ -22,7 +22,6 @@ void TradeModel::reset()
 {
   beginResetModel();
   trades.clear();
-  ids.clear();
   endResetModel();
   emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
@@ -42,6 +41,24 @@ void TradeModel::clearAbove(int tradeCount)
   }
 }
 
+void TradeModel::addTrade(const MarketStream::Trade& newTrade)
+{
+  int oldCount = trades.size();
+  double lastPrice = trades.size() > 0 ? trades.back()->price : 0.;
+
+  beginInsertRows(QModelIndex(), oldCount, oldCount);
+  Trade* trade = new Trade(newTrade);
+  if(lastPrice != 0.)
+  {
+    if(trade->price > lastPrice)
+      trade->icon = Trade::Icon::up;
+    else if(trade->price < lastPrice)
+      trade->icon = Trade::Icon::down;
+  }
+  trades.append(trade);
+  endInsertRows();
+}
+/*
 void TradeModel::addData(const QList<Market::Trade>& newTrades)
 {
   QList<const Market::Trade*> tradesToAdd;
@@ -75,9 +92,8 @@ void TradeModel::addData(const QList<Market::Trade>& newTrades)
   }
 
   endInsertRows();
-
-
 }
+*/
 
 QModelIndex TradeModel::index(int row, int column, const QModelIndex& parent) const
 {
@@ -146,11 +162,11 @@ QVariant TradeModel::data(const QModelIndex& index, int role) const
         return QString("%1 minutes ago").arg(timeSinceTrade / 60);
       }
     case Column::amount:
-      return dataModel.formatAmount(trade.amount);
+      return publicDataModel.formatAmount(trade.amount);
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.amount, 'f', 8), market->getCoinCurrency());
       //return QString().sprintf("%.08f %s", transaction.amount, market->getCoinCurrency());
     case Column::price:
-      return dataModel.formatPrice(trade.price);
+      return publicDataModel.formatPrice(trade.price);
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.price, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%.02f %s", transaction.price, market->getMarketCurrency());
     }
@@ -179,9 +195,9 @@ QVariant TradeModel::headerData(int section, Qt::Orientation orientation, int ro
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount %1").arg(dataModel.getCoinCurrency());
+        return tr("Amount %1").arg(publicDataModel.getCoinCurrency());
       case Column::price:
-        return tr("Price %1").arg(dataModel.getMarketCurrency());
+        return tr("Price %1").arg(publicDataModel.getMarketCurrency());
     }
   }
   return QVariant();

@@ -1,15 +1,17 @@
 
 #pragma once
 
+class PublicDataModel;
+
 class TradeModel : public QAbstractItemModel
 {
   Q_OBJECT
 
 public:
-  TradeModel(DataModel& dataModel);
+  TradeModel(PublicDataModel& publicDataModel);
   ~TradeModel();
 
-  class Trade : public Market::Trade
+  class Trade : public MarketStream::Trade
   {
   public:
     enum class Icon
@@ -20,7 +22,7 @@ public:
     } icon;
 
     //Trade() : amount(0.), price(0.), icon(Icon::neutral) {}
-    Trade(const Market::Trade& trade) : Market::Trade(trade), icon(Icon::neutral) {}
+    Trade(const MarketStream::Trade& trade) : MarketStream::Trade(trade), icon(Icon::neutral) {}
   };
 
   enum class Column
@@ -34,17 +36,17 @@ public:
 
   void reset();
 
-  void addData(const QList<Market::Trade>& trades);
+  //void addData(const QList<Market::Trade>& trades);
+  void addTrade(const MarketStream::Trade& trade);
 
   void clearAbove(int tradeCount);
 
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
 private:
-  DataModel& dataModel;
-  GraphModel& graphModel;
+  PublicDataModel& publicDataModel;
   QList<Trade*> trades;
-  QHash<QString, void*> ids;
+  //QHash<QString, void*> ids;
   QVariant upIcon;
   QVariant downIcon;
   QVariant neutralIcon;

@@ -6,19 +6,17 @@ class BookWidget : public QWidget
   Q_OBJECT
 
 public:
-  BookWidget(QWidget* parent, QSettings& settings, DataModel& dataModel);
+  BookWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel);
 
   void saveState(QSettings& settings);
 
 private slots:
-  void setMarket(Market* market);
   void checkAutoScroll(const QModelIndex&, int, int);
   void autoScroll(int, int);
 
 private:
-  DataModel& dataModel;
+  PublicDataModel& publicDataModel;
   BookModel& bookModel;
-  Market* market;
   QTreeView* askView;
   QTreeView* bidView;
   bool askAutoScrollEnabled;

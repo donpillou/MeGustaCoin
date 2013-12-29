@@ -5,7 +5,7 @@ class GraphView : public QWidget
 {
 
 public:
-  GraphView(QWidget* parent, DataModel& dataModel);
+  GraphView(QWidget* parent, PublicDataModel& publicDataModel);
 
   void setMaxAge(int maxAge);
 
@@ -21,8 +21,10 @@ public:
   void setEnabledData(unsigned int data);
   unsigned int getEnabledData() const {return enabledData;}
 
+  virtual QSize sizeHint() const;
+
 private:
-  DataModel& dataModel;
+  PublicDataModel& publicDataModel;
   GraphModel& graphModel;
 
   unsigned int enabledData;

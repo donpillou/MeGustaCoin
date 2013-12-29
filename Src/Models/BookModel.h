@@ -6,12 +6,12 @@ class BookModel : public QObject
   Q_OBJECT
 
 public:
-  BookModel(DataModel& dataModel);
+  BookModel(PublicDataModel& publicDataModel);
 
   class ItemModel : public QAbstractItemModel
   {
   public:
-    ItemModel(DataModel& dataModel);
+    ItemModel(PublicDataModel& publicDataModel);
     ~ItemModel();
 
     void reset();
@@ -23,7 +23,7 @@ public:
     virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
   private:
-    DataModel& dataModel;
+    PublicDataModel& publicDataModel;
     QList<Market::OrderBookEntry*> items;
 
     virtual QModelIndex parent(const QModelIndex& child) const;
@@ -49,7 +49,7 @@ public:
   ItemModel bidModel;
 
 private:
-  DataModel& dataModel;
+  PublicDataModel& publicDataModel;
   GraphModel& graphModel;
   quint64 time;
 

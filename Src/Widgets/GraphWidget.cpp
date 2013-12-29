@@ -1,7 +1,9 @@
 
 #include "stdafx.h"
 
-GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), graphModel(dataModel.graphModel), zoom(60 * 60)
+GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel) :
+  QWidget(parent),
+  publicDataModel(publicDataModel), graphModel(publicDataModel.graphModel), zoom(60 * 60)
 {
   /*
   setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
@@ -24,6 +26,11 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   action->setCheckable(true);
   zoomActionGroup->addAction(action);
   zoomSignalMapper->setMapping(action, 10 * 60);
+  connect(action, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
+  action = zoomMenu->addAction(tr("30 Minutes"));
+  action->setCheckable(true);
+  zoomActionGroup->addAction(action);
+  zoomSignalMapper->setMapping(action, 30 * 60);
   connect(action, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
   action = zoomMenu->addAction(tr("1 Hour"));
   action->setCheckable(true);
@@ -80,10 +87,13 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   action->setCheckable(true);
   dataSignalMapper->setMapping(action, (int)GraphView::Data::tradeVolume);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
-  action = dataMenu->addAction(tr("Order Book"));
-  action->setCheckable(true);
-  dataSignalMapper->setMapping(action, (int)GraphView::Data::orderBook);
-  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  if(publicDataModel.getFeatures() & (int)MarketStream::Features::orderBook)
+  {
+    action = dataMenu->addAction(tr("Order Book"));
+    action->setCheckable(true);
+    dataSignalMapper->setMapping(action, (int)GraphView::Data::orderBook);
+    connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  }
   action = dataMenu->addAction(tr("Regression Lines"));
   action->setCheckable(true);
   dataSignalMapper->setMapping(action, (int)GraphView::Data::regressionLines);
@@ -96,7 +106,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   frame->setBackgroundRole(QPalette::Base);
   frame->setAutoFillBackground(true);
 
-  graphView = new GraphView(this, dataModel);
+  graphView = new GraphView(this, publicDataModel);
   QVBoxLayout* graphLayout = new QVBoxLayout;
   graphLayout->setMargin(0);
   graphLayout->setSpacing(0);

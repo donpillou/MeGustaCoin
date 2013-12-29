@@ -1,32 +1,32 @@
 
 #include "stdafx.h"
 
-void GraphModel::addTrade(quint64 time, double price, double amount)
+void GraphModel::addTrade(const MarketStream::Trade& trade)
 {
   TradeSample* tradeSample;
-  if(tradeSamples.isEmpty() || tradeSamples.last().time != time)
+  if(tradeSamples.isEmpty() || tradeSamples.last().time != trade.date)
     tradeSamples.append(TradeSample());
   tradeSample =  &tradeSamples.last();
 
-  tradeSample->time = time;
-  tradeSample->last = price;
+  tradeSample->time = trade.date;
+  tradeSample->last = trade.price;
   if(tradeSample->amount == 0.)
-    tradeSample->min = tradeSample->max = tradeSample->first = price;
-  else if(price < tradeSample->min)
-    tradeSample->min = price;
-  else if(price > tradeSample->max)
-    tradeSample->max = price;
-  tradeSample->amount += amount;
+    tradeSample->min = tradeSample->max = tradeSample->first = trade.price;
+  else if(trade.price < tradeSample->min)
+    tradeSample->min = trade.price;
+  else if(trade.price > tradeSample->max)
+    tradeSample->max = trade.price;
+  tradeSample->amount += trade.amount;
 
   double depths[] = {10., 20., 50., 100., 200., 500., 1000.};
   for (int i = 0; i < (int)RegressionDepth::numOfRegressionDepths; ++i)
   {
-    averager[i].add(time, amount, price);
+    averager[i].add(trade.date, trade.amount, trade.price);
     averager[i].limitTo(depths[i]);
     averager[i].getLine(regressionLines[i].a, regressionLines[i].b, regressionLines[i].startTime, regressionLines[i].endTime);
   }
 
-  while(!tradeSamples.isEmpty() && time - tradeSamples.front().time > 7 * 24 * 60 * 60)
+  while(!tradeSamples.isEmpty() && trade.date - tradeSamples.front().time > 7 * 24 * 60 * 60)
     tradeSamples.pop_front();
 
   emit dataAdded();

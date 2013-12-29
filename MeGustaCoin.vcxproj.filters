@@ -34,6 +34,12 @@
     <ClCompile Include="Src\Markets\MarketService.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Markets\MarketStreamService.cpp">
+      <Filter>Markets</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Markets\MtGoxMarketStream.cpp">
+      <Filter>Markets</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Models\BookModel.cpp">
       <Filter>Models</Filter>
     </ClCompile>
@@ -49,6 +55,9 @@
     <ClCompile Include="Src\Models\OrderModel.cpp">
       <Filter>Models</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Models\PublicDataModel.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Models\TradeModel.cpp">
       <Filter>Models</Filter>
     </ClCompile>
@@ -58,7 +67,13 @@
     <ClCompile Include="Src\Tools\Download.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Tools\Json.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Tools\Sha256.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Tools\Websocket.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
     <ClCompile Include="Src\Widgets\BookWidget.cpp">
@@ -94,6 +109,15 @@
     <CustomBuild Include="Src\Markets\MarketService.h">
       <Filter>Markets</Filter>
     </CustomBuild>
+    <ClInclude Include="Src\Markets\MarketStream.h">
+      <Filter>Markets</Filter>
+    </ClInclude>
+    <CustomBuild Include="Src\Markets\MarketStreamService.h">
+      <Filter>Markets</Filter>
+    </CustomBuild>
+    <ClInclude Include="Src\Markets\MtGoxMarketStream.h">
+      <Filter>Markets</Filter>
+    </ClInclude>
     <CustomBuild Include="Src\Models\BookModel.h">
       <Filter>Models</Filter>
     </CustomBuild>
@@ -109,6 +133,9 @@
     <CustomBuild Include="Src\Models\OrderModel.h">
       <Filter>Models</Filter>
     </CustomBuild>
+    <CustomBuild Include="Src\Models\PublicDataModel.h">
+      <Filter>Models</Filter>
+    </CustomBuild>
     <CustomBuild Include="Src\Models\TradeModel.h">
       <Filter>Models</Filter>
     </CustomBuild>
@@ -118,7 +145,13 @@
     <ClInclude Include="Src\Tools\Download.h">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Tools\Json.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
     <ClInclude Include="Src\Tools\Sha256.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Tools\Websocket.h">
       <Filter>Tools</Filter>
     </ClInclude>
     <CustomBuild Include="Src\Widgets\BookWidget.h">
@@ -221,6 +254,9 @@
     <ClCompile Include="Build\Debug\moc_DataModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_PublicDataModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_OrderModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -237,6 +273,9 @@
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\moc_MarketService.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_MarketStreamService.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\moc_MainWindow.cpp">
@@ -275,6 +314,9 @@
     <ClCompile Include="Build\Release\moc_DataModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Release\moc_PublicDataModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Release\moc_OrderModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -291,6 +333,9 @@
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_MarketService.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_MarketStreamService.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_MainWindow.cpp">

@@ -6,7 +6,7 @@ class GraphWidget : public QWidget
   Q_OBJECT
 
 public:
-  GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataModel);
+  GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel);
 
   void saveState(QSettings& settings);
 
@@ -15,7 +15,7 @@ private slots:
   void setEnabledData(int data);
 
 private:
-  DataModel& dataModel;
+  PublicDataModel& publicDataModel;
   GraphModel& graphModel;
   GraphView* graphView;
 

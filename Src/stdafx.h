@@ -6,9 +6,13 @@
 
 #include "Tools/Download.h"
 #include "Tools/Sha256.h"
+#include "Tools/Json.h"
+#include "Tools/Websocket.h"
 
 #include "Markets/Market.h"
 #include "Markets/BitstampMarket.h"
+#include "Markets/MarketStream.h"
+#include "Markets/MtGoxMarketStream.h"
 
 #include "Models/GraphModel.h"
 #include "Models/OrderModel.h"
@@ -17,8 +21,10 @@
 #include "Models/BookModel.h"
 #include "Models/LogModel.h"
 #include "Models/DataModel.h"
+#include "Models/PublicDataModel.h"
 
 #include "Markets/MarketService.h"
+#include "Markets/MarketStreamService.h"
 
 #include "Widgets/OrdersWidget.h"
 #include "Widgets/TransactionsWidget.h"

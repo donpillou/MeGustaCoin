@@ -1,15 +1,15 @@
 
 #include "stdafx.h"
 
-BookModel::BookModel(DataModel& dataModel) :
-  askModel(dataModel), bidModel(dataModel),
-  dataModel(dataModel), graphModel(dataModel.graphModel),
+BookModel::BookModel(PublicDataModel& publicDataModel) :
+  askModel(publicDataModel), bidModel(publicDataModel),
+  publicDataModel(publicDataModel), graphModel(publicDataModel.graphModel),
   time(0)
 {
-  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateHeader()));
+  connect(&publicDataModel, SIGNAL(changedMarket()), this, SLOT(updateHeader()));
 }
 
-BookModel::ItemModel::ItemModel(DataModel& dataModel) : dataModel(dataModel)
+BookModel::ItemModel::ItemModel(PublicDataModel& publicDataModel) : publicDataModel(publicDataModel)
 {
 }
 
@@ -188,9 +188,9 @@ QVariant BookModel::ItemModel::data(const QModelIndex& index, int role) const
     switch((Column)index.column())
     {
     case Column::amount:
-      return dataModel.formatAmount(item.amount);
+      return publicDataModel.formatAmount(item.amount);
     case Column::price:
-      return dataModel.formatPrice(item.price);
+      return publicDataModel.formatPrice(item.price);
     }
   }
   return QVariant();
@@ -215,9 +215,9 @@ QVariant BookModel::ItemModel::headerData(int section, Qt::Orientation orientati
     switch((Column)section)
     {
       case Column::amount:
-        return tr("Amount %1").arg(dataModel.getCoinCurrency());
+        return tr("Amount %1").arg(publicDataModel.getCoinCurrency());
       case Column::price:
-        return tr("Price %1").arg(dataModel.getMarketCurrency());
+        return tr("Price %1").arg(publicDataModel.getMarketCurrency());
     }
   }
   return QVariant();

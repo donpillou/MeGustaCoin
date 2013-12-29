@@ -2,18 +2,32 @@
 #include "stdafx.h"
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"),
-  marketService(dataModel),
-  liveTradeUpdatesEnabled(false), orderBookUpdatesEnabled(false), graphUpdatesEnabled(false)
+  marketService(dataModel)
 {
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateWindowTitle()));
   connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
   connect(&dataModel, SIGNAL(changedTickerData()), this, SLOT(updateWindowTitle()));
 
+  MarketData marketData;
+  marketData.publicDataModel = new PublicDataModel(this);
+  marketData.streamService = new MarketStreamService(this, dataModel, *marketData.publicDataModel, "MtGox/USD");
+  marketDataList.append(marketData);
+  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
+  {
+    MarketData& marketData = *i;
+    marketData.tradesWidget = new TradesWidget(this, settings, *marketData.publicDataModel);
+    if(marketData.publicDataModel->getFeatures() & (int)MarketStream::Features::orderBook)
+      marketData.bookWidget = new BookWidget(this, settings, *marketData.publicDataModel);
+    else
+      marketData.bookWidget = 0;
+    marketData.graphWidget = new GraphWidget(this, settings, *marketData.publicDataModel);
+  }
+
   ordersWidget = new OrdersWidget(this, settings, dataModel, marketService);
   transactionsWidget = new TransactionsWidget(this, settings, dataModel, marketService);
-  tradesWidget = new TradesWidget(this, settings, dataModel);
-  bookWidget = new BookWidget(this, settings, dataModel);
-  graphWidget = new GraphWidget(this, settings, dataModel);
+  //tradesWidget = new TradesWidget(this, settings, dataModel);
+  //bookWidget = new BookWidget(this, settings, dataModel);
+  //graphWidget = new GraphWidget(this, settings, dataModel);
   logWidget = new LogWidget(this, settings, dataModel.logModel);
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
@@ -34,31 +48,43 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addDockWidget(Qt::TopDockWidgetArea, ordersDockWidget);
   tabifyDockWidget(transactionsDockWidget, ordersDockWidget);
 
-  QDockWidget* graphDockWidget = new QDockWidget(tr("Live Graph"), this);
-  connect(graphDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableGraphUpdates(bool)));
-  graphDockWidget->setObjectName("LiveGraph");
-  graphDockWidget->setWidget(graphWidget);
-  addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
-  tabifyDockWidget(transactionsDockWidget, graphDockWidget);
+  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
+  {
+    MarketData& marketData = *i;
+    marketData.graphDockWidget = new QDockWidget(tr("%1 Live Graph").arg(marketData.publicDataModel->getMarketName()), this);
+    connect(marketData.graphDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableGraphUpdates(bool)));
+    marketData.graphDockWidget->setObjectName(marketData.publicDataModel->getMarketName() + "LiveGraph");
+    marketData.graphDockWidget->setWidget(marketData.graphWidget);
+    addDockWidget(Qt::TopDockWidgetArea, marketData.graphDockWidget);
+    //marketData.graphDockWidget->setFloating(true);
+    marketData.graphDockWidget->hide();
 
-  QDockWidget* bookDockWidget = new QDockWidget(tr("Order Book"), this);
-  connect(bookDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableOrderBookUpdates(bool)));
-  bookDockWidget->setObjectName("OrderBook");
-  bookDockWidget->setWidget(bookWidget);
-  addDockWidget(Qt::TopDockWidgetArea, bookDockWidget, Qt::Vertical);
-  bookDockWidget->hide();
+    if(marketData.bookWidget)
+    {
+      marketData.bookDockWidget = new QDockWidget(tr("%1 Order Book").arg(marketData.publicDataModel->getMarketName()), this);
+      connect(marketData.bookDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableOrderBookUpdates(bool)));
+      marketData.bookDockWidget->setObjectName(marketData.publicDataModel->getMarketName() + "OrderBook");
+      marketData.bookDockWidget->setWidget(marketData.bookWidget);
+      addDockWidget(Qt::TopDockWidgetArea, marketData.bookDockWidget);
+      //marketData.bookDockWidget->setFloating(true);
+      marketData.bookDockWidget->hide();
+    }
+    else
+      marketData.bookDockWidget = 0;
+
+    marketData.tradesDockWidget = new QDockWidget(tr("%1 Live Trades").arg(marketData.publicDataModel->getMarketName()), this);
+    connect(marketData.tradesDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableLiveTradesUpdates(bool)));
+    marketData.tradesDockWidget->setObjectName(marketData.publicDataModel->getMarketName() + "LiveTrades");
+    marketData.tradesDockWidget->setWidget(marketData.tradesWidget);
+    addDockWidget(Qt::TopDockWidgetArea, marketData.tradesDockWidget);
+    //marketData.tradesDockWidget->setFloating(true);
+    marketData.tradesDockWidget->hide();
+  }
 
   QDockWidget* logDockWidget = new QDockWidget(tr("Log"), this);
   logDockWidget->setObjectName("Log");
   logDockWidget->setWidget(logWidget);
   addDockWidget(Qt::TopDockWidgetArea, logDockWidget, Qt::Vertical);
-
-  QDockWidget* tradesDockWidget = new QDockWidget(tr("Live Trades"), this);
-  connect(tradesDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableLiveTradesUpdates(bool)));
-  tradesDockWidget->setObjectName("LiveTrades");
-  tradesDockWidget->setWidget(tradesWidget);
-  addDockWidget(Qt::TopDockWidgetArea, tradesDockWidget); //, Qt::Horizontal);
-  tradesDockWidget->hide();
 
   QMenuBar* menuBar = this->menuBar();
   QMenu* menu = menuBar->addMenu(tr("&Market"));
@@ -80,10 +106,29 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   menu->addSeparator();
   menu->addAction(ordersDockWidget->toggleViewAction());
   menu->addAction(transactionsDockWidget->toggleViewAction());
-  menu->addAction(tradesDockWidget->toggleViewAction());
-  menu->addAction(graphDockWidget->toggleViewAction());
-  menu->addAction(bookDockWidget->toggleViewAction());
+  //menu->addAction(tradesDockWidget->toggleViewAction());
+  //menu->addAction(graphDockWidget->toggleViewAction());
+  //menu->addAction(bookDockWidget->toggleViewAction());
   menu->addAction(logDockWidget->toggleViewAction());
+  menu->addSeparator();
+  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
+  {
+    MarketData& marketData = *i;
+    int marketLen = marketData.publicDataModel->getMarketName().length();
+    QMenu* subMenu = menu->addMenu(marketData.publicDataModel->getMarketName());
+    QAction* action = marketData.tradesDockWidget->toggleViewAction();
+    action->setText(action->text().mid(marketLen + 1));
+    subMenu->addAction(action);
+    if(marketData.bookDockWidget)
+    {
+      action = marketData.bookDockWidget->toggleViewAction();
+      action->setText(action->text().mid(marketLen + 1));
+      subMenu->addAction(action);
+    }
+    action = marketData.graphDockWidget->toggleViewAction();
+    action->setText(action->text().mid(marketLen + 1));
+    subMenu->addAction(action);
+  }
 
   menu = menuBar->addMenu(tr("&Help"));
   connect(menu->addAction(tr("&About...")), SIGNAL(triggered()), this, SLOT(about()));
@@ -112,6 +157,21 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 MainWindow::~MainWindow()
 {
   logout();
+
+  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
+  {
+    MarketData& marketData = *i;
+
+    delete marketData.tradesWidget;
+    delete marketData.tradesDockWidget;
+    delete marketData.bookWidget;
+    delete marketData.bookDockWidget;
+    delete marketData.graphWidget;
+    delete marketData.graphDockWidget;
+
+    delete marketData.streamService;
+    delete marketData.publicDataModel;
+  }
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -122,9 +182,14 @@ void MainWindow::closeEvent(QCloseEvent* event)
   settings.setValue("WindowState", saveState());
   ordersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
-  tradesWidget->saveState(settings);
-  bookWidget->saveState(settings);
-  graphWidget->saveState(settings);
+  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
+  {
+    MarketData& marketData = *i;
+    marketData.graphWidget->saveState(settings);
+    marketData.tradesWidget->saveState(settings);
+    if(marketData.bookWidget)
+      marketData.bookWidget->saveState(settings);
+  }
   logWidget->saveState(settings);
 
   QMainWindow::closeEvent(event);
@@ -183,7 +248,7 @@ void MainWindow::updateWindowTitle()
     double btc = balance.availableBtc + balance.reservedBtc;
     if(usd != 0. || btc != 0. || balance.fee != 0.)
       title = QString("%1 %2 / %3 %4 - ").arg(dataModel.formatPrice(usd), dataModel.getMarketCurrency(), dataModel.formatAmount(btc), dataModel.getCoinCurrency());
-    title += dataModel.marketName;
+    title += dataModel.getMarketName();
     const Market::TickerData& tickerData = dataModel.getTickerData();
     if(tickerData.lastTradePrice != 0.)
       title += QString(" - %1 / %2 bid / %3 ask").arg(dataModel.formatPrice(tickerData.lastTradePrice), dataModel.formatPrice(tickerData.highestBuyOrder), dataModel.formatPrice(tickerData.lowestSellOrder));
@@ -198,29 +263,81 @@ void MainWindow::about()
 
 void MainWindow::enableLiveTradesUpdates(bool enable)
 {
-  liveTradeUpdatesEnabled = enable;
-  if(!marketService.isReady())
+  QObject* sender = this->sender();
+  MarketData* marketData = 0;
+  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
+    if(i->tradesDockWidget == sender)
+    {
+      marketData = &*i;
+      break;
+    }
+  Q_ASSERT(marketData);
+
+  int enabledWidgets = marketData->enabledWidgets;
+  if(enable)
+    enabledWidgets |= (int)MarketData::EnabledWidgets::trades;
+  else
+    enabledWidgets &= ~(int)MarketData::EnabledWidgets::trades;
+
+  if(enabledWidgets == marketData->enabledWidgets)
     return;
-  // todo
-  //market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
-  
+
+  if(enabledWidgets != 0)
+    marketData->streamService->subscribe();
+  else
+    marketData->streamService->unsubscribe();
 }
 
 void MainWindow::enableOrderBookUpdates(bool enable)
 {
-  orderBookUpdatesEnabled = enable;
-  if(!marketService.isReady())
+  QObject* sender = this->sender();
+  MarketData* marketData = 0;
+  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
+    if(i->bookDockWidget == sender)
+    {
+      marketData = &*i;
+      break;
+    }
+  Q_ASSERT(marketData);
+
+  int enabledWidgets = marketData->enabledWidgets;
+  if(enable)
+    enabledWidgets |= (int)MarketData::EnabledWidgets::book;
+  else
+    enabledWidgets &= ~(int)MarketData::EnabledWidgets::book;
+
+  if(enabledWidgets == marketData->enabledWidgets)
     return;
-  // todo
-  // market->enableOrderBookUpdates(orderBookUpdatesEnabled || graphUpdatesEnabled);
+
+  if(enabledWidgets != 0)
+    marketData->streamService->subscribe();
+  else
+    marketData->streamService->unsubscribe();
 }
 
 void MainWindow::enableGraphUpdates(bool enable)
 {
-  graphUpdatesEnabled = enable;
-  if(!marketService.isReady())
+  QObject* sender = this->sender();
+  MarketData* marketData = 0;
+  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
+    if(i->graphDockWidget == sender)
+    {
+      marketData = &*i;
+      break;
+    }
+  Q_ASSERT(marketData);
+
+  int enabledWidgets = marketData->enabledWidgets;
+  if(enable)
+    enabledWidgets |= (int)MarketData::EnabledWidgets::graph;
+  else
+    enabledWidgets &= ~(int)MarketData::EnabledWidgets::graph;
+
+  if(enabledWidgets == marketData->enabledWidgets)
     return;
-  // todo
-  //market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
-  //market->enableOrderBookUpdates(orderBookUpdatesEnabled || graphUpdatesEnabled);
+
+  if(enabledWidgets != 0)
+    marketData->streamService->subscribe();
+  else
+    marketData->streamService->unsubscribe();
 }

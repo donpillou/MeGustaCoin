@@ -14,17 +14,39 @@ private:
 
   OrdersWidget* ordersWidget;
   TransactionsWidget* transactionsWidget;
-  TradesWidget* tradesWidget;
-  BookWidget* bookWidget;
-  GraphWidget* graphWidget;
+  //TradesWidget* tradesWidget;
+  //BookWidget* bookWidget;
+  //GraphWidget* graphWidget;
   LogWidget* logWidget;
 
   DataModel dataModel;
   MarketService marketService;
 
-  bool liveTradeUpdatesEnabled;
-  bool orderBookUpdatesEnabled;
-  bool graphUpdatesEnabled;
+  struct MarketData
+  {
+    MarketStreamService* streamService;
+    PublicDataModel* publicDataModel;
+
+    TradesWidget* tradesWidget;
+    QDockWidget* tradesDockWidget;
+    BookWidget* bookWidget;
+    QDockWidget* bookDockWidget;
+    GraphWidget* graphWidget;
+    QDockWidget* graphDockWidget;
+
+    enum class EnabledWidgets
+    {
+      trades = 0x01,
+      book = 0x02,
+      graph = 0x04,
+    };
+
+    int enabledWidgets;
+
+    MarketData() : enabledWidgets(0) {}
+  };
+
+  QList<MarketData> marketDataList;
 
   void open(const QString& market, const QString& userName, const QString& key, const QString& secret);
 

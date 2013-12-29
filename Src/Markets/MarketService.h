@@ -21,7 +21,7 @@ public:
   void loadTicker();
   void loadTransactions();
   //void loadLiveTrades();
-  void loadOrderBook();
+  //void loadOrderBook();
   //void enableLiveTradeUpdates(bool enable);
   //void enableOrderBookUpdates(bool enable);
   void createOrder(const QString& draftId, double amount, double price);
@@ -44,8 +44,8 @@ private:
       loadOrders,
       loadBalance,
       loadTickerData,
-      loadOrderBook,
-      loadTrades,
+      //loadOrderBook,
+      //loadTrades,
       createOrder,
       cancelOrder,
       updateOrder,
@@ -89,8 +89,8 @@ private:
 
     LoadTickerDataJob() : Job(Type::loadTickerData) {}
   };
-
-  class LoadOrderBookJob : public Job
+  
+  /*class LoadOrderBookJob : public Job
   {
   public:
     quint64 date;
@@ -98,7 +98,7 @@ private:
     QList<Market::OrderBookEntry> asks;
 
     LoadOrderBookJob() : Job(Type::loadOrderBook) {}
-  };
+  };*/
 
   class CreateOrderJob : public Job
   {
@@ -125,13 +125,13 @@ private:
     CancelOrderJob() : Job(Type::cancelOrder) {}
   };
 
-  class LoadTradesJob : public Job
+  /*class LoadTradesJob : public Job
   {
   public:
     QList<Market::Trade> trades;
 
     LoadTradesJob() : Job(Type::loadTrades) {}
-  };
+  };*/
 
   class JobQueue
   {

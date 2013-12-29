@@ -1,7 +1,10 @@
 
 #include "stdafx.h"
 
-BookWidget::BookWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), bookModel(dataModel.bookModel), market(0), askAutoScrollEnabled(false), bidAutoScrollEnabled(false)
+BookWidget::BookWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel) :
+  QWidget(parent),
+  publicDataModel(publicDataModel), bookModel(publicDataModel.bookModel),
+  askAutoScrollEnabled(false), bidAutoScrollEnabled(false)
 {
   connect(&bookModel.askModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
   connect(&bookModel.bidModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
@@ -17,11 +20,23 @@ BookWidget::BookWidget(QWidget* parent, QSettings& settings, DataModel& dataMode
   askView->setAlternatingRowColors(true);
   bidView->setAlternatingRowColors(true);
 
-  QHBoxLayout* layout = new QHBoxLayout;
-  layout->setMargin(0);
-  layout->setSpacing(0);
-  layout->addWidget(bidView);
-  layout->addWidget(askView);
+  class MyLayout : public QHBoxLayout
+  {
+  public:
+    MyLayout(QTreeView* bidView, QTreeView* askView) : bidView(bidView), askView(askView)
+    {
+      setMargin(0);
+      setSpacing(0);
+      addWidget(bidView);
+      addWidget(askView);
+    }
+    virtual QSize sizeHint() const {return bidView->sizeHint();}
+  private:
+    QTreeView* bidView;
+    QTreeView* askView;
+  };
+
+  QHBoxLayout* layout = new MyLayout(bidView, askView);
   setLayout(layout);
 
   QHeaderView* askHeaderView = askView->header();
@@ -42,11 +57,6 @@ void BookWidget::saveState(QSettings& settings)
 {
   settings.setValue("BookAskHeaderState", askView->header()->saveState());
   settings.setValue("BookBidHeaderState", bidView->header()->saveState());
-}
-
-void BookWidget::setMarket(Market* market)
-{
-  this->market = market;
 }
 
 void BookWidget::checkAutoScroll(const QModelIndex& index, int, int)

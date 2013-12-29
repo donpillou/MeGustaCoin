@@ -189,7 +189,7 @@ public:
   QList<BookSample> bookSamples;
   RegressionLine regressionLines[(int)RegressionDepth::numOfRegressionDepths];
 
-  void addTrade(quint64 time, double price, double amount);
+  void addTrade(const MarketStream::Trade& trade);
   void addBookSample(const BookSample& bookSummary);
 
 signals:
