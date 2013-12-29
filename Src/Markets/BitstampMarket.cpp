@@ -582,7 +582,7 @@ bool BitstampMarket::request(const char* url, bool isPublic, const QVariantMap& 
     result = cancelData;
   }
   else
-    result = QxtJSON::parse(dlData);
+    result = Json::parse(dlData);
 
   if(result.toMap().contains("error"))
   {

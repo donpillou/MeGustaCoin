@@ -24,13 +24,8 @@ void BitstampMarketStream::loop(Callback& callback)
         break;
 
       // send subscribe command
-      QVariantMap subscribeMessage;
-      subscribeMessage["event"] = "pusher:subscribe";
-      QVariantMap subscribeMessageData;
-      subscribeMessageData["channel"] = "live_trades";
-      subscribeMessage["data"] = subscribeMessageData;
-      QString message = QxtJSON::stringify(subscribeMessage);
-      if(!websocket.send(message.toUtf8()))
+      QByteArray message("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"live_trades\"}}");
+      if(!websocket.send(message))
         continue;
       if(canceled)
         break;

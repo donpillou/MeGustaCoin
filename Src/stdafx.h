@@ -2,7 +2,6 @@
 #pragma once
 
 #include <QtGUI>
-#include <QxtCore/QxtJSON>
 
 #include "Tools/Download.h"
 #include "Tools/Sha256.h"

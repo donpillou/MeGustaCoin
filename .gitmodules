@@ -1,6 +1,3 @@
-[submodule "Ext/libqxt"]
-	path = Ext/libqxt
-	url = https://bitbucket.org/libqxt/libqxt.git
 [submodule "Ext/curl"]
 	path = Ext/curl
 	url = https://github.com/bagder/curl.git
