@@ -8,6 +8,8 @@ MarketStreamService::MarketStreamService(QObject* parent, DataModel& dataModel, 
   int features = 0;
   if(marketName == "MtGox/USD")
     features = (int)MarketStream::Features::trades;
+  else if(marketName == "Bitstamp/USD")
+    features = (int)MarketStream::Features::trades;
 
   publicDataModel.setMarket(marketName, features);
 }
@@ -24,8 +26,8 @@ void MarketStreamService::subscribe()
 
   if(marketName == "MtGox/USD")
     marketStream = new MtGoxMarketStream();
-  //else if(marketName == "Bitstamp/USD")
-    //marketStream = new BitstampMarketStream();
+  else if(marketName == "Bitstamp/USD")
+    marketStream = new BitstampMarketStream();
   if(!marketStream)
     return;
 

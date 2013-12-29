@@ -68,7 +68,7 @@ void Websocket::close()
   easywsclient::WebSocket::pointer ws = (easywsclient::WebSocket::pointer)data;
   ws->close();
   delete ws;
-  ws = 0;
+  data = 0;
 }
 
 bool Websocket::isConnected()

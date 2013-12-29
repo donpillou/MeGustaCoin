@@ -16,7 +16,7 @@ static bool nextToken(const char*& data, Token& token)
   switch(token.token)
   {
   case '\0':
-    return false;
+    return true;
   case '{':
   case '}':
   case '[':
@@ -203,14 +203,14 @@ static QVariant parseObject(const char*& data, Token& token)
     if(!nextToken(data, token))
       return QVariant();
     object[key] = parseValue(data, token);
-    if(token.token != ',')
+    if(token.token == '}')
       break;
+    if(token.token != ',')
+      return QVariant();
     if(!nextToken(data, token))
       return QVariant();
   } 
-  if(token.token != '}')
-    return QVariant();
-  if(!nextToken(data, token))
+  if(!nextToken(data, token)) // skip }
     return QVariant();
   return object;
 }
@@ -227,14 +227,14 @@ static QVariant parseArray(const char*& data, Token& token)
   {
     var = parseValue(data, token);
     list.push_back(var);
-    if(token.token != ',')
+    if(token.token == ']')
       break;
+    if(token.token != ',')
+      return QVariant();
     if(!nextToken(data, token))
       return QVariant();
   }
-  if(token.token != ']')
-    return QVariant();
-  if(!nextToken(data, token))
+  if(!nextToken(data, token)) // skip ]
     return QVariant();
   return list;
 }
@@ -262,7 +262,7 @@ static QVariant parseValue(const char*& data, Token& token)
   return QVariant();
 }
 
-QVariantList Json::parse(const QByteArray& byteArray)
+QVariantList Json::parseList(const QByteArray& byteArray)
 {
   QVariantList result;
   const char* data = byteArray.constData();
@@ -270,11 +270,20 @@ QVariantList Json::parse(const QByteArray& byteArray)
   QVariant var;
   if(!nextToken(data, token))
     return result;
-  while(token.token == '{')
+  while(token.token != '\0')
   {
     var = parseObject(data, token);
     if(var.isValid())
       result.push_back(var);
   }
   return result;
+}
+
+QVariant Json::parse(const QByteArray& byteArray)
+{
+  const char* data = byteArray.constData();
+  Token token;
+  if(!nextToken(data, token))
+    return QVariant();
+  return parseObject(data, token);
 }

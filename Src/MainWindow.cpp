@@ -12,6 +12,9 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   marketData.publicDataModel = new PublicDataModel(this);
   marketData.streamService = new MarketStreamService(this, dataModel, *marketData.publicDataModel, "MtGox/USD");
   marketDataList.append(marketData);
+  marketData.publicDataModel = new PublicDataModel(this);
+  marketData.streamService = new MarketStreamService(this, dataModel, *marketData.publicDataModel, "Bitstamp/USD");
+  marketDataList.append(marketData);
   for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
   {
     MarketData& marketData = *i;

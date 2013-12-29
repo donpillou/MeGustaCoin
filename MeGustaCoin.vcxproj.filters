@@ -31,6 +31,9 @@
     <ClCompile Include="Src\Markets\BitstampMarket.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Markets\BitstampMarketStream.cpp">
+      <Filter>Markets</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Markets\MarketService.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
@@ -101,6 +104,9 @@
     <CustomBuild Include="Src\MainWindow.h" />
     <ClInclude Include="Src\stdafx.h" />
     <ClInclude Include="Src\Markets\BitstampMarket.h">
+      <Filter>Markets</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Markets\BitstampMarketStream.h">
       <Filter>Markets</Filter>
     </ClInclude>
     <ClInclude Include="Src\Markets\Market.h">

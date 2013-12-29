@@ -13,9 +13,9 @@ void MtGoxMarketStream::loop(Callback& callback)
     if(!websocket.isConnected())
     {
       websocket.close();
-      if(!websocket.connect("ws://websocket.mtgox.com:80/mtgox?Currency=USD "))
+      if(!websocket.connect("ws://websocket.mtgox.com:80/mtgox?Currency=USD"))
       {
-        callback.error("Could not connect to websocket.mtgox.com.");
+        callback.error("Could not connect to MtGox' streaming API.");
         sleep(10 * 1000);
         continue;
       }
@@ -25,7 +25,7 @@ void MtGoxMarketStream::loop(Callback& callback)
       // appearantly i don't need this
       //if(!websocket.send())
       //  continue;
-      //if(!canceled)
+      //if(canceled)
       //  break;
     }
 
@@ -38,7 +38,7 @@ void MtGoxMarketStream::loop(Callback& callback)
     if(buffer.isEmpty())
       continue;
 
-    QVariantList data = Json::parse(buffer);
+    QVariantList data = Json::parseList(buffer);
 
     foreach(const QVariant& var, data)
     {
