@@ -63,8 +63,10 @@ void BookWidget::checkAutoScroll(const QModelIndex& index, int, int)
 {
   QScrollBar* askScrollBar = askView->verticalScrollBar();
   QScrollBar* bidScrollBar = bidView->verticalScrollBar();
-  askAutoScrollEnabled = askScrollBar->value() == askScrollBar->maximum();
-  bidAutoScrollEnabled = bidScrollBar->value() == bidScrollBar->maximum();
+  if(askScrollBar->value() == askScrollBar->maximum())
+    askAutoScrollEnabled = true;
+  if(bidScrollBar->value() == bidScrollBar->maximum())
+    bidAutoScrollEnabled = true;
 }
 
 void BookWidget::autoScroll(int, int)
@@ -73,10 +75,12 @@ void BookWidget::autoScroll(int, int)
   {
     QScrollBar* scrollBar = askView->verticalScrollBar();
     scrollBar->setValue(scrollBar->maximum());
+    askAutoScrollEnabled = false;
   }
   if(bidAutoScrollEnabled)
   {
     QScrollBar* scrollBar = bidView->verticalScrollBar();
     scrollBar->setValue(scrollBar->maximum());
+    bidAutoScrollEnabled = false;
   }
 }

@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
 
-LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) : QWidget(parent), logModel(logModel), autoScrollEnabled(true)
+LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) : QWidget(parent),
+  logModel(logModel), autoScrollEnabled(true)
 {
   connect(&logModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
 
@@ -33,7 +34,8 @@ void LogWidget::saveState(QSettings& settings)
 void LogWidget::checkAutoScroll(const QModelIndex& index, int, int)
 {
   QScrollBar* scrollBar = logView->verticalScrollBar();
-  autoScrollEnabled = scrollBar->value() == scrollBar->maximum();
+  if(scrollBar->value() == scrollBar->maximum())
+    autoScrollEnabled = true;
 }
 
 void LogWidget::autoScroll(int, int)
@@ -42,4 +44,5 @@ void LogWidget::autoScroll(int, int)
     return;
   QScrollBar* scrollBar = logView->verticalScrollBar();
   scrollBar->setValue(scrollBar->maximum());
+  autoScrollEnabled = false;
 }
