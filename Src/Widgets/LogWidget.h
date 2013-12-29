@@ -11,7 +11,6 @@ public:
   void saveState(QSettings& settings);
 
 private slots:
-  void setMarket(Market* market);
   void checkAutoScroll(const QModelIndex&, int, int);
   void autoScroll(int, int);
 

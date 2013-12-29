@@ -5,9 +5,8 @@ class GraphView : public QWidget
 {
 
 public:
-  GraphView(QWidget* parent, GraphModel& graphModel);
+  GraphView(QWidget* parent, DataModel& dataModel);
 
-  void setMarket(Market* market);
   void setMaxAge(int maxAge);
 
   enum class Data
@@ -23,7 +22,7 @@ public:
   unsigned int getEnabledData() const {return enabledData;}
 
 private:
-  Market* market;
+  DataModel& dataModel;
   GraphModel& graphModel;
 
   unsigned int enabledData;

@@ -1,12 +1,15 @@
 
 #include "stdafx.h"
 
-OrderModel::OrderModel() : market(0), draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), 
-canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), 
-sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
-dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat)),
-nextDraftId(0)
+OrderModel::OrderModel(DataModel& dataModel) :
+  dataModel(dataModel),
+  draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), 
+  sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
+  dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat)),
+  nextDraftId(0)
 {
+  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateHeader()));
+
   italicFont.setItalic(true);
 }
 
@@ -15,31 +18,29 @@ OrderModel::~OrderModel()
   qDeleteAll(orders);
 }
 
-void OrderModel::setMarket(Market* market)
+void OrderModel::updateHeader()
 {
-  this->market = market;
   emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
 void OrderModel::reset()
 {
   emit beginResetModel();
-  market = 0;
   orders.clear();
   emit endResetModel();
   emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
-void OrderModel::setData(const QList<Order>& updatedOrders)
+void OrderModel::setData(const QList<Market::Order>& updatedOrders)
 {
-  QHash<QString, const Order*> openOrders;
-  foreach(const Order& order, updatedOrders)
+  QHash<QString, const Market::Order*> openOrders;
+  foreach(const Market::Order& order, updatedOrders)
     openOrders.insert(order.id, &order);
 
   for(int i = 0, count = orders.size(); i < count; ++i)
   {
     Order* order = orders[i];
-    QHash<QString, const Order*>::iterator openIt = openOrders.find(order->id);
+    QHash<QString, const Market::Order*>::iterator openIt = openOrders.find(order->id);
     if(order->state == Order::State::open && openIt == openOrders.end())
     {
       order->state = Order::State::closed;
@@ -50,7 +51,8 @@ void OrderModel::setData(const QList<Order>& updatedOrders)
     }
     if(openIt != openOrders.end())
     {
-      *order = *openIt.value();
+      const Market::Order& updatedOrder = *openIt.value();
+      *order = updatedOrder;
       emit dataChanged(createIndex(i, (int)Column::first, 0), createIndex(i, (int)Column::last, 0));
       openOrders.erase(openIt);
       continue;
@@ -62,13 +64,13 @@ void OrderModel::setData(const QList<Order>& updatedOrders)
     int oldOrderCount = orders.size();
     beginInsertRows(QModelIndex(), oldOrderCount, oldOrderCount + openOrders.size() - 1);
 
-    foreach(const Order& order, updatedOrders)
+    foreach(const Market::Order& newOrder, updatedOrders)
     {
-      if(openOrders.contains(order.id))
+      if(openOrders.contains(newOrder.id))
       {
-        Order* newOrder = new Order;
-        *newOrder = order;
-        orders.append(newOrder);
+        Order* order = new Order;
+        *order = newOrder;
+        orders.append(order);
       }
     }
 
@@ -76,7 +78,7 @@ void OrderModel::setData(const QList<Order>& updatedOrders)
   }
 }
 
-void OrderModel::updateOrder(const QString& id, const Order& newOrder)
+void OrderModel::updateOrder(const QString& id, const Market::Order& newOrder)
 {
   for(int i = 0, count = orders.size(); i < count; ++i)
   {
@@ -141,6 +143,25 @@ int OrderModel::addOrder(Order::Type type, double price)
   return orderCount;
 }
 
+const OrderModel::Order* OrderModel::getOrder(const QString& id) const
+{
+  for(int i = 0, count = orders.size(); i < count; ++i)
+  {
+    Order* order = orders[i];
+    if(order->id == id)
+      return order;
+  }
+  return 0;
+}
+
+const OrderModel::Order* OrderModel::getOrder(const QModelIndex& index) const
+{
+  int row = index.row();
+  if(row < 0 || row >= orders.size())
+    return 0;
+  return orders[row];
+}
+
 void OrderModel::removeOrder(const QModelIndex& index)
 {
   int row = index.row();
@@ -150,14 +171,6 @@ void OrderModel::removeOrder(const QModelIndex& index)
   delete orders[row];
   orders.removeAt(row);
   endRemoveRows();
-}
-
-const OrderModel::Order* OrderModel::getOrder(const QModelIndex& index) const
-{
-  int row = index.row();
-  if(row < 0 || row >= orders.size())
-    return 0;
-  return orders[row];
 }
 
 QModelIndex OrderModel::index(int row, int column, const QModelIndex& parent) const
@@ -260,22 +273,23 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
       case Order::Type::sell:
         return sellStr;
       }
+      break;
     case Column::date:
       return order.date.toString(dateFormat);
     case Column::amount:
       if(role == Qt::EditRole)
         return order.newAmount != 0. ? order.newAmount : order.amount;
-      return market->formatAmount(order.amount);
+      return dataModel.formatAmount(order.amount);
       //return QString("%1 %2").arg(QLocale::system().toString(order.amount, 'f', 8), market->getCoinCurrency());
       //return QString().sprintf("%.08f %s", order.amount, market->getCoinCurrency());
     case Column::price:
       if(role == Qt::EditRole)
         return order.newPrice != 0. ? order.newPrice : order.price;
-      return market->formatPrice(order.price);
+      return dataModel.formatPrice(order.price);
       //return QString("%1 %2").arg(QLocale::system().toString(order.price, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%.02f %s", order.price, market->getMarketCurrency());
     case Column::value:
-      return market->formatPrice(order.amount * order.price);
+      return dataModel.formatPrice(order.amount * order.price);
       //return QString("%1 %2").arg(QLocale::system().toString(order.amount * order.price, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%.02f %s", order.amount * order.price, market->getMarketCurrency());
     case Column::state:
@@ -298,7 +312,7 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
     case Column::total:
       {
         //double charge = market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price);
-        return order.total > 0 ? (QString("+") + market->formatPrice(order.total)) : market->formatPrice(order.total);
+        return order.total > 0 ? (QString("+") + dataModel.formatPrice(order.total)) : dataModel.formatPrice(order.total);
       }
       //return QString(order.type == Order::Type::buy ? "+%1 %2" : "%1 %2").arg(QLocale::system().toString(market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price), 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%+.02f %s", market->getOrderCharge(order.type == Order::Type::buy ? order.amount : -order.amount, order.price), market->getMarketCurrency());
@@ -332,15 +346,15 @@ QVariant OrderModel::headerData(int section, Qt::Orientation orientation, int ro
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount %1").arg(market ? market->getCoinCurrency() : "");
+        return tr("Amount %1").arg(dataModel.getCoinCurrency());
       case Column::price:
-        return tr("Price %1").arg(market ? market->getMarketCurrency() : "");
+        return tr("Price %1").arg(dataModel.getMarketCurrency());
       case Column::value:
-        return tr("Value %1").arg(market ? market->getMarketCurrency() : "");
+        return tr("Value %1").arg(dataModel.getMarketCurrency());
       case Column::state:
         return tr("Status");
       case Column::total:
-        return tr("Total %1").arg(market ? market->getMarketCurrency() : "");
+        return tr("Total %1").arg(dataModel.getMarketCurrency());
     }
   }
   return QVariant();

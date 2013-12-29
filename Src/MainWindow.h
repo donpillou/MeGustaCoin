@@ -9,9 +9,6 @@ public:
   MainWindow();
   ~MainWindow();
 
-signals:
-  void marketChanged(Market* market);
-
 private:
   QSettings settings;
 
@@ -23,9 +20,7 @@ private:
   LogWidget* logWidget;
 
   DataModel dataModel;
-  Market* market;
-  QString marketName;
-  QString userName;
+  MarketService marketService;
 
   bool liveTradeUpdatesEnabled;
   bool orderBookUpdatesEnabled;

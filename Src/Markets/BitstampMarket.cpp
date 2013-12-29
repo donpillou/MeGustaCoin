@@ -1,128 +1,246 @@
 
 #include "stdafx.h"
 
-BitstampMarket::BitstampMarket(DataModel& dataModel, const QString& userName, const QString& key, const QString& secret) : Market(dataModel), userName(userName), key(key), secret(secret),
-liveTradeUpdatesEnabled(false), liveTradeUpdateTimerStarted(false),
-orderBookUpdatesEnabled(false), orderBookUpdateTimerStarted(false)
-{
-  marketCurrency = tr("USD");
-  coinCurrency = tr("BTC");
+BitstampMarket::BitstampMarket(const QString& userName, const QString& key, const QString& secret) :
+  marketCurrency(QObject::tr("USD")), coinCurrency(QObject::tr("BTC")),
+  userName(userName), key(key), secret(secret),
+  balanceLoaded(false), lastNonce(0) {}
 
-  worker = new BitstampWorker(*this);
-  worker->moveToThread(&thread);
-  connect(this, SIGNAL(requestData(int, QVariant)), worker, SLOT(loadData(int, QVariant)), Qt::QueuedConnection);
-  connect(worker, SIGNAL(dataLoaded(int, const QVariant&, const QVariant&)), this, SLOT(handleData(int, const QVariant&, const QVariant&)), Qt::BlockingQueuedConnection);
-  connect(worker, SIGNAL(error(int, const QVariant&, const QStringList&)), this, SLOT(handleError(int, const QVariant&, const QStringList&)), Qt::BlockingQueuedConnection);
-  thread.start();
+bool BitstampMarket::loadBalanceAndFee()
+{
+  if(balanceLoaded)
+    return true;
+  Market::Balance balance;
+  if(!loadBalance(balance))
+    return false;
+  return true;
 }
 
-BitstampMarket::~BitstampMarket()
+bool BitstampMarket::createOrder(double amount, double price, Market::Order& order)
 {
-  QEventLoop loop;
-  connect(&thread, SIGNAL(finished()), &loop, SLOT(quit()));
-  thread.quit();
-  loop.exec();
-  thread.wait();
-  delete worker;
-}
+  if(!loadBalanceAndFee())
+    return false;
 
-void BitstampMarket::loadOrders()
-{
-  emit requestData((int)BitstampWorker::Request::openOrders, QVariant());
-}
-
-void BitstampMarket::loadBalance()
-{
-  emit requestData((int)BitstampWorker::Request::balance, QVariant());
-}
-
-void BitstampMarket::loadTicker()
-{
-  emit requestData((int)BitstampWorker::Request::ticker, QVariant());
-}
-
-void BitstampMarket::loadTransactions()
-{
-  emit requestData((int)BitstampWorker::Request::transactions, QVariant());
-}
-
-void BitstampMarket::loadLiveTrades()
-{
-  lastLiveTradesLoad = QDateTime::currentDateTime();
-  emit requestData((int)BitstampWorker::Request::liveTrades, QVariant());
-}
-
-void BitstampMarket::loadOrderBook()
-{
-  lastOrderBookLoad = QDateTime::currentDateTime();
-  emit requestData((int)BitstampWorker::Request::orderBook, QVariant());
-}
-
-void BitstampMarket::enableLiveTradeUpdates(bool enable)
-{
-  if(enable == liveTradeUpdatesEnabled)
-    return;
-  liveTradeUpdatesEnabled = enable;
-  if(enable && !liveTradeUpdateTimerStarted)
-  {
-    liveTradeUpdateTimerStarted = true;
-    qint64 timer = QDateTime::currentDateTime().msecsTo(lastLiveTradesLoad.addMSecs(liveTradesUpdateRate));
-    QTimer::singleShot(qMax(0LL, timer), this, SLOT(updateLiveTrades()));
-  }
-}
-
-void BitstampMarket::enableOrderBookUpdates(bool enable)
-{
-  if(enable == orderBookUpdatesEnabled)
-    return;
-  orderBookUpdatesEnabled = enable;
-  if(enable && !orderBookUpdateTimerStarted)
-  {
-    orderBookUpdateTimerStarted = true;
-    qint64 timer = QDateTime::currentDateTime().msecsTo(lastOrderBookLoad.addMSecs(orderBookUpdateRate));
-    QTimer::singleShot(qMax(0LL, timer), this, SLOT(updateOrderBook()));
-  }
-}
-
-void BitstampMarket::createOrder(const QString& draftId, double amount, double price)
-{
-  const char* format = amount > 0. ? "Submitting buy order (%1 @ %2)..." : "Submitting sell order (%1 @ %2)...";
-  dataModel.logModel.addMessage(LogModel::Type::information, QString(format).arg(formatAmount(amount), formatPrice(price)));
-  dataModel.orderModel.setOrderState(draftId, OrderModel::Order::State::submitting);
+  double maxAmount = fabs(amount > 0. ? getMaxBuyAmout(price) : getMaxSellAmout());
+  if(fabs(amount) > maxAmount)
+    amount = copysign(maxAmount, amount);
 
   QVariantMap args;
-  args["draftid"] = draftId;
   args["amount"] = fabs(amount);
   args["price"] = price;
-  BitstampWorker::Request request = amount > 0. ? BitstampWorker::Request::buy : BitstampWorker::Request::sell;
-  emit requestData((int)request, args);
+
+  const char* url = amount > 0. ? "https://www.bitstamp.net/api/buy/" : "https://www.bitstamp.net/api/sell/";
+  VariantBugWorkaround result;
+  if(!request(url, false, args, result))
+    return false;
+
+  QVariantMap orderData = result.toMap();
+
+  order.id = orderData["id"].toString();
+  QString type = orderData["type"].toString();
+  if(type != "0" && type != "1")
+  {
+    error = "Received invalid response.";
+    return false;
+  }
+
+  bool buy = type == "0";
+
+  QString dateStr = orderData["datetime"].toString();
+  int lastDot = dateStr.lastIndexOf('.');
+  if(lastDot >= 0)
+    dateStr.resize(lastDot);
+  QDateTime date = QDateTime::fromString(dateStr, "yyyy-MM-dd hh:mm:ss");
+  date.setTimeSpec(Qt::UTC);
+  order.date = date.toTime_t();
+
+  order.price = orderData["price"].toDouble();
+  order.amount = fabs(orderData["amount"].toDouble());
+  if(!buy)
+    order.amount = -order.amount;
+  order.total = getOrderCharge(buy ? order.amount : -order.amount, order.price);
+  balanceLoaded = false;
+  return true;
 }
 
-void BitstampMarket::cancelOrder(const QString& id, double oldAmount, double oldPrice)
+bool BitstampMarket::cancelOrder(const QString& id)
 {
-  const char* format = oldAmount > 0. ? "Canceling buy order (%1 @ %2)..." : "Canceling sell order (%1 @ %2)...";
-  dataModel.logModel.addMessage(LogModel::Type::information, QString(format).arg(formatAmount(oldAmount), formatPrice(oldPrice)));
-  dataModel.orderModel.setOrderState(id, OrderModel::Order::State::canceling);
-
   QVariantMap args;
   args["id"] = id;
-  emit requestData((int)BitstampWorker::Request::cancel, args);
+  VariantBugWorkaround result;
+  if(!request("https://www.bitstamp.net/api/cancel_order/", false, args, result))
+    return false;
+  balanceLoaded = false;
+  return true;
 }
 
-void BitstampMarket::updateOrder(const QString& id, double amount, double price, double oldAmount, double oldPrice)
+bool BitstampMarket::loadOrders(QList<Order>& orders)
 {
-  const char* format = oldAmount > 0. ? "Canceling buy order (%1 @ %2)..." : "Canceling sell order (%1 @ %2)...";
-  dataModel.logModel.addMessage(LogModel::Type::information, QString(format).arg(formatAmount(oldAmount), formatPrice(oldPrice)));
-  dataModel.orderModel.setOrderState(id, OrderModel::Order::State::canceling);
+  if(!loadBalanceAndFee())
+    return false;
 
-  QVariantMap args;
-  args["id"] = id;
-  args["updating"] = true;
-  args["draftid"] = id;
-  args["amount"] = fabs(amount);
-  args["price"] = price;
-  args["sell"] = !(amount > 0.);
-  emit requestData((int)BitstampWorker::Request::cancel, args);
+  VariantBugWorkaround result;
+  if(!request("https://www.bitstamp.net/api/open_orders/", false, QVariantMap(), result))
+    return false;
+
+  QVariantList ordersData = result.toList();
+  orders.reserve(ordersData.size());
+  foreach(const QVariant& orderDataVar, ordersData)
+  {
+    QVariantMap orderData = orderDataVar.toMap();
+    orders.append(Market::Order());
+    Market::Order& order = orders.back();
+    
+    order.id = orderData["id"].toString();
+    QString type = orderData["type"].toString();
+    if(type != "0" && type != "1")
+      continue;
+    bool buy = type == "0";
+
+    QString dateStr = orderData["datetime"].toString();
+    QDateTime date = QDateTime::fromString(dateStr, "yyyy-MM-dd hh:mm:ss");
+    date.setTimeSpec(Qt::UTC);
+    order.date = date.toTime_t();
+
+    order.price = orderData["price"].toDouble();
+    order.amount = fabs(orderData["amount"].toDouble());
+    if(!buy)
+      order.amount = -order.amount;
+    order.total = getOrderCharge(buy ? order.amount : -order.amount, order.price);
+  }
+  return true;
+}
+
+bool BitstampMarket::loadBalance(Balance& balance)
+{
+  VariantBugWorkaround result;
+  if(!request("https://www.bitstamp.net/api/balance/", false, QVariantMap(), result))
+    return false;
+
+  QVariantMap balanceData = result.toMap();
+  balance.reservedUsd = balanceData["usd_reserved"].toDouble();
+  balance.reservedBtc = balanceData["btc_reserved"].toDouble();
+  balance.availableUsd = balanceData["usd_available"].toDouble();
+  balance.availableBtc = balanceData["btc_available"].toDouble();
+  balance.fee =  balanceData["fee"].toDouble() * 0.01;
+  this->balance = balance;
+  this->balanceLoaded = true;
+  return true;
+}
+
+bool BitstampMarket::loadTransactions(QList<Transaction>& transactions)
+{
+  VariantBugWorkaround result;
+  if(!request("https://www.bitstamp.net/api/user_transactions/", false, QVariantMap(), result))
+    return false;
+
+  QVariantList transactionData = result.toList();
+  transactions.reserve(transactionData.size());
+  foreach(const QVariant& transactionDataVar, transactionData)
+  {
+    QVariantMap transactionData = transactionDataVar.toMap();
+    transactions.append(Market::Transaction());
+    Market::Transaction& transaction = transactions.back();
+    
+    transaction.id = transactionData["id"].toString();
+    QString type = transactionData["type"].toString();
+    if(type != "2")
+      continue;
+
+    QString dateStr = transactionData["datetime"].toString();
+    QDateTime date = QDateTime::fromString(dateStr, "yyyy-MM-dd hh:mm:ss");
+    date.setTimeSpec(Qt::UTC);
+    transaction.date = date.toTime_t();
+    transaction.fee = transactionData["fee"].toDouble();
+
+    double value = transactionData["usd"].toDouble();
+    bool buy = value < 0.;
+    transaction.total = buy ? -(fabs(value) + transaction.fee) : (fabs(value) - transaction.fee);
+    transaction.amount = fabs(transactionData["btc"].toDouble());
+    if(!buy)
+      transaction.amount = -transaction.amount;
+    transaction.price = fabs(value) / fabs(transaction.amount);
+  }
+
+  return true;
+}
+
+bool BitstampMarket::loadTicker(TickerData& tickerData)
+{
+  VariantBugWorkaround result;
+  if(!request("https://www.bitstamp.net/api/ticker/", true, QVariantMap(), result))
+    return false;
+
+  QVariantMap tickerDataVar = result.toMap();
+  tickerData.lastTradePrice = tickerDataVar["last"].toDouble();
+  tickerData.highestBuyOrder = tickerDataVar["bid"].toDouble();
+  tickerData.lowestSellOrder = tickerDataVar["ask"].toDouble();
+  return true;
+}
+
+bool BitstampMarket::loadTrades(QList<Trade>& trades)
+{
+  const char* url = "https://www.bitstamp.net/api/transactions/?time=minute";
+  {
+    QDateTime now = QDateTime::currentDateTime();
+    qint64 elapsed = lastLiveTradeUpdateTime.isNull() ? 60 * 60 : lastLiveTradeUpdateTime.secsTo(now);
+    if(elapsed > 60 - 10)
+      url = "https://www.bitstamp.net/api/transactions/";
+    lastLiveTradeUpdateTime = now;
+  }
+
+  VariantBugWorkaround result;
+  if(!request(url, true, QVariantMap(), result))
+    return false;
+
+  QVariantList tradesData = result.toList();
+  trades.reserve(tradesData.size());
+  foreach(const QVariant& tradeDataVar, tradesData)
+  {
+    QVariantMap tradeData = tradeDataVar.toMap();
+
+    trades.prepend(Market::Trade());
+    Market::Trade& trade = trades.front();
+
+    trade.id = tradeData["tid"].toString();
+    trade.date = tradeData["date"].toULongLong();
+    trade.price = tradeData["price"].toDouble();
+    trade.amount = tradeData["amount"].toDouble();
+  }
+
+  return true;
+}
+
+bool BitstampMarket::loadOrderBook(quint64& date, QList<OrderBookEntry>& bids, QList<OrderBookEntry>& asks)
+{
+  VariantBugWorkaround result;
+  if(!request("https://www.bitstamp.net/api/order_book/", true, QVariantMap(), result))
+    return false;
+
+  QVariantMap orderBookData = result.toMap();
+  date = orderBookData["timestamp"].toULongLong();
+  QVariantList askData = orderBookData["asks"].toList();
+  QVariantList bidData = orderBookData["bids"].toList();
+  asks.reserve(askData.size());
+  QVariantList dataList;
+  for(int i = askData.size() - 1; i >= 0; --i)
+  {
+    asks.append(Market::OrderBookEntry());
+    Market::OrderBookEntry& item = asks.back();
+    dataList = askData[i].toList();
+    item.price = dataList[0].toDouble();
+    item.amount = dataList[1].toDouble();
+  }
+  bids.reserve(bidData.size());
+  for(int i = bidData.size() - 1; i >= 0; --i)
+  {
+    bids.append(Market::OrderBookEntry());
+    Market::OrderBookEntry& item = bids.back();
+    dataList = bidData[i].toList();
+    item.price = dataList[0].toDouble();
+    item.amount = dataList[1].toDouble();
+  }
+  return true;
 }
 
 double BitstampMarket::getMaxSellAmout() const
@@ -130,11 +248,11 @@ double BitstampMarket::getMaxSellAmout() const
   return balance.availableBtc;
 }
 
-double BitstampMarket::getMaxBuyAmout(double price, double canceledAmount, double canceledPrice) const
+double BitstampMarket::getMaxBuyAmout(double price) const
 {
   double fee = balance.fee; // e.g. 0.0044
   double availableUsd = balance.availableUsd;
-  double additionalAvailableUsd = floor(canceledAmount * canceledPrice * (1. + fee) * 100.) / 100.;
+  double additionalAvailableUsd = 0.; //floor(canceledAmount * canceledPrice * (1. + fee) * 100.) / 100.;
   double usdAmount = availableUsd + additionalAvailableUsd;
   double result = floor(((100. / ( 100. + (fee * 100.))) * usdAmount) * 100.) / 100.;
   result /= price;
@@ -149,84 +267,7 @@ double BitstampMarket::getOrderCharge(double amount, double price) const
   else // buy order
     return floor(amount * price * (1. + balance.fee) * -100.) / 100.;
 }
-
-QString BitstampMarket::formatAmount(double amount) const
-{
-  return QLocale::system().toString(fabs(amount), 'f', 8);
-}
-
-QString BitstampMarket::formatPrice(double price) const
-{
-  return QLocale::system().toString(price, 'f', 2);
-}
-
-const QString& BitstampMarket::getCoinCurrency() const
-{
-  return coinCurrency;
-}
-
-const QString& BitstampMarket::getMarketCurrency() const
-{
-  return marketCurrency;
-}
-
-void BitstampMarket::handleError(int request, const QVariant& args, const QStringList& errors)
-{
-  switch((BitstampWorker::Request)request)
-  {
-  case BitstampWorker::Request::openOrders:
-    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load orders:"));
-    break;
-  case BitstampWorker::Request::balance:
-    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load balance:"));
-    break;
-  case BitstampWorker::Request::ticker:
-    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load ticker data:"));
-    break;
-  case BitstampWorker::Request::orderBook:
-  case BitstampWorker::Request::orderBookUpdate:
-    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load order book:"));
-    if(orderBookUpdatesEnabled && !orderBookUpdateTimerStarted)
-    {
-      orderBookUpdateTimerStarted = true;
-      QTimer::singleShot(orderBookUpdateRate, this, SLOT(updateOrderBook()));
-    }
-    break;
-  case BitstampWorker::Request::liveTrades:
-  case BitstampWorker::Request::liveTradesUpdate:
-    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load live trades:"));
-    if(liveTradeUpdatesEnabled && !liveTradeUpdateTimerStarted)
-    {
-      liveTradeUpdateTimerStarted = true;
-      QTimer::singleShot(liveTradesUpdateRate, this, SLOT(updateLiveTrades()));
-    }
-    break;
-  case BitstampWorker::Request::buy:
-  case BitstampWorker::Request::sell:
-    {
-      if((BitstampWorker::Request)request == BitstampWorker::Request::buy)
-        dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not submit buy order:"));
-      else
-        dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not submit sell order:"));
-      QString draftId = args.toMap()["draftid"].toString();
-      dataModel.orderModel.setOrderState(draftId, OrderModel::Order::State::draft);
-    }
-    break;
-  case BitstampWorker::Request::cancel:
-    {
-      dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not cancel order:"));
-      QString id = args.toMap()["id"].toString();
-      dataModel.orderModel.setOrderState(id, OrderModel::Order::State::open);
-    }
-    break;
-  case BitstampWorker::Request::transactions:
-    dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load transactions:"));
-    break;
-  }
-  foreach(const QString& error, errors)
-    dataModel.logModel.addMessage(LogModel::Type::error, error);
-}
-
+/*
 void BitstampMarket::handleData(int request, const QVariant& args, const QVariant& data)
 {
   switch((BitstampWorker::Request)request)
@@ -459,13 +500,12 @@ void BitstampMarket::handleData(int request, const QVariant& args, const QVarian
         transaction.total = value > 0. ? (fabs(value) - transaction.fee) : -(fabs(value) + transaction.fee);
       }
 
-      dataModel.transactionModel.setData(transactions);
-      dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved transactions"));
     }
     break;
   }
 }
-
+*/
+/*
 void BitstampMarket::updateLiveTrades()
 {
   liveTradeUpdateTimerStarted = false;
@@ -477,64 +517,10 @@ void BitstampMarket::updateOrderBook()
   orderBookUpdateTimerStarted = false;
   emit requestData((int)BitstampWorker::Request::orderBookUpdate, QVariant());
 }
-
-BitstampWorker::BitstampWorker(const BitstampMarket& market) : market(market), lastNonce(QDateTime::currentDateTime().toTime_t()) {}
-
-void BitstampWorker::loadData(int request, QVariant params)
+*/
+bool BitstampMarket::request(const char* url, bool isPublic, const QVariantMap& params, QVariant& result)
 {
   avoidSpamming();
-
-  const char* url = 0;
-  bool isPublic = false;
-  switch((Request)request)
-  {
-  case Request::openOrders:
-    url = "https://www.bitstamp.net/api/open_orders/";
-    break;
-  case Request::balance:
-    url = "https://www.bitstamp.net/api/balance/";
-    break;
-  case Request::ticker:
-    url = "https://www.bitstamp.net/api/ticker/";
-    isPublic = true;
-    break;
-  case Request::liveTrades:
-    url = "https://www.bitstamp.net/api/transactions/";
-    isPublic = true;
-    lastLiveTradeUpdateTime = QDateTime::currentDateTime();
-    break;
-  case Request::liveTradesUpdate:
-    url = "https://www.bitstamp.net/api/transactions/?time=minute";
-    isPublic = true;
-    {
-      QDateTime now = QDateTime::currentDateTime();
-      qint64 elapsed = lastLiveTradeUpdateTime.isNull() ? 60 * 60 : lastLiveTradeUpdateTime.secsTo(now);
-      if(elapsed > 60 - 10)
-        url = "https://www.bitstamp.net/api/transactions/";
-      lastLiveTradeUpdateTime = now;
-    }
-    break;
-  case Request::buy:
-    url = "https://www.bitstamp.net/api/buy/";
-    break;
-  case Request::sell:
-    url = "https://www.bitstamp.net/api/sell/";
-    break;
-  case Request::cancel:
-    url = "https://www.bitstamp.net/api/cancel_order/";
-    break;
-  case Request::transactions:
-    url = "https://www.bitstamp.net/api/user_transactions/";
-    break;
-  case Request::orderBook:
-  case Request::orderBookUpdate:
-    url = "https://www.bitstamp.net/api/order_book/";
-    isPublic = true;
-    break;
-  default:
-    Q_ASSERT(false);
-    return;
-  }
 
   Download dl;
   char* dlData;
@@ -542,17 +528,15 @@ void BitstampWorker::loadData(int request, QVariant params)
   {
     if(!(dlData = dl.load(url)))
     {
-      QStringList errors;
-      errors.push_back(dl.getErrorString());
-      emit error(request, params, errors);
-      return;
+      error = dl.getErrorString();
+      return false;
     }
   }
   else
   {
-    QByteArray clientId(market.userName.toUtf8());
-    QByteArray key(market.key.toUtf8());
-    QByteArray secret(market.secret.toUtf8());
+    QByteArray clientId(this->userName.toUtf8());
+    QByteArray key(this->key.toUtf8());
+    QByteArray secret(this->secret.toUtf8());
 
     quint64 newNonce = QDateTime::currentDateTime().toTime_t();
     if(newNonce <= lastNonce)
@@ -571,40 +555,36 @@ void BitstampWorker::loadData(int request, QVariant params)
     fields[i] = "key"; values[i++] = key.data();
     fields[i] = "signature"; values[i++] = signature.data();
     fields[i] = "nonce"; values[i++] = nonce.data();
-    if((Request)request == Request::buy || (Request)request == Request::sell)
+
+    QList<QByteArray> buffers;
+    for(QVariantMap::const_iterator j = params.begin(), end = params.end(); j != end; ++j, ++i)
     {
-      amount = params.toMap()["amount"].toString().toAscii();
-      price = params.toMap()["price"].toString().toAscii();
-      fields[i] = "amount"; values[i++] = amount.data();
-      fields[i] = "price"; values[i++] = price.data();
-    }
-    if((Request)request == Request::cancel)
-    {
-      id = params.toMap()["id"].toString().toAscii();
-      fields[i] = "id"; values[i++] = id.data();
+      Q_ASSERT(i < sizeof(fields) / sizeof(*fields));
+      buffers.append(j.key().toUtf8());
+      fields[i] = buffers.back().constData();
+      buffers.append(j.value().toString().toUtf8());
+      values[i] = buffers.back().constData();
     }
 
     if(!(dlData = dl.loadPOST(url, fields, values, i)))
     {
-      QStringList errors;
-      errors.push_back(dl.getErrorString());
-      emit error(request, params, errors);
-      return;
+      error = dl.getErrorString();
+      return false;
     }
   }
 
-  QVariant data;
-  if((Request)request == Request::cancel)
+  if(strcmp(url, "https://www.bitstamp.net/api/cancel_order/") == 0) // does not return JSON
   {
+    QString answer(dlData);
     QVariantMap cancelData;
-    cancelData["success"] = QString(dlData) != "true";
-    data = cancelData;
+    if(answer != "true")
+      cancelData["error"] = answer;
+    result = cancelData;
   }
   else
-    data = QxtJSON::parse(dlData);
+    result = QxtJSON::parse(dlData);
 
-  QVariantMap dataMap = data.toMap();
-  if(!dataMap["error"].isNull())
+  if(result.toMap().contains("error"))
   {
     QStringList errors;
     struct ErrorStringCollector
@@ -633,17 +613,39 @@ void BitstampWorker::loadData(int request, QVariant params)
         }
       }
     };
-    ErrorStringCollector::collect(data, errors);
-    emit error(request, params, errors);
+    ErrorStringCollector::collect(result, errors);
+    error = errors.join(" ");
+    return false;
   }
   else
-    dataLoaded(request, params, data);
+    return true;
+}
 
-  // something is wrong with qt, the QVariant destructor crashes when it tries to free a variant list.
-  // so, lets prevent the destructor from doing so:
+void BitstampMarket::avoidSpamming()
+{
+  const qint64 queryDelay = 1337LL;
+  QDateTime now = QDateTime::currentDateTime();
+  qint64 elapsed = lastRequestTime.isNull() ? queryDelay : lastRequestTime.msecsTo(now);
+  if(elapsed < queryDelay)
+  {
+    QMutex mutex;
+    QWaitCondition condition;
+    condition.wait(&mutex, queryDelay - elapsed); // wait without processing messages while waiting
+    lastRequestTime = now;
+    lastRequestTime  = lastRequestTime.addMSecs(queryDelay - elapsed);
+  }
+  else
+    lastRequestTime = now;
+  // TODO: allow more than 1 request per second but limit requests to 600 per 10 minutes
+}
+
+BitstampMarket::VariantBugWorkaround::~VariantBugWorkaround()
+{
+  // Something is wrong with Qt. The QVariant destructor crashes when it tries to free a variant list.
+  // So, lets prevent the destructor from doing so:
   struct VariantListDestructorBugfix
   {
-    static void findLists(QVariant var, QList<QVariantList>& lists)
+    static void findLists(const QVariant& var, QList<QVariantList>& lists)
     {
       switch(var.type())
       {
@@ -666,23 +668,6 @@ void BitstampWorker::loadData(int request, QVariant params)
     }
   };
   QList<QVariantList> lists;
-  VariantListDestructorBugfix::findLists(data, lists);
-  data.clear();
-}
-
-void BitstampWorker::avoidSpamming()
-{
-  const qint64 queryDelay = 1337LL;
-  QDateTime now = QDateTime::currentDateTime();
-  qint64 elapsed = lastRequestTime.isNull() ? queryDelay : lastRequestTime.msecsTo(now);
-  if(elapsed < queryDelay)
-  {
-    QMutex mutex;
-    QWaitCondition condition;
-    condition.wait(&mutex, queryDelay - elapsed); // wait without processing messages while waiting
-    lastRequestTime = now;
-    lastRequestTime  = lastRequestTime.addMSecs(queryDelay - elapsed);
-  }
-  else
-    lastRequestTime = now;
+  VariantListDestructorBugfix::findLists(*this, lists);
+  this->clear();
 }

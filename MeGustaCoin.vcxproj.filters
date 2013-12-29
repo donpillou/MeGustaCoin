@@ -31,7 +31,13 @@
     <ClCompile Include="Src\Markets\BitstampMarket.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Markets\MarketService.cpp">
+      <Filter>Markets</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Models\BookModel.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Models\DataModel.cpp">
       <Filter>Models</Filter>
     </ClCompile>
     <ClCompile Include="Src\Models\GraphModel.cpp">
@@ -79,18 +85,21 @@
     <CustomBuild Include="Src\LoginDialog.h" />
     <CustomBuild Include="Src\MainWindow.h" />
     <ClInclude Include="Src\stdafx.h" />
-    <CustomBuild Include="Src\Markets\BitstampMarket.h">
+    <ClInclude Include="Src\Markets\BitstampMarket.h">
+      <Filter>Markets</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Markets\Market.h">
+      <Filter>Markets</Filter>
+    </ClInclude>
+    <CustomBuild Include="Src\Markets\MarketService.h">
       <Filter>Markets</Filter>
     </CustomBuild>
-    <CustomBuild Include="Src\Markets\Market.h">
-      <Filter>Markets</Filter>
+    <CustomBuild Include="Src\Models\BookModel.h">
+      <Filter>Models</Filter>
     </CustomBuild>
-    <ClInclude Include="Src\Models\BookModel.h">
+    <CustomBuild Include="Src\Models\DataModel.h">
       <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Models\DataModel.h">
-      <Filter>Models</Filter>
-    </ClInclude>
+    </CustomBuild>
     <CustomBuild Include="Src\Models\GraphModel.h">
       <Filter>Models</Filter>
     </CustomBuild>
@@ -100,12 +109,12 @@
     <CustomBuild Include="Src\Models\OrderModel.h">
       <Filter>Models</Filter>
     </CustomBuild>
-    <ClInclude Include="Src\Models\TradeModel.h">
+    <CustomBuild Include="Src\Models\TradeModel.h">
       <Filter>Models</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Models\TransactionModel.h">
+    </CustomBuild>
+    <CustomBuild Include="Src\Models\TransactionModel.h">
       <Filter>Models</Filter>
-    </ClInclude>
+    </CustomBuild>
     <ClInclude Include="Src\Tools\Download.h">
       <Filter>Tools</Filter>
     </ClInclude>
@@ -209,16 +218,25 @@
     <ClCompile Include="Build\Debug\moc_GraphWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_DataModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_OrderModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\moc_GraphModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Debug\moc_Market.cpp">
+    <ClCompile Include="Build\Debug\moc_BookModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Debug\moc_BitstampMarket.cpp">
+    <ClCompile Include="Build\Debug\moc_TradeModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_TransactionModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_MarketService.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\moc_MainWindow.cpp">
@@ -254,16 +272,25 @@
     <ClCompile Include="Build\Release\moc_GraphWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Release\moc_DataModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Release\moc_OrderModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_GraphModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Release\moc_Market.cpp">
+    <ClCompile Include="Build\Release\moc_BookModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Release\moc_BitstampMarket.cpp">
+    <ClCompile Include="Build\Release\moc_TradeModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_TransactionModel.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_MarketService.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_MainWindow.cpp">

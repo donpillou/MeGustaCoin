@@ -6,7 +6,7 @@ class OrdersWidget : public QWidget
   Q_OBJECT
 
 public:
-  OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel);
+  OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService);
 
   void saveState(QSettings& settings);
 
@@ -14,7 +14,6 @@ public slots:
   void refresh();
 
 private slots:
-  void setMarket(Market* market);
   void newBuyOrder();
   void newSellOrder();
   void submitOrder();
@@ -25,7 +24,8 @@ private slots:
 private:
   DataModel& dataModel;
   OrderModel& orderModel;
-  Market* market;
+  MarketService& marketService;
+
   QTreeView* orderView;
   QSortFilterProxyModel* proxyModel;
 
@@ -38,4 +38,3 @@ private:
   void addOrder(OrderModel::Order::Type type);
   QList<QModelIndex> getSelectedRows();
 };
-

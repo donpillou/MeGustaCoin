@@ -1,10 +1,13 @@
 
 #include "stdafx.h"
 
-TransactionModel::TransactionModel() : market(0), buyStr(tr("buy")), sellStr(tr("sell")),
-sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
-dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
+TransactionModel::TransactionModel(DataModel& dataModel) :
+  dataModel(dataModel),
+  buyStr(tr("buy")), sellStr(tr("sell")),
+  sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
+  dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
+  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateHeader()));
 }
 
 TransactionModel::~TransactionModel()
@@ -12,31 +15,29 @@ TransactionModel::~TransactionModel()
   qDeleteAll(transactions);
 }
 
-void TransactionModel::setMarket(Market* market)
+void TransactionModel::updateHeader()
 {
-  this->market = market;
   emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
 void TransactionModel::reset()
 {
   emit beginResetModel();
-  market = 0;
   transactions.clear();
   emit endResetModel();
   emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
-void TransactionModel::setData(const QList<Transaction>& updatedTransactions)
+void TransactionModel::setData(const QList<Market::Transaction>& updatedTransactions)
 {
-  QHash<QString, const Transaction*> newTransactions;
-  foreach(const Transaction& transaction, updatedTransactions)
+  QHash<QString, const Market::Transaction*> newTransactions;
+  foreach(const Market::Transaction& transaction, updatedTransactions)
     newTransactions.insert(transaction.id, &transaction);
 
   for(int i = 0, count = transactions.size(); i < count; ++i)
   {
     Transaction* transaction = transactions[i];
-    QHash<QString, const Transaction*>::iterator newIt = newTransactions.find(transaction->id);
+    QHash<QString, const Market::Transaction*>::iterator newIt = newTransactions.find(transaction->id);
     if(newIt == newTransactions.end())
     {
       beginRemoveRows(QModelIndex(), i, i);
@@ -49,7 +50,8 @@ void TransactionModel::setData(const QList<Transaction>& updatedTransactions)
     }
     else
     {
-      *transaction = *newIt.value();
+      const Market::Transaction& updatedTransaction = *newIt.value();
+      *transaction = updatedTransaction;
       emit dataChanged(createIndex(i, (int)Column::first, 0), createIndex(i, (int)Column::last, 0));
       newTransactions.erase(newIt);
       continue;
@@ -61,12 +63,13 @@ void TransactionModel::setData(const QList<Transaction>& updatedTransactions)
     int oldTransactionCount = transactions.size();
     beginInsertRows(QModelIndex(), oldTransactionCount, oldTransactionCount + newTransactions.size() - 1);
 
-    foreach(const Transaction& transaction, updatedTransactions)
+    foreach(const Market::Transaction& newTransaction, updatedTransactions)
     {
-      if(newTransactions.contains(transaction.id))
+      if(newTransactions.contains(newTransaction.id))
       {
-        Transaction* newTransaction = new Transaction(transaction);
-        transactions.append(newTransaction);
+        Transaction* transaction = new Transaction;
+        *transaction = newTransaction;
+        transactions.append(transaction);
       }
     }
 
@@ -151,23 +154,23 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
     case Column::date:
       return transaction.date.toString(dateFormat);
     case Column::amount:
-      return market->formatAmount(transaction.amount);
+      return dataModel.formatAmount(transaction.amount);
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.amount, 'f', 8), market->getCoinCurrency());
       //return QString().sprintf("%.08f %s", transaction.amount, market->getCoinCurrency());
     case Column::price:
-      return market->formatPrice(transaction.price);
+      return dataModel.formatPrice(transaction.price);
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.price, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%.02f %s", transaction.price, market->getMarketCurrency());
     case Column::value:
-      return market->formatPrice(transaction.amount * transaction.price);
+      return dataModel.formatPrice(transaction.amount * transaction.price);
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.amount * transaction.price, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%.02f %s", transaction.amount * transaction.price, market->getMarketCurrency());
     case Column::fee:
-      return market->formatPrice(transaction.fee);
+      return dataModel.formatPrice(transaction.fee);
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.fee, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%.02f %s", transaction.fee, market->getMarketCurrency());
     case Column::total:
-      return transaction.total > 0 ? (QString("+") + market->formatPrice(transaction.total)) : market->formatPrice(transaction.total);
+      return transaction.total > 0 ? (QString("+") + dataModel.formatPrice(transaction.total)) : dataModel.formatPrice(transaction.total);
       //return QString(transaction.balanceChange > 0 ? "+%1 %2" : "%1 %2").arg(QLocale::system().toString(transaction.balanceChange, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%+.02f %s", transaction.balanceChange, market->getMarketCurrency());
     }
@@ -201,15 +204,15 @@ QVariant TransactionModel::headerData(int section, Qt::Orientation orientation, 
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount %1").arg(market ? market->getCoinCurrency() : "");
+        return tr("Amount %1").arg(dataModel.getCoinCurrency());
       case Column::price:
-        return tr("Price %1").arg(market ? market->getMarketCurrency() : "");
+        return tr("Price %1").arg(dataModel.getMarketCurrency());
       case Column::value:
-        return tr("Value %1").arg(market ? market->getMarketCurrency() : "");
+        return tr("Value %1").arg(dataModel.getMarketCurrency());
       case Column::fee:
-        return tr("Fee %1").arg(market ? market->getMarketCurrency() : "");
+        return tr("Fee %1").arg(dataModel.getMarketCurrency());
       case Column::total:
-        return tr("Total %1").arg(market ? market->getMarketCurrency() : "");
+        return tr("Total %1").arg(dataModel.getMarketCurrency());
     }
   }
   return QVariant();

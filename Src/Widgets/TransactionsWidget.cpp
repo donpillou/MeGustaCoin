@@ -1,8 +1,13 @@
 
 #include "stdafx.h"
 
-TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), transactionModel(dataModel.transactionModel), market(0)
+TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService) :
+  QWidget(parent),
+  dataModel(dataModel), transactionModel(dataModel.transactionModel),
+  marketService(marketService)
 {
+  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
+
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
   toolBar->setIconSize(QSize(16, 16));
@@ -79,23 +84,14 @@ void TransactionsWidget::saveState(QSettings& settings)
   settings.setValue("TransactionHeaderState", transactionView->header()->saveState());
 }
 
-void TransactionsWidget::setMarket(Market* market)
-{
-  this->market = market;
-  updateToolBarButtons();
-}
-
 void TransactionsWidget::updateToolBarButtons()
 {
-  bool hasMarket = market != 0;
+  bool hasMarket = marketService.isReady();
 
   refreshAction->setEnabled(hasMarket);
 }
 
 void TransactionsWidget::refresh()
 {
-  if(!market)
-    return;
-  dataModel.logModel.addMessage(LogModel::Type::information, "Refreshing transactions...");
-  market->loadTransactions();
+  marketService.loadTransactions();
 }

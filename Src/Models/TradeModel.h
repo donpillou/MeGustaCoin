@@ -3,17 +3,15 @@
 
 class TradeModel : public QAbstractItemModel
 {
+  Q_OBJECT
+
 public:
-  TradeModel(GraphModel& graphModel);
+  TradeModel(DataModel& dataModel);
   ~TradeModel();
 
-  class Trade
+  class Trade : public Market::Trade
   {
   public:
-    QString id;
-    quint64 date;
-    double amount;
-    double price;
     enum class Icon
     {
       up,
@@ -21,7 +19,8 @@ public:
       neutral,
     } icon;
 
-    Trade() : amount(0.), price(0.), icon(Icon::neutral) {}
+    //Trade() : amount(0.), price(0.), icon(Icon::neutral) {}
+    Trade(const Market::Trade& trade) : Market::Trade(trade), icon(Icon::neutral) {}
   };
 
   enum class Column
@@ -33,21 +32,19 @@ public:
       last = amount,
   };
 
-  void setMarket(Market* market);
-
   void reset();
 
-  void addData(const QList<Trade>& trades);
+  void addData(const QList<Market::Trade>& trades);
 
   void clearAbove(int tradeCount);
 
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
 private:
+  DataModel& dataModel;
   GraphModel& graphModel;
   QList<Trade*> trades;
   QHash<QString, void*> ids;
-  Market* market;
   QVariant upIcon;
   QVariant downIcon;
   QVariant neutralIcon;
@@ -57,4 +54,7 @@ private:
   virtual int columnCount(const QModelIndex& parent) const;
   virtual QVariant data(const QModelIndex& index, int role) const;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+
+private slots:
+  void updateHeader();
 };

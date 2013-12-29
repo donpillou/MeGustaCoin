@@ -1,8 +1,10 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel) : QWidget(parent), dataModel(dataModel), orderModel(dataModel.orderModel), market(0)
+OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService) : QWidget(parent), dataModel(dataModel), orderModel(dataModel.orderModel), marketService(marketService)
 {
+  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
+
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
   toolBar->setIconSize(QSize(16, 16));
@@ -100,11 +102,6 @@ void OrdersWidget::saveState(QSettings& settings)
   settings.setValue("OrderHeaderState", orderView->header()->saveState());
 }
 
-void OrdersWidget::setMarket(Market* market)
-{
-  this->market = market;
-  updateToolBarButtons();
-}
 
 void OrdersWidget::newBuyOrder()
 {
@@ -118,13 +115,10 @@ void OrdersWidget::newSellOrder()
 
 void OrdersWidget::addOrder(OrderModel::Order::Type type)
 {
-  if(!market)
-    return;
-
   double price = 0;
-  const Market::TickerData* tickerData = market->getTickerData();
-  if(tickerData)
-    price = type == OrderModel::Order::Type::buy ? (tickerData->highestBuyOrder + 0.01) : (tickerData->lowestSellOrder - 0.01);
+  const Market::TickerData& tickerData = dataModel.getTickerData();
+  if(tickerData.highestBuyOrder != 0. && tickerData.lowestSellOrder != 0.)
+    price = type == OrderModel::Order::Type::buy ? (tickerData.highestBuyOrder + 0.01) : (tickerData.lowestSellOrder - 0.01);
 
   int row = orderModel.addOrder(type, price);
 
@@ -158,14 +152,16 @@ void OrdersWidget::submitOrder()
     {
       double amount = order->newAmount != 0. ? order->newAmount : order->amount;
       double price = order->newPrice != 0. ? order->newPrice : order->price;
-      double maxAmount = order->type == OrderModel::Order::Type::buy ? market->getMaxBuyAmout(price) : market->getMaxSellAmout();
+      /*
+      double maxAmount = order->type == OrderModel::Order::Type::buy ? marketService.getMaxBuyAmout(price) : marketService.getMaxSellAmout();
       if(amount > maxAmount)
       {
         orderModel.setOrderNewAmount(order->id, maxAmount);
         amount = maxAmount;
       }
+      */
 
-      market->createOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
+      marketService.createOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
     }
   }
   updateToolBarButtons();
@@ -189,7 +185,7 @@ void OrdersWidget::cancelOrder()
       break;
     case OrderModel::Order::State::open:
       {
-        market->cancelOrder(order->id, order->type == OrderModel::Order::Type::buy ? order->amount : -order->amount, order->price);
+        marketService.cancelOrder(order->id);
         break;
       }
     }
@@ -211,17 +207,16 @@ void OrdersWidget::updateOrder(const QModelIndex& index)
   double amount = order->newAmount != 0. ? order->newAmount : order->amount;
   double price = order->newPrice != 0. ? order->newPrice : order->price;
 
-  double maxAmount = order->type == OrderModel::Order::Type::buy ? market->getMaxBuyAmout(price, order->amount, order->price) : market->getMaxSellAmout() + order->amount;
+  /*
+  double maxAmount = order->type == OrderModel::Order::Type::buy ? marketService.getMaxBuyAmout(price, order->amount, order->price) : marketService.getMaxSellAmout() + order->amount;
   if(amount > maxAmount)
   {
     orderModel.setOrderNewAmount(order->id, maxAmount);
     amount = maxAmount;
   }
+  */
 
-  if(order->type == OrderModel::Order::Type::buy)
-    market->updateOrder(order->id, amount, price, order->amount, order->price);
-  else
-    market->updateOrder(order->id, -amount, price, -order->amount, order->price);
+  marketService.updateOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
   updateToolBarButtons();
 }
 
@@ -229,7 +224,7 @@ void OrdersWidget::updateToolBarButtons()
 {
   QList<QModelIndex> selectedRows = getSelectedRows();
 
-  bool hasMarket = market != 0;
+  bool hasMarket = marketService.isReady();
   bool canCancel = getSelectedRows().size() > 0;
   bool canSubmit = false;
 
@@ -248,16 +243,11 @@ void OrdersWidget::updateToolBarButtons()
   refreshAction->setEnabled(hasMarket);
   buyAction->setEnabled(hasMarket);
   sellAction->setEnabled(hasMarket);
-  submitAction->setEnabled(canSubmit);
+  submitAction->setEnabled(hasMarket && canSubmit);
   cancelAction->setEnabled(canCancel);
 }
 
 void OrdersWidget::refresh()
 {
-  if(!market)
-    return;
-  dataModel.logModel.addMessage(LogModel::Type::information, "Refreshing orders...");
-  market->loadBalance(); // load fee
-  market->loadOrders();
-  market->loadTicker();
+  marketService.loadOrders();
 }

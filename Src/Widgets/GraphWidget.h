@@ -11,12 +11,10 @@ public:
   void saveState(QSettings& settings);
 
 private slots:
-  void setMarket(Market* market);
   void setZoom(int maxTime);
   void setEnabledData(int data);
 
 private:
-  Market* market;
   DataModel& dataModel;
   GraphModel& graphModel;
   GraphView* graphView;

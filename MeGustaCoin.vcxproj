@@ -105,7 +105,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Src\Markets\BitstampMarket.cpp" />
+    <ClCompile Include="Src\Markets\MarketService.cpp" />
     <ClCompile Include="Src\Models\BookModel.cpp" />
+    <ClCompile Include="Src\Models\DataModel.cpp" />
     <ClCompile Include="Src\Models\GraphModel.cpp" />
     <ClCompile Include="Src\Models\LogModel.cpp" />
     <ClCompile Include="Src\Models\OrderModel.cpp" />
@@ -137,24 +139,32 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_MainWindow.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="Src\stdafx.h" />
-    <CustomBuild Include="Src\Markets\BitstampMarket.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"BitstampMarket.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl -IExt/easywsclient Src/Markets/BitstampMarket.h -o Build/Debug/moc_BitstampMarket.cpp</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_BitstampMarket.cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"BitstampMarket.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl -IExt/easywsclient Src/Markets/BitstampMarket.h -o Build/Release/moc_BitstampMarket.cpp</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_BitstampMarket.cpp;%(Outputs)</Outputs>
+    <ClInclude Include="Src\Markets\BitstampMarket.h" />
+    <ClInclude Include="Src\Markets\Market.h" />
+    <CustomBuild Include="Src\Markets\MarketService.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"MarketService.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl -IExt/easywsclient Src/Markets/MarketService.h -o Build/Debug/moc_MarketService.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_MarketService.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"MarketService.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl -IExt/easywsclient Src/Markets/MarketService.h -o Build/Release/moc_MarketService.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_MarketService.cpp;%(Outputs)</Outputs>
     </CustomBuild>
-    <CustomBuild Include="Src\Markets\Market.h">
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"Market.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl -IExt/easywsclient Src/Markets/Market.h -o Build/Debug/moc_Market.cpp</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_Market.cpp;%(Outputs)</Outputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"Market.h (Qt moc)"</Message>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl -IExt/easywsclient Src/Markets/Market.h -o Build/Release/moc_Market.cpp</Command>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_Market.cpp;%(Outputs)</Outputs>
+    <CustomBuild Include="Src\Models\BookModel.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"BookModel.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl -IExt/easywsclient Src/Models/BookModel.h -o Build/Debug/moc_BookModel.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_BookModel.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"BookModel.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl -IExt/easywsclient Src/Models/BookModel.h -o Build/Release/moc_BookModel.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_BookModel.cpp;%(Outputs)</Outputs>
     </CustomBuild>
-    <ClInclude Include="Src\Models\BookModel.h" />
-    <ClInclude Include="Src\Models\DataModel.h" />
+    <CustomBuild Include="Src\Models\DataModel.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"DataModel.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl -IExt/easywsclient Src/Models/DataModel.h -o Build/Debug/moc_DataModel.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_DataModel.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"DataModel.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl -IExt/easywsclient Src/Models/DataModel.h -o Build/Release/moc_DataModel.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_DataModel.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <CustomBuild Include="Src\Models\GraphModel.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"GraphModel.h (Qt moc)"</Message>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl -IExt/easywsclient Src/Models/GraphModel.h -o Build/Debug/moc_GraphModel.cpp</Command>
@@ -172,8 +182,22 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl -IExt/easywsclient Src/Models/OrderModel.h -o Build/Release/moc_OrderModel.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_OrderModel.cpp;%(Outputs)</Outputs>
     </CustomBuild>
-    <ClInclude Include="Src\Models\TradeModel.h" />
-    <ClInclude Include="Src\Models\TransactionModel.h" />
+    <CustomBuild Include="Src\Models\TradeModel.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"TradeModel.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl -IExt/easywsclient Src/Models/TradeModel.h -o Build/Debug/moc_TradeModel.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_TradeModel.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"TradeModel.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl -IExt/easywsclient Src/Models/TradeModel.h -o Build/Release/moc_TradeModel.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_TradeModel.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="Src\Models\TransactionModel.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"TransactionModel.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl -IExt/easywsclient Src/Models/TransactionModel.h -o Build/Debug/moc_TransactionModel.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_TransactionModel.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"TransactionModel.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/libqxt/include -IExt/libqxt/include/QxtCore -IExt/libqxt/src/core -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl -IExt/easywsclient Src/Models/TransactionModel.h -o Build/Release/moc_TransactionModel.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_TransactionModel.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <ClInclude Include="Src\Tools\Download.h" />
     <ClInclude Include="Src\Tools\Sha256.h" />
     <CustomBuild Include="Src\Widgets\BookWidget.h">
@@ -285,16 +309,25 @@
     <ClCompile Include="Build\Debug\moc_GraphWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_DataModel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_OrderModel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Debug\moc_GraphModel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Build\Debug\moc_Market.cpp">
+    <ClCompile Include="Build\Debug\moc_BookModel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Build\Debug\moc_BitstampMarket.cpp">
+    <ClCompile Include="Build\Debug\moc_TradeModel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_TransactionModel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Debug\moc_MarketService.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Debug\moc_MainWindow.cpp">
@@ -337,16 +370,25 @@
     <ClCompile Include="Build\Release\moc_GraphWidget.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Build\Release\moc_DataModel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Build\Release\moc_OrderModel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_GraphModel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Build\Release\moc_Market.cpp">
+    <ClCompile Include="Build\Release\moc_BookModel.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="Build\Release\moc_BitstampMarket.cpp">
+    <ClCompile Include="Build\Release\moc_TradeModel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_TransactionModel.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_MarketService.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_MainWindow.cpp">

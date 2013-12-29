@@ -7,8 +7,8 @@
 #include "Tools/Download.h"
 #include "Tools/Sha256.h"
 
-class Market;
-class DataModel;
+#include "Markets/Market.h"
+#include "Markets/BitstampMarket.h"
 
 #include "Models/GraphModel.h"
 #include "Models/OrderModel.h"
@@ -18,8 +18,7 @@ class DataModel;
 #include "Models/LogModel.h"
 #include "Models/DataModel.h"
 
-#include "Markets/Market.h"
-#include "Markets/BitstampMarket.h"
+#include "Markets/MarketService.h"
 
 #include "Widgets/OrdersWidget.h"
 #include "Widgets/TransactionsWidget.h"

@@ -96,7 +96,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   frame->setBackgroundRole(QPalette::Base);
   frame->setAutoFillBackground(true);
 
-  graphView = new GraphView(this, graphModel);
+  graphView = new GraphView(this, dataModel);
   QVBoxLayout* graphLayout = new QVBoxLayout;
   graphLayout->setMargin(0);
   graphLayout->setSpacing(0);
@@ -135,12 +135,6 @@ void GraphWidget::saveState(QSettings& settings)
   settings.setValue("Zoom", zoom);
   settings.setValue("EnabledData", graphView->getEnabledData());
   settings.endGroup();
-}
-
-void GraphWidget::setMarket(Market* market)
-{
-  this->market = market;
-  graphView->setMarket(market);
 }
 
 void GraphWidget::setZoom(int maxTime)

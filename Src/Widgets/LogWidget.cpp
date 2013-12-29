@@ -22,16 +22,12 @@ LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) :
   headerView->resizeSection(0, 110);
   headerView->resizeSection(1, 200);
   logView->sortByColumn(0, Qt::AscendingOrder);
-  //headerView->restoreState(settings.value("LogHeaderState").toByteArray());
+  headerView->restoreState(settings.value("LogHeaderState").toByteArray());
 }
 
 void LogWidget::saveState(QSettings& settings)
 {
   settings.setValue("LogHeaderState", logView->header()->saveState());
-}
-
-void LogWidget::setMarket(Market* market)
-{
 }
 
 void LogWidget::checkAutoScroll(const QModelIndex& index, int, int)

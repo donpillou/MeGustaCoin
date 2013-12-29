@@ -1,21 +1,20 @@
 
 #include "stdafx.h"
 
-MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"), market(0), 
-liveTradeUpdatesEnabled(false), orderBookUpdatesEnabled(false), graphUpdatesEnabled(false)
+MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"),
+  marketService(dataModel),
+  liveTradeUpdatesEnabled(false), orderBookUpdatesEnabled(false), graphUpdatesEnabled(false)
 {
-  ordersWidget = new OrdersWidget(this, settings, dataModel);
-  connect(this, SIGNAL(marketChanged(Market*)), ordersWidget, SLOT(setMarket(Market*)));
-  transactionsWidget = new TransactionsWidget(this, settings, dataModel);
-  connect(this, SIGNAL(marketChanged(Market*)), transactionsWidget, SLOT(setMarket(Market*)));
+  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateWindowTitle()));
+  connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
+  connect(&dataModel, SIGNAL(changedTickerData()), this, SLOT(updateWindowTitle()));
+
+  ordersWidget = new OrdersWidget(this, settings, dataModel, marketService);
+  transactionsWidget = new TransactionsWidget(this, settings, dataModel, marketService);
   tradesWidget = new TradesWidget(this, settings, dataModel);
-  connect(this, SIGNAL(marketChanged(Market*)), tradesWidget, SLOT(setMarket(Market*)));
   bookWidget = new BookWidget(this, settings, dataModel);
-  connect(this, SIGNAL(marketChanged(Market*)), bookWidget, SLOT(setMarket(Market*)));
   graphWidget = new GraphWidget(this, settings, dataModel);
-  connect(this, SIGNAL(marketChanged(Market*)), graphWidget, SLOT(setMarket(Market*)));
   logWidget = new LogWidget(this, settings, dataModel.logModel);
-  connect(this, SIGNAL(marketChanged(Market*)), logWidget, SLOT(setMarket(Market*)));
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
   updateWindowTitle();
@@ -106,7 +105,7 @@ liveTradeUpdatesEnabled(false), orderBookUpdatesEnabled(false), graphUpdatesEnab
   else
     settings.endGroup();
 
-  if(!market)
+  if(!marketService.isReady())
     QTimer::singleShot(0, this, SLOT(login()));
 }
 
@@ -142,19 +141,7 @@ void MainWindow::login()
 
 void MainWindow::logout()
 {
-  if(!market)
-    return;
-
-  delete market;
-  market = 0;
-  emit marketChanged(0);
-  dataModel.orderModel.reset();
-  dataModel.transactionModel.reset();
-  dataModel.tradeModel.reset();
-  dataModel.bookModel.reset();
-  updateWindowTitle();
-
-  dataModel.logModel.addMessage(LogModel::Type::information, QString("Closed %1").arg(marketName));
+  marketService.logout();
 }
 
 void MainWindow::refresh()
@@ -167,62 +154,39 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
 {
   logout();
 
-  // login
-  this->marketName = marketName;
-  this->userName = userName;
-  if(marketName == "Bitstamp/USD")
-  {
-    market = new BitstampMarket(dataModel, userName, key, secret);
-  }
-  if(!market)
-    return;
-
-  dataModel.orderModel.setMarket(market);
-  dataModel.transactionModel.setMarket(market);
-  dataModel.tradeModel.setMarket(market);
-  dataModel.bookModel.setMarket(market);
-
-  connect(market, SIGNAL(balanceUpdated()), this, SLOT(updateWindowTitle()));
-  connect(market, SIGNAL(tickerUpdated()), this, SLOT(updateWindowTitle()));
-  dataModel.logModel.addMessage(LogModel::Type::information, QString(tr("Opened %1")).arg(marketName));
+  marketService.login(marketName, userName, key, secret);
 
   // update gui
   updateWindowTitle();
-  emit marketChanged(market);
 
   // request data
+  marketService.loadBalance();
   refresh();
+  marketService.loadTicker();
+  /*
   market->loadLiveTrades();
   market->loadOrderBook();
   market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
   market->enableOrderBookUpdates(orderBookUpdatesEnabled || graphUpdatesEnabled);
+  */
 }
 
 void MainWindow::updateWindowTitle()
 {
-  if(!market)
+  if(!marketService.isReady())
     setWindowTitle(tr("MeGustaCoin Market Client"));
   else
   {
     QString title;
-    const Market::Balance* balance = market->getBalance();
-    if(balance)
-    {
-      double usd = balance->availableUsd + balance->reservedUsd;
-      double btc = balance->availableBtc + balance->reservedBtc;
-      title = QString("%1 %2 / %3 %4 - ").arg(market->formatPrice(usd), market->getMarketCurrency(), market->formatAmount(btc), market->getCoinCurrency());
-      //title = QString("%1 %2 / %3 %4 - ").arg(QLocale::system().toString(usd, 'f', 2), market->getMarketCurrency(), QLocale::system().toString(btc, 'f', 2), market->getCoinCurrency());
-      //title.sprintf("%.02f %s, %.02f %s - ", usd, market->getMarketCurrency(), btc, market->getCoinCurrency());
-    }
-    title += marketName;
-    const Market::TickerData* tickerData = market->getTickerData();
-    if(tickerData)
-    {
-      title += QString(" - %1 / %2 bid / %3 ask").arg(market->formatPrice(tickerData->lastTradePrice), market->formatPrice(tickerData->highestBuyOrder), market->formatPrice(tickerData->lowestSellOrder));
-      //QString tickerInfo;
-      //tickerInfo.sprintf(" - %.02f, %.02f bid, %.02f ask", tickerData->lastTradePrice, tickerData->highestBuyOrder, tickerData->lowestSellOrder);
-      //title += QString(" - %1 / %2 bid / %3 ask").arg(QLocale::system().toString(tickerData->lastTradePrice, 'f', 2), QLocale::system().toString(tickerData->highestBuyOrder, 'f', 2), QLocale::system().toString(tickerData->lowestSellOrder, 'f', 2));
-    }
+    const Market::Balance& balance = dataModel.getBalance();
+    double usd = balance.availableUsd + balance.reservedUsd;
+    double btc = balance.availableBtc + balance.reservedBtc;
+    if(usd != 0. || btc != 0. || balance.fee != 0.)
+      title = QString("%1 %2 / %3 %4 - ").arg(dataModel.formatPrice(usd), dataModel.getMarketCurrency(), dataModel.formatAmount(btc), dataModel.getCoinCurrency());
+    title += dataModel.marketName;
+    const Market::TickerData& tickerData = dataModel.getTickerData();
+    if(tickerData.lastTradePrice != 0.)
+      title += QString(" - %1 / %2 bid / %3 ask").arg(dataModel.formatPrice(tickerData.lastTradePrice), dataModel.formatPrice(tickerData.highestBuyOrder), dataModel.formatPrice(tickerData.lowestSellOrder));
     setWindowTitle(title);
   }
 }
@@ -235,24 +199,28 @@ void MainWindow::about()
 void MainWindow::enableLiveTradesUpdates(bool enable)
 {
   liveTradeUpdatesEnabled = enable;
-  if(!market)
+  if(!marketService.isReady())
     return;
-  market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
+  // todo
+  //market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
+  
 }
 
 void MainWindow::enableOrderBookUpdates(bool enable)
 {
   orderBookUpdatesEnabled = enable;
-  if(!market)
+  if(!marketService.isReady())
     return;
-  market->enableOrderBookUpdates(orderBookUpdatesEnabled || graphUpdatesEnabled);
+  // todo
+  // market->enableOrderBookUpdates(orderBookUpdatesEnabled || graphUpdatesEnabled);
 }
 
 void MainWindow::enableGraphUpdates(bool enable)
 {
   graphUpdatesEnabled = enable;
-  if(!market)
+  if(!marketService.isReady())
     return;
-  market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
-  market->enableOrderBookUpdates(orderBookUpdatesEnabled || graphUpdatesEnabled);
+  // todo
+  //market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
+  //market->enableOrderBookUpdates(orderBookUpdatesEnabled || graphUpdatesEnabled);
 }

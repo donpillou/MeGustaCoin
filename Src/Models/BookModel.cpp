@@ -1,22 +1,30 @@
 
 #include "stdafx.h"
 
-BookModel::BookModel(GraphModel& graphModel) : graphModel(graphModel), time(0) {}
+BookModel::BookModel(DataModel& dataModel) :
+  askModel(dataModel), bidModel(dataModel),
+  dataModel(dataModel), graphModel(dataModel.graphModel),
+  time(0)
+{
+  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateHeader()));
+}
 
-BookModel::ItemModel::ItemModel() : market(0) {}
+BookModel::ItemModel::ItemModel(DataModel& dataModel) : dataModel(dataModel)
+{
+}
 
 BookModel::ItemModel::~ItemModel()
 {
   qDeleteAll(items);
 }
 
-void BookModel::setMarket(Market* market)
+void BookModel::updateHeader()
 {
-  askModel.setMarket(market);
-  bidModel.setMarket(market);
+  askModel.updateHeader();
+  bidModel.updateHeader();
 }
 
-void BookModel::setData(quint64 time, const QList<Item>& askItems, const QList<Item>& bidItems)
+void BookModel::setData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems)
 {
   if(time == this->time)
     return;
@@ -39,7 +47,7 @@ void BookModel::setData(quint64 time, const QList<Item>& askItems, const QList<I
   double askSumMass[numOfSumType] = {};
   for(int i = askItems.size() - 1; i >= 0; --i)
   {
-    const Item& item = askItems[i];
+    const Market::OrderBookEntry& item = askItems[i];
     for(int i = 0; i < numOfSumType; ++i)
       if(askSum[i] < sumMax[i])
       {
@@ -55,7 +63,7 @@ void BookModel::setData(quint64 time, const QList<Item>& askItems, const QList<I
   double bidSumMass[numOfSumType] = {};
   for(int i = bidItems.size() - 1; i >= 0; --i)
   {
-    const Item& item = bidItems[i];
+    const Market::OrderBookEntry& item = bidItems[i];
     for(int i = 0; i < numOfSumType; ++i)
       if(bidSum[i] < sumMax[i])
       {
@@ -85,9 +93,8 @@ void BookModel::reset()
   bidModel.reset();
 }
 
-void BookModel::ItemModel::setMarket(Market* market)
+void BookModel::ItemModel::updateHeader()
 {
-  this->market = market;
   emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
@@ -95,12 +102,11 @@ void BookModel::ItemModel::reset()
 {
   emit beginResetModel();
   items.clear();
-  market = 0;
   emit endResetModel();
   emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
-void BookModel::ItemModel::setData(const QList<Item>& newData)
+void BookModel::ItemModel::setData(const QList<Market::OrderBookEntry>& newData)
 {
   int oldCount = items.size();
   int newCount = qMin(newData.size(), 100);
@@ -116,7 +122,7 @@ void BookModel::ItemModel::setData(const QList<Item>& newData)
     beginInsertRows(QModelIndex(), oldCount, oldCount + (newCount - destIndex) - 1);
     for(int count = newCount; destIndex < count; ++destIndex, ++srcIndex)
     {
-      Item* newItem = new Item;
+      Market::OrderBookEntry* newItem = new Market::OrderBookEntry;
       *newItem = newData[srcIndex];
       items.push_back(newItem);
     }
@@ -174,7 +180,7 @@ QVariant BookModel::ItemModel::data(const QModelIndex& index, int role) const
   int row = index.row();
   if(row < 0 || row >= items.size())
     return QVariant();
-  const Item& item = *items[row];
+  const Market::OrderBookEntry& item = *items[row];
 
   switch(role)
   {
@@ -182,9 +188,9 @@ QVariant BookModel::ItemModel::data(const QModelIndex& index, int role) const
     switch((Column)index.column())
     {
     case Column::amount:
-      return market->formatAmount(item.amount);
+      return dataModel.formatAmount(item.amount);
     case Column::price:
-      return market->formatPrice(item.price);
+      return dataModel.formatPrice(item.price);
     }
   }
   return QVariant();
@@ -209,9 +215,9 @@ QVariant BookModel::ItemModel::headerData(int section, Qt::Orientation orientati
     switch((Column)section)
     {
       case Column::amount:
-        return tr("Amount %1").arg(market ? market->getCoinCurrency() : "");
+        return tr("Amount %1").arg(dataModel.getCoinCurrency());
       case Column::price:
-        return tr("Price %1").arg(market ? market->getMarketCurrency() : "");
+        return tr("Price %1").arg(dataModel.getMarketCurrency());
     }
   }
   return QVariant();

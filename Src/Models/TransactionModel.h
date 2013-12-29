@@ -3,8 +3,10 @@
 
 class TransactionModel : public QAbstractItemModel
 {
+  Q_OBJECT
+
 public:
-  TransactionModel();
+  TransactionModel(DataModel& dataModel);
   ~TransactionModel();
 
   class Transaction
@@ -24,6 +26,18 @@ public:
     double total;
 
     Transaction() : type(Type::unknown), amount(0.), price(0.), fee(0.), total(0.) {}
+
+    Transaction& operator=(const Market::Transaction& transaction)
+    {
+      id = transaction.id;
+      date = QDateTime::fromTime_t(transaction.date).toLocalTime();
+      amount = fabs(transaction.amount);
+      price = transaction.price;
+      fee = transaction.fee;
+      total = transaction.total;
+      type = transaction.amount > 0. ? Transaction::Type::buy : Transaction::Type::sell;
+      return *this;
+    }
   };
 
   enum class Column
@@ -39,19 +53,17 @@ public:
       last = total,
   };
 
-  void setMarket(Market* market);
-
   void reset();
 
-  void setData(const QList<Transaction>& order);
+  void setData(const QList<Market::Transaction>& order);
 
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
  
   const Transaction* getTransaction(const QModelIndex& index) const;
 
 private:
+  DataModel& dataModel;
   QList<Transaction*> transactions;
-  Market* market;
   QVariant buyStr;
   QVariant sellStr;
   QVariant sellIcon;
@@ -63,4 +75,7 @@ private:
   virtual int columnCount(const QModelIndex& parent) const;
   virtual QVariant data(const QModelIndex& index, int role) const;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+
+private slots:
+  void updateHeader();
 };

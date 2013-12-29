@@ -2,14 +2,13 @@
 #include "stdafx.h"
 #include <cfloat>
 
-GraphView::GraphView(QWidget* parent, GraphModel& graphModel) : QWidget(parent), graphModel(graphModel), enabledData((unsigned int)Data::all), time(0), maxAge(60 * 60), totalMin(0.), totalMax(0.), volumeMax(0.)
+GraphView::GraphView(QWidget* parent, DataModel& dataModel) :
+  QWidget(parent),
+  dataModel(dataModel), graphModel(dataModel.graphModel),
+  enabledData((unsigned int)Data::all), time(0), maxAge(60 * 60),
+  totalMin(0.), totalMax(0.), volumeMax(0.)
 {
   connect(&graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
-}
-
-void GraphView::setMarket(Market* market)
-{
-  this->market = market;
 }
 
 void GraphView::setMaxAge(int maxAge)
@@ -59,7 +58,7 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   double hmin = floor(lastTotalMin);
   double hmax = ceil(qMax(lastTotalMax, hmin + 1.));
-  const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, market->formatPrice(hmax == DBL_MAX ? 0. : hmax));
+  const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, dataModel.formatPrice(hmax == DBL_MAX ? 0. : hmax));
 
   QRect plotRect(10, 10, rect.width() - (10 + priceSize.width() + 8), rect.height() - 20 - priceSize.height() + 5);
   if(plotRect.width() <= 0 || plotRect.height() <= 0)
@@ -100,7 +99,7 @@ void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin
       painter.setPen(linePen);
       painter.drawLine(QPoint(0, right.y()), right);
       painter.setPen(textPen);
-      painter.drawText(QPoint(right.x() + 2, right.y() + priceSize.height() * 0.5 - 3), market->formatPrice(vmin + i * vstep));
+      painter.drawText(QPoint(right.x() + 2, right.y() + priceSize.height() * 0.5 - 3), dataModel.formatPrice(vmin + i * vstep));
     }
   }
 
@@ -476,7 +475,7 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
     QPointF a(rect.left() + (startTime - hmin) * width / hrange, rect.bottom() - (val -  vmin) * height / vrange);
     QPointF b(rect.right() - (time - endTime) * width / hrange, rect.bottom() - (rl.a -  vmin) * height / vrange);
 
-    int color = qMin((int)((0xdd - 0x44) * fabs(rl.b / 0.005)), 0xdd - 0x44);
+    int color = qMin((int)((0xdd - 0x44) * qMin(qMax(fabs(rl.b / 0.005), 0.), 1.)), 0xdd - 0x44);
     QPen pen(rl.b >= 0 ? QColor(0, color + 0x44, 0) : QColor(color + 0x44, 0, 0));
     pen.setWidth(2);
     painter.setPen(pen);

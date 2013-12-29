@@ -1,46 +1,36 @@
 
 #pragma once
 
-class BookModel
+class BookModel : public QObject
 {
+  Q_OBJECT
+
 public:
-  BookModel(GraphModel& graphModel);
-
-  class Item
-  {
-  public:
-    double amount;
-    double price;
-
-    Item() : amount(0.), price(0.) {}
-  };
+  BookModel(DataModel& dataModel);
 
   class ItemModel : public QAbstractItemModel
   {
   public:
-  //private:
-    ItemModel();
+    ItemModel(DataModel& dataModel);
     ~ItemModel();
 
     void reset();
 
-    void setData(const QList<Item>& items);
+    void setData(const QList<Market::OrderBookEntry>& items);
 
-    void setMarket(Market* market);
+    void updateHeader();
 
     virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
   private:
-    QList<Item*> items;
-    Market* market;
+    DataModel& dataModel;
+    QList<Market::OrderBookEntry*> items;
 
     virtual QModelIndex parent(const QModelIndex& child) const;
     virtual int rowCount(const QModelIndex& parent) const;
     virtual int columnCount(const QModelIndex& parent) const;
     virtual QVariant data(const QModelIndex& index, int role) const;
     virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-
-    //friend class BookModel;
   };
 
   enum class Column
@@ -51,8 +41,7 @@ public:
       last = amount,
   };
 
-  void setMarket(Market* market);
-  void setData(quint64 time, const QList<Item>& askItems, const QList<Item>& bidItems);
+  void setData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems);
 
   void reset();
 
@@ -60,6 +49,10 @@ public:
   ItemModel bidModel;
 
 private:
+  DataModel& dataModel;
   GraphModel& graphModel;
   quint64 time;
+
+private slots:
+  void updateHeader();
 };

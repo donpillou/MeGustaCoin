@@ -1,12 +1,14 @@
 
 #pragma once
 
+class DataModel;
+
 class OrderModel : public QAbstractItemModel
 {
   Q_OBJECT
 
 public:
-  OrderModel();
+  OrderModel(DataModel& dataModel);
   ~OrderModel();
 
   class Order
@@ -36,6 +38,19 @@ public:
     } state;
 
     Order() : type(Type::unknown), amount(0.), price(0.), newAmount(0.), newPrice(0.), state(State::open) {}
+
+    Order& operator=(const Market::Order& order)
+    {
+      id = order.id;
+      date = QDateTime::fromTime_t(order.date).toLocalTime();
+      amount = fabs(order.amount);
+      price = order.price;
+      total = order.total;
+      newAmount = newPrice = 0.;
+      state = Order::State::open;
+      type = order.amount > 0. ? Type::buy : Type::sell;
+      return *this;
+    }
   };
 
   enum class Column
@@ -51,12 +66,10 @@ public:
       last = total,
   };
 
-  void setMarket(Market* market);
-
   void reset();
 
-  void setData(const QList<Order>& order);
-  void updateOrder(const QString& id, const Order& order);
+  void setData(const QList<Market::Order>& orders);
+  void updateOrder(const QString& id, const Market::Order& order);
   void setOrderState(const QString& id, Order::State state);
   void setOrderNewAmount(const QString& id, double newAmount);
 
@@ -64,6 +77,7 @@ public:
 
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
+  const Order* getOrder(const QString& id) const;
   const Order* getOrder(const QModelIndex& index) const;
   void removeOrder(const QModelIndex& index);
 
@@ -71,8 +85,8 @@ signals:
   void orderEdited(const QModelIndex& index);
 
 private:
+  DataModel& dataModel;
   QList<Order*> orders;
-  Market* market;
   QVariant draftStr;
   QVariant submittingStr;
   QVariant openStr;
@@ -95,4 +109,7 @@ private:
   virtual QVariant data(const QModelIndex& index, int role) const;
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
   virtual bool setData(const QModelIndex & index, const QVariant & value, int role);
+
+private slots:
+  void updateHeader();
 };
