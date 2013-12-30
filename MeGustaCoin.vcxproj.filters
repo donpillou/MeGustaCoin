@@ -34,6 +34,9 @@
     <ClCompile Include="Src\Markets\BitstampMarketStream.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Markets\BtcChinaMarketStream.cpp">
+      <Filter>Markets</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Markets\MarketService.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
@@ -107,6 +110,9 @@
       <Filter>Markets</Filter>
     </ClInclude>
     <ClInclude Include="Src\Markets\BitstampMarketStream.h">
+      <Filter>Markets</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Markets\BtcChinaMarketStream.h">
       <Filter>Markets</Filter>
     </ClInclude>
     <ClInclude Include="Src\Markets\Market.h">

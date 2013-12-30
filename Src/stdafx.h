@@ -13,6 +13,7 @@
 #include "Markets/MarketStream.h"
 #include "Markets/MtGoxMarketStream.h"
 #include "Markets/BitstampMarketStream.h"
+#include "Markets/BtcChinaMarketStream.h"
 
 #include "Models/GraphModel.h"
 #include "Models/OrderModel.h"

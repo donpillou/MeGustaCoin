@@ -28,6 +28,8 @@ void MarketStreamService::subscribe()
     marketStream = new MtGoxMarketStream();
   else if(marketName == "Bitstamp/USD")
     marketStream = new BitstampMarketStream();
+  else if(marketName == "BtcChina/CNY")
+    marketStream = new BtcChinaMarketStream();
   if(!marketStream)
     return;
 

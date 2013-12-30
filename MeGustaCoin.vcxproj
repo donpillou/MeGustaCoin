@@ -106,6 +106,7 @@
     </ClCompile>
     <ClCompile Include="Src\Markets\BitstampMarket.cpp" />
     <ClCompile Include="Src\Markets\BitstampMarketStream.cpp" />
+    <ClCompile Include="Src\Markets\BtcChinaMarketStream.cpp" />
     <ClCompile Include="Src\Markets\MarketService.cpp" />
     <ClCompile Include="Src\Markets\MarketStreamService.cpp" />
     <ClCompile Include="Src\Markets\MtGoxMarketStream.cpp" />
@@ -147,6 +148,7 @@
     <ClInclude Include="Src\stdafx.h" />
     <ClInclude Include="Src\Markets\BitstampMarket.h" />
     <ClInclude Include="Src\Markets\BitstampMarketStream.h" />
+    <ClInclude Include="Src\Markets\BtcChinaMarketStream.h" />
     <ClInclude Include="Src\Markets\Market.h" />
     <CustomBuild Include="Src\Markets\MarketService.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"MarketService.h (Qt moc)"</Message>
