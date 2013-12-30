@@ -89,7 +89,7 @@ bool Websocket::read(QByteArray& buffer, unsigned int timeout)
     return false;
 
   easywsclient::WebSocket::pointer ws = (easywsclient::WebSocket::pointer)data;
-  if (ws->getReadyState() != easywsclient::WebSocket::OPEN)
+  if(ws->getReadyState() != easywsclient::WebSocket::OPEN)
     return false;
 
   struct CallbackHandler
@@ -119,8 +119,10 @@ bool Websocket::send(const QByteArray& buffer)
     return false;
 
   easywsclient::WebSocket::pointer ws = (easywsclient::WebSocket::pointer)data;
-
+  if(ws->getReadyState() != easywsclient::WebSocket::OPEN)
+    return false;
   ws->send(buffer.constData());
-  return true;
+
+  return ws->getReadyState() == easywsclient::WebSocket::OPEN;
 }
 
