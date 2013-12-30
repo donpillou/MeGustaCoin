@@ -15,7 +15,7 @@ bool Websocket::connect(const QString& url)
   if(data)
     return false;
 
-  data = easywsclient::WebSocket::from_url(url.toUtf8().constData());
+  data = easywsclient::WebSocket::from_url(url.toUtf8().constData(), "https://github.com/donpillou/MeGustaCoin");
   if(!data)
     return false;
 
