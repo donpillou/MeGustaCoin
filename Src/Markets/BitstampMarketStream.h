@@ -20,8 +20,5 @@ private:
   QMutex canceledConditionMutex;
   QWaitCondition canceledCondition;
 
-  qint64 timeOffset;
-  bool timeOffsetSet;
-
   void sleep(unsigned int ms);
 };

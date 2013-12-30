@@ -2,10 +2,8 @@
 #include "stdafx.h"
 
 BitstampMarketStream::BitstampMarketStream() :
-  canceled(false), marketCurrency("USD"), coinCurrency("BTC"),
-  timeOffsetSet(false) {}
+  canceled(false), marketCurrency("USD"), coinCurrency("BTC") {}
 
-#include <string>
 void BitstampMarketStream::loop(Callback& callback) 
 {
   QByteArray buffer;
@@ -40,10 +38,12 @@ void BitstampMarketStream::loop(Callback& callback)
     if(buffer.isEmpty())
       continue;
 
-    //QFile file("omgblah.txt");
-    //file.open(QIODevice::WriteOnly | QIODevice::Append);
-    //file.write(buffer);
+    // {"event":"pusher:connection_established","data":"{\"socket_id\":\"32831.40191965\"}"}
+    // {"event":"pusher_internal:subscription_succeeded","data":"{}","channel":"live_trades"}
+    // {"event":"trade","data":"{\"price\": 719.98000000000002, \"amount\": 5.3522414999999999, \"id\": 2799842}","channel":"live_trades"}
+    // {"event":"trade","data":"{\"price\": 719.99000000000001, \"amount\": 39.6419985, \"id\": 2799843}","channel":"live_trades"}
 
+    quint64 now = QDateTime::currentDateTimeUtc().toTime_t();
     QVariantList data = Json::parseList(buffer);
     foreach(const QVariant& var, data)
     {
@@ -68,7 +68,7 @@ void BitstampMarketStream::loop(Callback& callback)
           MarketStream::Trade trade;
           trade.amount =  tradeMap["amount"].toDouble();
           trade.price = tradeMap["price"].toDouble();
-          trade.date = QDateTime::currentDateTimeUtc().toTime_t();
+          trade.date = now;
 
           callback.receivedTrade(trade);
         }
