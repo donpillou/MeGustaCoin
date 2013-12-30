@@ -47,6 +47,7 @@ private:
   };
 
   QList<MarketData> marketDataList;
+  QMap<QString, PublicDataModel*> publicDataModels;
 
   void open(const QString& market, const QString& userName, const QString& key, const QString& secret);
 

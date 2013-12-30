@@ -8,25 +8,26 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
   connect(&dataModel, SIGNAL(changedTickerData()), this, SLOT(updateWindowTitle()));
 
-  MarketData marketData;
-  marketData.publicDataModel = new PublicDataModel(this);
-  marketData.streamService = new MarketStreamService(this, dataModel, *marketData.publicDataModel, "MtGox/USD");
-  marketDataList.append(marketData);
-  marketData.publicDataModel = new PublicDataModel(this);
-  marketData.streamService = new MarketStreamService(this, dataModel, *marketData.publicDataModel, "Bitstamp/USD");
-  marketDataList.append(marketData);
-  marketData.publicDataModel = new PublicDataModel(this);
-  marketData.streamService = new MarketStreamService(this, dataModel, *marketData.publicDataModel, "BtcChina/CNY");
-  marketDataList.append(marketData);
-  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
+  //7f007f
+  //00007f
+  //007f7f
+  //615f00
+
+  publicDataModels.insert("MtGox/USD", new PublicDataModel(this, QColor(0x7f, 0x00, 0x7f, 0x70)));
+  publicDataModels.insert("Bitstamp/USD", new PublicDataModel(this, QColor(0x00, 0x00, 0x7f, 0x70)));
+  publicDataModels.insert("BtcChina/CNY", new PublicDataModel(this, QColor(0x00, 0x7f, 0x7f, 0x70)));
+  for(QMap<QString, PublicDataModel*>::iterator i = publicDataModels.begin(), end = publicDataModels.end(); i != end; ++i)
   {
-    MarketData& marketData = *i;
+    MarketData marketData;
+    marketData.publicDataModel = i.value();
+    marketData.streamService = new MarketStreamService(this, dataModel, *marketData.publicDataModel, i.key());
     marketData.tradesWidget = new TradesWidget(this, settings, *marketData.publicDataModel);
     if(marketData.publicDataModel->getFeatures() & (int)MarketStream::Features::orderBook)
       marketData.bookWidget = new BookWidget(this, settings, *marketData.publicDataModel);
     else
       marketData.bookWidget = 0;
-    marketData.graphWidget = new GraphWidget(this, settings, *marketData.publicDataModel);
+    marketData.graphWidget = new GraphWidget(this, settings, *marketData.publicDataModel, publicDataModels);
+    marketDataList.append(marketData);
   }
 
   ordersWidget = new OrdersWidget(this, settings, dataModel, marketService);

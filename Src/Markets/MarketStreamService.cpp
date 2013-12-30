@@ -10,6 +10,8 @@ MarketStreamService::MarketStreamService(QObject* parent, DataModel& dataModel, 
     features = (int)MarketStream::Features::trades;
   else if(marketName == "Bitstamp/USD")
     features = (int)MarketStream::Features::trades;
+  else if(marketName == "BtcChina/CNY")
+    features = (int)MarketStream::Features::trades;
 
   publicDataModel.setMarket(marketName, features);
 }

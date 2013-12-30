@@ -5,7 +5,7 @@ class GraphView : public QWidget
 {
 
 public:
-  GraphView(QWidget* parent, PublicDataModel& publicDataModel);
+  GraphView(QWidget* parent, PublicDataModel& publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels);
 
   void setMaxAge(int maxAge);
 
@@ -15,6 +15,7 @@ public:
     tradeVolume = 0x02,
     orderBook = 0x04,
     regressionLines = 0x08,
+    otherMarkets = 0x10,
     all = 0xffff,
   };
 
@@ -26,6 +27,7 @@ public:
 private:
   PublicDataModel& publicDataModel;
   GraphModel& graphModel;
+  const QMap<QString, PublicDataModel*>& publicDataModels;
 
   unsigned int enabledData;
 
@@ -38,7 +40,7 @@ private:
   virtual void paintEvent(QPaintEvent* );
 
   void drawAxesLables(QPainter& painter, const QRect& rect, double hmin, double hmax, const QSize& priceSize);
-  void drawTradePolyline(QPainter& painter, const QRect& rect, double hmin, double hmax, double lastVolumeMax);
+  void drawTradePolyline(QPainter& painter, const QRect& rect, double hmin, double hmax, double lastVolumeMax, const GraphModel& graphModel, int enabledData, double scale, const QColor& color);
   void drawBookPolyline(QPainter& painter, const QRect& rect, double hmin, double hmax);
   void drawRegressionLines(QPainter& painter, const QRect& rect, double hmin, double hmax);
 

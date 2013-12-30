@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-PublicDataModel::PublicDataModel(QObject* parent) : QObject(parent),
-  tradeModel(*this), bookModel(*this) {}
+PublicDataModel::PublicDataModel(QObject* parent, const QColor& color) : QObject(parent),
+  tradeModel(*this), bookModel(*this), color(color) {}
 
 void PublicDataModel::setMarket(const QString& marketName, int features)
 {

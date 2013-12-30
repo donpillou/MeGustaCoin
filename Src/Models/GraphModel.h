@@ -57,6 +57,7 @@ public:
     double b;
     quint64 startTime;
     quint64 endTime;
+    double averagePrice;
   };
 
   class Averager
@@ -136,13 +137,18 @@ public:
       }
     }
 
-    void getLine(double& a, double& b, quint64& startTime, quint64& endTime)
+    void getLine(double& a, double& b, quint64& startTime, quint64& endTime) const
     {
       b = (sumN * sumXY - sumX * sumY) / (sumN * sumXX - sumX * sumX);
       double ar = (sumXX * sumY - sumX * sumXY) / (sumN * sumXX - sumX * sumX);
       a = ar + b * x;
       startTime = data.isEmpty() ? startTime : data.front().time;
       endTime = data.isEmpty() ? startTime : data.back().time;
+    }
+
+    double getAveragePrice() const
+    {
+      return sumY / sumN;
     }
 
   private:

@@ -24,6 +24,7 @@ void GraphModel::addTrade(const MarketStream::Trade& trade)
     averager[i].add(trade.date, trade.amount, trade.price);
     averager[i].limitTo(depths[i]);
     averager[i].getLine(regressionLines[i].a, regressionLines[i].b, regressionLines[i].startTime, regressionLines[i].endTime);
+    regressionLines[i].averagePrice = averager[i].getAveragePrice();
   }
 
   while(!tradeSamples.isEmpty() && trade.date - tradeSamples.front().time > 7 * 24 * 60 * 60)

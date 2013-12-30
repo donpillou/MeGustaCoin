@@ -2,9 +2,9 @@
 #include "stdafx.h"
 #include <cfloat>
 
-GraphView::GraphView(QWidget* parent, PublicDataModel& publicDataModel) :
+GraphView::GraphView(QWidget* parent, PublicDataModel& publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels) :
   QWidget(parent),
-  publicDataModel(publicDataModel), graphModel(publicDataModel.graphModel),
+  publicDataModel(publicDataModel), graphModel(publicDataModel.graphModel), publicDataModels(publicDataModels),
   enabledData((unsigned int)Data::all), time(0), maxAge(60 * 60),
   totalMin(0.), totalMax(0.), volumeMax(0.)
 {
@@ -73,8 +73,19 @@ void GraphView::paintEvent(QPaintEvent* event)
     drawAxesLables(painter, plotRect, hmin, hmax, priceSize);
   if(enabledData & (int)Data::orderBook && !graphModel.bookSamples.isEmpty())
     drawBookPolyline(painter, plotRect, hmin, hmax);
+
+  if(enabledData & (int)Data::otherMarkets)
+  {
+    double averagePrice = graphModel.regressionLines[(int)GraphModel::RegressionDepth::depth1000].averagePrice;
+    foreach(const PublicDataModel* publicDataModel, publicDataModels)
+    {
+      double otherAveragePrice = publicDataModel->graphModel.regressionLines[(int)GraphModel::RegressionDepth::depth1000].averagePrice;
+      drawTradePolyline(painter, plotRect, hmin, hmax, lastVolumeMax, publicDataModel->graphModel, (int)Data::trades, averagePrice / otherAveragePrice, publicDataModel->color);
+    }
+  }
+
   if(enabledData & ((int)Data::trades | (int)Data::tradeVolume) && !graphModel.tradeSamples.isEmpty())
-    drawTradePolyline(painter, plotRect, hmin, hmax, lastVolumeMax);
+    drawTradePolyline(painter, plotRect, hmin, hmax, lastVolumeMax, graphModel, enabledData, 1., QColor(0, 0, 0));
   if(enabledData & (int)Data::regressionLines && !graphModel.tradeSamples.isEmpty())
     drawRegressionLines(painter, plotRect, hmin, hmax);
 
@@ -166,7 +177,7 @@ void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin
   }
 }
 
-void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double hmin, double hmax, double lastVolumeMax)
+void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double hmin, double hmax, double lastVolumeMax, const GraphModel& graphModel, int enabledData, double scale, const QColor& color)
 {
   double hrange = hmax - hmin;
   quint64 vmax = time;
@@ -252,47 +263,51 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
           }
           */
 
-          currentVolumePoint->setX(left + pixelX);
-          currentVolumePoint->setY(bottomInt);
-          ++currentVolumePoint;
-          currentVolumePoint->setX(left + pixelX);
-          currentVolumePoint->setY(bottomInt - currentVolume * (height / 3) / lastVolumeMax);
-          ++currentVolumePoint;
+          if(&graphModel == &this->graphModel)
+          {
+            currentVolumePoint->setX(left + pixelX);
+            currentVolumePoint->setY(bottomInt);
+            ++currentVolumePoint;
+            currentVolumePoint->setX(left + pixelX);
+            currentVolumePoint->setY(bottomInt - currentVolume * (height / 3) / lastVolumeMax);
+            ++currentVolumePoint;
 
-          if(currentVolume > volumeMax)
-            volumeMax = currentVolume;
-          if(currentMin < totalMin)
-            totalMin = currentMin;
-          if(currentMax > totalMax)
-            totalMax = currentMax;
+            if(currentVolume > volumeMax)
+              volumeMax = currentVolume;
+          }
+
+          if(currentMin * scale < totalMin)
+            totalMin = currentMin * scale;
+          if(currentMax * scale > totalMax)
+            totalMax = currentMax * scale;
 
           if(lastLeftPixelX != 0 && lastLeftPixelX != left + pixelX - 1)
           {
             currentPoint->setX(left + pixelX - 1);
-            currentPoint->setY(bottom - (lastLast - hmin) * height / hrange);
+            currentPoint->setY(bottom - (lastLast * scale - hmin) * height / hrange);
             ++currentPoint;
           }
           currentPoint->setX(left + pixelX);
-          currentPoint->setY(bottom - (currentFirst - hmin) * height / hrange);
+          currentPoint->setY(bottom - (currentFirst * scale - hmin) * height / hrange);
           ++currentPoint;
           if(currentFirst - currentMin < currentFirst - currentMax)
           {
             if(currentMin != currentFirst)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentMin - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentMin * scale - hmin) * height / hrange);
               ++currentPoint;
             }
             if(currentMax != currentMin)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentMax - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentMax * scale - hmin) * height / hrange);
               ++currentPoint;
             }
             if(currentLast != currentMax)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentLast - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentLast * scale - hmin) * height / hrange);
               ++currentPoint;
             }
           }
@@ -301,19 +316,19 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
             if(currentMax != currentFirst)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentMax - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentMax * scale - hmin) * height / hrange);
               ++currentPoint;
             }
             if(currentMin != currentMax)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentMin - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentMin * scale - hmin) * height / hrange);
               ++currentPoint;
             }
             if(currentLast != currentMin)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentLast - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentLast * scale - hmin) * height / hrange);
               ++currentPoint;
             }
           }
@@ -383,7 +398,7 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
 
     if(enabledData & (int)Data::trades)
     {
-      QPen rangePen(Qt::black);
+      QPen rangePen(color);
       rangePen.setWidth(2);
       painter.setPen(rangePen);
       painter.drawPolyline(polyData, currentPoint - polyData);

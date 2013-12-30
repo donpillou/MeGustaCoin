@@ -9,8 +9,9 @@ public:
   GraphModel graphModel;
   TradeModel tradeModel;
   BookModel bookModel;
+  QColor color;
 
-  PublicDataModel(QObject* parent);
+  PublicDataModel(QObject* parent, const QColor& color);
 
   void setMarket(const QString& marketName, int features);
   void setMarket(const QString& coinCurrency, const QString& marketCurrency);

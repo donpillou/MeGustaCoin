@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel) :
+GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels) :
   QWidget(parent),
   publicDataModel(publicDataModel), graphModel(publicDataModel.graphModel), zoom(60 * 60)
 {
@@ -98,6 +98,10 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& 
   action->setCheckable(true);
   dataSignalMapper->setMapping(action, (int)GraphView::Data::regressionLines);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  action = dataMenu->addAction(tr("Other Markets"));
+  action->setCheckable(true);
+  dataSignalMapper->setMapping(action, (int)GraphView::Data::otherMarkets);
+  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
   dataAction->setMenu(dataMenu);
   qobject_cast<QToolButton*>(toolBar->widgetForAction(dataAction))->setPopupMode(QToolButton::InstantPopup);
   
@@ -106,7 +110,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& 
   frame->setBackgroundRole(QPalette::Base);
   frame->setAutoFillBackground(true);
 
-  graphView = new GraphView(this, publicDataModel);
+  graphView = new GraphView(this, publicDataModel, publicDataModels);
   QVBoxLayout* graphLayout = new QVBoxLayout;
   graphLayout->setMargin(0);
   graphLayout->setSpacing(0);
