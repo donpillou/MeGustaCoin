@@ -58,7 +58,7 @@ bool BitstampMarket::createOrder(double amount, double price, Market::Order& ord
   order.amount = fabs(orderData["amount"].toDouble());
   if(!buy)
     order.amount = -order.amount;
-  order.total = getOrderCharge(buy ? order.amount : -order.amount, order.price);
+  order.total = getOrderCharge(order.amount, order.price);
   balanceLoaded = false;
   return true;
 }
@@ -106,7 +106,7 @@ bool BitstampMarket::loadOrders(QList<Order>& orders)
     order.amount = fabs(orderData["amount"].toDouble());
     if(!buy)
       order.amount = -order.amount;
-    order.total = getOrderCharge(buy ? order.amount : -order.amount, order.price);
+    order.total = getOrderCharge(order.amount, order.price);
   }
   return true;
 }
