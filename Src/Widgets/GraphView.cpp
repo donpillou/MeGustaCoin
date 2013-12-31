@@ -177,9 +177,9 @@ void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin
   }
 }
 
-void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double hmin, double hmax, double lastVolumeMax, const GraphModel& graphModel, int enabledData, double scale, const QColor& color)
+void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double ymin, double ymax, double lastVolumeMax, const GraphModel& graphModel, int enabledData, double scale, const QColor& color)
 {
-  double hrange = hmax - hmin;
+  double yrange = ymax - ymin;
   quint64 vmax = time;
   quint64 vmin = vmax - maxAge;
   quint64 vrange = vmax - vmin;
@@ -259,30 +259,30 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
           if(lastLeftPixelX != 0 && lastLeftPixelX != left + pixelX - 1)
           {
             currentPoint->setX(left + pixelX - 1);
-            currentPoint->setY(bottom - (lastLast * scale - hmin) * height / hrange);
+            currentPoint->setY(bottom - (lastLast * scale - ymin) * height / yrange);
             ++currentPoint;
           }
           currentPoint->setX(left + pixelX);
-          currentPoint->setY(bottom - (currentFirst * scale - hmin) * height / hrange);
+          currentPoint->setY(bottom - (currentFirst * scale - ymin) * height / yrange);
           ++currentPoint;
           if(currentFirst - currentMin < currentFirst - currentMax)
           {
             if(currentMin != currentFirst)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentMin * scale - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentMin * scale - ymin) * height / yrange);
               ++currentPoint;
             }
             if(currentMax != currentMin)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentMax * scale - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentMax * scale - ymin) * height / yrange);
               ++currentPoint;
             }
             if(currentLast != currentMax)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentLast * scale - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentLast * scale - ymin) * height / yrange);
               ++currentPoint;
             }
           }
@@ -291,19 +291,19 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
             if(currentMax != currentFirst)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentMax * scale - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentMax * scale - ymin) * height / yrange);
               ++currentPoint;
             }
             if(currentMin != currentMax)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentMin * scale - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentMin * scale - ymin) * height / yrange);
               ++currentPoint;
             }
             if(currentLast != currentMin)
             {
               currentPoint->setX(left + pixelX);
-              currentPoint->setY(bottom - (currentLast * scale - hmin) * height / hrange);
+              currentPoint->setY(bottom - (currentLast * scale - ymin) * height / yrange);
               ++currentPoint;
             }
           }
@@ -343,9 +343,9 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double h
   }
 }
 
-void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double hmin, double hmax)
+void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double ymin, double ymax)
 {
-  double hrange = hmax - hmin;
+  double yrange = ymax - ymin;
   quint64 vmax = time;
   quint64 vmin = vmax - maxAge;
   quint64 vrange = vmax - vmin;
@@ -395,7 +395,7 @@ void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double hm
         if(currentEntryCount > 0)
         {
           currentPoint->setX(left + pixelX);
-          currentPoint->setY(bottom - (currentVal - hmin) * height / hrange);
+          currentPoint->setY(bottom - (currentVal - ymin) * height / yrange);
           ++currentPoint;
         }
         if(i >= count)
