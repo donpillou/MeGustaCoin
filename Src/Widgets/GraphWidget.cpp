@@ -125,6 +125,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& 
   setLayout(layout);
 
   settings.beginGroup("LiveGraph");
+  settings.beginGroup(publicDataModel.getMarketName());
   action = qobject_cast<QAction*>(zoomSignalMapper->mapping(settings.value("Zoom", 60 * 60).toUInt()));
   action->setChecked(true);
   zoomSignalMapper->map(action);
@@ -141,13 +142,16 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& 
       }
     }
   settings.endGroup();
+  settings.endGroup();
 }
 
 void GraphWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("LiveGraph");
+  settings.beginGroup(publicDataModel.getMarketName());
   settings.setValue("Zoom", graphView->getMaxAge());
   settings.setValue("EnabledData", graphView->getEnabledData());
+  settings.endGroup();
   settings.endGroup();
 }
 

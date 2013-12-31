@@ -94,12 +94,16 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& data
   headerView->setStretchLastSection(false);
   headerView->setResizeMode(0, QHeaderView::Stretch);
   orderView->sortByColumn(2);
-  headerView->restoreState(settings.value("OrderHeaderState").toByteArray());
+  settings.beginGroup("Orders");
+  headerView->restoreState(settings.value("HeaderState").toByteArray());
+  settings.endGroup();
 }
 
 void OrdersWidget::saveState(QSettings& settings)
 {
-  settings.setValue("OrderHeaderState", orderView->header()->saveState());
+  settings.beginGroup("Orders");
+  settings.setValue("HeaderState", orderView->header()->saveState());
+  settings.endGroup();
 }
 
 

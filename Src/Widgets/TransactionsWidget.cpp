@@ -76,12 +76,16 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Dat
   headerView->setStretchLastSection(false);
   headerView->setResizeMode(0, QHeaderView::Stretch);
   transactionView->sortByColumn(1);
-  headerView->restoreState(settings.value("TransactionHeaderState").toByteArray());
+  settings.beginGroup("Transactions");
+  headerView->restoreState(settings.value("HeaderState").toByteArray());
+  settings.endGroup();
 }
 
 void TransactionsWidget::saveState(QSettings& settings)
 {
-  settings.setValue("TransactionHeaderState", transactionView->header()->saveState());
+  settings.beginGroup("Transactions");
+  settings.setValue("HeaderState", transactionView->header()->saveState());
+  settings.endGroup();
 }
 
 void TransactionsWidget::updateToolBarButtons()

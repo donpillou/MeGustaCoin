@@ -49,14 +49,22 @@ BookWidget::BookWidget(QWidget* parent, QSettings& settings, PublicDataModel& pu
   bidHeaderView->setStretchLastSection(false);
   askHeaderView->setResizeMode(0, QHeaderView::Stretch);
   bidHeaderView->setResizeMode(0, QHeaderView::Stretch);
-  askHeaderView->restoreState(settings.value("BookAskHeaderState").toByteArray());
-  bidHeaderView->restoreState(settings.value("BookBidHeaderState").toByteArray());
+  settings.beginGroup("OrderBook");
+  settings.beginGroup(publicDataModel.getMarketName());
+  askHeaderView->restoreState(settings.value("AskHeaderState").toByteArray());
+  bidHeaderView->restoreState(settings.value("BidHeaderState").toByteArray());
+  settings.endGroup();
+  settings.endGroup();
 }
 
 void BookWidget::saveState(QSettings& settings)
 {
-  settings.setValue("BookAskHeaderState", askView->header()->saveState());
-  settings.setValue("BookBidHeaderState", bidView->header()->saveState());
+  settings.beginGroup("OrderBook");
+  settings.beginGroup(publicDataModel.getMarketName());
+  settings.setValue("AskHeaderState", askView->header()->saveState());
+  settings.setValue("BidHeaderState", bidView->header()->saveState());
+  settings.endGroup();
+  settings.endGroup();
 }
 
 void BookWidget::checkAutoScroll(const QModelIndex& index, int, int)
