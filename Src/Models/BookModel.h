@@ -42,6 +42,7 @@ public:
   };
 
   void setData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems);
+  quint64 getTime() const {return time;}
 
   void reset();
 
@@ -50,7 +51,6 @@ public:
 
 private:
   PublicDataModel& publicDataModel;
-  GraphModel& graphModel;
   quint64 time;
 
 private slots:

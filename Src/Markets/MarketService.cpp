@@ -6,6 +6,9 @@ MarketService::MarketService(DataModel& dataModel) : dataModel(dataModel), marke
 MarketService::~MarketService()
 {
   logout();
+
+  qDeleteAll(queuedJobs.getAll());
+  qDeleteAll(finishedJobs.getAll());
 }
 
 void MarketService::login(const QString& marketName, const QString& userName, const QString& key, const QString& secret)
@@ -40,12 +43,15 @@ void MarketService::logout()
   if(!thread)
     return;
 
-  queuedJobs.prepend(0); // quit
+  queuedJobs.prepend(0); // quit message
   thread->wait();
   delete thread;
   thread = 0;
   delete market;
   market = 0;
+
+  qDeleteAll(queuedJobs.getAll());
+  qDeleteAll(finishedJobs.getAll());
 
   dataModel.orderModel.reset();
   dataModel.transactionModel.reset();
@@ -130,8 +136,8 @@ void MarketService::processJobs()
 {
   for(;;)
   {
-    Job* job = queuedJobs.get();
-    if(!job)
+    Job* job = 0;
+    if(!queuedJobs.get(job) || !job)
       break;
     processJob(job);
     finishedJobs.append(job);
@@ -211,8 +217,8 @@ void MarketService::finalizeJobs()
 {
   for(;;)
   {
-    Job* job = finishedJobs.get(0);
-    if(!job)
+    Job* job = 0;
+    if(!finishedJobs.get(job, 0) || !job)
       break;
     if(!job->error)
     {

@@ -19,6 +19,8 @@ MarketStreamService::MarketStreamService(QObject* parent, DataModel& dataModel, 
 MarketStreamService::~MarketStreamService()
 {
   unsubscribe();
+
+  qDeleteAll(actionQueue.getAll());
 }
 
 void MarketStreamService::subscribe()
@@ -37,8 +39,8 @@ void MarketStreamService::subscribe()
 
   struct WorkerThread : public QThread, public MarketStream::Callback
   {
-    WorkerThread(MarketStreamService& service, MarketStream& marketStream, DataModel& dataModel, PublicDataModel& publicDataModel) :
-      service(service), marketStream(marketStream), dataModel(dataModel), publicDataModel(publicDataModel) {}
+    WorkerThread(MarketStreamService& streamService, MarketStream& marketStream, JobQueue<Action*>& actionQueue) :
+      streamService(streamService), marketStream(marketStream), actionQueue(actionQueue) {}
 
     virtual void run()
     {
@@ -47,21 +49,22 @@ void MarketStreamService::subscribe()
 
     virtual void receivedTrade(const MarketStream::Trade& trade)
     {
-      publicDataModel.addTrade(trade);
+      actionQueue.append(new AddTradeAction(trade));
+      QTimer::singleShot(0, &streamService, SLOT(executeActions()));
     }
 
     virtual void error(const QString& message)
     {
-      dataModel.logModel.addMessage(LogModel::Type::error, message);
+      actionQueue.append(new ErrorAction(message));
+      QTimer::singleShot(0, &streamService, SLOT(executeActions()));
     }
 
-    MarketStreamService& service;
+    MarketStreamService& streamService;
     MarketStream& marketStream;
-    DataModel& dataModel;
-    PublicDataModel& publicDataModel;
+    JobQueue<Action*>& actionQueue;
   };
 
-  thread = new WorkerThread(*this, *marketStream, dataModel, publicDataModel);
+  thread = new WorkerThread(*this, *marketStream, actionQueue);
   thread->start();
 
   publicDataModel.setMarket(marketStream->getCoinCurrency(), marketStream->getMarketCurrency());
@@ -81,5 +84,34 @@ void MarketStreamService::unsubscribe()
   delete marketStream;
   marketStream = 0;
 
+  qDeleteAll(actionQueue.getAll());
+
   dataModel.logModel.addMessage(LogModel::Type::information,  tr("Stopped listening to %1").arg(marketName));
+}
+
+void MarketStreamService::executeActions()
+{
+  for(;;)
+  {
+    Action* action = 0;
+    if(!actionQueue.get(action, 0) || !action)
+      break;
+    switch(action->type)
+    {
+    case Action::Type::addTrade:
+      {
+        AddTradeAction* addTradeAction = (AddTradeAction*)action;
+        publicDataModel.addTrade(addTradeAction->trade);
+      }
+      break;
+    case Action::Type::error:
+      {
+        ErrorAction* errorAction = (ErrorAction*)action;
+        dataModel.logModel.addMessage(LogModel::Type::error, errorAction->message);
+      }
+      break;
+    }
+
+    delete action;
+  }
 }

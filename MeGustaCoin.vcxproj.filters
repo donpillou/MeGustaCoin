@@ -157,6 +157,9 @@
     <ClInclude Include="Src\Tools\Download.h">
       <Filter>Tools</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Tools\JobQueue.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
     <ClInclude Include="Src\Tools\Json.h">
       <Filter>Tools</Filter>
     </ClInclude>

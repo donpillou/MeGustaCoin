@@ -25,6 +25,7 @@ public:
   QString formatPrice(double price) const;
 
   void addTrade(const MarketStream::Trade& trade);
+  void setData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems);
 
 signals:
   void changedMarket();

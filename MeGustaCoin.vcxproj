@@ -226,6 +226,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_TransactionModel.cpp;%(Outputs)</Outputs>
     </CustomBuild>
     <ClInclude Include="Src\Tools\Download.h" />
+    <ClInclude Include="Src\Tools\JobQueue.h" />
     <ClInclude Include="Src\Tools\Json.h" />
     <ClInclude Include="Src\Tools\Sha256.h" />
     <ClInclude Include="Src\Tools\Websocket.h" />

@@ -133,55 +133,8 @@ private:
     LoadTradesJob() : Job(Type::loadTrades) {}
   };*/
 
-  class JobQueue
-  {
-  public:
-    ~JobQueue()
-    {
-      qDeleteAll(jobs);
-    }
-
-    void append(Job* job)
-    {
-      QMutexLocker sync(&jobMutex);
-      jobs.append(job);
-      createdJobCondition.wakeAll();
-    }
-
-    void prepend(Job* job)
-    {
-      QMutexLocker sync(&jobMutex);
-      jobs.append(job);
-      createdJobCondition.wakeAll();
-    }
-
-    Job* get(unsigned long timeout = ULONG_MAX)
-    {
-      QMutexLocker sync(&jobMutex);
-      for(;;)
-      {
-        if(jobs.isEmpty())
-        {
-          if(timeout == 0)
-            return 0;
-          createdJobCondition.wait(&jobMutex, timeout);
-        }
-        if(jobs.isEmpty())
-          return 0;
-        Job* job = jobs.front();
-        jobs.pop_front();
-        return job;
-      }
-    }
-
-  private:
-    QMutex jobMutex;
-    QWaitCondition createdJobCondition;
-    QList<Job*> jobs;
-  };
-
-  JobQueue queuedJobs;
-  JobQueue finishedJobs;
+  JobQueue<Job*> queuedJobs;
+  JobQueue<Job*> finishedJobs;
 
 private slots:
   void finalizeJobs();
