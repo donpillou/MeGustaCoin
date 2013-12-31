@@ -8,6 +8,7 @@ public:
   GraphView(QWidget* parent, PublicDataModel& publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels);
 
   void setMaxAge(int maxAge);
+  int getMaxAge() const {return maxAge;}
 
   enum class Data
   {

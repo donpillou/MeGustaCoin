@@ -3,7 +3,7 @@
 
 GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels) :
   QWidget(parent),
-  publicDataModel(publicDataModel), graphModel(publicDataModel.graphModel), zoom(60 * 60)
+  publicDataModel(publicDataModel), graphModel(publicDataModel.graphModel)
 {
   /*
   setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
@@ -146,14 +146,13 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& 
 void GraphWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("LiveGraph");
-  settings.setValue("Zoom", zoom);
+  settings.setValue("Zoom", graphView->getMaxAge());
   settings.setValue("EnabledData", graphView->getEnabledData());
   settings.endGroup();
 }
 
 void GraphWidget::setZoom(int maxTime)
 {
-  this->zoom = maxTime;
   QAction* srcAction = qobject_cast<QAction*>(zoomSignalMapper->mapping(maxTime));
   zoomAction->setText(srcAction->text());
   graphView->setMaxAge(maxTime);

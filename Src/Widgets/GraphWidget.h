@@ -21,6 +21,5 @@ private:
 
   QAction* zoomAction;
   QSignalMapper* zoomSignalMapper;
-  int zoom;
 };
 
