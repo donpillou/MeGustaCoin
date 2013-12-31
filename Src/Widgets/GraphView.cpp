@@ -212,7 +212,7 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double y
       double currentVolume = 0;
       int currentEntryCount = 0;
       double currentLast = 0.;
-      double currentFirst = 0.;
+      double currentFirst = sample->first;
       double lastLast = 0.;
       int lastLeftPixelX = 0;
 
