@@ -6,7 +6,7 @@ GraphView::GraphView(QWidget* parent, PublicDataModel& publicDataModel, const QM
   QWidget(parent),
   publicDataModel(publicDataModel), graphModel(publicDataModel.graphModel), publicDataModels(publicDataModels),
   enabledData((unsigned int)Data::all), time(0), maxAge(60 * 60),
-  totalMin(0.), totalMax(0.), volumeMax(0.)
+  totalMin(DBL_MAX), totalMax(0.), volumeMax(0.)
 {
   connect(&graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
 }
@@ -53,6 +53,10 @@ void GraphView::paintEvent(QPaintEvent* event)
       time = bookSample.time;
   }
 
+  double vmin = floor(totalMin);
+  double vmax = ceil(qMax(totalMax, vmin + 1.));
+  const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, publicDataModel.formatPrice(totalMax == 0. ? 0. : vmax));
+
   double lastTotalMin = totalMin;
   double lastTotalMax = totalMax;
   double lastVolumeMax = volumeMax;
@@ -61,18 +65,14 @@ void GraphView::paintEvent(QPaintEvent* event)
   totalMax = 0.;
   volumeMax = 0.;
 
-  double hmin = floor(lastTotalMin);
-  double hmax = ceil(qMax(lastTotalMax, hmin + 1.));
-  const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, publicDataModel.formatPrice(hmax == DBL_MAX ? 0. : hmax));
-
   QRect plotRect(10, 10, rect.width() - (10 + priceSize.width() + 8), rect.height() - 20 - priceSize.height() + 5);
   if(plotRect.width() <= 0 || plotRect.height() <= 0)
     return; // too small
 
   if(lastTotalMax != 0.)
-    drawAxesLables(painter, plotRect, hmin, hmax, priceSize);
+    drawAxesLables(painter, plotRect, vmin, vmax, priceSize);
   if(enabledData & (int)Data::orderBook && !graphModel.bookSamples.isEmpty())
-    drawBookPolyline(painter, plotRect, hmin, hmax);
+    drawBookPolyline(painter, plotRect, vmin, vmax);
 
   if(enabledData & (int)Data::otherMarkets)
   {
@@ -80,14 +80,14 @@ void GraphView::paintEvent(QPaintEvent* event)
     foreach(const PublicDataModel* publicDataModel, publicDataModels)
     {
       double otherAveragePrice = publicDataModel->graphModel.regressionLines[(int)GraphModel::RegressionDepth::depth1000].averagePrice;
-      drawTradePolyline(painter, plotRect, hmin, hmax, lastVolumeMax, publicDataModel->graphModel, (int)Data::trades, averagePrice / otherAveragePrice, publicDataModel->color);
+      drawTradePolyline(painter, plotRect, vmin, vmax, lastVolumeMax, publicDataModel->graphModel, (int)Data::trades, averagePrice / otherAveragePrice, publicDataModel->color);
     }
   }
 
   if(enabledData & ((int)Data::trades | (int)Data::tradeVolume) && !graphModel.tradeSamples.isEmpty())
-    drawTradePolyline(painter, plotRect, hmin, hmax, lastVolumeMax, graphModel, enabledData, 1., QColor(0, 0, 0));
+    drawTradePolyline(painter, plotRect, vmin, vmax, lastVolumeMax, graphModel, enabledData, 1., QColor(0, 0, 0));
   if(enabledData & (int)Data::regressionLines && !graphModel.tradeSamples.isEmpty())
-    drawRegressionLines(painter, plotRect, hmin, hmax);
+    drawRegressionLines(painter, plotRect, vmin, vmax);
 
   if((totalMin != lastTotalMin || totalMax != lastTotalMax || volumeMax != lastVolumeMax) && totalMax != 0.)
     update();
