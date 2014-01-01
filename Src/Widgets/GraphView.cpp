@@ -53,8 +53,8 @@ void GraphView::paintEvent(QPaintEvent* event)
       time = bookSample.time;
   }
 
-  double vmin = floor(totalMin);
-  double vmax = ceil(qMax(totalMax, vmin + 1.));
+  double vmin = totalMin;
+  double vmax = qMax(totalMax, vmin + 1.);
   const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, publicDataModel.formatPrice(totalMax == 0. ? 0. : vmax));
 
   double lastTotalMin = totalMin;
@@ -108,14 +108,21 @@ void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin
     if(vstep * height / vrange >= 40.f)
       vstep *= 0.5;
 
-    for(int i = 0, count = (int)(vrange / vstep); i <= count; ++i)
+    double vstart = ceil(vmin / vstep) * vstep - vmin;
+
+    for(int i = 0;; ++i)
     {
-      QPoint right(rect.right() + 4, rect.bottom() - vstep * i * height / vrange);
+      QPoint right(rect.right() + 4, rect.bottom() - (vstart + vstep * i) * height / vrange);
+
+      if(right.y() < rect.top())
+        break;
 
       painter.setPen(linePen);
       painter.drawLine(QPoint(0, right.y()), right);
       painter.setPen(textPen);
-      painter.drawText(QPoint(right.x() + 2, right.y() + priceSize.height() * 0.5 - 3), publicDataModel.formatPrice(vmin + i * vstep));
+      QPoint textPos(right.x() + 2, right.y() + priceSize.height() * 0.5 - 3);
+      if(textPos.y() > 2)
+        painter.drawText(textPos, publicDataModel.formatPrice(vmin + vstart + i * vstep));
     }
   }
 
