@@ -7,26 +7,25 @@ BtcChinaMarketStream::BtcChinaMarketStream() :
 
 void BtcChinaMarketStream::loop(Callback& callback) 
 {
+  HttpRequest httpRequest;
+
   while(!canceled)
   {
-    Download dl;
-    char url[256];
-    if(lastTid == 0)
-      strcpy(url, "https://data.btcchina.com/data/historydata");
-    else
-      _snprintf(url, sizeof(url), "https://data.btcchina.com/data/historydata?since=%llu", (long long unsigned)lastTid);
+    QString url = lastTid == 0 ? QString("https://data.btcchina.com/data/historydata") :
+      QString("https://data.btcchina.com/data/historydata?since=%1").arg(lastTid);
 
-    char* buffer = dl.load(url);
+    QByteArray buffer;
+    bool result = httpRequest.get(url, buffer);
     if(canceled)
       break;
-    if(!buffer)
+    if(!result)
     {
-      callback.error(QString("Could not update BtcChina trades: ") + dl.getErrorString());
+      callback.error(QString("Could not update BtcChina trades: ") + httpRequest.getLastError());
       sleep(10 * 1337);
       continue;
     }
 
-    if(*buffer)
+    if(!buffer.isEmpty())
     {
       // [{"date":"1388417186","price":4406.41,"amount":0.016,"tid":"4144642","type":"sell"},{"date":"1388417186","price":4401,"amount":0.973,"tid":"4144643","type":"sell"}]
 

@@ -522,13 +522,12 @@ bool BitstampMarket::request(const char* url, bool isPublic, const QVariantMap& 
 {
   avoidSpamming();
 
-  Download dl;
-  char* dlData;
+  QByteArray buffer;
   if (isPublic)
   {
-    if(!(dlData = dl.load(url)))
+    if(!httpRequest.get(url, buffer))
     {
-      error = dl.getErrorString();
+      error = httpRequest.getLastError();
       return false;
     }
   }
@@ -546,43 +545,31 @@ bool BitstampMarket::request(const char* url, bool isPublic, const QVariantMap& 
     QByteArray nonce(QString::number(newNonce).toAscii());
     QByteArray message = nonce + clientId + key;
     QByteArray signature = Sha256::hmac(secret, message).toHex().toUpper();
-    QByteArray amount, price, id;
+    
+    QMap<QString, QString> formData;
+    formData["key"] = key;
+    formData["signature"] = signature;
+    formData["nonce"] = nonce;
+    for(QVariantMap::const_iterator j = params.begin(), end = params.end(); j != end; ++j)
+      formData[j.key()] = j.value().toString();
 
-    const char* fields[10];
-    const char* values[10];
-    int i = 0;
-
-    fields[i] = "key"; values[i++] = key.data();
-    fields[i] = "signature"; values[i++] = signature.data();
-    fields[i] = "nonce"; values[i++] = nonce.data();
-
-    QList<QByteArray> buffers;
-    for(QVariantMap::const_iterator j = params.begin(), end = params.end(); j != end; ++j, ++i)
+    if(!httpRequest.post(url, formData, buffer))
     {
-      Q_ASSERT(i < sizeof(fields) / sizeof(*fields));
-      buffers.append(j.key().toUtf8());
-      fields[i] = buffers.back().constData();
-      buffers.append(j.value().toString().toUtf8());
-      values[i] = buffers.back().constData();
-    }
-
-    if(!(dlData = dl.loadPOST(url, fields, values, i)))
-    {
-      error = dl.getErrorString();
+      error = httpRequest.getLastError();
       return false;
     }
   }
 
   if(strcmp(url, "https://www.bitstamp.net/api/cancel_order/") == 0) // does not return JSON
   {
-    QString answer(dlData);
+    QString answer(buffer);
     QVariantMap cancelData;
     if(answer != "true")
       cancelData["error"] = answer;
     result = cancelData;
   }
   else
-    result = Json::parse(dlData);
+    result = Json::parse(buffer);
 
   if(result.toMap().contains("error"))
   {

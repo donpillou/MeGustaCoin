@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -118,7 +118,7 @@
     <ClCompile Include="Src\Models\PublicDataModel.cpp" />
     <ClCompile Include="Src\Models\TradeModel.cpp" />
     <ClCompile Include="Src\Models\TransactionModel.cpp" />
-    <ClCompile Include="Src\Tools\Download.cpp" />
+    <ClCompile Include="Src\Tools\HttpRequest.cpp" />
     <ClCompile Include="Src\Tools\Json.cpp" />
     <ClCompile Include="Src\Tools\Sha256.cpp" />
     <ClCompile Include="Src\Tools\Websocket.cpp" />
@@ -225,7 +225,7 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl -IExt/easywsclient Src/Models/TransactionModel.h -o Build/Release/moc_TransactionModel.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_TransactionModel.cpp;%(Outputs)</Outputs>
     </CustomBuild>
-    <ClInclude Include="Src\Tools\Download.h" />
+    <ClInclude Include="Src\Tools\HttpRequest.h" />
     <ClInclude Include="Src\Tools\JobQueue.h" />
     <ClInclude Include="Src\Tools\Json.h" />
     <ClInclude Include="Src\Tools\Sha256.h" />

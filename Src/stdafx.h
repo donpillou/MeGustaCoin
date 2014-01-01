@@ -3,7 +3,7 @@
 
 #include <QtGUI>
 
-#include "Tools/Download.h"
+#include "Tools/HttpRequest.h"
 #include "Tools/Sha256.h"
 #include "Tools/Json.h"
 #include "Tools/Websocket.h"

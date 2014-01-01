@@ -34,6 +34,8 @@ private:
 
   QString error;
 
+  HttpRequest httpRequest;
+
   QDateTime lastRequestTime;
   quint64 lastNonce;
   QDateTime lastLiveTradeUpdateTime;
