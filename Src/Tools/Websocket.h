@@ -17,6 +17,8 @@ public:
 
   bool send(const QByteArray& data);
 
+  bool sendPing();
+
 private:
   void* data;
   QString error;

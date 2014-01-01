@@ -27,14 +27,22 @@ void BitstampMarketStream::loop(Callback& callback)
         continue;
       if(canceled)
         break;
+      lastMessageTime = QDateTime::currentDateTime();
     }
 
     // wait for update
+    if(lastMessageTime.secsTo(QDateTime::currentDateTime()) > 3 * 60)
+    {
+      if(!websocket.sendPing())
+        continue;
+      lastMessageTime = QDateTime::currentDateTime();
+    }
     if(!websocket.read(buffer, 500))
       continue;
     if(canceled)
       break;
 
+    lastMessageTime = QDateTime::currentDateTime();
     if(buffer.isEmpty())
       continue;
 

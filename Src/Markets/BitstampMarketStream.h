@@ -20,5 +20,7 @@ private:
   QMutex canceledConditionMutex;
   QWaitCondition canceledCondition;
 
+  QDateTime lastMessageTime;
+
   void sleep(unsigned int ms);
 };

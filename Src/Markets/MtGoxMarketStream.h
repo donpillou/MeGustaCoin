@@ -24,5 +24,9 @@ private:
   qint64 timeOffset;
   bool timeOffsetSet;
 
+  QDateTime lastMessageTime;
+
   void sleep(unsigned int ms);
+
+  bool sendPing();
 };

@@ -21,23 +21,41 @@ void MtGoxMarketStream::loop(Callback& callback)
       }
       if(canceled)
         break;
+
       // send subscribe command
-      // appearantly i don't need this
-      //if(!websocket.send())
-      //  continue;
-      //if(canceled)
-      //  break;
+      // appearantly i don't need this, but lets send it anyway (just to say hello)
+      if(!websocket.send("{\"op\": \"mtgox.subscribe\",\"type\": \"ticker\"}"))
+        continue;
+      if(canceled)
+        break;
+      if(!websocket.send("{\"op\": \"mtgox.subscribe\",\"type\": \"trades\"}"))
+        continue;
+      if(canceled)
+        break;
+      if(!websocket.send("{\"op\": \"mtgox.subscribe\",\"type\": \"depth\"}"))
+        continue;
+      if(canceled)
+        break;
+      lastMessageTime = QDateTime::currentDateTime();
     }
 
     // wait for update
+    if(lastMessageTime.secsTo(QDateTime::currentDateTime()) > 3 * 60)
+    {
+      if(!sendPing())
+        continue;
+      lastMessageTime = QDateTime::currentDateTime();
+    }
     if(!websocket.read(buffer, 500))
       continue;
     if(canceled)
       break;
 
+    lastMessageTime = QDateTime::currentDateTime();
     if(buffer.isEmpty())
       continue;
 
+    qint64 now = QDateTime::currentDateTimeUtc().toTime_t();
     QVariantList data = Json::parseList(buffer);
 
     foreach(const QVariant& var, data)
@@ -56,7 +74,6 @@ void MtGoxMarketStream::loop(Callback& callback)
           trade.price = (double)tradeMap["price_int"].toULongLong() / (double)100000ULL;
           trade.date = tradeMap["date"].toULongLong();
 
-          qint64 now = QDateTime::currentDateTimeUtc().toTime_t();
           qint64 offset = now - trade.date;
           if(offset < timeOffset || !timeOffsetSet)
           {
@@ -84,6 +101,15 @@ void MtGoxMarketStream::loop(Callback& callback)
       }
     }
   }
+}
+
+bool MtGoxMarketStream::sendPing()
+{
+  // mtgox websocket server does not support websockt pings. hence lets send some valid commands
+  if(!websocket.send("{\"op\": \"unsubscribe\",\"channel\": \"d5f06780-30a8-4a48-a2f8-7ed181b4a13f \"}") ||
+     !websocket.send("{\"op\": \"mtgox.subscribe\",\"type\": \"ticker\"}"))
+    return false;
+  return true;
 }
 
 void MtGoxMarketStream::cancel()

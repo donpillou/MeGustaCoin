@@ -126,3 +126,15 @@ bool Websocket::send(const QByteArray& buffer)
   return ws->getReadyState() == easywsclient::WebSocket::OPEN;
 }
 
+bool Websocket::sendPing()
+{
+  if(!data)
+    return false;
+
+  easywsclient::WebSocket::pointer ws = (easywsclient::WebSocket::pointer)data;
+  if(ws->getReadyState() != easywsclient::WebSocket::OPEN)
+    return false;
+  ws->sendPing();
+
+  return ws->getReadyState() == easywsclient::WebSocket::OPEN;
+}
