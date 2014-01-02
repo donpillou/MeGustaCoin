@@ -8,14 +8,10 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
   connect(&dataModel, SIGNAL(changedTickerData()), this, SLOT(updateWindowTitle()));
 
-  //7f007f
-  //00007f
-  //007f7f
-  //615f00
-
   publicDataModels.insert("MtGox/USD", new PublicDataModel(this, QColor(0x7f, 0x00, 0x7f, 0x70)));
   publicDataModels.insert("Bitstamp/USD", new PublicDataModel(this, QColor(0x00, 0x00, 0x7f, 0x70)));
   publicDataModels.insert("BtcChina/CNY", new PublicDataModel(this, QColor(0x00, 0x7f, 0x7f, 0x70)));
+  publicDataModels.insert("Huobi/CNY", new PublicDataModel(this, QColor(0x61, 0x5f, 0x00, 0x70)));
   for(QMap<QString, PublicDataModel*>::iterator i = publicDataModels.begin(), end = publicDataModels.end(); i != end; ++i)
   {
     MarketData marketData;

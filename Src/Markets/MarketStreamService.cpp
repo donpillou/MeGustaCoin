@@ -12,6 +12,8 @@ MarketStreamService::MarketStreamService(QObject* parent, DataModel& dataModel, 
     features = (int)MarketStream::Features::trades;
   else if(marketName == "BtcChina/CNY")
     features = (int)MarketStream::Features::trades;
+  else if(marketName == "Huobi/CNY")
+    features = (int)MarketStream::Features::trades;
 
   publicDataModel.setMarket(marketName, features);
 }
@@ -34,6 +36,8 @@ void MarketStreamService::subscribe()
     marketStream = new BitstampMarketStream();
   else if(marketName == "BtcChina/CNY")
     marketStream = new BtcChinaMarketStream();
+  else if(marketName == "Huobi/CNY")
+    marketStream = new HuobiMarketStream();
   if(!marketStream)
     return;
 

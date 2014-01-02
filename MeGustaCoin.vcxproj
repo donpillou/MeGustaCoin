@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -107,6 +107,7 @@
     <ClCompile Include="Src\Markets\BitstampMarket.cpp" />
     <ClCompile Include="Src\Markets\BitstampMarketStream.cpp" />
     <ClCompile Include="Src\Markets\BtcChinaMarketStream.cpp" />
+    <ClCompile Include="Src\Markets\HuobiMarketStream.cpp" />
     <ClCompile Include="Src\Markets\MarketService.cpp" />
     <ClCompile Include="Src\Markets\MarketStreamService.cpp" />
     <ClCompile Include="Src\Markets\MtGoxMarketStream.cpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="Src\Markets\BitstampMarket.h" />
     <ClInclude Include="Src\Markets\BitstampMarketStream.h" />
     <ClInclude Include="Src\Markets\BtcChinaMarketStream.h" />
+    <ClInclude Include="Src\Markets\HuobiMarketStream.h" />
     <ClInclude Include="Src\Markets\Market.h" />
     <CustomBuild Include="Src\Markets\MarketService.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"MarketService.h (Qt moc)"</Message>
