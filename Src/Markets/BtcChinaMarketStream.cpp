@@ -5,9 +5,12 @@ BtcChinaMarketStream::BtcChinaMarketStream() :
   canceled(false), marketCurrency("CNY"), coinCurrency("BTC"),
   timeOffsetSet(false), lastTid(0) {}
 
-void BtcChinaMarketStream::loop(Callback& callback) 
+void BtcChinaMarketStream::process(Callback& callback) 
 {
   HttpRequest httpRequest;
+  bool connected = false;
+
+  callback.information("Connecting to BtcChina/CNY...");
 
   while(!canceled)
   {
@@ -16,14 +19,21 @@ void BtcChinaMarketStream::loop(Callback& callback)
 
     QByteArray buffer;
     bool result = httpRequest.get(url, buffer);
-    if(canceled)
-      break;
     if(!result)
     {
-      callback.error(QString("Could not update BtcChina trades: ") + httpRequest.getLastError());
-      sleep(10 * 1337);
-      continue;
+      if(connected)
+        callback.error("Lost connection to BtcChina/CNY.");
+      else
+        callback.error("Could not connect to BtcChina/CNY.");
+      return;
     }
+    if(!connected)
+    {
+      connected = true;
+      callback.information("Connected to BtcChina/CNY.");
+    }
+    if(canceled)
+      break;
 
     if(!buffer.isEmpty())
     {
@@ -57,8 +67,10 @@ void BtcChinaMarketStream::loop(Callback& callback)
         }
       }
     }
-    sleep(10 * 1337);
+    sleep(14);
   }
+
+  callback.information("Closed connection to BtcChina/CNY.");
 }
 
 void BtcChinaMarketStream::cancel()
@@ -69,9 +81,9 @@ void BtcChinaMarketStream::cancel()
   canceledConditionMutex.unlock();
 }
 
-void BtcChinaMarketStream::sleep(unsigned int ms)
+void BtcChinaMarketStream::sleep(unsigned int secs)
 {
   canceledConditionMutex.lock();
-  canceledCondition.wait(&canceledConditionMutex, ms);
+  canceledCondition.wait(&canceledConditionMutex, secs * 1000);
   canceledConditionMutex.unlock();
 }

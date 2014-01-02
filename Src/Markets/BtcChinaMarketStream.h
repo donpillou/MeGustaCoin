@@ -9,7 +9,7 @@ public:
 
   virtual const QString& getMarketCurrency() const {return marketCurrency;}
   virtual const QString& getCoinCurrency() const {return coinCurrency;}
-  virtual void loop(Callback& callback);
+  virtual void process(Callback& callback);
   virtual void cancel();
 
 private:
@@ -24,5 +24,5 @@ private:
 
   quint64 lastTid;
 
-  void sleep(unsigned int ms);
+  void sleep(unsigned int secs);
 };

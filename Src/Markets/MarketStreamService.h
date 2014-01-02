@@ -18,6 +18,7 @@ private:
   QString marketName;
   MarketStream* marketStream;
   QThread* thread;
+  bool canceled;
 
   class Action
   {
@@ -25,7 +26,7 @@ private:
     enum class Type
     {
       addTrade,
-      error
+      logMessage,
     };
     Type type;
 
@@ -40,11 +41,12 @@ private:
     AddTradeAction(const MarketStream::Trade& trade) : Action(Type::addTrade), trade(trade) {}
   };
 
-  class ErrorAction : public Action
+  class LogMessageAction : public Action
   {
   public:
+    LogModel::Type type;
     QString message;
-    ErrorAction(const QString& message) : Action(Type::error), message(message) {}
+    LogMessageAction(LogModel::Type type, const QString& message) : Action(Type::logMessage), type(type), message(message) {}
   };
 
   JobQueue<Action*> actionQueue;

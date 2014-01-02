@@ -9,16 +9,13 @@ public:
 
   virtual const QString& getMarketCurrency() const {return marketCurrency;}
   virtual const QString& getCoinCurrency() const {return coinCurrency;}
-  virtual void loop(Callback& callback);
+  virtual void process(Callback& callback);
   virtual void cancel();
 
 private:
   QString marketCurrency;
   QString coinCurrency;
-  Websocket websocket;
   bool canceled;
-  QMutex canceledConditionMutex;
-  QWaitCondition canceledCondition;
 
   QDateTime lastMessageTime;
 

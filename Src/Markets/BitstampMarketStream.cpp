@@ -4,41 +4,49 @@
 BitstampMarketStream::BitstampMarketStream() :
   canceled(false), marketCurrency("USD"), coinCurrency("BTC") {}
 
-void BitstampMarketStream::loop(Callback& callback) 
+void BitstampMarketStream::process(Callback& callback)
 {
+  Websocket websocket;
   QByteArray buffer;
+  
+  callback.information("Connecting to Bitstamp/USD...");
+
+  if(!websocket.connect("ws://ws.pusherapp.com/app/de504dc5763aeef9ff52?protocol=6&client=js&version=2.1.2"))
+  {
+    callback.error("Could not connect to Bitstamp/USD.");
+    return;
+  }
+
+  callback.information("Connected to Bitstamp/USD.");
+
+  // send subscribe command
+  QByteArray message("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"live_trades\"}}");
+  if(!websocket.send(message))
+  {
+    callback.error("Lost connection to Bitstamp/USD.");
+    return;
+  }
+  lastMessageTime = QDateTime::currentDateTime();
+
+  // message loop
   while(!canceled)
   {
-    if(!websocket.isConnected())
-    {
-      websocket.close();
-      if(!websocket.connect("ws://ws.pusherapp.com/app/de504dc5763aeef9ff52?protocol=6&client=js&version=2.1.2"))
-      {
-        callback.error("Could not connect to Bitstamp's streaming API.");
-        sleep(10 * 1000);
-        continue;
-      }
-      if(canceled)
-        break;
-
-      // send subscribe command
-      QByteArray message("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"live_trades\"}}");
-      if(!websocket.send(message))
-        continue;
-      if(canceled)
-        break;
-      lastMessageTime = QDateTime::currentDateTime();
-    }
-
     // wait for update
     if(lastMessageTime.secsTo(QDateTime::currentDateTime()) > 3 * 60)
     {
       if(!websocket.sendPing())
-        continue;
+      {
+        callback.error("Lost connection to Bitstamp/USD.");
+        return;
+      }
       lastMessageTime = QDateTime::currentDateTime();
     }
+
     if(!websocket.read(buffer, 500))
-      continue;
+    {
+      callback.error("Lost connection to Bitstamp/USD.");
+      return;
+    }
     if(canceled)
       break;
 
@@ -89,19 +97,11 @@ void BitstampMarketStream::loop(Callback& callback)
       }
     }
   }
+
+  callback.information("Closed connection to Bitstamp/USD.");
 }
 
 void BitstampMarketStream::cancel()
 {
   canceled = true;
-  canceledConditionMutex.lock(),
-  canceledCondition.wakeAll();
-  canceledConditionMutex.unlock();
-}
-
-void BitstampMarketStream::sleep(unsigned int ms)
-{
-  canceledConditionMutex.lock();
-  canceledCondition.wait(&canceledConditionMutex, ms);
-  canceledConditionMutex.unlock();
 }

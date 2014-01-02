@@ -5,49 +5,50 @@ MtGoxMarketStream::MtGoxMarketStream() :
   canceled(false), marketCurrency("USD"), coinCurrency("BTC"),
   timeOffsetSet(false) {}
 
-void MtGoxMarketStream::loop(Callback& callback) 
+void MtGoxMarketStream::process(Callback& callback) 
 {
+  Websocket websocket;
   QByteArray buffer;
+
+  callback.information("Connecting to MtGox/USD...");
+
+  if(!websocket.connect("ws://websocket.mtgox.com:80/mtgox?Currency=USD"))
+  {
+    callback.error("Could not connect to MtGox/USD.");
+    return;
+  }
+
+  callback.information("Connected to MtGox/USD.");
+
+  // send subscribe command
+  // appearantly i don't need this, but lets send it anyway (just to say hello)
+  if(!websocket.send("{\"op\": \"mtgox.subscribe\",\"type\": \"ticker\"}") ||
+     !websocket.send("{\"op\": \"mtgox.subscribe\",\"type\": \"trades\"}") ||
+     !websocket.send("{\"op\": \"mtgox.subscribe\",\"type\": \"depth\"}"))
+  {
+    callback.error("Lost connection to MtGox/USD.");
+    return;
+  }
+  lastMessageTime = QDateTime::currentDateTime();
+
+  // message loop
   while(!canceled)
   {
-    if(!websocket.isConnected())
-    {
-      websocket.close();
-      if(!websocket.connect("ws://websocket.mtgox.com:80/mtgox?Currency=USD"))
-      {
-        callback.error("Could not connect to MtGox' streaming API.");
-        sleep(10 * 1000);
-        continue;
-      }
-      if(canceled)
-        break;
-
-      // send subscribe command
-      // appearantly i don't need this, but lets send it anyway (just to say hello)
-      if(!websocket.send("{\"op\": \"mtgox.subscribe\",\"type\": \"ticker\"}"))
-        continue;
-      if(canceled)
-        break;
-      if(!websocket.send("{\"op\": \"mtgox.subscribe\",\"type\": \"trades\"}"))
-        continue;
-      if(canceled)
-        break;
-      if(!websocket.send("{\"op\": \"mtgox.subscribe\",\"type\": \"depth\"}"))
-        continue;
-      if(canceled)
-        break;
-      lastMessageTime = QDateTime::currentDateTime();
-    }
-
     // wait for update
     if(lastMessageTime.secsTo(QDateTime::currentDateTime()) > 3 * 60)
     {
-      if(!sendPing())
-        continue;
+      if(!sendPing(websocket))
+      {
+        callback.error("Lost connection to MtGox/USD.");
+        return;
+      }
       lastMessageTime = QDateTime::currentDateTime();
     }
     if(!websocket.read(buffer, 500))
-      continue;
+    {
+      callback.error("Lost connection to MtGox/USD.");
+      return;
+    }
     if(canceled)
       break;
 
@@ -101,9 +102,11 @@ void MtGoxMarketStream::loop(Callback& callback)
       }
     }
   }
+
+  callback.information("Closed connection to MtGox/USD.");
 }
 
-bool MtGoxMarketStream::sendPing()
+bool MtGoxMarketStream::sendPing(Websocket& websocket)
 {
   // mtgox websocket server does not support websockt pings. hence lets send some valid commands
   if(!websocket.send("{\"op\": \"unsubscribe\",\"channel\": \"d5f06780-30a8-4a48-a2f8-7ed181b4a13f \"}") ||
@@ -115,14 +118,4 @@ bool MtGoxMarketStream::sendPing()
 void MtGoxMarketStream::cancel()
 {
   canceled = true;
-  canceledConditionMutex.lock(),
-  canceledCondition.wakeAll();
-  canceledConditionMutex.unlock();
-}
-
-void MtGoxMarketStream::sleep(unsigned int ms)
-{
-  canceledConditionMutex.lock();
-  canceledCondition.wait(&canceledConditionMutex, ms);
-  canceledConditionMutex.unlock();
 }
