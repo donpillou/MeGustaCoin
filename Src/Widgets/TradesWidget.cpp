@@ -66,4 +66,9 @@ void TradesWidget::clearAbove()
   if(scrollBar->value() == scrollBar->maximum())
     autoScrollEnabled = true;
   tradeModel.clearAbove(500);
+  if(autoScrollEnabled)
+  {
+    QScrollBar* scrollBar = tradeView->verticalScrollBar();
+    scrollBar->setValue(scrollBar->maximum());
+  }
 }
