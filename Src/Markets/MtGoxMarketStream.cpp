@@ -57,7 +57,8 @@ void MtGoxMarketStream::process(Callback& callback)
     quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
     qint64 timeOffset = (qint64)localTime - (qint64)serverTime;
 
-    if(!httpRequest.get(QString("http://data.mtgox.com/api/2/BTCUSD/money/trades/fetch?since=%1").arg((serverTime - 60 * 60) * 1000000ULL), buffer))
+    //if(!httpRequest.get(QString("http://data.mtgox.com/api/2/BTCUSD/money/trades/fetch?since=%1").arg((serverTime - 60 * 60) * 1000000ULL), buffer))
+    if(!httpRequest.get("http://data.mtgox.com/api/2/BTCUSD/money/trades/fetch", buffer))
     {
       // todo: warn?
       goto cont;
@@ -76,6 +77,9 @@ void MtGoxMarketStream::process(Callback& callback)
       trade.amount =  tradeData["amount_int"].toDouble() / (double)100000000ULL;;
       trade.price = tradeData["price_int"].toULongLong() / (double)100000ULL;;
       trade.date = (qint64)tradeData["date"].toULongLong() + timeOffset;
+      if(localTime - trade.date > 60 * 60)
+        continue;
+
       quint64 id = tradeData["tid"].toULongLong();
       if(id > lastTradeId)
         if(tradeData["item"].toString().toUpper() == "BTC" && tradeData["price_currency"].toString().toUpper() == "USD")
