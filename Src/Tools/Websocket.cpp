@@ -88,6 +88,13 @@ bool Websocket::read(QByteArray& buffer, unsigned int timeout)
   if(!data)
     return false;
 
+  if(!messageBuffer.isEmpty())
+  {
+    buffer.swap(messageBuffer.front());
+    messageBuffer.pop_front();
+    return true;
+  }
+
   easywsclient::WebSocket::pointer ws = (easywsclient::WebSocket::pointer)data;
   if(ws->getReadyState() != easywsclient::WebSocket::OPEN)
     return false;
@@ -96,21 +103,24 @@ bool Websocket::read(QByteArray& buffer, unsigned int timeout)
   {
     void operator()(const std::string & message)
     {
-      buffer->append(message.c_str(), message.length());
+      messageBuffer->append(QByteArray(message.c_str(), (int)message.length()));
     }
 
-    easywsclient::WebSocket::pointer ws;
-    QByteArray* buffer;
-  } callbackHandler = { ws, &buffer };
+    QList<QByteArray>* messageBuffer;
+  } callbackHandler = { &messageBuffer };
 
-  buffer.clear();
+  ws->poll(timeout);
+  ws->dispatch(callbackHandler);
 
-  if(ws->getReadyState() != easywsclient::WebSocket::CLOSED)
+  if(messageBuffer.isEmpty())
   {
-    ws->poll(timeout);
-    ws->dispatch(callbackHandler);
+    buffer.clear();
+    return ws->getReadyState() == easywsclient::WebSocket::OPEN;;
   }
-  return ws->getReadyState() == easywsclient::WebSocket::OPEN;
+
+  buffer.swap(messageBuffer.front());
+  messageBuffer.pop_front();
+  return true;
 }
 
 bool Websocket::send(const QByteArray& buffer)

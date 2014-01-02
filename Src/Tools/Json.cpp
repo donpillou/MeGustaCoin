@@ -261,7 +261,7 @@ static QVariant parseValue(const char*& data, Token& token)
   }
   return QVariant();
 }
-
+/*
 QVariantList Json::parseList(const QByteArray& byteArray)
 {
   QVariantList result;
@@ -279,7 +279,7 @@ QVariantList Json::parseList(const QByteArray& byteArray)
   }
   return result;
 }
-
+*/
 QVariant Json::parse(const QByteArray& byteArray)
 {
   const char* data = byteArray.constData();

@@ -22,5 +22,6 @@ public:
 private:
   void* data;
   QString error;
+  QList<QByteArray> messageBuffer;
 };
 

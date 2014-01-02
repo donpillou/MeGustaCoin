@@ -52,14 +52,15 @@ void MtGoxMarketStream::process(Callback& callback)
     if(canceled)
       break;
 
-    lastMessageTime = QDateTime::currentDateTime();
     if(buffer.isEmpty())
       continue;
+    lastMessageTime = QDateTime::currentDateTime();
 
     qint64 now = QDateTime::currentDateTimeUtc().toTime_t();
-    QVariantList data = Json::parseList(buffer);
+    //QVariantList data = Json::parseList(buffer);
+    QVariant var = Json::parse(buffer);
 
-    foreach(const QVariant& var, data)
+    //foreach(const QVariant& var, data)
     {
       QVariantMap data = var.toMap();
       QString channel = data["channel"].toString();

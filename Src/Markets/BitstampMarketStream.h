@@ -16,8 +16,12 @@ private:
   QString marketCurrency;
   QString coinCurrency;
   bool canceled;
+  QMutex canceledConditionMutex;
+  QWaitCondition canceledCondition;
 
-  QDateTime lastMessageTime;
+  quint64 lastTradeId;
+
+  QDateTime lastPingTime;
 
   void sleep(unsigned int ms);
 };
