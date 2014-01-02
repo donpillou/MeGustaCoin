@@ -17,11 +17,16 @@ private:
   QString marketCurrency;
   QString coinCurrency;
   bool canceled;
+  QMutex canceledConditionMutex;
+  QWaitCondition canceledCondition;
 
   qint64 timeOffset;
   bool timeOffsetSet;
 
-  QDateTime lastMessageTime;
+  quint64 lastTradeId;
+  QDateTime lastPingTime;
 
   bool sendPing(Websocket& websocket);
+
+  void sleep(unsigned int secs);
 };

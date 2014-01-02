@@ -20,7 +20,6 @@ private:
   QWaitCondition canceledCondition;
 
   quint64 lastTradeId;
-
   QDateTime lastPingTime;
 
   void sleep(unsigned int ms);
