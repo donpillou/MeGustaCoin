@@ -291,7 +291,7 @@ void MainWindow::enableLiveTradesUpdates(bool enable)
 
   if(enabledWidgets == marketData->enabledWidgets)
     return;
-
+  marketData->enabledWidgets = enabledWidgets;
   if(enabledWidgets != 0)
     marketData->streamService->subscribe();
   else
@@ -318,7 +318,7 @@ void MainWindow::enableOrderBookUpdates(bool enable)
 
   if(enabledWidgets == marketData->enabledWidgets)
     return;
-
+  marketData->enabledWidgets = enabledWidgets;
   if(enabledWidgets != 0)
     marketData->streamService->subscribe();
   else
@@ -345,7 +345,7 @@ void MainWindow::enableGraphUpdates(bool enable)
 
   if(enabledWidgets == marketData->enabledWidgets)
     return;
-
+  marketData->enabledWidgets = enabledWidgets;
   if(enabledWidgets != 0)
     marketData->streamService->subscribe();
   else

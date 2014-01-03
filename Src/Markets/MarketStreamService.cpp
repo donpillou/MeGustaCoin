@@ -103,7 +103,7 @@ void MarketStreamService::unsubscribe()
   delete marketStream;
   marketStream = 0;
 
-  qDeleteAll(actionQueue.getAll());
+  executeActions(); // better than qDeleteAll(actionQueue.getAll()); ;)
 
   //dataModel.logModel.addMessage(LogModel::Type::information,  tr("Stopped listening to %1").arg(marketName));
 }
