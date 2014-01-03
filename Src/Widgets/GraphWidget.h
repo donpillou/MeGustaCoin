@@ -6,9 +6,14 @@ class GraphWidget : public QWidget
   Q_OBJECT
 
 public:
-  GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, const QString& focusMarketName, const QString& graphNum, const QMap<QString, PublicDataModel*>& publicDataModels);
+  GraphWidget(QWidget* parent, QSettings& settings, const PublicDataModel* publicDataModel, const QString& graphNum, const QMap<QString, PublicDataModel*>& publicDataModels);
 
   void saveState(QSettings& settings);
+
+  void setFocusPublicDataModel(const PublicDataModel* publicDataModel);
+
+public slots:
+  void updateTitle();
 
 private slots:
   void setZoom(int maxTime);
@@ -16,9 +21,8 @@ private slots:
   void updateDataMenu();
 
 private:
-  DataModel& dataModel;
-  QString focusMarketName;
-  QString graphNum;
+  const PublicDataModel* publicDataModel;
+  QString settingsSection;
   const QMap<QString, PublicDataModel*>& publicDataModels;
   GraphView* graphView;
 

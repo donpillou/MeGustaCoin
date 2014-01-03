@@ -50,11 +50,21 @@ void MarketStreamService::subscribe()
     {
       while(!canceled)
       {
+        actionQueue.append(new SetStateAction(PublicDataModel::State::connecting));
+        QTimer::singleShot(0, &streamService, SLOT(executeActions()));
         marketStream.process(*this);
+        actionQueue.append(new SetStateAction(PublicDataModel::State::offline));
+        QTimer::singleShot(0, &streamService, SLOT(executeActions()));
         if(canceled)
           return;
         sleep(10);
       }
+    }
+
+    virtual void connected()
+    {
+      actionQueue.append(new SetStateAction(PublicDataModel::State::connected));
+      QTimer::singleShot(0, &streamService, SLOT(executeActions()));
     }
 
     virtual void receivedTrade(const MarketStream::Trade& trade)
@@ -139,6 +149,12 @@ void MarketStreamService::executeActions()
       {
         LogMessageAction* logMessageAction = (LogMessageAction*)action;
         dataModel.logModel.addMessage(logMessageAction->type, logMessageAction->message);
+      }
+      break;
+    case Action::Type::setState:
+      {
+        SetStateAction* setStateAction = (SetStateAction*)action;
+        publicDataModel.setState(setStateAction->state);
       }
       break;
     }

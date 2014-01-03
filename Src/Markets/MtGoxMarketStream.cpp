@@ -19,6 +19,7 @@ void MtGoxMarketStream::process(Callback& callback)
   }
 
   callback.information("Connected to MtGox/USD.");
+  callback.connected();
 
   // send subscribe command
   // appearantly i don't need this, but lets send it anyway (just to say hello)

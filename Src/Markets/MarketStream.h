@@ -10,6 +10,7 @@ public:
   class Callback
   {
   public:
+    virtual void connected() = 0;
     virtual void receivedTickerData(const TickerData& tickerData) = 0;
     virtual void receivedTrade(const Trade& trade) = 0;
     virtual void error(const QString& message) = 0;

@@ -2,19 +2,17 @@
 #include "stdafx.h"
 #include <cfloat>
 
-GraphView::GraphView(QWidget* parent, const DataModel& dataModel, const QString& focusMarketName, const QMap<QString, PublicDataModel*>& publicDataModels) :
-  QWidget(parent), dataModel(dataModel), focusMarketName(focusMarketName), 
-  publicDataModels(publicDataModels), graphModel(0), publicDataModel(0),
+GraphView::GraphView(QWidget* parent, const PublicDataModel* publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels) :
+  QWidget(parent), publicDataModel(publicDataModel), 
+  publicDataModels(publicDataModels), graphModel(0),
   enabledData((unsigned int)Data::all), time(0), maxAge(60 * 60),
   totalMin(DBL_MAX), totalMax(0.), volumeMax(0.)
 {
-  if(!focusMarketName.isEmpty())
+  if(publicDataModel)
   {
-    graphModel = &publicDataModels[focusMarketName]->graphModel;
+    graphModel = &publicDataModel->graphModel;
     connect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
   }
-  else
-    connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateGraphModel()));
 }
 
 QSize GraphView::sizeHint() const
@@ -44,7 +42,7 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   if(!graphModel->tradeSamples.isEmpty())
   {
-    GraphModel::TradeSample& tradeSample = graphModel->tradeSamples.back();
+    const GraphModel::TradeSample& tradeSample = graphModel->tradeSamples.back();
     addToMinMax(tradeSample.max);
     addToMinMax(tradeSample.min);
     if(tradeSample.time > time)
@@ -53,7 +51,7 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   if(!graphModel->bookSamples.isEmpty())
   {
-    GraphModel::BookSample& bookSample = graphModel->bookSamples.back();
+    const GraphModel::BookSample& bookSample = graphModel->bookSamples.back();
     addToMinMax(bookSample.ask);
     addToMinMax(bookSample.bid);
     for(int i = 0; i < (int)GraphModel::BookSample::ComPrice::numOfComPrice; ++i)
@@ -464,19 +462,19 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
   }
 }
 
-void GraphView::updateGraphModel()
+void GraphView::setFocusPublicDataModel(const PublicDataModel* publicDataModel)
 {
   if(graphModel)
   {
     disconnect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
     graphModel = 0;
-    publicDataModel = 0;
+    this->publicDataModel = 0;
   }
-  const QString& marketName = dataModel.getMarketName();
-  if(!marketName.isEmpty())
+  if(publicDataModel)
   {
-    publicDataModel = publicDataModels[dataModel.getMarketName()];
+    this->publicDataModel = publicDataModel;
     graphModel = &publicDataModel->graphModel;
     connect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
   }
+  update();
 }

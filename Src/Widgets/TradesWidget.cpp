@@ -5,6 +5,7 @@ TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, PublicDataModel
   QWidget(parent),
   publicDataModel(publicDataModel), tradeModel(publicDataModel.tradeModel), autoScrollEnabled(false)
 {
+  connect(&publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
   connect(&tradeModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
 
   tradeView = new QTreeView(this);
@@ -71,4 +72,15 @@ void TradesWidget::clearAbove()
     QScrollBar* scrollBar = tradeView->verticalScrollBar();
     scrollBar->setValue(scrollBar->maximum());
   }
+}
+
+void TradesWidget::updateTitle()
+{
+  QString stateStr = publicDataModel.getStateName();
+
+  QString title  = tr(stateStr.isEmpty() ? "%1 Live Trades" : "%1 Live Trades (%2)").arg(publicDataModel.getMarketName(), stateStr);
+
+  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
+  dockWidget->setWindowTitle(title);
+  dockWidget->toggleViewAction()->setText(tr("Live Trades"));
 }

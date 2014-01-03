@@ -1,10 +1,13 @@
 
 #include "stdafx.h"
 
-GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, const QString& focusMarketName, const QString& graphNum, const QMap<QString, PublicDataModel*>& publicDataModels) :
-  QWidget(parent), dataModel(dataModel), focusMarketName(focusMarketName), graphNum(graphNum),
+GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const PublicDataModel* publicDataModel, const QString& settingsSection, const QMap<QString, PublicDataModel*>& publicDataModels) :
+  QWidget(parent), publicDataModel(publicDataModel), settingsSection(settingsSection),
   publicDataModels(publicDataModels)
 {
+  if(publicDataModel)
+    connect(publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
+
   /*
   setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
   setBackgroundRole(QPalette::Base);
@@ -88,7 +91,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   frame->setBackgroundRole(QPalette::Base);
   frame->setAutoFillBackground(true);
 
-  graphView = new GraphView(this, dataModel, focusMarketName, publicDataModels);
+  graphView = new GraphView(this, publicDataModel, publicDataModels);
   QVBoxLayout* graphLayout = new QVBoxLayout;
   graphLayout->setMargin(0);
   graphLayout->setSpacing(0);
@@ -103,7 +106,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
   setLayout(layout);
 
   settings.beginGroup("LiveGraph");
-  settings.beginGroup(focusMarketName + "_" + graphNum);
+  settings.beginGroup(settingsSection);
   action = qobject_cast<QAction*>(zoomSignalMapper->mapping(settings.value("Zoom", 60 * 60).toUInt()));
   action->setChecked(true);
   zoomSignalMapper->map(action);
@@ -116,11 +119,23 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataMo
 void GraphWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("LiveGraph");
-  settings.beginGroup(focusMarketName + "_" + graphNum);
+  settings.beginGroup(settingsSection);
   settings.setValue("Zoom", graphView->getMaxAge());
   settings.setValue("EnabledData", graphView->getEnabledData());
   settings.endGroup();
   settings.endGroup();
+}
+
+void GraphWidget::setFocusPublicDataModel(const PublicDataModel* publicDataModel)
+{
+  if(this->publicDataModel)
+    disconnect(this->publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
+  this->publicDataModel = publicDataModel;
+  if(publicDataModel)
+    connect(publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
+
+  graphView->setFocusPublicDataModel(publicDataModel);
+  updateTitle();
 }
 
 void GraphWidget::setZoom(int maxTime)
@@ -148,11 +163,8 @@ void GraphWidget::updateDataMenu()
     dataSignalMapper->removeMappings(action);
   dataMenu->clear();
 
-  QString marketName = focusMarketName.isEmpty() ? dataModel.getMarketName() : focusMarketName;
-  if(marketName.isEmpty())
+  if(!publicDataModel)
     return;
-  PublicDataModel* publicDataModel = publicDataModels[marketName];
-
 
   QAction* action = dataMenu->addAction(tr("Trades"));
   action->setCheckable(true);
@@ -189,4 +201,21 @@ void GraphWidget::updateDataMenu()
         action->setChecked(true);
       }
     }
+}
+
+void GraphWidget::updateTitle()
+{
+  QString stateStr;
+  if(publicDataModel)
+    stateStr = publicDataModel->getStateName();
+
+  QString title;
+  if(publicDataModel)
+    title = tr(stateStr.isEmpty() ? "%1 Live Graph" : "%1 Live Graph (%2)").arg(publicDataModel->getMarketName(), stateStr);
+  else
+    title = tr("Live Graph (%1)").arg(tr("offline"));
+
+  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
+  dockWidget->setWindowTitle(title);
+  dockWidget->toggleViewAction()->setText(tr("Live Graph"));
 }

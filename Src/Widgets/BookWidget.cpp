@@ -6,6 +6,7 @@ BookWidget::BookWidget(QWidget* parent, QSettings& settings, PublicDataModel& pu
   publicDataModel(publicDataModel), bookModel(publicDataModel.bookModel),
   askAutoScrollEnabled(false), bidAutoScrollEnabled(false)
 {
+  connect(&publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
   connect(&bookModel.askModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
   connect(&bookModel.bidModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
 
@@ -91,4 +92,14 @@ void BookWidget::autoScroll(int, int)
     scrollBar->setValue(scrollBar->maximum());
     bidAutoScrollEnabled = false;
   }
+}
+
+void BookWidget::updateTitle()
+{
+  QString stateStr = publicDataModel.getStateName();
+  QString title  = tr(stateStr.isEmpty() ? "%1 Order Book" : "%1 Order Book (%2)").arg(publicDataModel.getMarketName(), stateStr);
+
+  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
+  dockWidget->setWindowTitle(title);
+  dockWidget->toggleViewAction()->setText(tr("Order Book"));
 }

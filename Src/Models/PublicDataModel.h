@@ -26,14 +26,27 @@ public:
 
   void addTrade(const MarketStream::Trade& trade);
   void addTickerData(const MarketStream::TickerData& tickerData);
-  void setData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems);
+  void setBookData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems);
+
+  enum class State
+  {
+    connecting,
+    connected,
+    offline,
+  };
+
+  State getState() const {return state;}
+  QString getStateName() const;
+  void setState(State state);
 
 signals:
   void changedMarket();
+  void changedState();
 
 private:
   QString marketName;
   QString coinCurrency;
   QString marketCurrency;
   int features;
+  State state;
 };

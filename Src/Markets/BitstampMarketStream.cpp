@@ -19,6 +19,7 @@ void BitstampMarketStream::process(Callback& callback)
   }
 
   callback.information("Connected to Bitstamp/USD.");
+  callback.connected();
 
   // send subscribe command
   QByteArray message("{\"event\":\"pusher:subscribe\",\"data\":{\"channel\":\"live_trades\"}}");

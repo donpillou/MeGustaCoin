@@ -4,7 +4,7 @@
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"),
   marketService(dataModel)
 {
-  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateWindowTitle()));
+  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
   connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
   connect(&dataModel, SIGNAL(changedTickerData()), this, SLOT(updateWindowTitle()));
 
@@ -22,7 +22,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
       marketData.bookWidget = new BookWidget(this, settings, *marketData.publicDataModel);
     else
       marketData.bookWidget = 0;
-    marketData.graphWidget = new GraphWidget(this, settings, dataModel, i.key(), "0", publicDataModels);
+    marketData.graphWidget = new GraphWidget(this, settings, marketData.publicDataModel, i.key() + "_0", publicDataModels);
     marketDataList.append(marketData);
   }
 
@@ -30,7 +30,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   transactionsWidget = new TransactionsWidget(this, settings, dataModel, marketService);
   //tradesWidget = new TradesWidget(this, settings, dataModel);
   //bookWidget = new BookWidget(this, settings, dataModel);
-  graphWidget = new GraphWidget(this, settings, dataModel, QString(), "0", publicDataModels);
+  graphWidget = new GraphWidget(this, settings, 0, QString(), publicDataModels);
   logWidget = new LogWidget(this, settings, dataModel.logModel);
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
@@ -51,29 +51,32 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addDockWidget(Qt::TopDockWidgetArea, ordersDockWidget);
   tabifyDockWidget(transactionsDockWidget, ordersDockWidget);
 
-  QDockWidget* graphDockWidget = new QDockWidget(tr("Live Graph"), this);
+  QDockWidget* graphDockWidget = new QDockWidget(this);
   graphDockWidget->setObjectName("LiveGraph");
   graphDockWidget->setWidget(graphWidget);
+  graphWidget->updateTitle();
   addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
   tabifyDockWidget(transactionsDockWidget, graphDockWidget);
 
   for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
   {
     MarketData& marketData = *i;
-    marketData.graphDockWidget = new QDockWidget(tr("%1 Live Graph").arg(marketData.publicDataModel->getMarketName()), this);
+    marketData.graphDockWidget = new QDockWidget(this);
     connect(marketData.graphDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableGraphUpdates(bool)));
     marketData.graphDockWidget->setObjectName(marketData.publicDataModel->getMarketName() + "LiveGraph");
     marketData.graphDockWidget->setWidget(marketData.graphWidget);
+    marketData.graphWidget->updateTitle();
     addDockWidget(Qt::TopDockWidgetArea, marketData.graphDockWidget);
     //marketData.graphDockWidget->setFloating(true);
     marketData.graphDockWidget->hide();
 
     if(marketData.bookWidget)
     {
-      marketData.bookDockWidget = new QDockWidget(tr("%1 Order Book").arg(marketData.publicDataModel->getMarketName()), this);
+      marketData.bookDockWidget = new QDockWidget(this);
       connect(marketData.bookDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableOrderBookUpdates(bool)));
       marketData.bookDockWidget->setObjectName(marketData.publicDataModel->getMarketName() + "OrderBook");
       marketData.bookDockWidget->setWidget(marketData.bookWidget);
+      marketData.bookWidget->updateTitle();
       addDockWidget(Qt::TopDockWidgetArea, marketData.bookDockWidget);
       //marketData.bookDockWidget->setFloating(true);
       marketData.bookDockWidget->hide();
@@ -81,10 +84,11 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
     else
       marketData.bookDockWidget = 0;
 
-    marketData.tradesDockWidget = new QDockWidget(tr("%1 Live Trades").arg(marketData.publicDataModel->getMarketName()), this);
+    marketData.tradesDockWidget = new QDockWidget(this);
     connect(marketData.tradesDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableLiveTradesUpdates(bool)));
     marketData.tradesDockWidget->setObjectName(marketData.publicDataModel->getMarketName() + "LiveTrades");
     marketData.tradesDockWidget->setWidget(marketData.tradesWidget);
+    marketData.tradesWidget->updateTitle();
     addDockWidget(Qt::TopDockWidgetArea, marketData.tradesDockWidget);
     //marketData.tradesDockWidget->setFloating(true);
     marketData.tradesDockWidget->hide();
@@ -123,19 +127,15 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
   {
     MarketData& marketData = *i;
-    int marketLen = marketData.publicDataModel->getMarketName().length();
     QMenu* subMenu = menu->addMenu(marketData.publicDataModel->getMarketName());
     QAction* action = marketData.tradesDockWidget->toggleViewAction();
-    action->setText(action->text().mid(marketLen + 1));
     subMenu->addAction(action);
     if(marketData.bookDockWidget)
     {
       action = marketData.bookDockWidget->toggleViewAction();
-      action->setText(action->text().mid(marketLen + 1));
       subMenu->addAction(action);
     }
     action = marketData.graphDockWidget->toggleViewAction();
-    action->setText(action->text().mid(marketLen + 1));
     subMenu->addAction(action);
   }
 
@@ -264,6 +264,14 @@ void MainWindow::updateWindowTitle()
       title += QString(" - %1 / %2 bid / %3 ask").arg(dataModel.formatPrice(tickerData.lastTradePrice), dataModel.formatPrice(tickerData.highestBuyOrder), dataModel.formatPrice(tickerData.lowestSellOrder));
     setWindowTitle(title);
   }
+}
+
+void MainWindow::updateFocusPublicDataModel()
+{
+  const QString& marketName = dataModel.getMarketName();
+  PublicDataModel* publicDataModel = marketName.isEmpty() ? 0 : publicDataModels[marketName];
+  graphWidget->setFocusPublicDataModel(publicDataModel);
+  updateWindowTitle();
 }
 
 void MainWindow::about()

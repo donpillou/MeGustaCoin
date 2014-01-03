@@ -3,10 +3,10 @@
 
 class GraphView : public QWidget
 {
-  Q_OBJECT
-
 public:
-  GraphView(QWidget* parent, const DataModel& dataModel, const QString& focusMarketName, const QMap<QString, PublicDataModel*>& publicDataModels);
+  GraphView(QWidget* parent, const PublicDataModel* publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels);
+
+  void setFocusPublicDataModel(const PublicDataModel* publicDataModel);
 
   void setMaxAge(int maxAge);
   int getMaxAge() const {return maxAge;}
@@ -27,11 +27,9 @@ public:
   virtual QSize sizeHint() const;
 
 private:
-  const DataModel& dataModel;
-  QString focusMarketName;
+  const PublicDataModel* publicDataModel;
   const QMap<QString, PublicDataModel*>& publicDataModels;
-  GraphModel* graphModel;
-  PublicDataModel* publicDataModel;
+  const GraphModel* graphModel;
 
   unsigned int enabledData;
 
@@ -55,7 +53,4 @@ private:
     if(price < totalMin)
       totalMin = price;
   }
-
-private slots:
-  void updateGraphModel();
 };

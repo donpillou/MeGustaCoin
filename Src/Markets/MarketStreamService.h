@@ -28,6 +28,7 @@ private:
       addTrade,
       addTickerData,
       logMessage,
+      setState,
     };
     Type type;
 
@@ -55,6 +56,13 @@ private:
     LogModel::Type type;
     QString message;
     LogMessageAction(LogModel::Type type, const QString& message) : Action(Type::logMessage), type(type), message(message) {}
+  };
+
+  class SetStateAction : public Action
+  {
+  public:
+    PublicDataModel::State state;
+    SetStateAction(PublicDataModel::State state) : Action(Type::setState), state(state) {}
   };
 
   JobQueue<Action*> actionQueue;

@@ -32,6 +32,7 @@ void HuobiMarketStream::process(Callback& callback)
     {
       connected = true;
       callback.information("Connected to Huobi/CNY.");
+      callback.connected();
 
       quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
       QDateTime approxServerTime = QDateTime::fromTime_t(approxServerStartTime + (localTime - localStartTime));

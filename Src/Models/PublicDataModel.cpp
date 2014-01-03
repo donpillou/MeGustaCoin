@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 PublicDataModel::PublicDataModel(QObject* parent, const QColor& color) : QObject(parent),
-  tradeModel(*this), bookModel(*this), color(color) {}
+  tradeModel(*this), bookModel(*this), color(color), state(State::offline) {}
 
 void PublicDataModel::setMarket(const QString& marketName, int features)
 {
@@ -38,7 +38,7 @@ void PublicDataModel::addTickerData(const MarketStream::TickerData& tickerData)
   graphModel.addTickerData(tickerData);
 }
 
-void PublicDataModel::setData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems)
+void PublicDataModel::setBookData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems)
 {
   if(time == bookModel.getTime())
     return;
@@ -97,4 +97,25 @@ void PublicDataModel::setData(quint64 time, const QList<Market::OrderBookEntry>&
   summary.comPrice[(int)GraphModel::BookSample::ComPrice::comPrice500] = askSum[sum250] >= sumMax[sum250] && bidSum[sum250] >= sumMax[sum250] ? (askSumMass[sum250] + bidSumMass[sum250]) / (askSum[sum250] + bidSum[sum250]) : summary.comPrice[(int)GraphModel::BookSample::ComPrice::comPrice200];
   summary.comPrice[(int)GraphModel::BookSample::ComPrice::comPrice1000] = askSum[sum500] >= sumMax[sum500] && bidSum[sum500] >= sumMax[sum500] ? (askSumMass[sum500] + bidSumMass[sum500]) / (askSum[sum500] + bidSum[sum500]) : summary.comPrice[(int)GraphModel::BookSample::ComPrice::comPrice500];
   graphModel.addBookSample(summary);
+}
+
+void PublicDataModel::setState(State state)
+{
+  this->state = state;
+  emit changedState();
+}
+
+QString PublicDataModel::getStateName() const
+{
+  switch(state)
+  {
+  case PublicDataModel::State::connecting:
+    return tr("connecting");
+  case PublicDataModel::State::offline:
+    return tr("offline");
+  case PublicDataModel::State::connected:
+    return QString();
+  }
+  Q_ASSERT(false);
+  return QString();
 }

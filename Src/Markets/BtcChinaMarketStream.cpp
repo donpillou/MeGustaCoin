@@ -31,9 +31,8 @@ void BtcChinaMarketStream::process(Callback& callback)
     {
       connected = true;
       callback.information("Connected to BtcChina/CNY.");
+      callback.connected();
 
-      
-      
       BitcoinCharts::Data bcData;
       QString bcError;
       if(BitcoinCharts::getData("btcnCNY", bcData, bcError))

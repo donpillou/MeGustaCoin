@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Markets">
@@ -28,6 +28,9 @@
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\MainWindow.cpp" />
     <ClCompile Include="Src\stdafx.cpp" />
+    <ClCompile Include="Src\Markets\BitcoinCharts.cpp">
+      <Filter>Markets</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Markets\BitstampMarket.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
@@ -109,6 +112,9 @@
     <CustomBuild Include="Src\LoginDialog.h" />
     <CustomBuild Include="Src\MainWindow.h" />
     <ClInclude Include="Src\stdafx.h" />
+    <ClInclude Include="Src\Markets\BitcoinCharts.h">
+      <Filter>Markets</Filter>
+    </ClInclude>
     <ClInclude Include="Src\Markets\BitstampMarket.h">
       <Filter>Markets</Filter>
     </ClInclude>
@@ -178,9 +184,9 @@
     <CustomBuild Include="Src\Widgets\BookWidget.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
-    <CustomBuild Include="Src\Widgets\GraphView.h">
+    <ClInclude Include="Src\Widgets\GraphView.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
+    </ClInclude>
     <CustomBuild Include="Src\Widgets\GraphWidget.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
@@ -272,9 +278,6 @@
     <ClCompile Include="Build\Debug\moc_GraphWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Debug\moc_GraphView.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
     <ClCompile Include="Build\Debug\moc_DataModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -335,9 +338,6 @@
     <ClCompile Include="Build\Release\moc_GraphWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Release\moc_GraphView.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
     <ClCompile Include="Build\Release\moc_DataModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -371,13 +371,5 @@
     <ClCompile Include="Build\Release\moc_LoginDialog.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Markets\BitcoinCharts.cpp">
-      <Filter>Markets</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Src\Markets\BitcoinCharts.h">
-      <Filter>Markets</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
