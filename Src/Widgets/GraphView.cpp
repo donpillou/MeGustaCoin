@@ -443,6 +443,9 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
 
   for(int i = 0; i < (int)GraphModel::RegressionDepth::numOfRegressionDepths; ++i)
   {
+    if(i == (int)GraphModel::RegressionDepth::depth24h)
+      continue;
+
     const GraphModel::RegressionLine& rl = graphModel->regressionLines[i];
     quint64 startTime = qMax(rl.startTime, hmin);
     quint64 endTime = rl.endTime;
