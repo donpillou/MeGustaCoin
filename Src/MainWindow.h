@@ -16,7 +16,7 @@ private:
   TransactionsWidget* transactionsWidget;
   //TradesWidget* tradesWidget;
   //BookWidget* bookWidget;
-  //GraphWidget* graphWidget;
+  GraphWidget* graphWidget;
   LogWidget* logWidget;
 
   DataModel dataModel;

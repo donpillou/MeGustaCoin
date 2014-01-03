@@ -2,13 +2,19 @@
 #include "stdafx.h"
 #include <cfloat>
 
-GraphView::GraphView(QWidget* parent, PublicDataModel& publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels) :
-  QWidget(parent),
-  publicDataModel(publicDataModel), graphModel(publicDataModel.graphModel), publicDataModels(publicDataModels),
+GraphView::GraphView(QWidget* parent, const DataModel& dataModel, const QString& focusMarketName, const QMap<QString, PublicDataModel*>& publicDataModels) :
+  QWidget(parent), dataModel(dataModel), focusMarketName(focusMarketName), 
+  publicDataModels(publicDataModels), graphModel(0), publicDataModel(0),
   enabledData((unsigned int)Data::all), time(0), maxAge(60 * 60),
   totalMin(DBL_MAX), totalMax(0.), volumeMax(0.)
 {
-  connect(&graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
+  if(!focusMarketName.isEmpty())
+  {
+    graphModel = &publicDataModels[focusMarketName]->graphModel;
+    connect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
+  }
+  else
+    connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateGraphModel()));
 }
 
 QSize GraphView::sizeHint() const
@@ -28,23 +34,26 @@ void GraphView::setEnabledData(unsigned int data)
 
 void GraphView::paintEvent(QPaintEvent* event)
 {
+  if(!graphModel)
+    return;
+
   QRect rect = this->rect();
   QPainter painter(this);
   painter.setRenderHint(QPainter::Antialiasing);
   painter.setPen(Qt::black);
 
-  if(!graphModel.tradeSamples.isEmpty())
+  if(!graphModel->tradeSamples.isEmpty())
   {
-    GraphModel::TradeSample& tradeSample = graphModel.tradeSamples.back();
+    GraphModel::TradeSample& tradeSample = graphModel->tradeSamples.back();
     addToMinMax(tradeSample.max);
     addToMinMax(tradeSample.min);
     if(tradeSample.time > time)
       time = tradeSample.time;
   }
 
-  if(!graphModel.bookSamples.isEmpty())
+  if(!graphModel->bookSamples.isEmpty())
   {
-    GraphModel::BookSample& bookSample = graphModel.bookSamples.back();
+    GraphModel::BookSample& bookSample = graphModel->bookSamples.back();
     addToMinMax(bookSample.ask);
     addToMinMax(bookSample.bid);
     for(int i = 0; i < (int)GraphModel::BookSample::ComPrice::numOfComPrice; ++i)
@@ -55,7 +64,7 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   double vmin = totalMin;
   double vmax = qMax(totalMax, vmin + 1.);
-  const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, publicDataModel.formatPrice(totalMax == 0. ? 0. : vmax));
+  const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, publicDataModel->formatPrice(totalMax == 0. ? 0. : vmax));
 
   double lastTotalMin = totalMin;
   double lastTotalMax = totalMax;
@@ -71,15 +80,15 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   if(lastTotalMax != 0.)
     drawAxesLables(painter, plotRect, vmin, vmax, priceSize);
-  if(enabledData & (int)Data::orderBook && !graphModel.bookSamples.isEmpty())
+  if(enabledData & (int)Data::orderBook && !graphModel->bookSamples.isEmpty())
     drawBookPolyline(painter, plotRect, vmin, vmax);
 
   if(enabledData & (int)Data::otherMarkets)
   {
-    double averagePrice = graphModel.regressionLines[(int)GraphModel::RegressionDepth::depth1000].averagePrice;
+    double averagePrice = graphModel->regressionLines[(int)GraphModel::RegressionDepth::depth1000].averagePrice;
     foreach(const PublicDataModel* publicDataModel, publicDataModels)
     {
-      if(publicDataModel != &this->publicDataModel || !(enabledData & ((int)Data::trades)))
+      if(publicDataModel != this->publicDataModel || !(enabledData & ((int)Data::trades)))
       {
         double otherAveragePrice = publicDataModel->graphModel.regressionLines[(int)GraphModel::RegressionDepth::depth1000].averagePrice;
         drawTradePolyline(painter, plotRect, vmin, vmax, lastVolumeMax, publicDataModel->graphModel, (int)Data::trades, averagePrice / otherAveragePrice, publicDataModel->color);
@@ -87,9 +96,9 @@ void GraphView::paintEvent(QPaintEvent* event)
     }
   }
 
-  if(enabledData & ((int)Data::trades | (int)Data::tradeVolume) && !graphModel.tradeSamples.isEmpty())
-    drawTradePolyline(painter, plotRect, vmin, vmax, lastVolumeMax, graphModel, enabledData, 1., QColor(0, 0, 0));
-  if(enabledData & (int)Data::regressionLines && !graphModel.tradeSamples.isEmpty())
+  if(enabledData & ((int)Data::trades | (int)Data::tradeVolume) && !graphModel->tradeSamples.isEmpty())
+    drawTradePolyline(painter, plotRect, vmin, vmax, lastVolumeMax, *graphModel, enabledData, 1., QColor(0, 0, 0));
+  if(enabledData & (int)Data::regressionLines && !graphModel->tradeSamples.isEmpty())
     drawRegressionLines(painter, plotRect, vmin, vmax);
 
   if((totalMin != lastTotalMin || totalMax != lastTotalMax || volumeMax != lastVolumeMax) && totalMax != 0.)
@@ -125,7 +134,7 @@ void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin
       painter.setPen(textPen);
       QPoint textPos(right.x() + 2, right.y() + priceSize.height() * 0.5 - 3);
       if(textPos.y() > 2)
-        painter.drawText(textPos, publicDataModel.formatPrice(vmin + vstart + i * vstep));
+        painter.drawText(textPos, publicDataModel->formatPrice(vmin + vstart + i * vstep));
     }
   }
 
@@ -248,7 +257,7 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double y
         Q_ASSERT(currentPoint - polyData < rect.width() * 4);
         if(currentEntryCount > 0)
         {
-          if(&graphModel == &this->graphModel)
+          if(&graphModel == this->graphModel)
           {
             currentVolumePoint->setX(left + pixelX);
             currentVolumePoint->setY(bottomInt);
@@ -370,7 +379,7 @@ void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double ym
   {
     QPointF* currentPoint = polyData;
 
-    const QList<GraphModel::BookSample>& bookSummaries = graphModel.bookSamples;
+    const QList<GraphModel::BookSample>& bookSummaries = graphModel->bookSamples;
     int i = 0, count = bookSummaries.size();
     for(; i < count; ++i) // todo: optimize this
       if(bookSummaries.at(i).time >= vmin) 
@@ -434,7 +443,7 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
 
   for(int i = 0; i < (int)GraphModel::RegressionDepth::numOfRegressionDepths; ++i)
   {
-    const GraphModel::RegressionLine& rl = graphModel.regressionLines[i];
+    const GraphModel::RegressionLine& rl = graphModel->regressionLines[i];
     quint64 startTime = qMax(rl.startTime, hmin);
     quint64 endTime = rl.endTime;
     double val = rl.a - rl.b * (endTime - startTime);
@@ -447,5 +456,22 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
     painter.setPen(pen);
 
     painter.drawLine(a, b);
+  }
+}
+
+void GraphView::updateGraphModel()
+{
+  if(graphModel)
+  {
+    disconnect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
+    graphModel = 0;
+    publicDataModel = 0;
+  }
+  const QString& marketName = dataModel.getMarketName();
+  if(!marketName.isEmpty())
+  {
+    publicDataModel = publicDataModels[dataModel.getMarketName()];
+    graphModel = &publicDataModel->graphModel;
+    connect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
   }
 }

@@ -1,9 +1,9 @@
 
 #include "stdafx.h"
 
-GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels) :
-  QWidget(parent),
-  publicDataModel(publicDataModel), graphModel(publicDataModel.graphModel)
+GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, const QString& focusMarketName, const QString& graphNum, const QMap<QString, PublicDataModel*>& publicDataModels) :
+  QWidget(parent), dataModel(dataModel), focusMarketName(focusMarketName), graphNum(graphNum),
+  publicDataModels(publicDataModels)
 {
   /*
   setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
@@ -76,32 +76,10 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& 
   qobject_cast<QToolButton*>(toolBar->widgetForAction(zoomAction))->setPopupMode(QToolButton::InstantPopup);
   
   QAction* dataAction = toolBar->addAction(QIcon(":/Icons/chart_curve.png"), tr("Data"));
-  QMenu* dataMenu = new QMenu(this);
-  QSignalMapper* dataSignalMapper = new QSignalMapper(dataMenu);
+  dataMenu = new QMenu(this);
+  connect(dataMenu, SIGNAL(aboutToShow()), this, SLOT(updateDataMenu()));
+  dataSignalMapper = new QSignalMapper(dataMenu);
   connect(dataSignalMapper, SIGNAL(mapped(int)), SLOT(setEnabledData(int)));
-  action = dataMenu->addAction(tr("Trades"));
-  action->setCheckable(true);
-  dataSignalMapper->setMapping(action, (int)GraphView::Data::trades);
-  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
-  action = dataMenu->addAction(tr("Trade Volume"));
-  action->setCheckable(true);
-  dataSignalMapper->setMapping(action, (int)GraphView::Data::tradeVolume);
-  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
-  if(publicDataModel.getFeatures() & (int)MarketStream::Features::orderBook)
-  {
-    action = dataMenu->addAction(tr("Order Book"));
-    action->setCheckable(true);
-    dataSignalMapper->setMapping(action, (int)GraphView::Data::orderBook);
-    connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
-  }
-  action = dataMenu->addAction(tr("Regression Lines"));
-  action->setCheckable(true);
-  dataSignalMapper->setMapping(action, (int)GraphView::Data::regressionLines);
-  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
-  action = dataMenu->addAction(tr("Other Markets"));
-  action->setCheckable(true);
-  dataSignalMapper->setMapping(action, (int)GraphView::Data::otherMarkets);
-  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
   dataAction->setMenu(dataMenu);
   qobject_cast<QToolButton*>(toolBar->widgetForAction(dataAction))->setPopupMode(QToolButton::InstantPopup);
   
@@ -110,7 +88,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& 
   frame->setBackgroundRole(QPalette::Base);
   frame->setAutoFillBackground(true);
 
-  graphView = new GraphView(this, publicDataModel, publicDataModels);
+  graphView = new GraphView(this, dataModel, focusMarketName, publicDataModels);
   QVBoxLayout* graphLayout = new QVBoxLayout;
   graphLayout->setMargin(0);
   graphLayout->setSpacing(0);
@@ -125,22 +103,12 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& 
   setLayout(layout);
 
   settings.beginGroup("LiveGraph");
-  settings.beginGroup(publicDataModel.getMarketName());
+  settings.beginGroup(focusMarketName + "_" + graphNum);
   action = qobject_cast<QAction*>(zoomSignalMapper->mapping(settings.value("Zoom", 60 * 60).toUInt()));
   action->setChecked(true);
   zoomSignalMapper->map(action);
   unsigned int enabledData = settings.value("EnabledData", (unsigned int)graphView->getEnabledData()).toUInt();
   graphView->setEnabledData(enabledData);
-  for(int i = 0; i < 16; ++i)
-    if(enabledData & (1 << i))
-    {
-      QObject* obj = dataSignalMapper->mapping(1 << i);
-      if(obj)
-      {
-        action = qobject_cast<QAction*>(obj);
-        action->setChecked(true);
-      }
-    }
   settings.endGroup();
   settings.endGroup();
 }
@@ -148,7 +116,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, PublicDataModel& 
 void GraphWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("LiveGraph");
-  settings.beginGroup(publicDataModel.getMarketName());
+  settings.beginGroup(focusMarketName + "_" + graphNum);
   settings.setValue("Zoom", graphView->getMaxAge());
   settings.setValue("EnabledData", graphView->getEnabledData());
   settings.endGroup();
@@ -172,4 +140,53 @@ void GraphWidget::setEnabledData(int data)
   else
     graphView->setEnabledData(enabledData & ~data);
   graphView->update();
+}
+
+void GraphWidget::updateDataMenu()
+{
+  foreach(QAction* action, dataMenu->actions())
+    dataSignalMapper->removeMappings(action);
+  dataMenu->clear();
+
+  QString marketName = focusMarketName.isEmpty() ? dataModel.getMarketName() : focusMarketName;
+  if(marketName.isEmpty())
+    return;
+  PublicDataModel* publicDataModel = publicDataModels[marketName];
+
+
+  QAction* action = dataMenu->addAction(tr("Trades"));
+  action->setCheckable(true);
+  dataSignalMapper->setMapping(action, (int)GraphView::Data::trades);
+  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  action = dataMenu->addAction(tr("Trade Volume"));
+  action->setCheckable(true);
+  dataSignalMapper->setMapping(action, (int)GraphView::Data::tradeVolume);
+  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  if(publicDataModel->getFeatures() & (int)MarketStream::Features::orderBook)
+  {
+    action = dataMenu->addAction(tr("Order Book"));
+    action->setCheckable(true);
+    dataSignalMapper->setMapping(action, (int)GraphView::Data::orderBook);
+    connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  }
+  action = dataMenu->addAction(tr("Regression Lines"));
+  action->setCheckable(true);
+  dataSignalMapper->setMapping(action, (int)GraphView::Data::regressionLines);
+  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  action = dataMenu->addAction(tr("Other Markets"));
+  action->setCheckable(true);
+  dataSignalMapper->setMapping(action, (int)GraphView::Data::otherMarkets);
+  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+
+  unsigned int enabledData = graphView->getEnabledData();
+  for(int i = 0; i < 16; ++i)
+    if(enabledData & (1 << i))
+    {
+      QObject* obj = dataSignalMapper->mapping(1 << i);
+      if(obj)
+      {
+        action = qobject_cast<QAction*>(obj);
+        action->setChecked(true);
+      }
+    }
 }

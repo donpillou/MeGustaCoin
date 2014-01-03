@@ -22,7 +22,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
       marketData.bookWidget = new BookWidget(this, settings, *marketData.publicDataModel);
     else
       marketData.bookWidget = 0;
-    marketData.graphWidget = new GraphWidget(this, settings, *marketData.publicDataModel, publicDataModels);
+    marketData.graphWidget = new GraphWidget(this, settings, dataModel, i.key(), "0", publicDataModels);
     marketDataList.append(marketData);
   }
 
@@ -30,7 +30,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   transactionsWidget = new TransactionsWidget(this, settings, dataModel, marketService);
   //tradesWidget = new TradesWidget(this, settings, dataModel);
   //bookWidget = new BookWidget(this, settings, dataModel);
-  //graphWidget = new GraphWidget(this, settings, dataModel);
+  graphWidget = new GraphWidget(this, settings, dataModel, QString(), "0", publicDataModels);
   logWidget = new LogWidget(this, settings, dataModel.logModel);
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
@@ -50,6 +50,12 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   ordersDockWidget->setWidget(ordersWidget);
   addDockWidget(Qt::TopDockWidgetArea, ordersDockWidget);
   tabifyDockWidget(transactionsDockWidget, ordersDockWidget);
+
+  QDockWidget* graphDockWidget = new QDockWidget(tr("Live Graph"), this);
+  graphDockWidget->setObjectName("LiveGraph");
+  graphDockWidget->setWidget(graphWidget);
+  addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
+  tabifyDockWidget(transactionsDockWidget, graphDockWidget);
 
   for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
   {
@@ -110,7 +116,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   menu->addAction(ordersDockWidget->toggleViewAction());
   menu->addAction(transactionsDockWidget->toggleViewAction());
   //menu->addAction(tradesDockWidget->toggleViewAction());
-  //menu->addAction(graphDockWidget->toggleViewAction());
+  menu->addAction(graphDockWidget->toggleViewAction());
   //menu->addAction(bookDockWidget->toggleViewAction());
   menu->addAction(logDockWidget->toggleViewAction());
   menu->addSeparator();
@@ -185,6 +191,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   settings.setValue("WindowState", saveState());
   ordersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
+  graphWidget->saveState(settings);
   for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
   {
     MarketData& marketData = *i;

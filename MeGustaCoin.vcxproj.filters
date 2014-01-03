@@ -178,9 +178,9 @@
     <CustomBuild Include="Src\Widgets\BookWidget.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
-    <ClInclude Include="Src\Widgets\GraphView.h">
+    <CustomBuild Include="Src\Widgets\GraphView.h">
       <Filter>Widgets</Filter>
-    </ClInclude>
+    </CustomBuild>
     <CustomBuild Include="Src\Widgets\GraphWidget.h">
       <Filter>Widgets</Filter>
     </CustomBuild>
@@ -272,6 +272,9 @@
     <ClCompile Include="Build\Debug\moc_GraphWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_GraphView.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_DataModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -330,6 +333,9 @@
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_GraphWidget.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_GraphView.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_DataModel.cpp">
