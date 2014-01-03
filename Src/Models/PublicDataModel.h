@@ -49,4 +49,5 @@ private:
   QString marketCurrency;
   int features;
   State state;
+  quint64 startTime;
 };

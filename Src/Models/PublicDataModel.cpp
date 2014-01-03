@@ -8,6 +8,7 @@ void PublicDataModel::setMarket(const QString& marketName, int features)
 {
   this->marketName = marketName;
   this->features = features;
+  startTime = QDateTime::currentDateTimeUtc().toTime_t();
 }
 
 void PublicDataModel::setMarket(const QString& coinCurrency, const QString& marketCurrency)
@@ -29,7 +30,8 @@ QString PublicDataModel::formatPrice(double price) const
 
 void PublicDataModel::addTrade(const MarketStream::Trade& trade)
 {
-  tradeModel.addTrade(trade);
+  if((qint64)startTime - (qint64)trade.date < 60 * 60)
+    tradeModel.addTrade(trade);
   graphModel.addTrade(trade);
 }
 
@@ -86,7 +88,6 @@ void PublicDataModel::setBookData(quint64 time, const QList<Market::OrderBookEnt
     if(bidSum[numOfSumType - 1] >= sumMax[numOfSumType - 1])
       break;
   }
-
 
   GraphModel::BookSample summary;
   summary.time = time;
