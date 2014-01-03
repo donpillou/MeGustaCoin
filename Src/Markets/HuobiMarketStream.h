@@ -24,6 +24,7 @@ private:
 
   quint64 lastTradeDate;
   QSet<QString> lastTradeList;
+  bool loadedTradeHistory;
 
   void sleep(unsigned int secs);
 };

@@ -3,7 +3,7 @@
 
 HuobiMarketStream::HuobiMarketStream() :
   canceled(false), marketCurrency("CNY"), coinCurrency("BTC"),
-  lastTradeDate(0)
+  lastTradeDate(0), loadedTradeHistory(false)
 {
   localStartTime = QDateTime::currentDateTimeUtc().toTime_t();
   approxServerStartTime = localStartTime + 8 * 60 * 60; // Hong Kong time
@@ -32,6 +32,91 @@ void HuobiMarketStream::process(Callback& callback)
     {
       connected = true;
       callback.information("Connected to Huobi/CNY.");
+
+      quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
+      QDateTime approxServerTime = QDateTime::fromTime_t(approxServerStartTime + (localTime - localStartTime));
+      approxServerTime.setTimeSpec(Qt::UTC);
+      QDateTime prevTradeTime = approxServerTime;
+
+      QByteArray buffer2;
+      if(httpRequest.get("https://market.huobi.com/market/huobi.php?a=td", buffer2))
+      {
+        QString chartData(buffer2);
+        QStringList chart = chartData.split(QChar('\n'), QString::SkipEmptyParts);
+        QStringList entryData;
+        QList<MarketStream::Trade> tradeSamples;
+        tradeSamples.reserve(chart.size());
+        double sumPriceVolume = 0.;
+        double sumVolume = 0.;
+        double min, max;
+        for(int i = chart.size() - 1; i >= 3; --i)
+        {
+          entryData = chart[i].split(QChar(','));
+          if(entryData.size() != 4)
+            continue;
+
+          QTime time = QTime::fromString(entryData[0], "hhmmss");
+          QDateTime tradeDate(approxServerTime);
+          tradeDate.setTime(time);
+
+          int timeDiff = prevTradeTime.secsTo(tradeDate);
+          if(qAbs(timeDiff) > 12 * 60 * 60)
+            tradeDate = tradeDate.addDays(timeDiff > 0 ? -1 : 1);
+          prevTradeTime = tradeDate;
+
+          MarketStream::Trade trade;
+          trade.date = tradeDate.toTime_t();
+          trade.amount = entryData[2].toDouble();
+          trade.price = entryData[1].toDouble();
+          tradeSamples.append(trade);
+
+          if(sumVolume == 0.)
+            min = max = trade.price;
+          sumPriceVolume += trade.price * trade.amount;
+          sumVolume += trade.amount;
+          if(trade.price < min)
+            min = trade.price;
+          if(trade.price < max)
+            max = trade.price;
+        }
+
+        MarketStream::TickerData tickerData;
+        tickerData.date = QDateTime::currentDateTimeUtc().toTime_t();
+        tickerData.bid = 0.; // todo: grab from buffer1
+        tickerData.ask = 0.;  // todo: grab from buffer1
+        tickerData.high24h = max; // approx
+        tickerData.low24h = min; // approx
+        tickerData.volume24h = sumVolume; // approx
+        tickerData.vwap24h = sumPriceVolume / sumVolume; // approx
+        BitcoinCharts::Data bcData;
+        QString bcError;
+        if(BitcoinCharts::getData("btcnCNY", bcData, bcError)) // hmm, the approx vwap24h suchs (it's basically a vwap4h)
+        { // Since Huobi is not on BitcoinCharts, lets just use BtcChina's data...
+          tickerData.high24h = bcData.high;
+          tickerData.low24h = bcData.low;
+          tickerData.volume24h = bcData.volume;
+          tickerData.vwap24h = bcData.vwap24;
+        }
+        else
+        {
+          // todo: error or warn
+        }
+        callback.receivedTickerData(tickerData);
+
+        if(!loadedTradeHistory)
+          for(int i = tradeSamples.size() - 1; i >= 0; --i)
+          {
+            MarketStream::Trade& trade = tradeSamples[i];
+            trade.date -= 8 * 60 * 60;
+            callback.receivedTrade(trade);
+            loadedTradeHistory = true;
+          }
+      }
+      else
+      {
+        // todo: warn or error
+      }
+
     }
     if(canceled)
       break;

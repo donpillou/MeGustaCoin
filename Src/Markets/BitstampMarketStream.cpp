@@ -43,8 +43,8 @@ void BitstampMarketStream::process(Callback& callback)
 
     // {"high": "759.90", "last": "753.40", "timestamp": "1388668694", "bid": "753.31", "volume": "5972.35893309", "low": "741.00", "ask": "753.40"}
 
-    QVariantMap tickerData = Json::parse(buffer).toMap();
-    quint64 serverTime = tickerData["timestamp"].toULongLong(); // + up to 8 seconds
+    QVariantMap tickerObject= Json::parse(buffer).toMap();
+    quint64 serverTime = tickerObject["timestamp"].toULongLong(); // + up to 8 seconds
     quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
     qint64 timeOffset = (qint64)localTime - (qint64)serverTime;
 
@@ -53,6 +53,26 @@ void BitstampMarketStream::process(Callback& callback)
       // todo: warn?
       goto cont;
     }
+
+    TickerData tickerData;
+    tickerData.date = localTime;
+    tickerData.bid = tickerObject["bid"].toDouble();
+    tickerData.ask = tickerObject["ask"].toDouble();
+    tickerData.high24h = tickerObject["high"].toDouble();
+    tickerData.low24h = tickerObject["low"].toDouble();
+    tickerData.volume24h = tickerObject["volume"].toDouble();
+    tickerData.vwap24h = (tickerData.high24h + tickerData.low24h) * 0.5; // todo: acquire vwap24h from somewhere
+    BitcoinCharts::Data bcData;
+    QString bcError;
+    if(BitcoinCharts::getData("bitstampUSD", bcData, bcError))
+    {
+      tickerData.vwap24h = bcData.vwap24;
+    }
+    else
+    {
+      // todo: warn or error
+    }
+    callback.receivedTickerData(tickerData);
 
     // [{"date": "1388668244", "tid": 2831838, "price": "754.00", "amount": "0.01326260"}, 
     // {"date": "1388668244", "tid": 2831837, "price": "754.00", "amount": "0.49916678"},

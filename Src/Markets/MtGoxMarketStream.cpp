@@ -52,12 +52,43 @@ void MtGoxMarketStream::process(Callback& callback)
     // "sell":{"value":"824.99999","value_int":"82499999","display":"$825.00","display_short":"$825.00","currency":"USD"},
     // "now":"1388675661812776"}}
 
-    QVariantMap tickerData = Json::parse(buffer).toMap()["data"].toMap();
-    quint64 serverTime = tickerData["now"].toULongLong() / 1000000ULL;
+    QVariantMap tickerObject = Json::parse(buffer).toMap()["data"].toMap();
+    quint64 serverTime = tickerObject["now"].toULongLong() / 1000000ULL;
     quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
     qint64 timeOffset = (qint64)localTime - (qint64)serverTime;
 
-    //if(!httpRequest.get(QString("http://data.mtgox.com/api/2/BTCUSD/money/trades/fetch?since=%1").arg((serverTime - 60 * 60) * 1000000ULL), buffer))
+    if(!httpRequest.get("http://data.mtgox.com/api/2/BTCUSD/money/ticker", buffer))
+    {
+      // todo: warn?
+    }
+    else
+    {
+      //{"result":"success","data":{
+      //  "high":{"value":"886.31309","value_int":"88631309","display":"$886.31","display_short":"$886.31","currency":"USD"},
+      //    "low":{"value":"819.01000","value_int":"81901000","display":"$819.01","display_short":"$819.01","currency":"USD"},
+      //    "avg":{"value":"856.52955","value_int":"85652955","display":"$856.53","display_short":"$856.53","currency":"USD"},
+      //    "vwap":{"value":"855.22775","value_int":"85522775","display":"$855.23","display_short":"$855.23","currency":"USD"},
+      //    "vol":{"value":"15665.20117850","value_int":"1566520117850","display":"15,665.20\u00a0BTC","display_short":"15,665.20\u00a0BTC","currency":"BTC"},
+      //    "last_local":{"value":"870.05500","value_int":"87005500","display":"$870.06","display_short":"$870.06","currency":"USD"},
+      //    "last_orig":{"value":"870.05500","value_int":"87005500","display":"$870.06","display_short":"$870.06","currency":"USD"},
+      //    "last_all":{"value":"870.05500","value_int":"87005500","display":"$870.06","display_short":"$870.06","currency":"USD"},
+      //    "last":{"value":"870.05500","value_int":"87005500","display":"$870.06","display_short":"$870.06","currency":"USD"},
+      //    "buy":{"value":"876.17567","value_int":"87617567","display":"$876.18","display_short":"$876.18","currency":"USD"},
+      //    "sell":{"value":"879.85833","value_int":"87985833","display":"$879.86","display_short":"$879.86","currency":"USD"},
+      //    "item":"BTC","now":"1388750714118765"}}
+      QVariantMap tickerObject = Json::parse(buffer).toMap()["data"].toMap();
+      TickerData tickerData;
+      tickerData.date = localTime;
+      tickerData.bid = (double)tickerObject["buy"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+      tickerData.ask = (double)tickerObject["sell"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+      tickerData.high24h = (double)tickerObject["high"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+      tickerData.low24h = (double)tickerObject["low"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+      tickerData.volume24h = (double)tickerObject["vol"].toMap()["value_int"].toULongLong() / (double)100000000ULL;
+      tickerData.vwap24h = (double)tickerObject["vwap"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+      callback.receivedTickerData(tickerData);
+    }
+
+
     if(!httpRequest.get("http://data.mtgox.com/api/2/BTCUSD/money/trades/fetch", buffer))
     {
       // todo: warn?

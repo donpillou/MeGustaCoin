@@ -46,3 +46,10 @@ void GraphModel::addBookSample(const BookSample& bookSample)
 
   emit dataAdded();
 }
+
+void GraphModel::addTickerData(const MarketStream::TickerData& tickerData)
+{
+  tickerSamples.append(tickerData);
+
+  emit dataAdded();
+}

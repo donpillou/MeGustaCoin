@@ -9,6 +9,7 @@
 #include "Tools/Websocket.h"
 #include "Tools/JobQueue.h"
 
+#include "Markets/BitcoinCharts.h"
 #include "Markets/Market.h"
 #include "Markets/BitstampMarket.h"
 #include "Markets/MarketStream.h"

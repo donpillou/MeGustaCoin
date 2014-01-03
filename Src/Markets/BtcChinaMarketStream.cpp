@@ -31,6 +31,29 @@ void BtcChinaMarketStream::process(Callback& callback)
     {
       connected = true;
       callback.information("Connected to BtcChina/CNY.");
+
+      
+      
+      BitcoinCharts::Data bcData;
+      QString bcError;
+      if(BitcoinCharts::getData("btcnCNY", bcData, bcError))
+      {
+        TickerData tickerData;
+        tickerData.date = QDateTime::currentDateTimeUtc().toTime_t();
+        tickerData.vwap24h = bcData.vwap24;
+        tickerData.bid = bcData.bid;
+        tickerData.ask = bcData.ask;
+        tickerData.high24h = bcData.high;
+        tickerData.low24h = bcData.low;
+        tickerData.volume24h = bcData.volume;
+        tickerData.vwap24h = bcData.vwap24;
+
+        callback.receivedTickerData(tickerData);
+      }
+      else
+      {
+        // todo: warn or error
+      }
     }
     if(canceled)
       break;

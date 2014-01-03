@@ -26,6 +26,7 @@ private:
     enum class Type
     {
       addTrade,
+      addTickerData,
       logMessage,
     };
     Type type;
@@ -39,6 +40,13 @@ private:
   public:
     MarketStream::Trade trade;
     AddTradeAction(const MarketStream::Trade& trade) : Action(Type::addTrade), trade(trade) {}
+  };
+
+  class AddTickerDataAction : public Action
+  {
+  public:
+    MarketStream::TickerData tickerData;
+    AddTickerDataAction(const MarketStream::TickerData& tickerData) : Action(Type::addTickerData), tickerData(tickerData) {}
   };
 
   class LogMessageAction : public Action

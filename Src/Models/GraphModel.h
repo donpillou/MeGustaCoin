@@ -19,6 +19,12 @@ public:
     TradeSample() : amount(0) {}
   };
 
+  class TickerSample : public MarketStream::TickerData
+  {
+  public:
+    TickerSample(const MarketStream::TickerData& tickerData) : MarketStream::TickerData(tickerData) {}
+  };
+
   class BookSample
   {
   public:
@@ -227,10 +233,21 @@ public:
 
   QList<TradeSample> tradeSamples;
   QList<BookSample> bookSamples;
+  QList<TickerSample> tickerSamples;
   RegressionLine regressionLines[(int)RegressionDepth::numOfRegressionDepths];
 
   void addTrade(const MarketStream::Trade& trade);
   void addBookSample(const BookSample& bookSummary);
+  void addTickerData(const MarketStream::TickerData& tickerData);
+
+  double getVwap24() const
+  {
+    if(!tickerSamples.isEmpty())
+      return tickerSamples.back().vwap24h;
+    if(!tradeSamples.isEmpty())
+      return regressionLines[(int)RegressionDepth::depth24h].averagePrice;
+    return 0;
+  }
 
 signals:
   void dataAdded();

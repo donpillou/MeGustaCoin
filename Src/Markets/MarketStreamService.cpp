@@ -63,6 +63,12 @@ void MarketStreamService::subscribe()
       QTimer::singleShot(0, &streamService, SLOT(executeActions()));
     }
 
+    virtual void receivedTickerData(const MarketStream::TickerData& tickerData)
+    {
+      actionQueue.append(new AddTickerDataAction(tickerData));
+      QTimer::singleShot(0, &streamService, SLOT(executeActions()));
+    }
+
     virtual void error(const QString& message)
     {
       actionQueue.append(new LogMessageAction(LogModel::Type::error, message));
@@ -121,6 +127,12 @@ void MarketStreamService::executeActions()
       {
         AddTradeAction* addTradeAction = (AddTradeAction*)action;
         publicDataModel.addTrade(addTradeAction->trade);
+      }
+      break;
+    case Action::Type::addTickerData:
+      {
+        AddTickerDataAction* addTickerDataAction = (AddTickerDataAction*)action;
+        publicDataModel.addTickerData(addTickerDataAction->tickerData);
       }
       break;
     case Action::Type::logMessage:
