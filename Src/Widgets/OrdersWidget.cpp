@@ -3,6 +3,7 @@
 
 OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService) : QWidget(parent), dataModel(dataModel), orderModel(dataModel.orderModel), marketService(marketService)
 {
+  connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
 
   QToolBar* toolBar = new QToolBar(this);
@@ -254,4 +255,13 @@ void OrdersWidget::updateToolBarButtons()
 void OrdersWidget::refresh()
 {
   marketService.loadOrders();
+}
+
+void OrdersWidget::updateTitle()
+{
+  QString stateStr = dataModel.orderModel.getStateName();
+  QString title  = tr(stateStr.isEmpty() ? "Orders" : "Orders (%2)").arg(stateStr);
+  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
+  dockWidget->setWindowTitle(title);
+  dockWidget->toggleViewAction()->setText(tr("Orders"));
 }

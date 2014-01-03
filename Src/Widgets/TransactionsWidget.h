@@ -15,6 +15,7 @@ public slots:
 
 private slots:
   void updateToolBarButtons();
+  void updateTitle();
 
 private:
   DataModel& dataModel;

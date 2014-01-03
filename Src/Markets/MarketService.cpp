@@ -63,12 +63,14 @@ void MarketService::logout()
 
 void MarketService::loadTransactions()
 {
+  dataModel.transactionModel.setState(TransactionModel::State::loading);
   dataModel.logModel.addMessage(LogModel::Type::information, "Refreshing transactions...");
   queuedJobs.append(new LoadTransactionsJob());
 }
 
 void MarketService::loadOrders()
 {
+  dataModel.orderModel.setState(OrderModel::State::loading);
   dataModel.logModel.addMessage(LogModel::Type::information, "Refreshing orders...");
   queuedJobs.append(new LoadOrdersJob());
 }
@@ -304,6 +306,7 @@ void MarketService::finalizeJobs()
         {
           const LoadOrdersJob* loadOrdersJob = (LoadOrdersJob*)job;
           dataModel.orderModel.setData(loadOrdersJob->orders);
+          dataModel.orderModel.setState(OrderModel::State::loaded);
           dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved orders"));
         }
         break;
@@ -311,6 +314,7 @@ void MarketService::finalizeJobs()
         {
           const LoadTransactionsJob* loadTransactionsJob = (LoadTransactionsJob*)job;
           dataModel.transactionModel.setData(loadTransactionsJob->transactions);
+          dataModel.transactionModel.setState(TransactionModel::State::loaded);
           dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved transactions"));
         }
         break;
@@ -322,6 +326,7 @@ void MarketService::finalizeJobs()
       {
       case Job::Type::loadOrders:
         dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load orders: %1").arg(job->errorMessage));
+        dataModel.orderModel.setState(OrderModel::State::error);
         break;
       case Job::Type::loadBalance:
         dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load balance: %1").arg(job->errorMessage));
@@ -354,6 +359,7 @@ void MarketService::finalizeJobs()
         break;
       case Job::Type::loadTransactions:
         dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load transactions: %1").arg(job->errorMessage));
+        dataModel.transactionModel.setState(TransactionModel::State::error);
         break;
       }
     }

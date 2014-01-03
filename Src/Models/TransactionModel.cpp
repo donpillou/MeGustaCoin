@@ -5,7 +5,7 @@ TransactionModel::TransactionModel(DataModel& dataModel) :
   dataModel(dataModel),
   buyStr(tr("buy")), sellStr(tr("sell")),
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
-  dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
+  dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat)), state(State::empty)
 {
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateHeader()));
 }
@@ -13,6 +13,29 @@ TransactionModel::TransactionModel(DataModel& dataModel) :
 TransactionModel::~TransactionModel()
 {
   qDeleteAll(transactions);
+}
+
+void TransactionModel::setState(State state)
+{
+  this->state = state;
+  emit changedState();
+}
+
+QString TransactionModel::getStateName() const
+{
+  switch(state)
+  {
+  case State::empty:
+    return QString();
+  case State::loading:
+    return tr("loading...");
+  case State::loaded:
+    return QString();
+  case State::error:
+    return tr("error");
+  }
+  Q_ASSERT(false);
+  return QString();
 }
 
 void TransactionModel::updateHeader()

@@ -6,7 +6,7 @@ OrderModel::OrderModel(DataModel& dataModel) :
   draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), 
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat)),
-  nextDraftId(0)
+  nextDraftId(0), state(State::empty)
 {
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateHeader()));
 
@@ -16,6 +16,29 @@ OrderModel::OrderModel(DataModel& dataModel) :
 OrderModel::~OrderModel()
 {
   qDeleteAll(orders);
+}
+
+void OrderModel::setState(State state)
+{
+  this->state = state;
+  emit changedState();
+}
+
+QString OrderModel::getStateName() const
+{
+  switch(state)
+  {
+  case State::empty:
+    return QString();
+  case State::loading:
+    return tr("loading...");
+  case State::loaded:
+    return QString();
+  case State::error:
+    return tr("error");
+  }
+  Q_ASSERT(false);
+  return QString();
 }
 
 void OrderModel::updateHeader()

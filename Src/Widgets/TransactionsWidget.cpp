@@ -6,6 +6,7 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Dat
   dataModel(dataModel), transactionModel(dataModel.transactionModel),
   marketService(marketService)
 {
+  connect(&dataModel.transactionModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
 
   QToolBar* toolBar = new QToolBar(this);
@@ -98,4 +99,13 @@ void TransactionsWidget::updateToolBarButtons()
 void TransactionsWidget::refresh()
 {
   marketService.loadTransactions();
+}
+
+void TransactionsWidget::updateTitle()
+{
+  QString stateStr = dataModel.transactionModel.getStateName();
+  QString title  = tr(stateStr.isEmpty() ? "Transactions" : "Transactions (%2)").arg(stateStr);
+  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
+  dockWidget->setWindowTitle(title);
+  dockWidget->toggleViewAction()->setText(tr("Transactions"));
 }

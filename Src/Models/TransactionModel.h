@@ -9,6 +9,14 @@ public:
   TransactionModel(DataModel& dataModel);
   ~TransactionModel();
 
+  enum class State
+  {
+    empty,
+    loading,
+    loaded,
+    error,
+  };
+
   class Transaction
   {
   public:
@@ -53,6 +61,9 @@ public:
       last = total,
   };
 
+  void setState(State state);
+  QString getStateName() const;
+
   void reset();
 
   void setData(const QList<Market::Transaction>& order);
@@ -60,6 +71,9 @@ public:
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
  
   const Transaction* getTransaction(const QModelIndex& index) const;
+
+signals:
+  void changedState();
 
 private:
   DataModel& dataModel;
@@ -69,6 +83,7 @@ private:
   QVariant sellIcon;
   QVariant buyIcon;
   QString dateFormat;
+  State state;
 
   virtual QModelIndex parent(const QModelIndex& child) const;
   virtual int rowCount(const QModelIndex& parent) const;

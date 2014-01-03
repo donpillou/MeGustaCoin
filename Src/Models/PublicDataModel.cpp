@@ -111,7 +111,7 @@ QString PublicDataModel::getStateName() const
   switch(state)
   {
   case PublicDataModel::State::connecting:
-    return tr("connecting");
+    return tr("connecting...");
   case PublicDataModel::State::offline:
     return tr("offline");
   case PublicDataModel::State::connected:

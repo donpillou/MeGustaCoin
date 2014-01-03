@@ -11,6 +11,14 @@ public:
   OrderModel(DataModel& dataModel);
   ~OrderModel();
 
+  enum class State
+  {
+    empty,
+    loading,
+    loaded,
+    error,
+  };
+
   class Order
   {
   public:
@@ -66,6 +74,9 @@ public:
       last = total,
   };
 
+  void setState(State state);
+  QString getStateName() const;
+
   void reset();
 
   void setData(const QList<Market::Order>& orders);
@@ -83,6 +94,7 @@ public:
 
 signals:
   void orderEdited(const QModelIndex& index);
+  void changedState();
 
 private:
   DataModel& dataModel;
@@ -101,6 +113,7 @@ private:
   QVariant buyIcon;
   QString dateFormat;
   unsigned int nextDraftId;
+  State state;
 
   virtual QModelIndex parent(const QModelIndex& child) const;
   virtual int rowCount(const QModelIndex& parent) const;
