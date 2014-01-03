@@ -22,7 +22,10 @@ void GraphModel::addTrade(const MarketStream::Trade& trade)
   for (int i = 0; i < (int)RegressionDepth::numOfRegressionDepths; ++i)
   {
     averager[i].add(trade.date, trade.amount, trade.price);
-    averager[i].limitTo(depths[i]);
+    if(i == (int)RegressionDepth::depth24h)
+      averager[i].limitToAge(24 * 60 * 60);
+    else
+      averager[i].limitToVolume(depths[i]);
     averager[i].getLine(regressionLines[i].a, regressionLines[i].b, regressionLines[i].startTime, regressionLines[i].endTime);
     regressionLines[i].averagePrice = averager[i].getAveragePrice();
   }

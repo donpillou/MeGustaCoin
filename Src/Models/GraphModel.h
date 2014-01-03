@@ -47,6 +47,7 @@ public:
     depth200,
     depth500,
     depth1000,
+    depth24h,
     numOfRegressionDepths
   };
 
@@ -101,7 +102,7 @@ public:
       dataEntry.n = n;
     }
 
-    void limitTo(double amount)
+    void limitToVolume(double amount)
     {
       double totalNToRemove = sumN - amount;
       while(totalNToRemove > 0. && !data.isEmpty())
@@ -134,6 +135,39 @@ public:
           dataEntry.n -= nToRemove;
        
         totalNToRemove -= nToRemove;
+      }
+    }
+
+    void limitToAge(double maxAge)
+    {
+      if(data.isEmpty())
+        return;
+      quint64 now = data.back().time;
+
+      while(!data.isEmpty())
+      {
+        DataEntry& dataEntry = data.front();
+        if(now - dataEntry.time <= maxAge)
+          return;
+
+        const double& x = dataEntry.x;
+        const double& y = dataEntry.y;
+        const double& n = dataEntry.n;
+
+        const double nx = n * x;
+        const double ny = n * y;
+        const double nxy = nx * y;
+        const double nxx = nx * x;
+
+        sumXY -= nxy;
+        sumY -= ny;
+        sumX -= nx;
+        sumXX -= nxx;
+        sumN -= n;
+
+        data.pop_front();
+        if(newCount == data.size())
+          useNewSum();
       }
     }
 

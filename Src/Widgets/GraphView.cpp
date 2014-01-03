@@ -85,12 +85,12 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   if(enabledData & (int)Data::otherMarkets)
   {
-    double averagePrice = graphModel->regressionLines[(int)GraphModel::RegressionDepth::depth1000].averagePrice;
+    double averagePrice = graphModel->regressionLines[(int)GraphModel::RegressionDepth::depth24h].averagePrice;
     foreach(const PublicDataModel* publicDataModel, publicDataModels)
     {
       if(publicDataModel != this->publicDataModel || !(enabledData & ((int)Data::trades)))
       {
-        double otherAveragePrice = publicDataModel->graphModel.regressionLines[(int)GraphModel::RegressionDepth::depth1000].averagePrice;
+        double otherAveragePrice = publicDataModel->graphModel.regressionLines[(int)GraphModel::RegressionDepth::depth24h].averagePrice;
         drawTradePolyline(painter, plotRect, vmin, vmax, lastVolumeMax, publicDataModel->graphModel, (int)Data::trades, averagePrice / otherAveragePrice, publicDataModel->color);
       }
     }

@@ -77,8 +77,8 @@ void MtGoxMarketStream::process(Callback& callback)
       trade.amount =  tradeData["amount_int"].toDouble() / (double)100000000ULL;;
       trade.price = tradeData["price_int"].toULongLong() / (double)100000ULL;;
       trade.date = (qint64)tradeData["date"].toULongLong() + timeOffset;
-      if(localTime - trade.date > 60 * 60)
-        continue;
+      //if(localTime - trade.date > 60 * 60)
+      //  continue;
 
       quint64 id = tradeData["tid"].toULongLong();
       if(id > lastTradeId)
