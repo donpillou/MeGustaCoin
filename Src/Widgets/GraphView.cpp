@@ -347,7 +347,7 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double y
 
     if(enabledData & (int)Data::tradeVolume)
     {
-      QPen volumePen(Qt::darkGreen);
+      QPen volumePen(Qt::darkBlue);
       painter.setPen(volumePen);
       painter.drawLines(volumeData, (currentVolumePoint - volumeData) / 2);
     }
