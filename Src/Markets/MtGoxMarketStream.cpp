@@ -3,7 +3,7 @@
 
 MtGoxMarketStream::MtGoxMarketStream() :
   canceled(false), marketCurrency("USD"), coinCurrency("BTC"),
-  timeOffsetSet(false), lastTradeId(false) {}
+  timeOffsetSet(false), lastTradeId(0) {}
 
 void MtGoxMarketStream::process(Callback& callback) 
 {
@@ -116,8 +116,8 @@ void MtGoxMarketStream::process(Callback& callback)
       if(id > lastTradeId)
         if(tradeData["item"].toString().toUpper() == "BTC" && tradeData["price_currency"].toString().toUpper() == "USD")
         {
-          lastTradeId = id;
           callback.receivedTrade(trade);
+          lastTradeId = id;
         }
     }
   }
@@ -177,7 +177,10 @@ cont:
         quint64 id = tradeMap["tid"].toULongLong();
         if(id > lastTradeId)
           if(tradeMap["item"].toString().toUpper() == "BTC" && tradeMap["price_currency"].toString().toUpper() == "USD")
+          {
             callback.receivedTrade(trade);
+            lastTradeId = id;
+          }
       }
       else if(channel == "d5f06780-30a8-4a48-a2f8-7ed181b4a13f") // Ticker
       {
