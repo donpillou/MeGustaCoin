@@ -97,7 +97,12 @@ void BookWidget::autoScroll(int, int)
 void BookWidget::updateTitle()
 {
   QString stateStr = publicDataModel.getStateName();
-  QString title  = tr(stateStr.isEmpty() ? "%1 Order Book" : "%1 Order Book (%2)").arg(publicDataModel.getMarketName(), stateStr);
+
+  QString title;
+  if(stateStr.isEmpty())
+    title = tr("%1 Order Book").arg(publicDataModel.getMarketName());
+  else
+    title  = tr("%1 Order Book (%2)").arg(publicDataModel.getMarketName(), stateStr);
 
   QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
   dockWidget->setWindowTitle(title);

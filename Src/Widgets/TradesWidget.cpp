@@ -78,7 +78,11 @@ void TradesWidget::updateTitle()
 {
   QString stateStr = publicDataModel.getStateName();
 
-  QString title  = tr(stateStr.isEmpty() ? "%1 Live Trades" : "%1 Live Trades (%2)").arg(publicDataModel.getMarketName(), stateStr);
+  QString title;
+  if(stateStr.isEmpty())
+    title = tr("%1 Live Trades").arg(publicDataModel.getMarketName());
+  else
+    title = tr("%1 Live Trades (%2)").arg(publicDataModel.getMarketName(), stateStr);
 
   QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
   dockWidget->setWindowTitle(title);

@@ -260,7 +260,11 @@ void OrdersWidget::refresh()
 void OrdersWidget::updateTitle()
 {
   QString stateStr = dataModel.orderModel.getStateName();
-  QString title  = tr(stateStr.isEmpty() ? "Orders" : "Orders (%2)").arg(stateStr);
+  QString title;
+  if(stateStr.isEmpty())
+    title = tr("Orders");
+  else
+    title = tr("Orders (%2)").arg(stateStr);
   QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
   dockWidget->setWindowTitle(title);
   dockWidget->toggleViewAction()->setText(tr("Orders"));

@@ -104,7 +104,11 @@ void TransactionsWidget::refresh()
 void TransactionsWidget::updateTitle()
 {
   QString stateStr = dataModel.transactionModel.getStateName();
-  QString title  = tr(stateStr.isEmpty() ? "Transactions" : "Transactions (%2)").arg(stateStr);
+  QString title;
+  if(stateStr.isEmpty())
+    title = tr("Transactions");
+  else
+    title = tr("Transactions (%2)").arg(stateStr);
   QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
   dockWidget->setWindowTitle(title);
   dockWidget->toggleViewAction()->setText(tr("Transactions"));

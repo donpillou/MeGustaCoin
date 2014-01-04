@@ -211,7 +211,12 @@ void GraphWidget::updateTitle()
 
   QString title;
   if(publicDataModel)
-    title = tr(stateStr.isEmpty() ? "%1 Live Graph" : "%1 Live Graph (%2)").arg(publicDataModel->getMarketName(), stateStr);
+  {
+    if(stateStr.isEmpty())
+      title = tr("%1 Live Graph").arg(publicDataModel->getMarketName());
+    else
+      title = tr("%1 Live Graph (%2)").arg(publicDataModel->getMarketName(), stateStr);
+  }
   else
     title = tr("Live Graph (%1)").arg(tr("offline"));
 
