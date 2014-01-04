@@ -40,7 +40,7 @@ void MtGoxMarketStream::process(Callback& callback)
 
     if(!httpRequest.get("http://data.mtgox.com/api/2/BTCUSD/money/ticker_fast", buffer))
     {
-      // todo: warn?
+      callback.error(QString("Could not load MtGox/USD server time: %1").arg(httpRequest.getLastError()));
       goto cont;
     }
 
@@ -56,8 +56,10 @@ void MtGoxMarketStream::process(Callback& callback)
     QVariantMap tickerObject = Json::parse(buffer).toMap()["data"].toMap();
     quint64 serverTime = tickerObject["now"].toULongLong() / 1000000ULL;
     quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
-    qint64 timeOffset = (qint64)localTime - (qint64)serverTime;
+    timeOffset = (qint64)localTime - (qint64)serverTime;
+    timeOffsetSet = true;
 
+    /*
     if(!httpRequest.get("http://data.mtgox.com/api/2/BTCUSD/money/ticker", buffer))
     {
       // todo: warn?
@@ -88,11 +90,11 @@ void MtGoxMarketStream::process(Callback& callback)
       tickerData.vwap24h = (double)tickerObject["vwap"].toMap()["value_int"].toULongLong() / (double)100000ULL;
       callback.receivedTickerData(tickerData);
     }
-
+    */
 
     if(!httpRequest.get("http://data.mtgox.com/api/2/BTCUSD/money/trades/fetch", buffer))
     {
-      // todo: warn?
+      callback.error(QString("Could not load MtGox/USD trade history: %1").arg(httpRequest.getLastError()));
       goto cont;
     }
 
@@ -101,24 +103,24 @@ void MtGoxMarketStream::process(Callback& callback)
     // {"date":1388590384,"price":"806.5","amount":"0.43920867","price_int":"80650000","amount_int":"43920867","tid":"1388590384943529","price_currency":"USD","item":"BTC","trade_type":"ask","primary":"Y","properties":"market"},
     // ...
 
+    localTime = QDateTime::currentDateTimeUtc().toTime_t();
     QVariantList trades = Json::parse(buffer).toMap()["data"].toList();
     MarketStream::Trade trade;
     for(QVariantList::iterator i = trades.begin(), end = trades.end(); i != end; ++i)
     {
-      QVariantMap tradeData = i->toMap();
-      trade.amount =  tradeData["amount_int"].toDouble() / (double)100000000ULL;;
-      trade.price = tradeData["price_int"].toULongLong() / (double)100000ULL;;
-      trade.date = (qint64)tradeData["date"].toULongLong() + timeOffset;
-      //if(localTime - trade.date > 60 * 60)
-      //  continue;
+      QVariantMap tradeObject= i->toMap();
+      trade.amount =  tradeObject["amount_int"].toDouble() / (double)100000000ULL;;
+      trade.price = tradeObject["price_int"].toULongLong() / (double)100000ULL;;
+      trade.date = convertTime(localTime, tradeObject["date"].toULongLong());
+      quint64 id = tradeObject["tid"].toULongLong();
+      QString itemCurrency = tradeObject["item"].toString().toUpper();
+      QString priceCurrency = tradeObject["price_currency"].toString().toUpper();
 
-      quint64 id = tradeData["tid"].toULongLong();
-      if(id > lastTradeId)
-        if(tradeData["item"].toString().toUpper() == "BTC" && tradeData["price_currency"].toString().toUpper() == "USD")
-        {
-          callback.receivedTrade(trade);
-          lastTradeId = id;
-        }
+      if(id > lastTradeId && itemCurrency == "BTC" && priceCurrency == "USD")
+      {
+        callback.receivedTrade(trade);
+        lastTradeId = id;
+      }
     }
   }
 cont:
@@ -148,58 +150,60 @@ cont:
       continue;
     lastPingTime = QDateTime::currentDateTime();
 
-    qint64 now = QDateTime::currentDateTimeUtc().toTime_t();
-    //QVariantList data = Json::parseList(buffer);
-    QVariant var = Json::parse(buffer);
+    qint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
+    QVariantMap data = Json::parse(buffer).toMap();
+    QString channel = data["channel"].toString();
 
-    //foreach(const QVariant& var, data)
+    if(channel == "dbf1dee9-4f2e-4a08-8cb7-748919a71b21") // Trade
     {
-      QVariantMap data = var.toMap();
-      QString channel = data["channel"].toString();
+      QVariantMap tradeObject = data["trade"].toMap();
+      MarketStream::Trade trade;
+      trade.amount =  tradeObject["amount_int"].toDouble() / (double)100000000ULL;;
+      trade.price = tradeObject["price_int"].toULongLong() / (double)100000ULL;;
+      trade.date = convertTime(localTime, tradeObject["date"].toULongLong());
+      quint64 id = tradeObject["tid"].toULongLong();
+      QString itemCurrency = tradeObject["item"].toString().toUpper();
+      QString priceCurrency = tradeObject["price_currency"].toString().toUpper();
 
-      if(channel == "dbf1dee9-4f2e-4a08-8cb7-748919a71b21") // Trade
+      if(id > lastTradeId && itemCurrency == "BTC" && priceCurrency == "USD")
       {
-        QVariantMap tradeMap = data["trade"].toMap();
-
-        MarketStream::Trade trade;
-        trade.amount =  (double)tradeMap["amount_int"].toULongLong() / (double)100000000ULL;
-        trade.price = (double)tradeMap["price_int"].toULongLong() / (double)100000ULL;
-        trade.date = tradeMap["date"].toULongLong();
-
-        qint64 offset = now - trade.date;
-        if(offset < timeOffset || !timeOffsetSet)
-        {
-          timeOffset = offset;
-          timeOffsetSet = true;
-        }
-        trade.date += timeOffset;
-
-        quint64 id = tradeMap["tid"].toULongLong();
-        if(id > lastTradeId)
-          if(tradeMap["item"].toString().toUpper() == "BTC" && tradeMap["price_currency"].toString().toUpper() == "USD")
-          {
-            callback.receivedTrade(trade);
-            lastTradeId = id;
-          }
+        callback.receivedTrade(trade);
+        lastTradeId = id;
       }
-      else if(channel == "d5f06780-30a8-4a48-a2f8-7ed181b4a13f") // Ticker
-      {
-        QVariantMap tickerMap = data["ticker"].toMap();
-        // todo
-      }
-      else if(channel == "24e67e0d-1cad-4cc0-9e7a-f8523ef460fe") // Depth 
-      {
-        QVariantMap depthMap = data["depth"].toMap();
-        // todo
-      }
-      else
-      {
-        callback.error(QString("Received message on unknown channel %1").arg(channel));
-      }
+    }
+    else if(channel == "d5f06780-30a8-4a48-a2f8-7ed181b4a13f") // Ticker
+    {
+      QVariantMap tickerObject = data["ticker"].toMap();
+      TickerData tickerData;
+      tickerData.date = convertTime(localTime, tickerObject["now"].toULongLong() / 1000000ULL);
+      tickerData.bid = (double)tickerObject["buy"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+      tickerData.ask = (double)tickerObject["sell"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+      tickerData.high24h = (double)tickerObject["high"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+      tickerData.low24h = (double)tickerObject["low"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+      tickerData.volume24h = (double)tickerObject["vol"].toMap()["value_int"].toULongLong() / (double)100000000ULL;
+      tickerData.vwap24h = (double)tickerObject["vwap"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+      callback.receivedTickerData(tickerData);
+    }
+    else if(channel == "24e67e0d-1cad-4cc0-9e7a-f8523ef460fe") // Depth 
+    {
+      QVariantMap depthMap = data["depth"].toMap();
+      // todo
+    }
+    else
+    {
+      callback.error(QString("Received message on unknown channel %1").arg(channel));
     }
   }
 
   callback.information("Closed connection to MtGox/USD.");
+}
+
+quint64 MtGoxMarketStream::convertTime(quint64 currentLocalTime, quint64 time)
+{
+  qint64 offset = (qint64)currentLocalTime - (qint64)time;
+  if(offset < timeOffset)
+    timeOffset = offset;
+  return time + timeOffset;
 }
 
 bool MtGoxMarketStream::sendPing(Websocket& websocket)

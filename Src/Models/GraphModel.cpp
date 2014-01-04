@@ -51,5 +51,8 @@ void GraphModel::addTickerData(const MarketStream::TickerData& tickerData)
 {
   tickerSamples.append(tickerData);
 
+  while(!tickerSamples.isEmpty() && tickerData.date - tickerSamples.front().date > 7 * 24 * 60 * 60)
+    tickerSamples.pop_front();
+
   emit dataAdded();
 }

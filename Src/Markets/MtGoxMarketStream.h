@@ -26,6 +26,8 @@ private:
   quint64 lastTradeId;
   QDateTime lastPingTime;
 
+  quint64 convertTime(quint64 currentLocalTime, quint64 time);
+
   bool sendPing(Websocket& websocket);
 
   void sleep(unsigned int secs);
