@@ -21,6 +21,7 @@ private:
 
   quint64 lastTradeId;
   QDateTime lastPingTime;
+  QDateTime lastTickerUpdate;
 
   void sleep(unsigned int ms);
 };

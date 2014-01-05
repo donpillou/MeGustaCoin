@@ -9,6 +9,7 @@ void BitstampMarketStream::process(Callback& callback)
 {
   Websocket websocket;
   QByteArray buffer;
+  HttpRequest httpRequest;
   
   callback.information("Connecting to Bitstamp/USD...");
 
@@ -33,47 +34,26 @@ void BitstampMarketStream::process(Callback& callback)
   // load trade history
   sleep(3); // ensure requested trades are covered by the stream
   {
-    HttpRequest httpRequest;
     QByteArray buffer;
 
     if(!httpRequest.get("https://www.bitstamp.net/api/ticker/", buffer))
     {
-      // todo: warn?
+      callback.error(QString("Could not load Bitstamp/USD server time: %1").arg(httpRequest.getLastError()));
       goto cont;
     }
 
     // {"high": "759.90", "last": "753.40", "timestamp": "1388668694", "bid": "753.31", "volume": "5972.35893309", "low": "741.00", "ask": "753.40"}
 
-    QVariantMap tickerObject= Json::parse(buffer).toMap();
+    QVariantMap tickerObject = Json::parse(buffer).toMap();
     quint64 serverTime = tickerObject["timestamp"].toULongLong(); // + up to 8 seconds
     quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
     qint64 timeOffset = (qint64)localTime - (qint64)serverTime;
 
     if(!httpRequest.get("https://www.bitstamp.net/api/transactions/", buffer))
     {
-      // todo: warn?
+      callback.error(QString("Could not load Bitstamp/USD trade history: %1").arg(httpRequest.getLastError()));
       goto cont;
     }
-
-    TickerData tickerData;
-    tickerData.date = localTime;
-    tickerData.bid = tickerObject["bid"].toDouble();
-    tickerData.ask = tickerObject["ask"].toDouble();
-    tickerData.high24h = tickerObject["high"].toDouble();
-    tickerData.low24h = tickerObject["low"].toDouble();
-    tickerData.volume24h = tickerObject["volume"].toDouble();
-    tickerData.vwap24h = (tickerData.high24h + tickerData.low24h) * 0.5; // todo: acquire vwap24h from somewhere
-    BitcoinCharts::Data bcData;
-    QString bcError;
-    if(BitcoinCharts::getData("bitstampUSD", bcData, bcError))
-    {
-      tickerData.vwap24h = bcData.vwap24;
-    }
-    else
-    {
-      // todo: warn or error
-    }
-    callback.receivedTickerData(tickerData);
 
     // [{"date": "1388668244", "tid": 2831838, "price": "754.00", "amount": "0.01326260"}, 
     // {"date": "1388668244", "tid": 2831837, "price": "754.00", "amount": "0.49916678"},
@@ -91,8 +71,8 @@ void BitstampMarketStream::process(Callback& callback)
         quint64 id = tradeData["tid"].toULongLong();
         if(id > lastTradeId)
         {
-          lastTradeId = id;
           callback.receivedTrade(trade);
+          lastTradeId = id;
         }
         if(i == trades.begin())
           break;
@@ -103,7 +83,42 @@ cont:
   // message loop
   while(!canceled)
   {
-    // wait for update
+    // update ticker
+    if(lastTickerUpdate.isNull() || lastTickerUpdate.secsTo(QDateTime::currentDateTime()) > 30)
+    {
+      QByteArray buffer;
+      if(!httpRequest.get("https://www.bitstamp.net/api/ticker/", buffer))
+      {
+        callback.error(QString("Could not load Bitstamp/USD ticker data: %1").arg(httpRequest.getLastError()));
+      }
+      else
+      {
+        QVariantMap tickerObject = Json::parse(buffer).toMap();
+        TickerData tickerData;
+        tickerData.date = QDateTime::currentDateTimeUtc().toTime_t();
+        tickerData.bid = tickerObject["bid"].toDouble();
+        tickerData.ask = tickerObject["ask"].toDouble();
+        tickerData.high24h = tickerObject["high"].toDouble();
+        tickerData.low24h = tickerObject["low"].toDouble();
+        tickerData.volume24h = tickerObject["volume"].toDouble();
+        tickerData.vwap24h = (tickerData.high24h + tickerData.low24h) * 0.5; // todo: acquire vwap24h from somewhere
+        BitcoinCharts::Data bcData;
+        QString bcError;
+        if(BitcoinCharts::getData("bitstampUSD", bcData, bcError))
+        {
+          tickerData.vwap24h = bcData.vwap24;
+        }
+        else
+        {
+          // todo: warn or error
+        }
+        callback.receivedTickerData(tickerData);
+      }
+
+      lastTickerUpdate = QDateTime::currentDateTime();
+    }
+
+    // send ping?
     if(lastPingTime.secsTo(QDateTime::currentDateTime()) > 120)
     {
       if(!websocket.sendPing())
@@ -114,6 +129,7 @@ cont:
       lastPingTime = QDateTime::currentDateTime();
     }
 
+    // wait for update
     if(!websocket.read(buffer, 500))
     {
       callback.error("Lost connection to Bitstamp/USD.");
@@ -131,47 +147,42 @@ cont:
     // {"event":"trade","data":"{\"price\": 719.98000000000002, \"amount\": 5.3522414999999999, \"id\": 2799842}","channel":"live_trades"}
     // {"event":"trade","data":"{\"price\": 719.99000000000001, \"amount\": 39.6419985, \"id\": 2799843}","channel":"live_trades"}
 
-    quint64 now = QDateTime::currentDateTimeUtc().toTime_t();
-    //QVariantList data = Json::parseList(buffer);
-    QVariant var = Json::parse(buffer);
-    //foreach(const QVariant& var, data)
-    {
-      QVariantMap data = var.toMap();
-      QString event = data["event"].toString();
-      QString channel = data["channel"].toString();
+    quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
+    QVariantMap data = Json::parse(buffer).toMap();
+    QString event = data["event"].toString();
+    QString channel = data["channel"].toString();
 
-      if(channel.isEmpty() && event == "pusher:connection_established")
+    if(channel.isEmpty() && event == "pusher:connection_established")
+    {
+      // k
+    }
+    else if(channel == "live_trades")
+    {
+      if(event == "pusher_internal:subscription_succeeded")
       {
         // k
       }
-      else if(channel == "live_trades")
+      else if(event == "trade")
       {
-        if(event == "pusher_internal:subscription_succeeded")
-        {
-          // k
-        }
-        else if(event == "trade")
-        {
-          QVariantMap tradeMap = Json::parse(data["data"].toString().toAscii()).toMap();
+        QVariantMap tradeMap = Json::parse(data["data"].toString().toAscii()).toMap();
 
-          MarketStream::Trade trade;
-          trade.amount =  tradeMap["amount"].toDouble();
-          trade.price = tradeMap["price"].toDouble();
-          trade.date = now;
-          quint64 id = tradeMap["id"].toULongLong();
-          if(id >= lastTradeId)
-          {
-            lastTradeId = id;
-            callback.receivedTrade(trade);
-          }
+        MarketStream::Trade trade;
+        trade.amount =  tradeMap["amount"].toDouble();
+        trade.price = tradeMap["price"].toDouble();
+        trade.date = localTime;
+        quint64 id = tradeMap["id"].toULongLong();
+        if(id >= lastTradeId)
+        {
+          callback.receivedTrade(trade);
+          lastTradeId = id;
         }
-        else
-          callback.error(QString("Received unknown event %1 on channel %1").arg(event, channel));
       }
       else
-      {
-        callback.error(QString("Received message on unknown channel %1").arg(channel));
-      }
+        callback.error(QString("Received unknown event %1 on channel %1").arg(event, channel));
+    }
+    else
+    {
+      callback.error(QString("Received message on unknown channel %1").arg(channel));
     }
   }
 
