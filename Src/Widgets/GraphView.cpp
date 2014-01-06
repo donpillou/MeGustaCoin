@@ -217,9 +217,18 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double y
 
     const QList<GraphModel::TradeSample>& tradeSamples = graphModel.tradeSamples;
     int i = 0, count = tradeSamples.size();
-    for(; i < count; ++i) // todo: optimize this
-      if(tradeSamples.at(i).time >= vmin) 
+    for(int step = qMax(tradeSamples.size() / 2, 1);;)
+    {
+      if(i + step < count && tradeSamples.at(i + step).time < vmin)
+        i += step;
+      else if(step == 1)
         break;
+      if(step > 1)
+        step /= 2;
+    }
+    //for(; i < count; ++i)
+    //  if(tradeSamples.at(i).time >= vmin) 
+    //    break;
     if(i < count)
     {
       const GraphModel::TradeSample* sample = &tradeSamples.at(i);
