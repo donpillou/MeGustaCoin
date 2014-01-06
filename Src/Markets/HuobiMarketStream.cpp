@@ -13,6 +13,7 @@ void HuobiMarketStream::process(Callback& callback)
 {
   HttpRequest httpRequest;
   bool connected = false;
+  int timeoutCount = 0;
 
   callback.information("Connecting to Huobi/CNY...");
 
@@ -22,12 +23,21 @@ void HuobiMarketStream::process(Callback& callback)
     bool result = httpRequest.get("https://detail.huobi.com/staticmarket/detail.html", buffer);
     if(!result)
     {
+      // since the huobi request times out a lot, allow up to two timeouts in a row.
+      if(timeoutCount < 2 && (httpRequest.getLastError() == "Timeout was reached." ||
+        httpRequest.getLastError() == "Server responded with code 0."))
+      {
+        ++timeoutCount;
+        continue;
+      }
+
       if(connected)
         callback.error(QString("Lost connection to Huobi/CNY: %1").arg(httpRequest.getLastError()));
       else
         callback.error(QString("Could not connect to Huobi/CNY: %1").arg(httpRequest.getLastError()));
       return;
     }
+    timeoutCount = 0;
     if(!connected)
     {
       connected = true;
