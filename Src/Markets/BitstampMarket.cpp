@@ -16,6 +16,21 @@ bool BitstampMarket::loadBalanceAndFee()
   return true;
 }
 
+bool BitstampMarket::createOrderDraft(double amount, double price, Market::Order& order)
+{
+  if(!loadBalanceAndFee())
+    return false;
+
+  double maxAmount = fabs(amount > 0. ? getMaxBuyAmout(price) : getMaxSellAmout());
+  if(fabs(amount) > maxAmount)
+    amount = copysign(maxAmount, amount);
+
+  order.amount = amount;
+  order.price = price;
+  order.total = getOrderCharge(order.amount, order.price);
+  return true;
+}
+
 bool BitstampMarket::createOrder(double amount, double price, Market::Order& order)
 {
   if(!loadBalanceAndFee())

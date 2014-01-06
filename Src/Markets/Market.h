@@ -72,9 +72,5 @@ public:
   virtual bool loadOrderBook(quint64& date, QList<OrderBookEntry>& bids, QList<OrderBookEntry>& asks) = 0;
   virtual bool createOrder(double amount, double price, Market::Order& order) = 0;
   virtual bool cancelOrder(const QString& id) = 0;
-
-  /*
-  virtual double getMaxSellAmout() const = 0;
-  virtual double getMaxBuyAmout(double price, double canceledAmount = 0., double canceledPrice = 0.) const = 0;
-  */
+  virtual bool createOrderDraft(double amount, double price, Market::Order& order) = 0;
 };

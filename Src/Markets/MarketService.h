@@ -14,21 +14,14 @@ public:
 
   bool isReady() const {return thread != 0;}
 
-  //const QString& getMarketName() const {return marketName;}
-
   void loadOrders();
   void loadBalance();
-  //void loadTicker();
   void loadTransactions();
-  //void loadLiveTrades();
-  //void loadOrderBook();
-  //void enableLiveTradeUpdates(bool enable);
-  //void enableOrderBookUpdates(bool enable);
+  QString createOrderDraft(bool sell, double price);
+  void updateOrderDraft(const QString& draftId, double amount, double price);
   void createOrder(const QString& draftId, double amount, double price);
   void cancelOrder(const QString& id);
   void updateOrder(const QString& id, double amount, double price);
-  //double getMaxSellAmout() const;
-  //double getMaxBuyAmout(double price, double canceledAmount = 0., double canceledPrice = 0.) const;
 
 private:
   DataModel& dataModel;
@@ -43,12 +36,10 @@ private:
       loadTransactions,
       loadOrders,
       loadBalance,
-      //loadTickerData,
-      //loadOrderBook,
-      //loadTrades,
       createOrder,
       cancelOrder,
       updateOrder,
+      updateOrderDraft,
     };
     Type type;
     bool error;
@@ -82,24 +73,6 @@ private:
     LoadBalanceJob() : Job(Type::loadBalance) {}
   };
 
-//  class LoadTickerDataJob : public Job
-//  {
-//  public:
-//    Market::TickerData tickerData;
-//
-//    LoadTickerDataJob() : Job(Type::loadTickerData) {}
-//  };
-  
-  /*class LoadOrderBookJob : public Job
-  {
-  public:
-    quint64 date;
-    QList<Market::OrderBookEntry> bids;
-    QList<Market::OrderBookEntry> asks;
-
-    LoadOrderBookJob() : Job(Type::loadOrderBook) {}
-  };*/
-
   class CreateOrderJob : public Job
   {
   public:
@@ -117,6 +90,17 @@ private:
     UpdateOrderJob() {type = Type::updateOrder;}
   };
 
+  class UpdateOrderDraftJob : public Job
+  {
+  public:
+    QString draftId;
+    double amount;
+    double price;
+    Market::Order order;
+
+    UpdateOrderDraftJob() : Job(Type::updateOrderDraft) {}
+  };
+
   class CancelOrderJob : public Job
   {
   public:
@@ -124,14 +108,6 @@ private:
 
     CancelOrderJob() : Job(Type::cancelOrder) {}
   };
-
-  /*class LoadTradesJob : public Job
-  {
-  public:
-    QList<Market::Trade> trades;
-
-    LoadTradesJob() : Job(Type::loadTrades) {}
-  };*/
 
   JobQueue<Job*> queuedJobs;
   JobQueue<Job*> finishedJobs;

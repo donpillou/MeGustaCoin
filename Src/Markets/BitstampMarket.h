@@ -20,6 +20,7 @@ public:
 
   virtual bool createOrder(double amount, double price, Market::Order& order);
   virtual bool cancelOrder(const QString& id);
+  virtual bool createOrderDraft(double amount, double price, Market::Order& order);
 
 private:
   QString coinCurrency;

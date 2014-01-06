@@ -84,10 +84,11 @@ public:
   void setOrderState(const QString& id, Order::State state);
   void setOrderNewAmount(const QString& id, double newAmount);
 
-  int addOrder(Order::Type type, double price);
+  QString addOrderDraft(Order::Type type, double price);
 
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
+  QModelIndex getOrderIndex(const QString& id) const;
   const Order* getOrder(const QString& id) const;
   const Order* getOrder(const QModelIndex& index) const;
   void removeOrder(const QModelIndex& index);
@@ -95,6 +96,7 @@ public:
 signals:
   void orderEdited(const QModelIndex& index);
   void changedState();
+  void editedDraft(const QModelIndex& index);
 
 private:
   DataModel& dataModel;

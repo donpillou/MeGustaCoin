@@ -1,7 +1,9 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService) : QWidget(parent), dataModel(dataModel), orderModel(dataModel.orderModel), marketService(marketService)
+OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService, const QMap<QString, PublicDataModel*>& publicDataModels) :
+  QWidget(parent), dataModel(dataModel), orderModel(dataModel.orderModel), marketService(marketService),
+  publicDataModels(publicDataModels)
 {
   connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
@@ -81,6 +83,7 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& data
   setLayout(layout);
 
   connect(&orderModel, SIGNAL(orderEdited(const QModelIndex&)), this, SLOT(updateOrder(const QModelIndex&)));
+  connect(&orderModel, SIGNAL(editedDraft(const QModelIndex&)), this, SLOT(updateDraft(const QModelIndex&)));
   connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
 
   proxyModel->setSourceModel(&orderModel);
@@ -120,16 +123,23 @@ void OrdersWidget::newSellOrder()
 
 void OrdersWidget::addOrder(OrderModel::Order::Type type)
 {
+  const QString& marketName = dataModel.getMarketName();
+  if(marketName.isEmpty())
+    return;
+  const PublicDataModel* publicDataModel = publicDataModels[marketName];
   double price = 0;
-  //const Market::TickerData& tickerData = dataModel.getTickerData();
-  //if(tickerData.highestBuyOrder != 0. && tickerData.lowestSellOrder != 0.)
-  //  price = type == OrderModel::Order::Type::buy ? (tickerData.highestBuyOrder + 0.01) : (tickerData.lowestSellOrder - 0.01);
+  if(publicDataModel && !publicDataModel->graphModel.tickerSamples.isEmpty())
+  {
+    const GraphModel::TickerSample& tickerSample = publicDataModel->graphModel.tickerSamples.back();
+    price = type == OrderModel::Order::Type::buy ? (tickerSample.bid + 0.01) : (tickerSample.ask - 0.01);
+  }
 
-  int row = orderModel.addOrder(type, price);
+  QString id = marketService.createOrderDraft(type == OrderModel::Order::Type::sell, price);
+  QModelIndex index = orderModel.getOrderIndex(id);
 
-  QModelIndex index = proxyModel->mapFromSource(orderModel.index(row, (int)OrderModel::Column::amount));
-  orderView->setCurrentIndex(index);
-  orderView->edit(index);
+  QModelIndex amountIndex = proxyModel->mapFromSource(orderModel.index(index.row(), (int)OrderModel::Column::amount));
+  orderView->setCurrentIndex(amountIndex);
+  orderView->edit(amountIndex);
 }
 
 QList<QModelIndex> OrdersWidget::getSelectedRows()
@@ -212,17 +222,19 @@ void OrdersWidget::updateOrder(const QModelIndex& index)
   double amount = order->newAmount != 0. ? order->newAmount : order->amount;
   double price = order->newPrice != 0. ? order->newPrice : order->price;
 
-  /*
-  double maxAmount = order->type == OrderModel::Order::Type::buy ? marketService.getMaxBuyAmout(price, order->amount, order->price) : marketService.getMaxSellAmout() + order->amount;
-  if(amount > maxAmount)
-  {
-    orderModel.setOrderNewAmount(order->id, maxAmount);
-    amount = maxAmount;
-  }
-  */
-
   marketService.updateOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
   updateToolBarButtons();
+}
+
+void OrdersWidget::updateDraft(const QModelIndex& index)
+{
+  const OrderModel::Order* order = orderModel.getOrder(index);
+  if(order->state != OrderModel::Order::State::draft)
+    return;
+  double amount = order->newAmount != 0. ? order->newAmount : order->amount;
+  double price = order->newPrice != 0. ? order->newPrice : order->price;
+
+  marketService.updateOrderDraft(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
 }
 
 void OrdersWidget::updateToolBarButtons()

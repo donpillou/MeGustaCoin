@@ -27,7 +27,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
     marketDataList.append(marketData);
   }
 
-  ordersWidget = new OrdersWidget(this, settings, dataModel, marketService);
+  ordersWidget = new OrdersWidget(this, settings, dataModel, marketService, publicDataModels);
   transactionsWidget = new TransactionsWidget(this, settings, dataModel, marketService);
   //tradesWidget = new TradesWidget(this, settings, dataModel);
   //bookWidget = new BookWidget(this, settings, dataModel);

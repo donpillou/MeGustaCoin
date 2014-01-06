@@ -109,6 +109,11 @@ void OrderModel::updateOrder(const QString& id, const Market::Order& newOrder)
     if(order->id == id)
     {
       *order = newOrder;
+      if(newOrder.id.startsWith("draft_"))
+      {
+        order->state = Order::State::draft;
+        order->date = QDateTime();
+      }
       emit dataChanged(createIndex(i, (int)Column::first, 0), createIndex(i, (int)Column::last, 0));
       return;
     }
@@ -118,6 +123,11 @@ void OrderModel::updateOrder(const QString& id, const Market::Order& newOrder)
   beginInsertRows(QModelIndex(), oldOrderCount, oldOrderCount);
   Order* order = new Order;
   *order = newOrder;
+  if(newOrder.id.startsWith("draft_"))
+  {
+    order->state = Order::State::draft;
+    order->date = QDateTime();
+  }
   orders.append(order);
   endInsertRows();
 }
@@ -152,18 +162,29 @@ void OrderModel::setOrderNewAmount(const QString& id, double newAmount)
   }
 }
 
-int OrderModel::addOrder(Order::Type type, double price)
+QString OrderModel::addOrderDraft(Order::Type type, double price)
 {
   int orderCount = orders.size();
   beginInsertRows(QModelIndex(), orderCount, orderCount);
   Order* newOrder = new Order;
-  newOrder->id = QString("draft") + QString::number(nextDraftId++);
+  newOrder->id = QString("draft_") + QString::number(nextDraftId++);
   newOrder->type = type;
   newOrder->state = Order::State::draft;
   newOrder->price = price;
   orders.append(newOrder);
   endInsertRows();
-  return orderCount;
+  return newOrder->id;
+}
+
+QModelIndex OrderModel::getOrderIndex(const QString& id) const
+{
+  for(int i = 0, count = orders.size(); i < count; ++i)
+  {
+    Order* order = orders[i];
+    if(order->id == id)
+      return createIndex(i, (int)Column::first, 0);
+  }
+  return QModelIndex();
 }
 
 const OrderModel::Order* OrderModel::getOrder(const QString& id) const
@@ -404,7 +425,10 @@ bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int 
       if(newPrice <= 0.)
         return false;
       if(order.state == OrderModel::Order::State::draft)
+      {
         order.price = newPrice;
+        emit editedDraft(index);
+      }
       else if(newPrice != order.price)
       {
         order.newPrice = newPrice;
@@ -418,7 +442,10 @@ bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int 
       if(newAmount <= 0.)
         return false;
       if(order.state == OrderModel::Order::State::draft)
+      {
         order.amount = newAmount;
+        emit editedDraft(index);
+      }
       else if(newAmount != order.amount)
       {
         order.newAmount = value.toDouble();
