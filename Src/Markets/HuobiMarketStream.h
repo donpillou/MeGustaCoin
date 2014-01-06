@@ -22,9 +22,9 @@ private:
   quint64 approxServerStartTime;
   quint64 localStartTime;
 
-  quint64 lastTradeDate;
-  QSet<QString> lastTradeList;
+  QList<QString> lastTradeList;
   bool loadedTradeHistory;
+  QDateTime lastTickerUpdate;
 
   void sleep(unsigned int secs);
 };
