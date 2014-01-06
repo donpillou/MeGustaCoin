@@ -38,6 +38,12 @@ public:
     double price;
   };
 
+  struct OrderBookEntry
+  {
+    double amount;
+    double price;
+  };
+
   enum class Features
   {
     trades = 0x01,

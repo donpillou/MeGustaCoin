@@ -26,7 +26,7 @@ public:
 
   void addTrade(const MarketStream::Trade& trade);
   void addTickerData(const MarketStream::TickerData& tickerData);
-  void setBookData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems);
+  void setBookData(quint64 time, const QList<MarketStream::OrderBookEntry>& askItems, const QList<MarketStream::OrderBookEntry>& bidItems);
 
   enum class State
   {

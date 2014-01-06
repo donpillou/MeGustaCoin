@@ -41,7 +41,7 @@ void PublicDataModel::addTickerData(const MarketStream::TickerData& tickerData)
   emit updatedTicker();
 }
 
-void PublicDataModel::setBookData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems)
+void PublicDataModel::setBookData(quint64 time, const QList<MarketStream::OrderBookEntry>& askItems, const QList<MarketStream::OrderBookEntry>& bidItems)
 {
   if(time == bookModel.getTime())
     return;
@@ -62,7 +62,7 @@ void PublicDataModel::setBookData(quint64 time, const QList<Market::OrderBookEnt
   double askSumMass[numOfSumType] = {};
   for(int i = askItems.size() - 1; i >= 0; --i)
   {
-    const Market::OrderBookEntry& item = askItems[i];
+    const MarketStream::OrderBookEntry& item = askItems[i];
     for(int i = 0; i < numOfSumType; ++i)
       if(askSum[i] < sumMax[i])
       {
@@ -78,7 +78,7 @@ void PublicDataModel::setBookData(quint64 time, const QList<Market::OrderBookEnt
   double bidSumMass[numOfSumType] = {};
   for(int i = bidItems.size() - 1; i >= 0; --i)
   {
-    const Market::OrderBookEntry& item = bidItems[i];
+    const MarketStream::OrderBookEntry& item = bidItems[i];
     for(int i = 0; i < numOfSumType; ++i)
       if(bidSum[i] < sumMax[i])
       {

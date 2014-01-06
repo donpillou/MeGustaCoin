@@ -37,6 +37,5 @@ private:
   QString marketName;
   QString coinCurrency;
   QString marketCurrency;
-  Market::TickerData tickerData;
   Market::Balance balance;
 };

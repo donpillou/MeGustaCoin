@@ -14,9 +14,6 @@ public:
   virtual bool loadOrders(QList<Order>& orders);
   virtual bool loadBalance(Balance& balance);
   virtual bool loadTransactions(QList<Transaction>& transactions);
-  virtual bool loadTicker(TickerData& tickerData);
-  virtual bool loadTrades(QList<Trade>& trades);
-  virtual bool loadOrderBook(quint64& date, QList<OrderBookEntry>& bids, QList<OrderBookEntry>& asks);
 
   virtual bool createOrder(double amount, double price, Market::Order& order);
   virtual bool cancelOrder(const QString& id);

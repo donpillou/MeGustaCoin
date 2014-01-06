@@ -24,7 +24,7 @@ void BookModel::updateHeader()
   bidModel.updateHeader();
 }
 
-void BookModel::setData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems)
+void BookModel::setData(quint64 time, const QList<MarketStream::OrderBookEntry>& askItems, const QList<MarketStream::OrderBookEntry>& bidItems)
 {
   if(time == this->time)
     return;
@@ -53,7 +53,7 @@ void BookModel::ItemModel::reset()
   emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
-void BookModel::ItemModel::setData(const QList<Market::OrderBookEntry>& newData)
+void BookModel::ItemModel::setData(const QList<MarketStream::OrderBookEntry>& newData)
 {
   int oldCount = items.size();
   int newCount = qMin(newData.size(), 100);
@@ -69,7 +69,7 @@ void BookModel::ItemModel::setData(const QList<Market::OrderBookEntry>& newData)
     beginInsertRows(QModelIndex(), oldCount, oldCount + (newCount - destIndex) - 1);
     for(int count = newCount; destIndex < count; ++destIndex, ++srcIndex)
     {
-      Market::OrderBookEntry* newItem = new Market::OrderBookEntry;
+      MarketStream::OrderBookEntry* newItem = new MarketStream::OrderBookEntry;
       *newItem = newData[srcIndex];
       items.push_back(newItem);
     }
@@ -127,7 +127,7 @@ QVariant BookModel::ItemModel::data(const QModelIndex& index, int role) const
   int row = index.row();
   if(row < 0 || row >= items.size())
     return QVariant();
-  const Market::OrderBookEntry& item = *items[row];
+  const MarketStream::OrderBookEntry& item = *items[row];
 
   switch(role)
   {
