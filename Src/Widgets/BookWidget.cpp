@@ -14,6 +14,8 @@ BookWidget::BookWidget(QWidget* parent, QSettings& settings, PublicDataModel& pu
   bidView = new QTreeView(this);
   connect(askView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
   connect(bidView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
+  askView->setUniformRowHeights(true);
+  bidView->setUniformRowHeights(true);
   askView->setModel(&bookModel.askModel);
   bidView->setModel(&bookModel.bidModel);
   askView->setRootIsDecorated(false);

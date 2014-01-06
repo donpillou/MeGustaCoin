@@ -66,6 +66,7 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& data
   };
 
   orderView = new QTreeView(this);
+  orderView->setUniformRowHeights(true);
   proxyModel = new OrderSortProxyModel(this, orderModel);
   proxyModel->setDynamicSortFilter(true);
   orderView->setModel(proxyModel);

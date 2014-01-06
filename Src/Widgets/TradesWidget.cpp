@@ -10,6 +10,7 @@ TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, PublicDataModel
 
   tradeView = new QTreeView(this);
   connect(tradeView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
+  tradeView->setUniformRowHeights(true);
   tradeView->setModel(&tradeModel);
   //tradeView->setSortingEnabled(true);
   tradeView->setRootIsDecorated(false);

@@ -8,6 +8,7 @@ LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) :
 
   logView = new QTreeView(this);
   connect(logView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
+  logView->setUniformRowHeights(true);
   logView->setModel(&logModel);
   //logView->setSortingEnabled(true);
   logView->setRootIsDecorated(false);

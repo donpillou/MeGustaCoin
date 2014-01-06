@@ -50,6 +50,7 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Dat
   };
 
   transactionView = new QTreeView(this);
+  transactionView->setUniformRowHeights(true);
   proxyModel = new TransactionSortProxyModel(this, transactionModel);
   proxyModel->setDynamicSortFilter(true);
   transactionView->setModel(proxyModel);
