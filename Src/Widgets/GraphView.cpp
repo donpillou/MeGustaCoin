@@ -37,7 +37,7 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   QRect rect = this->rect();
   QPainter painter(this);
-  //painter.setRenderHint(QPainter::Antialiasing);
+  painter.setRenderHint(QPainter::Antialiasing);
   painter.setPen(Qt::black);
 
   if(!graphModel->tradeSamples.isEmpty())
@@ -58,6 +58,18 @@ void GraphView::paintEvent(QPaintEvent* event)
       addToMinMax(bookSample.comPrice[i]);
     if(bookSample.time > time)
       time = bookSample.time;
+  }
+
+  if(enabledData & (int)Data::otherMarkets)
+  {
+    foreach(const PublicDataModel* publicDataModel, publicDataModels)
+    {
+      if(publicDataModel->graphModel.tradeSamples.isEmpty())
+        continue;
+      const GraphModel::TradeSample& tradeSample = publicDataModel->graphModel.tradeSamples.back();
+      if(tradeSample.time > time)
+        time = tradeSample.time;
+    }
   }
 
   double vmin = totalMin;
