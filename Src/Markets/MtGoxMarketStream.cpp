@@ -182,6 +182,14 @@ cont:
       tickerData.low24h = (double)tickerObject["low"].toMap()["value_int"].toULongLong() / (double)100000ULL;
       tickerData.volume24h = (double)tickerObject["vol"].toMap()["value_int"].toULongLong() / (double)100000000ULL;
       tickerData.vwap24h = (double)tickerObject["vwap"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+
+        BitcoinCharts::Data bcData;
+        QString bcError;
+        if(BitcoinCharts::getData("mtgoxUSD", bcData, bcError))
+          tickerData.vwap24h = bcData.vwap24;
+        else
+          callback.error(QString("Could not load MtGox/USD vwap: %1").arg(bcError));
+
       callback.receivedTickerData(tickerData);
     }
     else if(channel == "24e67e0d-1cad-4cc0-9e7a-f8523ef460fe") // Depth 
