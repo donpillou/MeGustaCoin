@@ -31,6 +31,7 @@ private:
 
   Market::Balance balance;
   bool balanceLoaded;
+  QHash<QString, Market::Order> orders;
 
   QString error;
 

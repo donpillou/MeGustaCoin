@@ -257,7 +257,7 @@ void MainWindow::updateWindowTitle()
     double usd = balance.availableUsd + balance.reservedUsd;
     double btc = balance.availableBtc + balance.reservedBtc;
     if(usd != 0. || btc != 0. || balance.fee != 0.)
-      title = QString("%1 %2 / %3 %4 - ").arg(dataModel.formatPrice(usd), dataModel.getMarketCurrency(), dataModel.formatAmount(btc), dataModel.getCoinCurrency());
+      title = QString("%1(%2) %3 / %4(%5) %6 - ").arg(dataModel.formatPrice(balance.availableUsd), dataModel.formatPrice(usd), dataModel.getMarketCurrency(), dataModel.formatAmount(balance.availableBtc), dataModel.formatAmount(btc), dataModel.getCoinCurrency());
     title += dataModel.getMarketName();
     const Market::TickerData& tickerData = dataModel.getTickerData();
     if(tickerData.lastTradePrice != 0.)

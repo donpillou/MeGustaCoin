@@ -59,18 +59,50 @@ bool BitstampMarket::createOrder(double amount, double price, Market::Order& ord
   if(!buy)
     order.amount = -order.amount;
   order.total = getOrderCharge(order.amount, order.price);
-  balanceLoaded = false;
+  this->orders.insert(order.id, order);
+
+  // update balance
+  if(order.amount > 0) // buy order
+  {
+    balance.availableUsd -= order.total;
+    balance.reservedUsd += order.total;
+  }
+  else // sell order
+  {
+    balance.availableBtc -= order.amount;
+    balance.reservedBtc += order.amount;
+  }
   return true;
 }
 
 bool BitstampMarket::cancelOrder(const QString& id)
 {
+  QHash<QString, Market::Order>::const_iterator it = orders.find(id);
+  if(it == orders.end())
+  {
+    error = "Unknown order.";
+    return false; // unknown order
+  }
+  const Market::Order& order = it.value();
+
   QVariantMap args;
   args["id"] = id;
   VariantBugWorkaround result;
   if(!request("https://www.bitstamp.net/api/cancel_order/", false, args, result))
     return false;
-  balanceLoaded = false;
+
+  // update balance
+  if(order.amount > 0) // buy order
+  {
+    double orderValue = order.amount * order.price;
+    balance.availableUsd += orderValue;
+    balance.reservedUsd -= orderValue;
+  }
+  else // sell order
+  {
+    balance.availableBtc += order.amount;
+    balance.reservedBtc -= order.amount;
+  }
   return true;
 }
 
@@ -85,6 +117,8 @@ bool BitstampMarket::loadOrders(QList<Order>& orders)
 
   QVariantList ordersData = result.toList();
   orders.reserve(ordersData.size());
+  this->orders.clear();
+  this->orders.reserve(ordersData.size());
   foreach(const QVariant& orderDataVar, ordersData)
   {
     QVariantMap orderData = orderDataVar.toMap();
@@ -107,6 +141,7 @@ bool BitstampMarket::loadOrders(QList<Order>& orders)
     if(!buy)
       order.amount = -order.amount;
     order.total = getOrderCharge(order.amount, order.price);
+    this->orders.insert(order.id, order);
   }
   return true;
 }
@@ -560,13 +595,19 @@ bool BitstampMarket::request(const char* url, bool isPublic, const QVariantMap& 
     }
   }
 
-  if(strcmp(url, "https://www.bitstamp.net/api/cancel_order/") == 0) // does not return JSON
+  if(strcmp(url, "https://www.bitstamp.net/api/cancel_order/") == 0) // does not return JSON if successful
   {
     QString answer(buffer);
-    QVariantMap cancelData;
     if(answer != "true")
-      cancelData["error"] = answer;
-    result = cancelData;
+    {
+      result = Json::parse(buffer);
+      if(!result.toMap().contains("error"))
+      {
+        QVariantMap cancelData;
+        cancelData["error"] = answer;
+        result = cancelData;
+      }
+    }
   }
   else
     result = Json::parse(buffer);

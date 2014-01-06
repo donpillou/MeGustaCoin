@@ -6,10 +6,10 @@ class Market
 public:
   struct Balance
   {
-    double reservedUsd;
-    double reservedBtc;
-    double availableUsd;
-    double availableBtc;
+    double reservedUsd; // usd in open orders
+    double reservedBtc; // btc in open orders
+    double availableUsd; // usd available for orders
+    double availableBtc; // btc available for orders
     double fee;
 
     Balance() : reservedUsd(0.), reservedBtc(0.), availableUsd(0.), availableBtc(0.), fee(0.) {}

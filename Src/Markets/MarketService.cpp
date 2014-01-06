@@ -234,6 +234,7 @@ void MarketService::finalizeJobs()
             dataModel.logModel.addMessage(LogModel::Type::information, tr("Submitted buy order"));
           else
             dataModel.logModel.addMessage(LogModel::Type::information, tr("Submitted sell order"));
+          loadBalance();
         }
         break;
       case Job::Type::cancelOrder:
@@ -241,6 +242,7 @@ void MarketService::finalizeJobs()
           const CancelOrderJob* cancelOrderJob = (CancelOrderJob*)job;
           dataModel.orderModel.setOrderState(cancelOrderJob->id, OrderModel::Order::State::canceled);
           dataModel.logModel.addMessage(LogModel::Type::information, tr("Canceled order"));
+          loadBalance();
         }
         break;
       case Job::Type::updateOrder:
