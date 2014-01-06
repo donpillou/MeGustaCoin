@@ -60,7 +60,7 @@ bool HttpRequest::get(const QString& url, QByteArray& data)
   curl_easy_setopt(curl, CURLOPT_URL, url.toUtf8().constData());
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteResult::writeResponse);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeResult);
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20);
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 40);
 
   data.clear();
   data.reserve(1500);
@@ -124,7 +124,7 @@ bool HttpRequest::post(const QString& url, const QMap<QString, QString>& formDat
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteResult::writeResponse);
   curl_easy_setopt(curl, CURLOPT_WRITEDATA, &writeResult);
   curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
-  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 20);
+  curl_easy_setopt(curl, CURLOPT_TIMEOUT, 40);
 
   data.clear();
   data.reserve(1500);
