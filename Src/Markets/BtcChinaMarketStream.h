@@ -23,6 +23,7 @@ private:
   bool timeOffsetSet;
 
   quint64 lastTid;
+  QDateTime lastTickerUpdate;
 
   void sleep(unsigned int secs);
 };

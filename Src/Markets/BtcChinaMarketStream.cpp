@@ -32,27 +32,6 @@ void BtcChinaMarketStream::process(Callback& callback)
       connected = true;
       callback.information("Connected to BtcChina/CNY.");
       callback.connected();
-
-      BitcoinCharts::Data bcData;
-      QString bcError;
-      if(BitcoinCharts::getData("btcnCNY", bcData, bcError))
-      {
-        TickerData tickerData;
-        tickerData.date = QDateTime::currentDateTimeUtc().toTime_t();
-        tickerData.vwap24h = bcData.vwap24;
-        tickerData.bid = bcData.bid;
-        tickerData.ask = bcData.ask;
-        tickerData.high24h = bcData.high;
-        tickerData.low24h = bcData.low;
-        tickerData.volume24h = bcData.volume;
-        tickerData.vwap24h = bcData.vwap24;
-
-        callback.receivedTickerData(tickerData);
-      }
-      else
-      {
-        // todo: warn or error
-      }
     }
     if(canceled)
       break;
@@ -87,6 +66,31 @@ void BtcChinaMarketStream::process(Callback& callback)
       {
         callback.receivedTrade(trade);
         lastTid = tid;
+      }
+    }
+
+    // update ticker
+    if(lastTickerUpdate.isNull() || lastTickerUpdate.secsTo(QDateTime::currentDateTime()) > 30)
+    {
+      // todo: load data from btcChina
+      BitcoinCharts::Data bcData;
+      QString bcError;
+      if(BitcoinCharts::getData("btcnCNY", bcData, bcError))
+      {
+        TickerData tickerData;
+        tickerData.date = QDateTime::currentDateTimeUtc().toTime_t();
+        tickerData.bid = bcData.bid;
+        tickerData.ask = bcData.ask;
+        tickerData.high24h = bcData.high;
+        tickerData.low24h = bcData.low;
+        tickerData.volume24h = bcData.volume;
+        tickerData.vwap24h = bcData.vwap24;
+
+        callback.receivedTickerData(tickerData);
+      }
+      else
+      {
+        callback.error(QString("Could not load BtcChina/CNY ticker data: %1").arg(bcError));
       }
     }
   }
