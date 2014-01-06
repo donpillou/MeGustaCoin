@@ -80,10 +80,10 @@ void MarketService::loadBalance()
   queuedJobs.append(new LoadBalanceJob());
 }
 
-void MarketService::loadTicker()
-{
-  queuedJobs.append(new LoadTickerDataJob());
-}
+//void MarketService::loadTicker()
+//{
+//  queuedJobs.append(new LoadTickerDataJob());
+//}
 
 void MarketService::createOrder(const QString& draftId, double amount, double price)
 {
@@ -170,12 +170,12 @@ void MarketService::processJob(Job* job)
       success = market->loadBalance(loadBalanceJob->balance);
     }
     break;
-  case Job::Type::loadTickerData:
-    {
-      LoadTickerDataJob* loadTickerDataJob = (LoadTickerDataJob*)job;
-      success = market->loadTicker(loadTickerDataJob->tickerData);
-    }
-    break;
+//  case Job::Type::loadTickerData:
+//    {
+//      LoadTickerDataJob* loadTickerDataJob = (LoadTickerDataJob*)job;
+//      success = market->loadTicker(loadTickerDataJob->tickerData);
+//    }
+//    break;
   /*case Job::Type::loadOrderBook:
     {
       LoadOrderBookJob* loadOrderBookJob = (LoadOrderBookJob*)job;
@@ -261,13 +261,13 @@ void MarketService::finalizeJobs()
           dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved balance"));
         }
         break;
-      case Job::Type::loadTickerData:
-        {
-          const LoadTickerDataJob* loadTickerDataJob = (LoadTickerDataJob*)job;
-          dataModel.setTickerData(loadTickerDataJob->tickerData);
-          dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved ticker data"));
-        }
-        break;
+//      case Job::Type::loadTickerData:
+//        {
+//          const LoadTickerDataJob* loadTickerDataJob = (LoadTickerDataJob*)job;
+//          dataModel.setTickerData(loadTickerDataJob->tickerData);
+//          dataModel.logModel.addMessage(LogModel::Type::information, tr("Retrieved ticker data"));
+//        }
+//        break;
       /*case Job::Type::loadOrderBook:
         {
           const LoadOrderBookJob* loadOrderBookJob = (LoadOrderBookJob*)job;
@@ -333,9 +333,9 @@ void MarketService::finalizeJobs()
       case Job::Type::loadBalance:
         dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load balance: %1").arg(job->errorMessage));
         break;
-      case Job::Type::loadTickerData:
-        dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load ticker data: %1").arg(job->errorMessage));
-        break;
+//      case Job::Type::loadTickerData:
+//        dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load ticker data: %1").arg(job->errorMessage));
+//        break;
       /*case Job::Type::loadOrderBook:
         dataModel.logModel.addMessage(LogModel::Type::error, tr("Could not load order book: %1").arg(job->errorMessage));
         break;

@@ -6,7 +6,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 {
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
   connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
-  connect(&dataModel, SIGNAL(changedTickerData()), this, SLOT(updateWindowTitle()));
+  //connect(&dataModel, SIGNAL(changedTickerData()), this, SLOT(updateWindowTitle()));
 
   publicDataModels.insert("MtGox/USD", new PublicDataModel(this, QColor(0x7f, 0x00, 0x7f, 0x70)));
   publicDataModels.insert("Bitstamp/USD", new PublicDataModel(this, QColor(0x00, 0x00, 0x7f, 0x70)));
@@ -16,6 +16,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   {
     MarketData marketData;
     marketData.publicDataModel = i.value();
+    connect(marketData.publicDataModel, SIGNAL(updatedTicker()), this, SLOT(updateWindowTitleTicker()));
     marketData.streamService = new MarketStreamService(this, dataModel, *marketData.publicDataModel, i.key());
     marketData.tradesWidget = new TradesWidget(this, settings, *marketData.publicDataModel);
     if(marketData.publicDataModel->getFeatures() & (int)MarketStream::Features::orderBook)
@@ -237,7 +238,7 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
   // request data
   marketService.loadBalance();
   refresh();
-  marketService.loadTicker();
+//  marketService.loadTicker();
   /*
   market->loadLiveTrades();
   market->loadOrderBook();
@@ -258,12 +259,26 @@ void MainWindow::updateWindowTitle()
     double btc = balance.availableBtc + balance.reservedBtc;
     if(usd != 0. || btc != 0. || balance.fee != 0.)
       title = QString("%1(%2) %3 / %4(%5) %6 - ").arg(dataModel.formatPrice(balance.availableUsd), dataModel.formatPrice(usd), dataModel.getMarketCurrency(), dataModel.formatAmount(balance.availableBtc), dataModel.formatAmount(btc), dataModel.getCoinCurrency());
-    title += dataModel.getMarketName();
-    const Market::TickerData& tickerData = dataModel.getTickerData();
-    if(tickerData.lastTradePrice != 0.)
-      title += QString(" - %1 / %2 bid / %3 ask").arg(dataModel.formatPrice(tickerData.lastTradePrice), dataModel.formatPrice(tickerData.highestBuyOrder), dataModel.formatPrice(tickerData.lowestSellOrder));
+    const QString& marketName = dataModel.getMarketName();
+    title += marketName;
+    if(!marketName.isEmpty())
+    {
+      const PublicDataModel* publicDataModel = publicDataModels[marketName];
+      if(publicDataModel && !publicDataModel->graphModel.tickerSamples.isEmpty())
+      {
+        const GraphModel::TickerSample& tickerSample = publicDataModel->graphModel.tickerSamples.back();
+        title += QString(" - %1 / %2 bid / %3 ask").arg(dataModel.formatPrice(tickerSample.last), dataModel.formatPrice(tickerSample.bid), dataModel.formatPrice(tickerSample.ask));
+      }
+    }
     setWindowTitle(title);
   }
+}
+
+void MainWindow::updateWindowTitleTicker()
+{
+  PublicDataModel* sourceModel = qobject_cast<PublicDataModel*>(sender());
+  if(sourceModel->getMarketName() == dataModel.getMarketName())
+    updateWindowTitle();
 }
 
 void MainWindow::updateFocusPublicDataModel()

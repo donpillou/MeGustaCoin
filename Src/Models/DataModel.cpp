@@ -15,11 +15,11 @@ void DataModel::setBalance(const Market::Balance& balance)
   emit changedBalance();
 }
 
-void DataModel::setTickerData(const Market::TickerData& tickerData)
-{
-  this->tickerData = tickerData;
-  emit changedTickerData();
-}
+//void DataModel::setTickerData(const Market::TickerData& tickerData)
+//{
+//  this->tickerData = tickerData;
+//  emit changedTickerData();
+//}
 
 QString DataModel::formatAmount(double amount) const
 {

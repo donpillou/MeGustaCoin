@@ -58,6 +58,7 @@ private slots:
   void logout();
   void refresh();
   void updateWindowTitle();
+  void updateWindowTitleTicker();
   void updateFocusPublicDataModel();
   void about();
   void enableLiveTradesUpdates(bool enable);

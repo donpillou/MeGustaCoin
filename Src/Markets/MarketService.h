@@ -18,7 +18,7 @@ public:
 
   void loadOrders();
   void loadBalance();
-  void loadTicker();
+  //void loadTicker();
   void loadTransactions();
   //void loadLiveTrades();
   //void loadOrderBook();
@@ -43,7 +43,7 @@ private:
       loadTransactions,
       loadOrders,
       loadBalance,
-      loadTickerData,
+      //loadTickerData,
       //loadOrderBook,
       //loadTrades,
       createOrder,
@@ -82,13 +82,13 @@ private:
     LoadBalanceJob() : Job(Type::loadBalance) {}
   };
 
-  class LoadTickerDataJob : public Job
-  {
-  public:
-    Market::TickerData tickerData;
-
-    LoadTickerDataJob() : Job(Type::loadTickerData) {}
-  };
+//  class LoadTickerDataJob : public Job
+//  {
+//  public:
+//    Market::TickerData tickerData;
+//
+//    LoadTickerDataJob() : Job(Type::loadTickerData) {}
+//  };
   
   /*class LoadOrderBookJob : public Job
   {

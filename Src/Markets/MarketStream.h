@@ -23,6 +23,7 @@ public:
     quint64 date;
     double bid;
     double ask;
+    double last; // close
     double high24h;
     double low24h;
     double volume24h;

@@ -14,6 +14,7 @@ public:
     double vwap24;
     double bid;
     double ask;
+    double last; // close
   };
 
   static bool getData(const QString& symbol, Data& data, QString& error)
@@ -40,6 +41,7 @@ public:
           data.vwap24 = varMap["avg"].toDouble();
           data.bid = varMap["bid"].toDouble();
           data.ask = varMap["ask"].toDouble();
+          data.last = varMap["close"].toDouble();
           cachedData[varMap["symbol"].toString()] = data;
         }
       }

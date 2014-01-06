@@ -81,6 +81,7 @@ void BtcChinaMarketStream::process(Callback& callback)
         tickerData.date = QDateTime::currentDateTimeUtc().toTime_t();
         tickerData.bid = bcData.bid;
         tickerData.ask = bcData.ask;
+        tickerData.last = bcData.last;
         tickerData.high24h = bcData.high;
         tickerData.low24h = bcData.low;
         tickerData.volume24h = bcData.volume;

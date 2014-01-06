@@ -182,6 +182,7 @@ cont:
       tickerData.low24h = (double)tickerObject["low"].toMap()["value_int"].toULongLong() / (double)100000ULL;
       tickerData.volume24h = (double)tickerObject["vol"].toMap()["value_int"].toULongLong() / (double)100000000ULL;
       tickerData.vwap24h = (double)tickerObject["vwap"].toMap()["value_int"].toULongLong() / (double)100000ULL;
+      tickerData.last = (double)tickerObject["last_local"].toMap()["value_int"].toULongLong() / (double)100000ULL;
 
         BitcoinCharts::Data bcData;
         QString bcError;

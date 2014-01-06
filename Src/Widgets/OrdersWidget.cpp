@@ -121,9 +121,9 @@ void OrdersWidget::newSellOrder()
 void OrdersWidget::addOrder(OrderModel::Order::Type type)
 {
   double price = 0;
-  const Market::TickerData& tickerData = dataModel.getTickerData();
-  if(tickerData.highestBuyOrder != 0. && tickerData.lowestSellOrder != 0.)
-    price = type == OrderModel::Order::Type::buy ? (tickerData.highestBuyOrder + 0.01) : (tickerData.lowestSellOrder - 0.01);
+  //const Market::TickerData& tickerData = dataModel.getTickerData();
+  //if(tickerData.highestBuyOrder != 0. && tickerData.lowestSellOrder != 0.)
+  //  price = type == OrderModel::Order::Type::buy ? (tickerData.highestBuyOrder + 0.01) : (tickerData.lowestSellOrder - 0.01);
 
   int row = orderModel.addOrder(type, price);
 

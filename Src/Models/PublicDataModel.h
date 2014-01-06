@@ -42,6 +42,7 @@ public:
 signals:
   void changedMarket();
   void changedState();
+  void updatedTicker();
 
 private:
   QString marketName;

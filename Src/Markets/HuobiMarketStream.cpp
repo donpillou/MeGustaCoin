@@ -3,7 +3,7 @@
 
 HuobiMarketStream::HuobiMarketStream() :
   canceled(false), marketCurrency("CNY"), coinCurrency("BTC"),
-  loadedTradeHistory(false)
+  loadedTradeHistory(false), lastTradePrice(0.)
 {
   localStartTime = QDateTime::currentDateTimeUtc().toTime_t();
   approxServerStartTime = localStartTime + 8 * 60 * 60; // Hong Kong time
@@ -102,6 +102,7 @@ void HuobiMarketStream::process(Callback& callback)
             MarketStream::Trade& trade = tradeSamples[i];
             trade.date -= 8 * 60 * 60;
             callback.receivedTrade(trade);
+            lastTradePrice = trade.price;
           }
           loadedTradeHistory = true;
         }
@@ -191,6 +192,7 @@ void HuobiMarketStream::process(Callback& callback)
       }
 
       callback.receivedTrade(trade);
+      lastTradePrice = trade.price;
     }
     while(lastTradeList.size() > 100)
       lastTradeList.pop_front();
@@ -202,6 +204,7 @@ void HuobiMarketStream::process(Callback& callback)
       tickerData.date = QDateTime::currentDateTimeUtc().toTime_t();
       tickerData.bid = 0.; // todo: grab from buffer1
       tickerData.ask = 0.;  // todo: grab from buffer1
+      tickerData.last = lastTradePrice;
       tickerData.high24h = 0.;
       tickerData.low24h = 0.;
       tickerData.volume24h = 0.;

@@ -37,7 +37,7 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   QRect rect = this->rect();
   QPainter painter(this);
-  painter.setRenderHint(QPainter::Antialiasing);
+  //painter.setRenderHint(QPainter::Antialiasing);
   painter.setPen(Qt::black);
 
   if(!graphModel->tradeSamples.isEmpty())

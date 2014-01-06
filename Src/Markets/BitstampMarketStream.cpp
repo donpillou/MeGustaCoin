@@ -98,6 +98,7 @@ cont:
         tickerData.date = QDateTime::currentDateTimeUtc().toTime_t();
         tickerData.bid = tickerObject["bid"].toDouble();
         tickerData.ask = tickerObject["ask"].toDouble();
+        tickerData.last = tickerObject["last"].toDouble();
         tickerData.high24h = tickerObject["high"].toDouble();
         tickerData.low24h = tickerObject["low"].toDouble();
         tickerData.volume24h = tickerObject["volume"].toDouble();

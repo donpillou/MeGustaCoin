@@ -38,6 +38,7 @@ void PublicDataModel::addTrade(const MarketStream::Trade& trade)
 void PublicDataModel::addTickerData(const MarketStream::TickerData& tickerData)
 {
   graphModel.addTickerData(tickerData);
+  emit updatedTicker();
 }
 
 void PublicDataModel::setBookData(quint64 time, const QList<Market::OrderBookEntry>& askItems, const QList<Market::OrderBookEntry>& bidItems)

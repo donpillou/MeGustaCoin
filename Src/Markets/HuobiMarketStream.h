@@ -21,6 +21,7 @@ private:
 
   quint64 approxServerStartTime;
   quint64 localStartTime;
+  double lastTradePrice;
 
   QList<QString> lastTradeList;
   bool loadedTradeHistory;
