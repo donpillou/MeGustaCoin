@@ -110,7 +110,7 @@ cont:
         }
         else
         {
-          // todo: warn or error
+          callback.error(QString("Could not load Bitstamp/USD vwap: %1").arg(bcError));
         }
         callback.receivedTickerData(tickerData);
       }
