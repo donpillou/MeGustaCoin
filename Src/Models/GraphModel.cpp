@@ -18,14 +18,32 @@ void GraphModel::addTrade(const MarketStream::Trade& trade)
     tradeSample->max = trade.price;
   tradeSample->amount += trade.amount;
 
-  double depths[] = {10., 20., 50., 100., 200., 500., 1000.};
+  /*
+      depth1m,
+    depth3m,
+    depth5m,
+    depth10m,
+    depth15m,
+    depth20m,
+    depth30m,
+    depth1h,
+    depth2h,
+    depth4h,
+    depth6h,
+    depth12h,
+    depth24h,
+    */
+
+  quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
+  //double depths[] = {10., 20., 50., 100., 200., 500., 1000.};
   for (int i = 0; i < (int)RegressionDepth::numOfRegressionDepths; ++i)
   {
     averager[i].add(trade.date, trade.amount, trade.price);
-    if(i == (int)RegressionDepth::depth24h)
-      averager[i].limitToAge(24 * 60 * 60);
-    else
-      averager[i].limitToVolume(depths[i]);
+    averager[i].limitToAge(depths[i]);
+    //if(i == (int)RegressionDepth::depth24h)
+    //  averager[i].limitToAge(24 * 60 * 60);
+    //else
+    //  averager[i].limitToVolume(depths[i]);
     averager[i].getLine(regressionLines[i].a, regressionLines[i].b, regressionLines[i].startTime, regressionLines[i].endTime);
     regressionLines[i].averagePrice = averager[i].getAveragePrice();
   }

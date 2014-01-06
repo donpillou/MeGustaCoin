@@ -6,6 +6,18 @@ class GraphModel : public QObject
   Q_OBJECT
 
 public:
+  //enum class Indicator
+  //{
+  //  reg1m,
+  //  reg3m,
+  //  reg5m,
+  //  reg10m,
+  //  reg15m,
+  //  regSum,
+  //  
+  //  numOfIndicators
+  //};
+
   class TradeSample
   {
   public:
@@ -15,6 +27,8 @@ public:
     double first;
     double last;
     double amount;
+
+    //float indicators[(int)Indicator::numOfIndicators];
 
     TradeSample() : amount(0) {}
   };
@@ -46,6 +60,21 @@ public:
 
   enum class RegressionDepth
   {
+    depth1m,
+    depth3m,
+    depth5m,
+    depth10m,
+    depth15m,
+    depth20m,
+    depth30m,
+    depth1h,
+    depth2h,
+    depth4h,
+    depth6h,
+    depth12h,
+    depth24h,
+    
+    /*
     depth10,
     depth20,
     depth50,
@@ -53,7 +82,7 @@ public:
     depth200,
     depth500,
     depth1000,
-    depth24h,
+    */
     numOfRegressionDepths
   };
 
@@ -144,7 +173,7 @@ public:
       }
     }
 
-    void limitToAge(double maxAge)
+    void limitToAge(quint64 maxAge)
     {
       if(data.isEmpty())
         return;

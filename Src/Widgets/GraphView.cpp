@@ -452,11 +452,13 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
 
   for(int i = 0; i < (int)GraphModel::RegressionDepth::numOfRegressionDepths; ++i)
   {
-    if(i == (int)GraphModel::RegressionDepth::depth24h)
-      continue;
+    //if(i == (int)GraphModel::RegressionDepth::depth24h)
+    //  continue;
 
     const GraphModel::RegressionLine& rl = graphModel->regressionLines[i];
     quint64 startTime = qMax(rl.startTime, hmin);
+    if((qint64)hmin - (qint64)rl.startTime > maxAge / 2)
+      break;
     quint64 endTime = rl.endTime;
     double val = rl.a - rl.b * (endTime - startTime);
     QPointF a(rect.left() + (startTime - hmin) * width / hrange, rect.bottom() - (val -  vmin) * height / vrange);
