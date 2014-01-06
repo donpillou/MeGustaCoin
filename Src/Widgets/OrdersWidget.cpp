@@ -82,7 +82,7 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& data
   layout->addWidget(orderView);
   setLayout(layout);
 
-  connect(&orderModel, SIGNAL(orderEdited(const QModelIndex&)), this, SLOT(updateOrder(const QModelIndex&)));
+  connect(&orderModel, SIGNAL(editedOrder(const QModelIndex&)), this, SLOT(updateOrder(const QModelIndex&)));
   connect(&orderModel, SIGNAL(editedDraft(const QModelIndex&)), this, SLOT(updateDraft(const QModelIndex&)));
   connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
 

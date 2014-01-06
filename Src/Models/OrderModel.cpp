@@ -432,7 +432,7 @@ bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int 
       else if(newPrice != order.price)
       {
         order.newPrice = newPrice;
-        emit orderEdited(index);
+        emit editedOrder(index);
       }
       return true;
     }
@@ -449,7 +449,7 @@ bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int 
       else if(newAmount != order.amount)
       {
         order.newAmount = value.toDouble();
-        emit orderEdited(index);
+        emit editedOrder(index);
       }
       return true;
     }

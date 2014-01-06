@@ -21,7 +21,6 @@ public:
       neutral,
     } icon;
 
-    //Trade() : amount(0.), price(0.), icon(Icon::neutral) {}
     Trade(const MarketStream::Trade& trade) : MarketStream::Trade(trade), icon(Icon::neutral) {}
   };
 
@@ -36,7 +35,6 @@ public:
 
   void reset();
 
-  //void addData(const QList<Market::Trade>& trades);
   void addTrade(const MarketStream::Trade& trade);
 
   void clearAbove(int tradeCount);
@@ -46,7 +44,6 @@ public:
 private:
   PublicDataModel& publicDataModel;
   QList<Trade*> trades;
-  //QHash<QString, void*> ids;
   QVariant upIcon;
   QVariant downIcon;
   QVariant neutralIcon;

@@ -94,7 +94,7 @@ public:
   void removeOrder(const QModelIndex& index);
 
 signals:
-  void orderEdited(const QModelIndex& index);
+  void editedOrder(const QModelIndex& index);
   void changedState();
   void editedDraft(const QModelIndex& index);
 
