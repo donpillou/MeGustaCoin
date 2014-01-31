@@ -6,7 +6,7 @@ class OrdersWidget : public QWidget
   Q_OBJECT
 
 public:
-  OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService, const QMap<QString, PublicDataModel*>& publicDataModels);
+  OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService);
 
   void saveState(QSettings& settings);
 
@@ -27,7 +27,6 @@ private:
   DataModel& dataModel;
   OrderModel& orderModel;
   MarketService& marketService;
-  const QMap<QString, PublicDataModel*>& publicDataModels;
 
   QTreeView* orderView;
   QSortFilterProxyModel* proxyModel;

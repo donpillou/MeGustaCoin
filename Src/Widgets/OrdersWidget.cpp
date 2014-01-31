@@ -1,9 +1,8 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService, const QMap<QString, PublicDataModel*>& publicDataModels) :
-  QWidget(parent), dataModel(dataModel), orderModel(dataModel.orderModel), marketService(marketService),
-  publicDataModels(publicDataModels)
+OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService) :
+  QWidget(parent), dataModel(dataModel), orderModel(dataModel.orderModel), marketService(marketService)
 {
   connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
@@ -127,11 +126,11 @@ void OrdersWidget::addOrder(OrderModel::Order::Type type)
   const QString& marketName = dataModel.getMarketName();
   if(marketName.isEmpty())
     return;
-  const PublicDataModel* publicDataModel = publicDataModels[marketName];
+  const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
   double price = 0;
-  if(publicDataModel && !publicDataModel->graphModel.tickerSamples.isEmpty())
+  if(publicDataModel.graphModel.tickerSamples.isEmpty())
   {
-    const GraphModel::TickerSample& tickerSample = publicDataModel->graphModel.tickerSamples.back();
+    const GraphModel::TickerSample& tickerSample = publicDataModel.graphModel.tickerSamples.back();
     price = type == OrderModel::Order::Type::buy ? (tickerSample.bid + 0.01) : (tickerSample.ask - 0.01);
   }
 

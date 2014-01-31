@@ -5,17 +5,7 @@ MarketStreamService::MarketStreamService(QObject* parent, DataModel& dataModel, 
   QObject(parent),
   dataModel(dataModel), publicDataModel(publicDataModel), marketName(marketName), marketStream(0), thread(0), canceled(true)
 {
-  int features = 0;
-  if(marketName == "MtGox/USD")
-    features = (int)MarketStream::Features::trades;
-  else if(marketName == "Bitstamp/USD")
-    features = (int)MarketStream::Features::trades;
-  else if(marketName == "BtcChina/CNY")
-    features = (int)MarketStream::Features::trades;
-  else if(marketName == "Huobi/CNY")
-    features = (int)MarketStream::Features::trades;
-
-  publicDataModel.setMarket(marketName, features);
+  publicDataModel.setMarket(marketName);
 }
 
 MarketStreamService::~MarketStreamService()
@@ -27,6 +17,7 @@ MarketStreamService::~MarketStreamService()
 
 void MarketStreamService::subscribe()
 {
+  return;
   if(thread)
     return;
 
@@ -111,8 +102,8 @@ void MarketStreamService::unsubscribe()
     return;
 
   QString marketName = this->marketName;
-  marketStream->cancel();
   canceled = true;
+  marketStream->cancel();
   thread->wait();
   delete thread;
   thread = 0;

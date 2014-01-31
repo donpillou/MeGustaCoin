@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -100,6 +100,7 @@
     <ClCompile Include="Src\LoginDialog.cpp" />
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\MainWindow.cpp" />
+    <ClCompile Include="Src\Markets\DataConnection.cpp" />
     <ClCompile Include="Src\stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -108,6 +109,7 @@
     <ClCompile Include="Src\Markets\BitstampMarket.cpp" />
     <ClCompile Include="Src\Markets\BitstampMarketStream.cpp" />
     <ClCompile Include="Src\Markets\BtcChinaMarketStream.cpp" />
+    <ClCompile Include="Src\Markets\DataService.cpp" />
     <ClCompile Include="Src\Markets\HuobiMarketStream.cpp" />
     <ClCompile Include="Src\Markets\MarketService.cpp" />
     <ClCompile Include="Src\Markets\MarketStreamService.cpp" />
@@ -123,6 +125,7 @@
     <ClCompile Include="Src\Tools\HttpRequest.cpp" />
     <ClCompile Include="Src\Tools\Json.cpp" />
     <ClCompile Include="Src\Tools\Sha256.cpp" />
+    <ClCompile Include="Src\Tools\SocketConnection.cpp" />
     <ClCompile Include="Src\Tools\Websocket.cpp" />
     <ClCompile Include="Src\Widgets\BookWidget.cpp" />
     <ClCompile Include="Src\Widgets\GraphView.cpp" />
@@ -147,11 +150,21 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl -IExt/easywsclient Src/MainWindow.h -o Build/Release/moc_MainWindow.cpp</Command>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_MainWindow.cpp;%(Outputs)</Outputs>
     </CustomBuild>
+    <ClInclude Include="Src\Markets\DataConnection.h" />
+    <ClInclude Include="Src\Markets\DataProtocol.h" />
     <ClInclude Include="Src\stdafx.h" />
     <ClInclude Include="Src\Markets\BitcoinCharts.h" />
     <ClInclude Include="Src\Markets\BitstampMarket.h" />
     <ClInclude Include="Src\Markets\BitstampMarketStream.h" />
     <ClInclude Include="Src\Markets\BtcChinaMarketStream.h" />
+    <CustomBuild Include="Src\Markets\DataService.h">
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"DataService.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build\Debug\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/curl/include -IBuild/Debug/libcurl/include -IBuild/Debug/libcurl/include/curl -IExt/easywsclient Src/Markets/DataService.h -o Build/Debug/moc_DataService.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Build/Debug/moc_DataService.cpp;%(Outputs)</Outputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"DataService.h (Qt moc)"</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build\Release\moc\moc.exe -fstdafx.h -DQT_SHARED -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NO_DEBUG -DQXT_STATIC -DCURL_STATICLIB -D_MSC_VER=1500 -ISrc -IExt/libcppqt/include -IExt/libcppqt/include/QtCore -IExt/libcppqt/include/QtGUI -IExt/curl/include -IBuild/Release/libcurl/include -IBuild/Release/libcurl/include/curl -IExt/easywsclient Src/Markets/DataService.h -o Build/Release/moc_DataService.cpp</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Build/Release/moc_DataService.cpp;%(Outputs)</Outputs>
+    </CustomBuild>
     <ClInclude Include="Src\Markets\HuobiMarketStream.h" />
     <ClInclude Include="Src\Markets\Market.h" />
     <CustomBuild Include="Src\Markets\MarketService.h">
@@ -233,6 +246,7 @@
     <ClInclude Include="Src\Tools\JobQueue.h" />
     <ClInclude Include="Src\Tools\Json.h" />
     <ClInclude Include="Src\Tools\Sha256.h" />
+    <ClInclude Include="Src\Tools\SocketConnection.h" />
     <ClInclude Include="Src\Tools\Websocket.h" />
     <CustomBuild Include="Src\Widgets\BookWidget.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"BookWidget.h (Qt moc)"</Message>
@@ -370,6 +384,9 @@
     <ClCompile Include="Build\Debug\moc_MarketStreamService.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_DataService.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_MainWindow.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </ClCompile>
@@ -435,6 +452,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_MarketStreamService.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Build\Release\moc_DataService.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_MainWindow.cpp">

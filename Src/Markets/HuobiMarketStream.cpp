@@ -5,7 +5,7 @@ HuobiMarketStream::HuobiMarketStream() :
   canceled(false), marketCurrency("CNY"), coinCurrency("BTC"),
   loadedTradeHistory(false), lastTradePrice(0.)
 {
-  localStartTime = QDateTime::currentDateTimeUtc().toTime_t();
+  localStartTime = QDateTime::currentDateTime().toTime_t();
   approxServerStartTime = localStartTime + 8 * 60 * 60; // Hong Kong time
 }
 
@@ -44,7 +44,7 @@ void HuobiMarketStream::process(Callback& callback)
       callback.information("Connected to Huobi/CNY.");
       callback.connected();
 
-      quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
+      quint64 localTime = QDateTime::currentDateTime().toTime_t();
       QDateTime approxServerTime = QDateTime::fromTime_t(approxServerStartTime + (localTime - localStartTime));
       approxServerTime.setTimeSpec(Qt::UTC);
       QDateTime prevTradeTime = approxServerTime;
@@ -138,7 +138,7 @@ void HuobiMarketStream::process(Callback& callback)
 
     QVariantList tradesList = data["trades"].toList();
 
-    quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
+    quint64 localTime = QDateTime::currentDateTime().toTime_t();
     QDateTime approxServerTime = QDateTime::fromTime_t(approxServerStartTime + (localTime - localStartTime));
     approxServerTime.setTimeSpec(Qt::UTC);
 
@@ -201,7 +201,7 @@ void HuobiMarketStream::process(Callback& callback)
     if(lastTickerUpdate.isNull() || lastTickerUpdate.secsTo(QDateTime::currentDateTime()) > 30)
     {
       MarketStream::TickerData tickerData;
-      tickerData.date = QDateTime::currentDateTimeUtc().toTime_t();
+      tickerData.date = QDateTime::currentDateTime().toTime_t();
       tickerData.bid = 0.; // todo: grab from buffer1
       tickerData.ask = 0.;  // todo: grab from buffer1
       tickerData.last = lastTradePrice;

@@ -46,7 +46,7 @@ void BitstampMarketStream::process(Callback& callback)
 
     QVariantMap tickerObject = Json::parse(buffer).toMap();
     quint64 serverTime = tickerObject["timestamp"].toULongLong(); // + up to 8 seconds
-    quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
+    quint64 localTime = QDateTime::currentDateTime().toTime_t();
     qint64 timeOffset = (qint64)localTime - (qint64)serverTime;
 
     if(!httpRequest.get("https://www.bitstamp.net/api/transactions/", buffer))
@@ -95,7 +95,7 @@ cont:
       {
         QVariantMap tickerObject = Json::parse(buffer).toMap();
         TickerData tickerData;
-        tickerData.date = QDateTime::currentDateTimeUtc().toTime_t();
+        tickerData.date = QDateTime::currentDateTime().toTime_t();
         tickerData.bid = tickerObject["bid"].toDouble();
         tickerData.ask = tickerObject["ask"].toDouble();
         tickerData.last = tickerObject["last"].toDouble();
@@ -148,7 +148,7 @@ cont:
     // {"event":"trade","data":"{\"price\": 719.98000000000002, \"amount\": 5.3522414999999999, \"id\": 2799842}","channel":"live_trades"}
     // {"event":"trade","data":"{\"price\": 719.99000000000001, \"amount\": 39.6419985, \"id\": 2799843}","channel":"live_trades"}
 
-    quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
+    quint64 localTime = QDateTime::currentDateTime().toTime_t();
     QVariantMap data = Json::parse(buffer).toMap();
     QString event = data["event"].toString();
     QString channel = data["channel"].toString();

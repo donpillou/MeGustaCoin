@@ -11,15 +11,14 @@ public:
   BookModel bookModel;
   QColor color;
 
-  PublicDataModel(QObject* parent, const QColor& color);
+  PublicDataModel();
 
-  void setMarket(const QString& marketName, int features);
+  void setMarket(const QString& marketName);
   void setMarket(const QString& coinCurrency, const QString& marketCurrency);
 
   const QString& getMarketName() const {return marketName;}
   const QString& getCoinCurrency() const {return coinCurrency;}
   const QString& getMarketCurrency() const {return marketCurrency;}
-  int getFeatures() const {return features;}
 
   QString formatAmount(double amount) const;
   QString formatPrice(double price) const;
@@ -48,7 +47,6 @@ private:
   QString marketName;
   QString coinCurrency;
   QString marketCurrency;
-  int features;
   State state;
   quint64 startTime;
 };

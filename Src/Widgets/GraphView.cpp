@@ -64,7 +64,7 @@ void GraphView::paintEvent(QPaintEvent* event)
   {
     foreach(const PublicDataModel* publicDataModel, publicDataModels)
     {
-      if(publicDataModel->graphModel.tradeSamples.isEmpty())
+      if(!publicDataModel || publicDataModel->graphModel.tradeSamples.isEmpty())
         continue;
       const GraphModel::TradeSample& tradeSample = publicDataModel->graphModel.tradeSamples.back();
       if(tradeSample.time > time)
@@ -99,7 +99,7 @@ void GraphView::paintEvent(QPaintEvent* event)
     if(averagePrice > 0.)
       foreach(const PublicDataModel* publicDataModel, publicDataModels)
       {
-        if(publicDataModel != this->publicDataModel || !(enabledData & ((int)Data::trades)))
+        if(publicDataModel && (publicDataModel != this->publicDataModel || !(enabledData & ((int)Data::trades))))
         {
           double otherAveragePrice = publicDataModel->graphModel.getVwap24();
           if(otherAveragePrice > 0.)

@@ -174,13 +174,13 @@ void GraphWidget::updateDataMenu()
   action->setCheckable(true);
   dataSignalMapper->setMapping(action, (int)GraphView::Data::tradeVolume);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
-  if(publicDataModel->getFeatures() & (int)MarketStream::Features::orderBook)
-  {
-    action = dataMenu->addAction(tr("Order Book"));
-    action->setCheckable(true);
-    dataSignalMapper->setMapping(action, (int)GraphView::Data::orderBook);
-    connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
-  }
+  //if(publicDataModel->getFeatures() & (int)MarketStream::Features::orderBook)
+  //{
+  //  action = dataMenu->addAction(tr("Order Book"));
+  //  action->setCheckable(true);
+  //  dataSignalMapper->setMapping(action, (int)GraphView::Data::orderBook);
+  //  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  //}
   action = dataMenu->addAction(tr("Regression Lines"));
   action->setCheckable(true);
   dataSignalMapper->setMapping(action, (int)GraphView::Data::regressionLines);

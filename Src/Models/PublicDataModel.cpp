@@ -1,14 +1,13 @@
 
 #include "stdafx.h"
 
-PublicDataModel::PublicDataModel(QObject* parent, const QColor& color) : QObject(parent),
+PublicDataModel::PublicDataModel() :
   tradeModel(*this), bookModel(*this), color(color), state(State::offline) {}
 
-void PublicDataModel::setMarket(const QString& marketName, int features)
+void PublicDataModel::setMarket(const QString& marketName)
 {
   this->marketName = marketName;
-  this->features = features;
-  startTime = QDateTime::currentDateTimeUtc().toTime_t();
+  startTime = QDateTime::currentDateTime().toTime_t();
 }
 
 void PublicDataModel::setMarket(const QString& coinCurrency, const QString& marketCurrency)
@@ -103,6 +102,8 @@ void PublicDataModel::setBookData(quint64 time, const QList<MarketStream::OrderB
 
 void PublicDataModel::setState(State state)
 {
+  if(this->state == state)
+    return;
   this->state = state;
   emit changedState();
 }

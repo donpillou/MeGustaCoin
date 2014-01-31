@@ -5,7 +5,7 @@
 //#include <cstdlib>
 //#include <cstring>
 
-class Curl
+static class Curl
 {
 public:
   Curl()

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Markets">
@@ -38,6 +38,9 @@
       <Filter>Markets</Filter>
     </ClCompile>
     <ClCompile Include="Src\Markets\BtcChinaMarketStream.cpp">
+      <Filter>Markets</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Markets\DataService.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
     <ClCompile Include="Src\Markets\HuobiMarketStream.cpp">
@@ -85,6 +88,9 @@
     <ClCompile Include="Src\Tools\Sha256.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Tools\SocketConnection.cpp">
+      <Filter>Tools</Filter>
+    </ClCompile>
     <ClCompile Include="Src\Tools\Websocket.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
@@ -124,6 +130,9 @@
     <ClInclude Include="Src\Markets\BtcChinaMarketStream.h">
       <Filter>Markets</Filter>
     </ClInclude>
+    <CustomBuild Include="Src\Markets\DataService.h">
+      <Filter>Markets</Filter>
+    </CustomBuild>
     <ClInclude Include="Src\Markets\HuobiMarketStream.h">
       <Filter>Markets</Filter>
     </ClInclude>
@@ -176,6 +185,9 @@
       <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="Src\Tools\Sha256.h">
+      <Filter>Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Tools\SocketConnection.h">
       <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="Src\Tools\Websocket.h">
@@ -305,6 +317,9 @@
     <ClCompile Include="Build\Debug\moc_MarketStreamService.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Debug\moc_DataService.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Debug\moc_MainWindow.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -365,11 +380,25 @@
     <ClCompile Include="Build\Release\moc_MarketStreamService.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Build\Release\moc_DataService.cpp">
+      <Filter>.Qt</Filter>
+    </ClCompile>
     <ClCompile Include="Build\Release\moc_MainWindow.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_LoginDialog.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Markets\DataConnection.cpp">
+      <Filter>Markets</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Src\Markets\DataConnection.h">
+      <Filter>Markets</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\Markets\DataProtocol.h">
+      <Filter>Markets</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

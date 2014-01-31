@@ -55,7 +55,7 @@ void MtGoxMarketStream::process(Callback& callback)
 
     QVariantMap tickerObject = Json::parse(buffer).toMap()["data"].toMap();
     quint64 serverTime = tickerObject["now"].toULongLong() / 1000000ULL;
-    quint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
+    quint64 localTime = QDateTime::currentDateTime().toTime_t();
     timeOffset = (qint64)localTime - (qint64)serverTime;
     timeOffsetSet = true;
 
@@ -103,7 +103,7 @@ void MtGoxMarketStream::process(Callback& callback)
     // {"date":1388590384,"price":"806.5","amount":"0.43920867","price_int":"80650000","amount_int":"43920867","tid":"1388590384943529","price_currency":"USD","item":"BTC","trade_type":"ask","primary":"Y","properties":"market"},
     // ...
 
-    localTime = QDateTime::currentDateTimeUtc().toTime_t();
+    localTime = QDateTime::currentDateTime().toTime_t();
     QVariantList trades = Json::parse(buffer).toMap()["data"].toList();
     MarketStream::Trade trade;
     for(QVariantList::iterator i = trades.begin(), end = trades.end(); i != end; ++i)
@@ -150,7 +150,7 @@ cont:
       continue;
     lastPingTime = QDateTime::currentDateTime();
 
-    qint64 localTime = QDateTime::currentDateTimeUtc().toTime_t();
+    qint64 localTime = QDateTime::currentDateTime().toTime_t();
     QVariantMap data = Json::parse(buffer).toMap();
     QString channel = data["channel"].toString();
 

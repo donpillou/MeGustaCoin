@@ -14,40 +14,26 @@ private:
 
   OrdersWidget* ordersWidget;
   TransactionsWidget* transactionsWidget;
-  //TradesWidget* tradesWidget;
-  //BookWidget* bookWidget;
   GraphWidget* graphWidget;
   LogWidget* logWidget;
 
+  QMenu* viewMenu;
+
   DataModel dataModel;
   MarketService marketService;
+  DataService dataService;
 
-  struct MarketData
+  struct ChannelData
   {
-    MarketStreamService* streamService;
-    PublicDataModel* publicDataModel;
-
     TradesWidget* tradesWidget;
-    QDockWidget* tradesDockWidget;
-    BookWidget* bookWidget;
-    QDockWidget* bookDockWidget;
     GraphWidget* graphWidget;
-    QDockWidget* graphDockWidget;
 
-    enum class EnabledWidgets
-    {
-      trades = 0x01,
-      book = 0x02,
-      graph = 0x04,
-    };
-
-    int enabledWidgets;
-
-    MarketData() : enabledWidgets(0) {}
+    ChannelData() : tradesWidget(0), graphWidget(0) {}
   };
 
-  QList<MarketData> marketDataList;
-  QMap<QString, PublicDataModel*> publicDataModels;
+  QHash<QString, ChannelData> channelDataMap;
+  QSignalMapper liveTradesSignalMapper;
+  QSignalMapper liveGraphSignalMapper;
 
   void open(const QString& market, const QString& userName, const QString& key, const QString& secret);
 
@@ -60,8 +46,10 @@ private slots:
   void updateWindowTitle();
   void updateWindowTitleTicker();
   void updateFocusPublicDataModel();
+  void updateViewMenu();
   void about();
-  void enableLiveTradesUpdates(bool enable);
-  void enableOrderBookUpdates(bool enable);
-  void enableGraphUpdates(bool enable);
+  void disableTradesUpdates(bool enable);
+  void disableGraphUpdates(bool enable);
+  void createLiveTradeWidget(const QString& channel);
+  void createLiveGraphWidget(const QString& channel);
 };

@@ -19,10 +19,11 @@ public:
 
   static bool getData(const QString& symbol, Data& data, QString& error)
   {
+    return false;
     QMutexLocker sync(&mutex);
-    if(lastRequest.isNull() || lastRequest.secsTo(QDateTime::currentDateTimeUtc()) > 15 * 60)
+    if(lastRequest.isNull() || lastRequest.secsTo(QDateTime::currentDateTime()) > 15 * 60)
     {
-      lastRequest = QDateTime::currentDateTimeUtc();
+      lastRequest = QDateTime::currentDateTime();
       HttpRequest httpRequest;
       QByteArray buffer;
       if(httpRequest.get("http://api.bitcoincharts.com/v1/markets.json", buffer))

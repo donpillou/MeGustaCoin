@@ -2,12 +2,15 @@
 #include "stdafx.h"
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"),
-  marketService(dataModel)
+  marketService(dataModel), dataService(dataModel)
 {
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
   connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
   //connect(&dataModel, SIGNAL(changedTickerData()), this, SLOT(updateWindowTitle()));
+  connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
+  connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
 
+  /*
   publicDataModels.insert("MtGox/USD", new PublicDataModel(this, QColor(0x7f, 0x00, 0x7f, 0x70)));
   publicDataModels.insert("Bitstamp/USD", new PublicDataModel(this, QColor(0x00, 0x00, 0x7f, 0x70)));
   publicDataModels.insert("BtcChina/CNY", new PublicDataModel(this, QColor(0x00, 0x7f, 0x7f, 0x70)));
@@ -26,12 +29,11 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
     marketData.graphWidget = new GraphWidget(this, settings, marketData.publicDataModel, i.key() + "_0", publicDataModels);
     marketDataList.append(marketData);
   }
+  */
 
-  ordersWidget = new OrdersWidget(this, settings, dataModel, marketService, publicDataModels);
+  ordersWidget = new OrdersWidget(this, settings, dataModel, marketService);
   transactionsWidget = new TransactionsWidget(this, settings, dataModel, marketService);
-  //tradesWidget = new TradesWidget(this, settings, dataModel);
-  //bookWidget = new BookWidget(this, settings, dataModel);
-  graphWidget = new GraphWidget(this, settings, 0, QString(), publicDataModels);
+  graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
   logWidget = new LogWidget(this, settings, dataModel.logModel);
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
@@ -59,6 +61,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
   tabifyDockWidget(transactionsDockWidget, graphDockWidget);
 
+  /*
   for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
   {
     MarketData& marketData = *i;
@@ -94,6 +97,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
     //marketData.tradesDockWidget->setFloating(true);
     marketData.tradesDockWidget->hide();
   }
+  */
 
   QDockWidget* logDockWidget = new QDockWidget(tr("Log"), this);
   logDockWidget->setObjectName("Log");
@@ -113,36 +117,19 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   action->setShortcut(QKeySequence::Quit);
   connect(action, SIGNAL(triggered()), this, SLOT(close()));
 
-  menu = menuBar->addMenu(tr("&View"));
-  action = menu->addAction(tr("&Refresh"));
-  action->setShortcut(QKeySequence(QKeySequence::Refresh));
-  connect(action, SIGNAL(triggered()), this, SLOT(refresh()));
-  menu->addSeparator();
-  menu->addAction(ordersDockWidget->toggleViewAction());
-  menu->addAction(transactionsDockWidget->toggleViewAction());
-  //menu->addAction(tradesDockWidget->toggleViewAction());
-  menu->addAction(graphDockWidget->toggleViewAction());
-  //menu->addAction(bookDockWidget->toggleViewAction());
-  menu->addAction(logDockWidget->toggleViewAction());
-  menu->addSeparator();
-  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
-  {
-    MarketData& marketData = *i;
-    QMenu* subMenu = menu->addMenu(marketData.publicDataModel->getMarketName());
-    QAction* action = marketData.tradesDockWidget->toggleViewAction();
-    subMenu->addAction(action);
-    if(marketData.bookDockWidget)
-    {
-      action = marketData.bookDockWidget->toggleViewAction();
-      subMenu->addAction(action);
-    }
-    action = marketData.graphDockWidget->toggleViewAction();
-    subMenu->addAction(action);
-  }
+  viewMenu = menuBar->addMenu(tr("&View"));
+  connect(viewMenu, SIGNAL(aboutToShow()), this, SLOT(updateViewMenu()));
 
   menu = menuBar->addMenu(tr("&Help"));
   connect(menu->addAction(tr("&About...")), SIGNAL(triggered()), this, SLOT(about()));
   connect(menu->addAction(tr("About &Qt...")), SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+
+  QStringList liveTradesWidgets = settings.value("LiveTradesWidgets").toStringList();
+  QStringList liveGraphWidgets = settings.value("LiveGraphWidgets").toStringList();
+  foreach(const QString& channelName, liveTradesWidgets)
+    createLiveTradeWidget(channelName);
+  foreach(const QString& channelName, liveGraphWidgets)
+    createLiveGraphWidget(channelName);
 
   restoreGeometry(settings.value("Geometry").toByteArray());
   restoreState(settings.value("WindowState").toByteArray());
@@ -162,25 +149,18 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 
   if(!marketService.isReady())
     QTimer::singleShot(0, this, SLOT(login()));
+  dataService.start();
 }
 
 MainWindow::~MainWindow()
 {
   logout();
 
-  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
+  for(QHash<QString, ChannelData>::Iterator i = channelDataMap.begin(), end = channelDataMap.end(); i != end; ++i)
   {
-    MarketData& marketData = *i;
-
-    delete marketData.tradesWidget;
-    delete marketData.tradesDockWidget;
-    delete marketData.bookWidget;
-    delete marketData.bookDockWidget;
-    delete marketData.graphWidget;
-    delete marketData.graphDockWidget;
-
-    delete marketData.streamService;
-    delete marketData.publicDataModel;
+    ChannelData& channelData = i.value();
+    delete channelData.tradesWidget;
+    delete channelData.graphWidget;
   }
 }
 
@@ -193,15 +173,28 @@ void MainWindow::closeEvent(QCloseEvent* event)
   ordersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
   graphWidget->saveState(settings);
-  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
+
+  QStringList openedLiveTradesWidgets;
+  QStringList openedLiveGraphWidgets;
+  for(QHash<QString, ChannelData>::iterator i = channelDataMap.begin(), end = channelDataMap.end(); i != end; ++i)
   {
-    MarketData& marketData = *i;
-    marketData.graphWidget->saveState(settings);
-    marketData.tradesWidget->saveState(settings);
-    if(marketData.bookWidget)
-      marketData.bookWidget->saveState(settings);
+    const QString& channelName = i.key();
+    ChannelData& channelData = i.value();
+    if(channelData.tradesWidget)
+    {
+      channelData.tradesWidget->saveState(settings);
+      openedLiveTradesWidgets.append(channelName);
+    }
+    if(channelData.graphWidget)
+    {
+      channelData.graphWidget->saveState(settings);
+      openedLiveGraphWidgets.append(channelName);
+    }
   }
+
   logWidget->saveState(settings);
+  settings.setValue("LiveTradesWidgets", openedLiveTradesWidgets);
+  settings.setValue("LiveGraphWidgets", openedLiveGraphWidgets);
 
   QMainWindow::closeEvent(event);
 }
@@ -217,6 +210,9 @@ void MainWindow::login()
 
 void MainWindow::logout()
 {
+  const QString& marketName = dataModel.getMarketName();
+  if(!marketName.isEmpty())
+    dataService.unsubscribe(marketName);
   marketService.logout();
 }
 
@@ -238,13 +234,7 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
   // request data
   marketService.loadBalance();
   refresh();
-//  marketService.loadTicker();
-  /*
-  market->loadLiveTrades();
-  market->loadOrderBook();
-  market->enableLiveTradeUpdates(liveTradeUpdatesEnabled || graphUpdatesEnabled);
-  market->enableOrderBookUpdates(orderBookUpdatesEnabled || graphUpdatesEnabled);
-  */
+  dataService.subscribe(marketName);
 }
 
 void MainWindow::updateWindowTitle()
@@ -263,10 +253,10 @@ void MainWindow::updateWindowTitle()
     title += marketName;
     if(!marketName.isEmpty())
     {
-      const PublicDataModel* publicDataModel = publicDataModels[marketName];
-      if(publicDataModel && !publicDataModel->graphModel.tickerSamples.isEmpty())
+      const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
+      if(!publicDataModel.graphModel.tickerSamples.isEmpty())
       {
-        const GraphModel::TickerSample& tickerSample = publicDataModel->graphModel.tickerSamples.back();
+        const GraphModel::TickerSample& tickerSample = publicDataModel.graphModel.tickerSamples.back();
         title += QString(" - %1 / %2 bid / %3 ask").arg(dataModel.formatPrice(tickerSample.last), dataModel.formatPrice(tickerSample.bid), dataModel.formatPrice(tickerSample.ask));
       }
     }
@@ -284,9 +274,97 @@ void MainWindow::updateWindowTitleTicker()
 void MainWindow::updateFocusPublicDataModel()
 {
   const QString& marketName = dataModel.getMarketName();
-  PublicDataModel* publicDataModel = marketName.isEmpty() ? 0 : publicDataModels[marketName];
-  graphWidget->setFocusPublicDataModel(publicDataModel);
-  updateWindowTitle();
+  if(marketName.isEmpty())
+  {
+    graphWidget->setFocusPublicDataModel(0);
+    updateWindowTitle();
+  }
+  else
+  {
+    PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
+    graphWidget->setFocusPublicDataModel(&publicDataModel);
+    updateWindowTitle();
+  }
+}
+
+void MainWindow::updateViewMenu()
+{
+  viewMenu->clear();
+
+  QAction* action = viewMenu->addAction(tr("&Refresh"));
+  action->setShortcut(QKeySequence(QKeySequence::Refresh));
+  connect(action, SIGNAL(triggered()), this, SLOT(refresh()));
+  viewMenu->addSeparator();
+  viewMenu->addAction(qobject_cast<QDockWidget*>(ordersWidget->parent())->toggleViewAction());
+  viewMenu->addAction(qobject_cast<QDockWidget*>(transactionsWidget->parent())->toggleViewAction());
+  viewMenu->addAction(qobject_cast<QDockWidget*>(graphWidget->parent())->toggleViewAction());
+  viewMenu->addAction(qobject_cast<QDockWidget*>(logWidget->parent())->toggleViewAction());
+  viewMenu->addSeparator();
+  QMap<QString, PublicDataModel*> publicDataModels = dataModel.getDataChannels();
+  for(QMap<QString, PublicDataModel*>::Iterator i = publicDataModels.begin(), end = publicDataModels.end(); i != end; ++i)
+  {
+    const QString& channelName = i.key();
+    QMenu* subMenu = viewMenu->addMenu(channelName);
+
+    ChannelData* channelData = 0;
+    if(channelDataMap.contains(i.key()))
+      channelData = &channelDataMap[channelName];
+
+    if(channelData && channelData->tradesWidget)
+      subMenu->addAction(qobject_cast<QDockWidget*>(channelData->tradesWidget->parent())->toggleViewAction());
+    else
+    {
+      action = subMenu->addAction(tr("Live Trades"));
+      liveTradesSignalMapper.setMapping(action, channelName);
+      connect(action, SIGNAL(triggered()), &liveTradesSignalMapper, SLOT(map()));
+    }
+    if(channelData && channelData->graphWidget)
+      subMenu->addAction(qobject_cast<QDockWidget*>(channelData->graphWidget->parent())->toggleViewAction());
+    else
+    {
+      action = subMenu->addAction(tr("Live Graph"));
+      liveGraphSignalMapper.setMapping(action, channelName);
+      connect(action, SIGNAL(triggered()), &liveGraphSignalMapper, SLOT(map()));
+    }
+  }
+}
+
+void MainWindow::createLiveTradeWidget(const QString& channelName)
+{
+  ChannelData& channelData = channelDataMap[channelName];
+  if(channelData.tradesWidget)
+    return;
+
+  PublicDataModel& publicDataModel = dataModel.getDataChannel(channelName);
+  channelData.tradesWidget = new TradesWidget(this, settings, publicDataModel);
+
+  QDockWidget* tradesDockWidget = new QDockWidget(this);
+  connect(tradesDockWidget->toggleViewAction(), SIGNAL(toggled(bool)), this, SLOT(disableTradesUpdates(bool)));
+  tradesDockWidget->setObjectName(channelName + "LiveTrades");
+  tradesDockWidget->setWidget(channelData.tradesWidget);
+  channelData.tradesWidget->updateTitle();
+  addDockWidget(Qt::TopDockWidgetArea, tradesDockWidget);
+  
+  dataService.subscribe(channelName);
+}
+
+void MainWindow::createLiveGraphWidget(const QString& channelName)
+{
+  ChannelData& channelData = channelDataMap[channelName];
+  if(channelData.graphWidget)
+    return;
+
+  PublicDataModel& publicDataModel = dataModel.getDataChannel(channelName);
+  channelData.graphWidget = new GraphWidget(this, settings, &publicDataModel, channelName + "_0",dataModel.getDataChannels());
+
+  QDockWidget* graphDockWidget = new QDockWidget(this);
+  connect(graphDockWidget->toggleViewAction(), SIGNAL(toggled(bool)), this, SLOT(disableGraphUpdates(bool)));
+  graphDockWidget->setObjectName(channelName + "LiveGraph");
+  graphDockWidget->setWidget(channelData.graphWidget);
+  channelData.graphWidget->updateTitle();
+  addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
+
+  dataService.subscribe(channelName);
 }
 
 void MainWindow::about()
@@ -294,83 +372,50 @@ void MainWindow::about()
   QMessageBox::about(this, "About", "MeGustaCoin - Bitcoin Market Client<br><a href=\"https://github.com/donpillou/MeGustaCoin\">https://github.com/donpillou/MeGustaCoin</a><br><br>Released under the GNU General Public License Version 3<br><br>MeGustaCoin uses the following third-party libraries and components:<br>&nbsp;&nbsp;- Qt (GUI)<br>&nbsp;&nbsp;- libcurl (HTTP/HTTPS)<br>&nbsp;&nbsp;- easywsclient (Websockets)<br>&nbsp;&nbsp;- <a href=\"http://www.famfamfam.com/lab/icons/silk/\">silk icons</a> (by Mark James)<br><br>-- Donald Pillou, 2013");
 }
 
-void MainWindow::enableLiveTradesUpdates(bool enable)
+void MainWindow::disableTradesUpdates(bool enable)
 {
-  QObject* sender = this->sender();
-  MarketData* marketData = 0;
-  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
-    if(i->tradesDockWidget == sender)
-    {
-      marketData = &*i;
-      break;
-    }
-  Q_ASSERT(marketData);
-
-  int enabledWidgets = marketData->enabledWidgets;
   if(enable)
-    enabledWidgets |= (int)MarketData::EnabledWidgets::trades;
-  else
-    enabledWidgets &= ~(int)MarketData::EnabledWidgets::trades;
-
-  if(enabledWidgets == marketData->enabledWidgets)
     return;
-  marketData->enabledWidgets = enabledWidgets;
-  if(enabledWidgets != 0)
-    marketData->streamService->subscribe();
-  else
-    marketData->streamService->unsubscribe();
+  QObject* sender = this->sender();
+  QHash<QString, ChannelData>::Iterator it = channelDataMap.begin();
+  for(QHash<QString, ChannelData>::Iterator end = channelDataMap.end(); it != end; ++it)
+  {
+    const ChannelData& channelData = it.value();
+    if(channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->toggleViewAction() == sender)
+      goto found;
+  }
+  return;
+found:
+  const QString& channelName = it.key();
+  ChannelData& channelData = it.value();
+  if((channelData.graphWidget == 0 || !qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) && 
+     (channelData.tradesWidget == 0 || !qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible()) &&
+     channelName != dataModel.getMarketName())
+  {
+    dataService.unsubscribe(channelName);
+  }
 }
 
-void MainWindow::enableOrderBookUpdates(bool enable)
+void MainWindow::disableGraphUpdates(bool enable)
 {
-  QObject* sender = this->sender();
-  MarketData* marketData = 0;
-  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
-    if(i->bookDockWidget == sender)
-    {
-      marketData = &*i;
-      break;
-    }
-  Q_ASSERT(marketData);
-
-  int enabledWidgets = marketData->enabledWidgets;
   if(enable)
-    enabledWidgets |= (int)MarketData::EnabledWidgets::book;
-  else
-    enabledWidgets &= ~(int)MarketData::EnabledWidgets::book;
-
-  if(enabledWidgets == marketData->enabledWidgets)
     return;
-  marketData->enabledWidgets = enabledWidgets;
-  if(enabledWidgets != 0)
-    marketData->streamService->subscribe();
-  else
-    marketData->streamService->unsubscribe();
-}
-
-void MainWindow::enableGraphUpdates(bool enable)
-{
   QObject* sender = this->sender();
-  MarketData* marketData = 0;
-  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
-    if(i->graphDockWidget == sender)
-    {
-      marketData = &*i;
-      break;
-    }
-  Q_ASSERT(marketData);
-
-  int enabledWidgets = marketData->enabledWidgets;
-  if(enable)
-    enabledWidgets |= (int)MarketData::EnabledWidgets::graph;
-  else
-    enabledWidgets &= ~(int)MarketData::EnabledWidgets::graph;
-
-  if(enabledWidgets == marketData->enabledWidgets)
-    return;
-  marketData->enabledWidgets = enabledWidgets;
-  if(enabledWidgets != 0)
-    marketData->streamService->subscribe();
-  else
-    marketData->streamService->unsubscribe();
+  QHash<QString, ChannelData>::Iterator it = channelDataMap.begin();
+  for(QHash<QString, ChannelData>::Iterator end = channelDataMap.end(); it != end; ++it)
+  {
+    const ChannelData& channelData = it.value();
+    if(channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->toggleViewAction() == sender)
+      goto found;
+  }
+  return;
+found:
+  const QString& channelName = it.key();
+  ChannelData& channelData = it.value();
+  if((channelData.graphWidget == 0 || !qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) && 
+     (channelData.tradesWidget == 0 || !qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible()) &&
+     channelName != dataModel.getMarketName())
+  {
+    dataService.unsubscribe(channelName);
+  }
 }

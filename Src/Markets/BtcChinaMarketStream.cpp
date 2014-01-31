@@ -41,7 +41,7 @@ void BtcChinaMarketStream::process(Callback& callback)
 
     // [{"date":"1388417186","price":4406.41,"amount":0.016,"tid":"4144642","type":"sell"},{"date":"1388417186","price":4401,"amount":0.973,"tid":"4144643","type":"sell"}]
 
-    qint64 now = QDateTime::currentDateTimeUtc().toTime_t();
+    qint64 now = QDateTime::currentDateTime().toTime_t();
     QVariantList varList = Json::parse(buffer).toList();
     if(!varList.isEmpty())
     {
@@ -78,7 +78,7 @@ void BtcChinaMarketStream::process(Callback& callback)
       if(BitcoinCharts::getData("btcnCNY", bcData, bcError))
       {
         TickerData tickerData;
-        tickerData.date = QDateTime::currentDateTimeUtc().toTime_t();
+        tickerData.date = QDateTime::currentDateTime().toTime_t();
         tickerData.bid = bcData.bid;
         tickerData.ask = bcData.ask;
         tickerData.last = bcData.last;

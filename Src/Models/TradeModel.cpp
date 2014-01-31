@@ -154,7 +154,7 @@ QVariant TradeModel::data(const QModelIndex& index, int role) const
     {
     case Column::date:
       {
-        quint64 timeSinceTrade = QDateTime::currentDateTimeUtc().toTime_t() - trade.date;
+        quint64 timeSinceTrade = QDateTime::currentDateTime().toTime_t() - trade.date;
         if(timeSinceTrade < 60)
           return QString("a few seconds ago");
         if(timeSinceTrade < 120)
