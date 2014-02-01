@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 PublicDataModel::PublicDataModel() :
-  tradeModel(*this), bookModel(*this), color(color), state(State::offline) {}
+  tradeModel(*this), bookModel(*this), state(State::offline) {}
 
 void PublicDataModel::setMarket(const QString& marketName)
 {

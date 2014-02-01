@@ -95,15 +95,22 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   if(enabledData & (int)Data::otherMarkets)
   {
+    static unsigned int colors[] = { 0x0000FF, 0x8A2BE2, 0xA52A2A, 0x5F9EA0, 0x7FFF00, 0xD2691E, 0xFF7F50, 0x6495ED, 0xDC143C, 0x00FFFF, 0x00008B, 0x008B8B, 0xB8860B, 0xA9A9A9, 0x006400, 0xBDB76B, 0x8B008B, 0x556B2F, 0xFF8C00, 0x9932CC, 0x8B0000, 0xE9967A, 0x8FBC8F, 0x483D8B, 0x2F4F4F, 0x00CED1, 0x9400D3, 0xFF1493, 0x00BFFF, 0x696969, 0x1E90FF, 0xB22222, 0x228B22, 0xFF00FF, 0xFFD700, 0xDAA520, 0x808080, 0x008000, 0xADFF2F, 0xFF69B4, 0xCD5C5C, 0x4B0082 };
+    int nextColorIndex = 0;
     double averagePrice = graphModel->getVwap24();
     if(averagePrice > 0.)
       foreach(const PublicDataModel* publicDataModel, publicDataModels)
       {
         if(publicDataModel && (publicDataModel != this->publicDataModel || !(enabledData & ((int)Data::trades))))
         {
+          int colorIndex = nextColorIndex++ % (sizeof(colors) / sizeof(*colors));
           double otherAveragePrice = publicDataModel->graphModel.getVwap24();
           if(otherAveragePrice > 0.)
-            drawTradePolyline(painter, plotRect, vmin, vmax, lastVolumeMax, publicDataModel->graphModel, (int)Data::trades, averagePrice / otherAveragePrice, publicDataModel->color);
+          {
+            QColor color(colors[colorIndex]);
+            color.setAlpha(0x70);
+            drawTradePolyline(painter, plotRect, vmin, vmax, lastVolumeMax, publicDataModel->graphModel, (int)Data::trades, averagePrice / otherAveragePrice, color);
+          }
         }
       }
   }

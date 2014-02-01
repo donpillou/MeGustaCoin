@@ -9,7 +9,6 @@ public:
   GraphModel graphModel;
   TradeModel tradeModel;
   BookModel bookModel;
-  QColor color;
 
   PublicDataModel();
 
