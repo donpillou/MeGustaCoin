@@ -180,12 +180,12 @@ void MainWindow::closeEvent(QCloseEvent* event)
   {
     const QString& channelName = i.key();
     ChannelData& channelData = i.value();
-    if(channelData.tradesWidget)
+    if(channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible())
     {
       channelData.tradesWidget->saveState(settings);
       openedLiveTradesWidgets.append(channelName);
     }
-    if(channelData.graphWidget)
+    if(channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible())
     {
       channelData.graphWidget->saveState(settings);
       openedLiveGraphWidgets.append(channelName);
@@ -339,7 +339,8 @@ void MainWindow::createLiveTradeWidget(const QString& channelName)
   channelData.tradesWidget = new TradesWidget(this, settings, publicDataModel);
 
   QDockWidget* tradesDockWidget = new QDockWidget(this);
-  connect(tradesDockWidget->toggleViewAction(), SIGNAL(toggled(bool)), this, SLOT(disableTradesUpdates(bool)));
+  //connect(tradesDockWidget->toggleViewAction(), SIGNAL(toggled(bool)), this, SLOT(enableTradesUpdates(bool)));
+  connect(tradesDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableTradesUpdates(bool)));
   tradesDockWidget->setObjectName(channelName + "LiveTrades");
   tradesDockWidget->setWidget(channelData.tradesWidget);
   channelData.tradesWidget->updateTitle();
@@ -358,7 +359,8 @@ void MainWindow::createLiveGraphWidget(const QString& channelName)
   channelData.graphWidget = new GraphWidget(this, settings, &publicDataModel, channelName + "_0",dataModel.getDataChannels());
 
   QDockWidget* graphDockWidget = new QDockWidget(this);
-  connect(graphDockWidget->toggleViewAction(), SIGNAL(toggled(bool)), this, SLOT(disableGraphUpdates(bool)));
+  //connect(graphDockWidget->toggleViewAction(), SIGNAL(toggled(bool)), this, SLOT(enableGraphUpdates(bool)));
+  connect(graphDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableGraphUpdates(bool)));
   graphDockWidget->setObjectName(channelName + "LiveGraph");
   graphDockWidget->setWidget(channelData.graphWidget);
   channelData.graphWidget->updateTitle();
@@ -372,50 +374,50 @@ void MainWindow::about()
   QMessageBox::about(this, "About", "MeGustaCoin - Bitcoin Market Client<br><a href=\"https://github.com/donpillou/MeGustaCoin\">https://github.com/donpillou/MeGustaCoin</a><br><br>Released under the GNU General Public License Version 3<br><br>MeGustaCoin uses the following third-party libraries and components:<br>&nbsp;&nbsp;- Qt (GUI)<br>&nbsp;&nbsp;- libcurl (HTTP/HTTPS)<br>&nbsp;&nbsp;- easywsclient (Websockets)<br>&nbsp;&nbsp;- <a href=\"http://www.famfamfam.com/lab/icons/silk/\">silk icons</a> (by Mark James)<br><br>-- Donald Pillou, 2013");
 }
 
-void MainWindow::disableTradesUpdates(bool enable)
+void MainWindow::enableTradesUpdates(bool enable)
 {
-  if(enable)
-    return;
-  QObject* sender = this->sender();
+  QDockWidget* sender = qobject_cast<QDockWidget*>(this->sender());
   QHash<QString, ChannelData>::Iterator it = channelDataMap.begin();
   for(QHash<QString, ChannelData>::Iterator end = channelDataMap.end(); it != end; ++it)
   {
     const ChannelData& channelData = it.value();
-    if(channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->toggleViewAction() == sender)
+    if(channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent()) == sender)
       goto found;
   }
   return;
 found:
   const QString& channelName = it.key();
+  if(channelName == dataModel.getMarketName())
+    return;
   ChannelData& channelData = it.value();
-  if((channelData.graphWidget == 0 || !qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) && 
-     (channelData.tradesWidget == 0 || !qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible()) &&
-     channelName != dataModel.getMarketName())
-  {
+  bool active = (channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) ||
+                (channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible());
+  if(active)
+    dataService.subscribe(channelName);
+  else
     dataService.unsubscribe(channelName);
-  }
 }
 
-void MainWindow::disableGraphUpdates(bool enable)
+void MainWindow::enableGraphUpdates(bool enable)
 {
-  if(enable)
-    return;
-  QObject* sender = this->sender();
+  QDockWidget* sender = qobject_cast<QDockWidget*>(this->sender());
   QHash<QString, ChannelData>::Iterator it = channelDataMap.begin();
   for(QHash<QString, ChannelData>::Iterator end = channelDataMap.end(); it != end; ++it)
   {
     const ChannelData& channelData = it.value();
-    if(channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->toggleViewAction() == sender)
+    if(channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent()) == sender)
       goto found;
   }
   return;
 found:
   const QString& channelName = it.key();
+  if(channelName == dataModel.getMarketName())
+    return;
   ChannelData& channelData = it.value();
-  if((channelData.graphWidget == 0 || !qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) && 
-     (channelData.tradesWidget == 0 || !qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible()) &&
-     channelName != dataModel.getMarketName())
-  {
+  bool active = (channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) ||
+                (channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible());
+  if(active)
+    dataService.subscribe(channelName);
+  else
     dataService.unsubscribe(channelName);
-  }
 }

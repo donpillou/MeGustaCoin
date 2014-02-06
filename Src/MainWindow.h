@@ -48,8 +48,8 @@ private slots:
   void updateFocusPublicDataModel();
   void updateViewMenu();
   void about();
-  void disableTradesUpdates(bool enable);
-  void disableGraphUpdates(bool enable);
+  void enableTradesUpdates(bool enable);
+  void enableGraphUpdates(bool enable);
   void createLiveTradeWidget(const QString& channel);
   void createLiveGraphWidget(const QString& channel);
 };

@@ -274,7 +274,6 @@ void DataService::executeActions()
         if(publicDataModel.getState() == PublicDataModel::State::connected)
         {
           publicDataModel.setState(PublicDataModel::State::offline);
-          dataModel.clearDataChannel(unsubscribeResponse->channel);
         }
         dataModel.logModel.addMessage(LogModel::Type::information, QString("Unsubscribed from channel %1.").arg(unsubscribeResponse->channel));
       }

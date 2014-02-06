@@ -6,8 +6,8 @@ bool DataConnection::connect()
   connection.close();
   recvBuffer.clear();
 
-  if(!connection.connect("192.168.0.49", 40123))
-  //if(!connection.connect("127.0.0.1", 40123))
+  //if(!connection.connect("192.168.0.49", 40123))
+  if(!connection.connect("127.0.0.1", 40123))
   {
     error = connection.getLastError();
     return false;
