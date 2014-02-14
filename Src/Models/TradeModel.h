@@ -11,17 +11,20 @@ public:
   TradeModel(PublicDataModel& publicDataModel);
   ~TradeModel();
 
-  class Trade : public MarketStream::Trade
+  class Trade
   {
   public:
+    quint64 id;
+    quint64 time;
+    double price;
+    double amount;
+
     enum class Icon
     {
       up,
       down,
       neutral,
     } icon;
-
-    Trade(const MarketStream::Trade& trade) : MarketStream::Trade(trade), icon(Icon::neutral) {}
   };
 
   enum class Column
@@ -35,7 +38,7 @@ public:
 
   void reset();
 
-  void addTrade(const MarketStream::Trade& trade);
+  void addTrade(quint64 id, quint64 time, double price, double amount);
 
   void clearAbove(int tradeCount);
 

@@ -254,11 +254,11 @@ void MainWindow::updateWindowTitle()
     if(!marketName.isEmpty())
     {
       const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
-      if(!publicDataModel.graphModel.tickerSamples.isEmpty())
-      {
-        const GraphModel::TickerSample& tickerSample = publicDataModel.graphModel.tickerSamples.back();
-        title += QString(" - %1 / %2 bid / %3 ask").arg(dataModel.formatPrice(tickerSample.last), dataModel.formatPrice(tickerSample.bid), dataModel.formatPrice(tickerSample.ask));
-      }
+      //if(!publicDataModel.graphModel.tickerSamples.isEmpty())
+      //{
+      //  const GraphModel::TickerSample& tickerSample = publicDataModel.graphModel.tickerSamples.back();
+      //  title += QString(" - %1 / %2 bid / %3 ask").arg(dataModel.formatPrice(tickerSample.last), dataModel.formatPrice(tickerSample.bid), dataModel.formatPrice(tickerSample.ask));
+      //}
     }
     setWindowTitle(title);
   }

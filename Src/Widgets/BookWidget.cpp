@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-
+#if 0
 BookWidget::BookWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel) :
   QWidget(parent),
   publicDataModel(publicDataModel), bookModel(publicDataModel.bookModel),
@@ -110,3 +110,4 @@ void BookWidget::updateTitle()
   dockWidget->setWindowTitle(title);
   dockWidget->toggleViewAction()->setText(tr("Order Book"));
 }
+#endif

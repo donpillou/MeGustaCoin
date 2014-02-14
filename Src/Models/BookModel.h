@@ -1,6 +1,6 @@
 
 #pragma once
-
+#if 0
 class BookModel : public QObject
 {
   Q_OBJECT
@@ -16,7 +16,7 @@ public:
 
     void reset();
 
-    void setData(const QList<MarketStream::OrderBookEntry>& items);
+    //void setData(const QList<MarketStream::OrderBookEntry>& items);
 
     void updateHeader();
 
@@ -24,7 +24,7 @@ public:
 
   private:
     PublicDataModel& publicDataModel;
-    QList<MarketStream::OrderBookEntry*> items;
+    //QList<MarketStream::OrderBookEntry*> items;
 
     virtual QModelIndex parent(const QModelIndex& child) const;
     virtual int rowCount(const QModelIndex& parent) const;
@@ -41,7 +41,7 @@ public:
       last = amount,
   };
 
-  void setData(quint64 time, const QList<MarketStream::OrderBookEntry>& askItems, const QList<MarketStream::OrderBookEntry>& bidItems);
+  //void setData(quint64 time, const QList<MarketStream::OrderBookEntry>& askItems, const QList<MarketStream::OrderBookEntry>& bidItems);
   quint64 getTime() const {return time;}
 
   void reset();
@@ -56,3 +56,4 @@ private:
 private slots:
   void updateHeader();
 };
+#endif

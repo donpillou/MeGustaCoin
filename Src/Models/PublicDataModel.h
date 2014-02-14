@@ -8,7 +8,7 @@ class PublicDataModel : public QObject
 public:
   GraphModel graphModel;
   TradeModel tradeModel;
-  BookModel bookModel;
+  //BookModel bookModel;
 
   PublicDataModel();
 
@@ -22,9 +22,9 @@ public:
   QString formatAmount(double amount) const;
   QString formatPrice(double price) const;
 
-  void addTrade(const MarketStream::Trade& trade);
-  void addTickerData(const MarketStream::TickerData& tickerData);
-  void setBookData(quint64 time, const QList<MarketStream::OrderBookEntry>& askItems, const QList<MarketStream::OrderBookEntry>& bidItems);
+  void addTrade(quint64 id, quint64 time, double price, double amount);
+  //void addTickerData(const MarketStream::TickerData& tickerData);
+  //void setBookData(quint64 time, const QList<MarketStream::OrderBookEntry>& askItems, const QList<MarketStream::OrderBookEntry>& bidItems);
 
   enum class State
   {

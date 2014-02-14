@@ -128,11 +128,12 @@ void OrdersWidget::addOrder(OrderModel::Order::Type type)
     return;
   const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
   double price = 0;
-  if(publicDataModel.graphModel.tickerSamples.isEmpty())
-  {
-    const GraphModel::TickerSample& tickerSample = publicDataModel.graphModel.tickerSamples.back();
-    price = type == OrderModel::Order::Type::buy ? (tickerSample.bid + 0.01) : (tickerSample.ask - 0.01);
-  }
+  // TODO: fix this
+  //if(publicDataModel.graphModel.tickerSamples.isEmpty())
+  //{
+  //  const GraphModel::TickerSample& tickerSample = publicDataModel.graphModel.tickerSamples.back();
+  //  price = type == OrderModel::Order::Type::buy ? (tickerSample.bid + 0.01) : (tickerSample.ask - 0.01);
+  //}
 
   QString id = marketService.createOrderDraft(type == OrderModel::Order::Type::sell, price);
   QModelIndex index = orderModel.getOrderIndex(id);

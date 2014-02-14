@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-
+#if 0
 BookModel::BookModel(PublicDataModel& publicDataModel) :
   askModel(publicDataModel), bidModel(publicDataModel),
   publicDataModel(publicDataModel),
@@ -169,3 +169,4 @@ QVariant BookModel::ItemModel::headerData(int section, Qt::Orientation orientati
   }
   return QVariant();
 }
+#endif

@@ -217,11 +217,8 @@ void DataService::executeActions()
         PublicDataModel* publicDataModel = activeSubscriptions[addTradeAction->channelId];
         if(publicDataModel)
         {
-          MarketStream::Trade trade;
-          trade.amount = addTradeAction->trade.amount;
-          trade.date = addTradeAction->trade.time / 1000;
-          trade.price = addTradeAction->trade.price;
-          publicDataModel->addTrade(trade);
+          DataProtocol::Trade& trade = addTradeAction->trade;
+          publicDataModel->addTrade(trade.id, trade.time / 1000ULL, trade.price, trade.amount);
         }
       }
       break;

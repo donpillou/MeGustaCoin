@@ -12,14 +12,8 @@
 
 #include "Markets/DataProtocol.h"
 #include "Markets/DataConnection.h"
-#include "Markets/BitcoinCharts.h"
 #include "Markets/Market.h"
 #include "Markets/BitstampMarket.h"
-#include "Markets/MarketStream.h"
-#include "Markets/MtGoxMarketStream.h"
-#include "Markets/BitstampMarketStream.h"
-#include "Markets/BtcChinaMarketStream.h"
-#include "Markets/HuobiMarketStream.h"
 
 #include "Models/GraphModel.h"
 #include "Models/OrderModel.h"
@@ -31,7 +25,6 @@
 #include "Models/DataModel.h"
 
 #include "Markets/MarketService.h"
-#include "Markets/MarketStreamService.h"
 #include "Markets/DataService.h"
 
 #include "Widgets/OrdersWidget.h"

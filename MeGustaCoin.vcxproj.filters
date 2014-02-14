@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Markets">
@@ -28,31 +28,16 @@
     <ClCompile Include="Src\Main.cpp" />
     <ClCompile Include="Src\MainWindow.cpp" />
     <ClCompile Include="Src\stdafx.cpp" />
-    <ClCompile Include="Src\Markets\BitcoinCharts.cpp">
-      <Filter>Markets</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Markets\BitstampMarket.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Markets\BitstampMarketStream.cpp">
-      <Filter>Markets</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Markets\BtcChinaMarketStream.cpp">
+    <ClCompile Include="Src\Markets\DataConnection.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
     <ClCompile Include="Src\Markets\DataService.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Markets\HuobiMarketStream.cpp">
-      <Filter>Markets</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Markets\MarketService.cpp">
-      <Filter>Markets</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Markets\MarketStreamService.cpp">
-      <Filter>Markets</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Markets\MtGoxMarketStream.cpp">
       <Filter>Markets</Filter>
     </ClCompile>
     <ClCompile Include="Src\Models\BookModel.cpp">
@@ -118,42 +103,27 @@
     <CustomBuild Include="Src\LoginDialog.h" />
     <CustomBuild Include="Src\MainWindow.h" />
     <ClInclude Include="Src\stdafx.h" />
-    <ClInclude Include="Src\Markets\BitcoinCharts.h">
-      <Filter>Markets</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Markets\BitstampMarket.h">
       <Filter>Markets</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Markets\BitstampMarketStream.h">
+    <ClInclude Include="Src\Markets\DataConnection.h">
       <Filter>Markets</Filter>
     </ClInclude>
-    <ClInclude Include="Src\Markets\BtcChinaMarketStream.h">
+    <ClInclude Include="Src\Markets\DataProtocol.h">
       <Filter>Markets</Filter>
     </ClInclude>
     <CustomBuild Include="Src\Markets\DataService.h">
       <Filter>Markets</Filter>
     </CustomBuild>
-    <ClInclude Include="Src\Markets\HuobiMarketStream.h">
-      <Filter>Markets</Filter>
-    </ClInclude>
     <ClInclude Include="Src\Markets\Market.h">
       <Filter>Markets</Filter>
     </ClInclude>
     <CustomBuild Include="Src\Markets\MarketService.h">
       <Filter>Markets</Filter>
     </CustomBuild>
-    <ClInclude Include="Src\Markets\MarketStream.h">
-      <Filter>Markets</Filter>
-    </ClInclude>
-    <CustomBuild Include="Src\Markets\MarketStreamService.h">
-      <Filter>Markets</Filter>
-    </CustomBuild>
-    <ClInclude Include="Src\Markets\MtGoxMarketStream.h">
-      <Filter>Markets</Filter>
-    </ClInclude>
-    <CustomBuild Include="Src\Models\BookModel.h">
+    <ClInclude Include="Src\Models\BookModel.h">
       <Filter>Models</Filter>
-    </CustomBuild>
+    </ClInclude>
     <CustomBuild Include="Src\Models\DataModel.h">
       <Filter>Models</Filter>
     </CustomBuild>
@@ -193,9 +163,9 @@
     <ClInclude Include="Src\Tools\Websocket.h">
       <Filter>Tools</Filter>
     </ClInclude>
-    <CustomBuild Include="Src\Widgets\BookWidget.h">
+    <ClInclude Include="Src\Widgets\BookWidget.h">
       <Filter>Widgets</Filter>
-    </CustomBuild>
+    </ClInclude>
     <ClInclude Include="Src\Widgets\GraphView.h">
       <Filter>Widgets</Filter>
     </ClInclude>
@@ -281,9 +251,6 @@
     <ClCompile Include="Build\Debug\moc_TradesWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Debug\moc_BookWidget.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
     <ClCompile Include="Build\Debug\moc_LogWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -302,9 +269,6 @@
     <ClCompile Include="Build\Debug\moc_GraphModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Debug\moc_BookModel.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
     <ClCompile Include="Build\Debug\moc_TradeModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -312,9 +276,6 @@
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\moc_MarketService.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\Debug\moc_MarketStreamService.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Debug\moc_DataService.cpp">
@@ -344,9 +305,6 @@
     <ClCompile Include="Build\Release\moc_TradesWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Release\moc_BookWidget.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
     <ClCompile Include="Build\Release\moc_LogWidget.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -365,9 +323,6 @@
     <ClCompile Include="Build\Release\moc_GraphModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Build\Release\moc_BookModel.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
     <ClCompile Include="Build\Release\moc_TradeModel.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
@@ -375,9 +330,6 @@
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_MarketService.cpp">
-      <Filter>.Qt</Filter>
-    </ClCompile>
-    <ClCompile Include="Build\Release\moc_MarketStreamService.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
     <ClCompile Include="Build\Release\moc_DataService.cpp">
@@ -389,16 +341,5 @@
     <ClCompile Include="Build\Release\moc_LoginDialog.cpp">
       <Filter>.Qt</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Markets\DataConnection.cpp">
-      <Filter>Markets</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Src\Markets\DataConnection.h">
-      <Filter>Markets</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Markets\DataProtocol.h">
-      <Filter>Markets</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

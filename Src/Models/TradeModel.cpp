@@ -41,13 +41,18 @@ void TradeModel::clearAbove(int tradeCount)
   }
 }
 
-void TradeModel::addTrade(const MarketStream::Trade& newTrade)
+void TradeModel::addTrade(quint64 id, quint64 time, double price, double amount)
 {
   int oldCount = trades.size();
   double lastPrice = trades.size() > 0 ? trades.back()->price : 0.;
 
   beginInsertRows(QModelIndex(), oldCount, oldCount);
-  Trade* trade = new Trade(newTrade);
+  Trade* trade = new Trade;
+  trade->id = id;
+  trade->time = time;
+  trade->price = price;
+  trade->amount = amount;
+  trade->icon = Trade::Icon::neutral;
   if(lastPrice != 0.)
   {
     if(trade->price > lastPrice)
@@ -154,7 +159,7 @@ QVariant TradeModel::data(const QModelIndex& index, int role) const
     {
     case Column::date:
       {
-        quint64 timeSinceTrade = QDateTime::currentDateTime().toTime_t() - trade.date;
+        quint64 timeSinceTrade = QDateTime::currentDateTime().toTime_t() - trade.time;
         if(timeSinceTrade < 60)
           return QString("a few seconds ago");
         if(timeSinceTrade < 120)

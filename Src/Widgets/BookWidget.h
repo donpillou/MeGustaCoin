@@ -1,6 +1,8 @@
 
 #pragma once
 
+#if 0
+
 class BookWidget : public QWidget
 {
   Q_OBJECT
@@ -25,3 +27,4 @@ private:
   bool askAutoScrollEnabled;
   bool bidAutoScrollEnabled;
 };
+#endif
