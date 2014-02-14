@@ -435,10 +435,6 @@
       <Project>{40449A6F-6DBC-99B8-3EEF-6EA900D10B11}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="easywsclient.vcxproj">
-      <Project>{B7F740D6-2B25-1C5A-85F1-6F2347D11475}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

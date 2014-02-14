@@ -4,6 +4,3 @@
 [submodule "Ext/libcppqt"]
 	path = Ext/libcppqt
 	url = https://github.com/donpillou/libcppqt.git
-[submodule "Ext/easywsclient"]
-	path = Ext/easywsclient
-	url = https://github.com/donpillou/easywsclient.git

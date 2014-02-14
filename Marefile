@@ -850,20 +850,6 @@ targets = {
       //"Ext/curl/include/*.h"
     }
   }
-  
-  easywsclient = cppStaticLibrary + {
-  buildDir = "Build/$(configuration)/$(target)"
-    folder = "Libs"
-    root = { "Ext/easywsclient" }
-    defines += {}
-    includePaths = {
-      "Ext/easywsclient"
-    }
-    files = {
-      "Ext/easywsclient/easywsclient.cpp" = cppSource
-      "Ext/easywsclient/easywsclient.hpp"
-    }
-  }
 }
 
 copyFile = {
