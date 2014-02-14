@@ -7,7 +7,6 @@
 #include "Tools/SocketConnection.h"
 #include "Tools/Sha256.h"
 #include "Tools/Json.h"
-#include "Tools/Websocket.h"
 #include "Tools/JobQueue.h"
 
 #include "Markets/DataProtocol.h"

@@ -120,7 +120,6 @@
     <ClCompile Include="Src\Tools\Json.cpp" />
     <ClCompile Include="Src\Tools\Sha256.cpp" />
     <ClCompile Include="Src\Tools\SocketConnection.cpp" />
-    <ClCompile Include="Src\Tools\Websocket.cpp" />
     <ClCompile Include="Src\Widgets\BookWidget.cpp" />
     <ClCompile Include="Src\Widgets\GraphView.cpp" />
     <ClCompile Include="Src\Widgets\GraphWidget.cpp" />
@@ -220,7 +219,6 @@
     <ClInclude Include="Src\Tools\Json.h" />
     <ClInclude Include="Src\Tools\Sha256.h" />
     <ClInclude Include="Src\Tools\SocketConnection.h" />
-    <ClInclude Include="Src\Tools\Websocket.h" />
     <ClInclude Include="Src\Widgets\BookWidget.h" />
     <ClInclude Include="Src\Widgets\GraphView.h" />
     <CustomBuild Include="Src\Widgets\GraphWidget.h">

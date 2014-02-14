@@ -76,9 +76,6 @@
     <ClCompile Include="Src\Tools\SocketConnection.cpp">
       <Filter>Tools</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Tools\Websocket.cpp">
-      <Filter>Tools</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Widgets\BookWidget.cpp">
       <Filter>Widgets</Filter>
     </ClCompile>
@@ -158,9 +155,6 @@
       <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="Src\Tools\SocketConnection.h">
-      <Filter>Tools</Filter>
-    </ClInclude>
-    <ClInclude Include="Src\Tools\Websocket.h">
       <Filter>Tools</Filter>
     </ClInclude>
     <ClInclude Include="Src\Widgets\BookWidget.h">
