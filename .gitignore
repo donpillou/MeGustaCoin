@@ -4,4 +4,8 @@ icons/
 *.opensdf
 *.suo
 *.vcxproj.user
+generateVs*.bat
 ipch/
+*.vcxproj
+*.vcxproj.filters
+*.sln
