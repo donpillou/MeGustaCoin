@@ -1,10 +1,7 @@
 Build/
 icons/
-#Marefile
 *.sdf
 *.opensdf
 *.suo
 *.vcxproj.user
-*.bat
 ipch/
-mare.exe
