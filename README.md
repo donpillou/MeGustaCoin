@@ -29,11 +29,12 @@ compiling MeGustaCoin from source!
 Windows
 -------
 
-Compiling MeGustaCoin will require the following steps:
+Compiling MeGustaCoin requires the following steps:
  1. Get and install Git and Visual Studio 2013 (its free, the Express version is sufficient)
- 2. Using Git, clone https://github.com/donpillou/MeGustaCoin onto you hard drive
- 3. In your working copy, initialize submodules (recursively!!) 
- 4. Open MeGustaCoin.sln in Visual Studio and compile the MeGustaCoin project
+ 2. Using Git, clone https://github.com/donpillou/MeGustaCoin onto you hard drive and create a working copy
+ 3. Initialize the Git submodules of your working copy (recursively!!)
+ 4. In the root directory of your wokring copy, call the generate.bat script to generate project files
+ 5. Open MeGustaCoin.sln in Visual Studio and compile the MeGustaCoin project
 
 Linux
 -----
