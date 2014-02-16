@@ -49,6 +49,6 @@ public:
 
 public: // TODO: private
   unsigned int state[8];
-  unsigned __int64 count;
+  unsigned long long count;
   unsigned char buffer[64];
 };
