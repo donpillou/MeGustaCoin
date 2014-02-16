@@ -22,7 +22,7 @@ This code is based on public domain code from Wei Dai's Crypto++ library. */
 
 typedef unsigned int UInt32;
 typedef unsigned char Byte;
-typedef unsigned __int64 UInt64;
+typedef unsigned long long UInt64;
 #define CSha256 Sha256
 
 #include "Sha256.h"
