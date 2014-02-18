@@ -5,6 +5,7 @@
 #ifdef _WIN32
 #include <WinSock2.h>
 #else
+#include <unistd.h>
 #endif
 
 #ifdef _WIN32
