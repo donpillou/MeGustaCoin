@@ -39,7 +39,14 @@ Compiling MeGustaCoin requires the following steps:
 Linux
 -----
 
-I am working on that.
+I am working on that. You could try roughly this:
+```
+sudo apt-get install git g++ libqt4-dev libcurl4-openssl-dev
+git clone https://github.com/donpillou/MeGustaCoin.git
+cd MeGustaCoin
+git submodule update --init --recursive
+./generate
+```
 
 Mac
 ---
