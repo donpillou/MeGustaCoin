@@ -3,6 +3,9 @@ if(tool == "vcxproj") {
   cppFlags += { -"/MDd", "/MD" }
   cFlags += { -"/MDd", "/MD" }
 }
+if(platform == "Linux") {
+  cppFlags += "-std=gnu++0x"
+}
 
 targets = {
 
@@ -46,7 +49,12 @@ targets = {
     files += qtFiles
     
     if(platform == "Linux") {
-      libs += { "rt", "pthread", "QtGui", "QtCore" }
+      libs += { "rt", "pthread", "QtGui", "QtCore", "curl" }
+      includePaths += {
+        "/usr/include/qt4/QtCore",
+        "/usr/include/qt4/QtGui",
+        "/usr/include/qt4"
+      }
     }
     
     if(tool == "vcxproj") {

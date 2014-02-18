@@ -2,7 +2,10 @@
 #include "stdafx.h"
 
 #include <curl/curl.h>
+#ifdef _WIN32
 #include <WinSock2.h>
+#else
+#endif
 
 #ifdef _WIN32
 #define ERRNO WSAGetLastError()
@@ -10,6 +13,7 @@
 typedef int SOCKET;
 #define ERRNO errno
 #define SOCKET_ERROR (-1)
+#define INVALID_SOCKET (-1)
 #endif
 
 static class Curl
@@ -26,7 +30,16 @@ public:
 
 } curl;
 
-SocketConnection::SocketConnection() : curl(0), s((void*)INVALID_SOCKET), cancelEvent(0), socketEvent(0) {}
+SocketConnection::SocketConnection() : curl(0), s((void*)INVALID_SOCKET)
+{
+#ifdef _WIN32
+  cancelEvent = 0;
+  socketEvent = 0;
+#else
+  cancelPipe[0] = 0;
+  cancelPipe[1] = 0;
+#endif
+}
 
 SocketConnection::~SocketConnection()
 {
@@ -72,6 +85,7 @@ bool SocketConnection::connect(const QString& host, quint16 port)
   }
   this->s = (void*)s;
 
+#ifdef _WIN32
   {
     QMutexLocker locker(&cancelEventMutex);
     cancelEvent = WSACreateEvent();
@@ -93,6 +107,15 @@ bool SocketConnection::connect(const QString& host, quint16 port)
     return false;
   }
   socketEventWriteMode = false;
+#else
+  QMutexLocker locker(&cancelEventMutex);
+  if(pipe(cancelPipe) == -1)
+  {
+    error = getSocketErrorString();
+    this->s = (void*)INVALID_SOCKET;
+    return false;
+  }
+#endif
 
   return true;
 }
@@ -100,19 +123,38 @@ bool SocketConnection::connect(const QString& host, quint16 port)
 void SocketConnection::interrupt()
 {
   QMutexLocker locker(&cancelEventMutex);
+#ifdef _WIN32
   if(cancelEvent != WSA_INVALID_EVENT)
     WSASetEvent(cancelEvent);
+#else
+  if(cancelPipe[1] != 0)
+    write(cancelPipe[1], "", 1);
+#endif
 }
 
 void SocketConnection::close()
 {
   {
     QMutexLocker locker(&cancelEventMutex);
-    WSACloseEvent(cancelEvent);
-    cancelEvent = WSA_INVALID_EVENT;
+#ifdef _WIN32
+    if(cancelEvent != WSA_INVALID_EVENT)
+    {
+      WSACloseEvent(cancelEvent);
+      cancelEvent = WSA_INVALID_EVENT;
+    }
+#else
+    if(cancelPipe[0])
+      ::close(cancelPipe[0]);
+    if(cancelPipe[1])
+      ::close(cancelPipe[1]);
+    cancelPipe[0] = 0;
+    cancelPipe[1] = 0;
+#endif
   }
+#ifdef _WIN32
   WSACloseEvent(socketEvent);
   socketEvent = WSA_INVALID_EVENT;
+#endif
   if(curl)
   {
     curl_easy_cleanup(curl);
@@ -169,6 +211,7 @@ bool SocketConnection::recv(QByteArray& data)
       sendBuffer.remove(0, totalSent);
   }
 
+#ifdef _WIN32
   // update event type?
   bool requireSocketEventWriteMode = !sendBuffer.isEmpty();
   if(requireSocketEventWriteMode != socketEventWriteMode)
@@ -180,8 +223,10 @@ bool SocketConnection::recv(QByteArray& data)
     }
     socketEventWriteMode = requireSocketEventWriteMode;
   }
+#endif
 
   // wait
+#ifdef _WIN32
   HANDLE events[2] = { socketEvent, cancelEvent };
   DWORD result = WSAWaitForMultipleEvents(2, events, FALSE, WSA_INFINITE, FALSE);
   switch(result)
@@ -196,7 +241,38 @@ bool SocketConnection::recv(QByteArray& data)
     error = getSocketErrorString();
     return false;
   }
+#else
+  fd_set rfds;
+  fd_set wfds;
+  FD_ZERO(&rfds);
+  FD_ZERO(&wfds);
+  for(;;)
+  {
+    const int timeout = 10000;
+    timeval tv = { timeout/1000, (timeout%1000) * 1000 };
+    FD_SET((int)s, &rfds);
+    if(!sendBuffer.isEmpty())
+      FD_SET((int)s, &wfds);
+    FD_SET(cancelPipe[0], &rfds);
+    int selectResult = select(((int)s > cancelPipe[0] ? (int)s : cancelPipe[0]) + 1, &rfds, &wfds, 0, &tv);
+    if(selectResult == 0)
+      continue;
+    if(selectResult == -1)
+    {
+      error = getSocketErrorString();
+      return false;
+    }
+    if(FD_ISSET(cancelPipe[0], &rfds))
+    {
+      char buf;
+      read(cancelPipe[0], &buf, 1);
+      return true;
+    }
+    break;
+  }
+#endif
 
+#ifdef _WIN32
   // check event
   WSANETWORKEVENTS networkEvents;
   if(WSAEnumNetworkEvents((SOCKET)s, socketEvent, &networkEvents) ==  SOCKET_ERROR)
@@ -204,9 +280,14 @@ bool SocketConnection::recv(QByteArray& data)
     error = getSocketErrorString();
     return false;
   }
+#endif
 
   // read data if read event occurred
+#ifdef _WIN32
   if(networkEvents.lNetworkEvents & (FD_READ | FD_CLOSE))
+#else
+  if(FD_ISSET((int)s, &rfds))
+#endif
   {
     int bufferSize = data.size();
     int bufferCapacity = bufferSize + 1500;
@@ -257,3 +338,4 @@ QString SocketConnection::getSocketErrorString(int error)
   return QString(errorMessage);
 #endif
 }
+

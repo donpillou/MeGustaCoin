@@ -22,12 +22,17 @@ private:
   void* curl;
   void* s;
   QString error;
+  QMutex cancelEventMutex;
+
+#ifdef _WIN32
   void* socketEvent;
   bool socketEventWriteMode;
-  QByteArray sendBuffer;
-
-  QMutex cancelEventMutex;
   void* cancelEvent;
+#else
+  int cancelPipe[2];
+#endif
+
+  QByteArray sendBuffer;
 
   QString getSocketErrorString();
   QString getSocketErrorString(int error);

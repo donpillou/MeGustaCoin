@@ -1,7 +1,7 @@
 
 #pragma once
 
-#include <QtGUI>
+#include <QtGui>
 
 #include "Tools/HttpRequest.h"
 #include "Tools/SocketConnection.h"
