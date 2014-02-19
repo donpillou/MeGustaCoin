@@ -137,13 +137,15 @@ bool BitstampMarket::loadOrders(QList<Order>& orders)
   foreach(const QVariant& orderDataVar, ordersData)
   {
     QVariantMap orderData = orderDataVar.toMap();
-    orders.append(Market::Order());
-    Market::Order& order = orders.back();
     
-    order.id = orderData["id"].toString();
+    QString id = orderData["id"].toString();
     QString type = orderData["type"].toString();
     if(type != "0" && type != "1")
       continue;
+
+    orders.append(Market::Order());
+    Market::Order& order = orders.back();
+    order.id = id;
     bool buy = type == "0";
 
     QString dateStr = orderData["datetime"].toString();
@@ -189,13 +191,15 @@ bool BitstampMarket::loadTransactions(QList<Transaction>& transactions)
   foreach(const QVariant& transactionDataVar, transactionData)
   {
     QVariantMap transactionData = transactionDataVar.toMap();
-    transactions.append(Market::Transaction());
-    Market::Transaction& transaction = transactions.back();
     
-    transaction.id = transactionData["id"].toString();
+    QString id = transactionData["id"].toString();
     QString type = transactionData["type"].toString();
     if(type != "2")
       continue;
+
+    transactions.append(Market::Transaction());
+    Market::Transaction& transaction = transactions.back();
+    transaction.id = id;
 
     QString dateStr = transactionData["datetime"].toString();
     QDateTime date = QDateTime::fromString(dateStr, "yyyy-MM-dd hh:mm:ss");
