@@ -303,6 +303,8 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
         return sellIcon;
       case Order::Type::buy:
         return buyIcon;
+      default:
+        break;
       }
     break;
   case Qt::DisplayRole:
@@ -316,6 +318,8 @@ QVariant OrderModel::data(const QModelIndex& index, int role) const
         return buyStr;
       case Order::Type::sell:
         return sellStr;
+      default:
+        break;
       }
       break;
     case Column::date:
@@ -453,6 +457,8 @@ bool OrderModel::setData(const QModelIndex & index, const QVariant & value, int 
       }
       return true;
     }
+  default:
+    break;
   }
 
   return false;

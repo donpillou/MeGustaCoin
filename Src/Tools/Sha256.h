@@ -29,7 +29,7 @@ public:
   static QByteArray hmac(const QByteArray& key, const QByteArray& message)
   {
     QByteArray hashKey;
-    if(key.length() > blockSize)
+    if((unsigned int)key.length() > blockSize)
       hashKey = hash(key);
     else
       hashKey = key;

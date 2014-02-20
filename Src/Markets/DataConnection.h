@@ -41,5 +41,5 @@ private:
   Callback* callback;
   qint64 serverTimeToLocalTime;
 
-  void handleMessage(DataProtocol::MessageType messageType, char* data, int dataSize);
+  void handleMessage(DataProtocol::MessageType messageType, char* data, unsigned int dataSize);
 };

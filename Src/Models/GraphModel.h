@@ -126,7 +126,7 @@ public:
       newSumX += nx;
       newSumXX += nxx;
       newSumN += n;
-      if(++newCount == data.size())
+      if(++newCount == (unsigned int)data.size())
         useNewSum();
 
       data.push_back(DataEntry());
@@ -163,7 +163,7 @@ public:
         if(nToRemove >= dataEntry.n)
         {
           data.pop_front();
-          if(newCount == data.size())
+          if(newCount == (unsigned int)data.size())
             useNewSum();
         }
         else
@@ -201,7 +201,7 @@ public:
         sumN -= n;
 
         data.pop_front();
-        if(newCount == data.size())
+        if(newCount == (unsigned int)data.size())
           useNewSum();
       }
     }

@@ -143,6 +143,8 @@ void DataService::start()
               }
             }
             break;
+          default:
+            break;
           }
           delete action;
         }
@@ -276,6 +278,8 @@ void DataService::executeActions()
       }
       break;
       // todo: unsubscripe response, set channel to offline
+    default:
+      break;
     }
 
     delete action;

@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-MarketService::MarketService(DataModel& dataModel) : dataModel(dataModel), market(0), thread(0) {}
+MarketService::MarketService(DataModel& dataModel) : dataModel(dataModel), thread(0), market(0) {}
 
 MarketService::~MarketService()
 {

@@ -253,7 +253,7 @@ void MainWindow::updateWindowTitle()
     title += marketName;
     if(!marketName.isEmpty())
     {
-      const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
+      //const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
       //if(!publicDataModel.graphModel.tickerSamples.isEmpty())
       //{
       //  const GraphModel::TickerSample& tickerSample = publicDataModel.graphModel.tickerSamples.back();

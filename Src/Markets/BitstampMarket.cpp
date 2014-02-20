@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BitstampMarket::BitstampMarket(const QString& userName, const QString& key, const QString& secret) :
-  marketCurrency(QObject::tr("USD")), coinCurrency(QObject::tr("BTC")),
+  coinCurrency(QObject::tr("BTC")), marketCurrency(QObject::tr("USD")),
   userName(userName), key(key), secret(secret),
   balanceLoaded(false), lastNonce(0) {}
 
@@ -329,6 +329,8 @@ bool BitstampMarket::request(const char* url, bool isPublic, const QVariantMap& 
               collect(i.value(), errors);
           }
           break;
+        default:
+          break;
         }
       }
     };
@@ -382,6 +384,8 @@ BitstampMarket::VariantBugWorkaround::~VariantBugWorkaround()
           for(QVariantMap::iterator i = map.begin(), end = map.end(); i != end; ++i)
             findLists(i.value(), lists);
         }
+        break;
+      default:
         break;
       }
     }

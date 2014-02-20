@@ -33,7 +33,7 @@ bool DataConnection::connect()
       error = connection.getLastError();
       return false;
     }
-  } while(recvBuffer.length() < sizeof(DataProtocol::Header) + sizeof(DataProtocol::TimeResponse));
+  } while((unsigned int)recvBuffer.length() < sizeof(DataProtocol::Header) + sizeof(DataProtocol::TimeResponse));
   qint64 localResponseTime = QDateTime::currentDateTime().toTime_t() * 1000ULL;
   {
     DataProtocol::Header* header = (DataProtocol::Header*)recvBuffer.data();
@@ -97,7 +97,7 @@ bool DataConnection::process(Callback& callback)
   return true;
 }
 
-void DataConnection::handleMessage(DataProtocol::MessageType messageType, char* data, int size)
+void DataConnection::handleMessage(DataProtocol::MessageType messageType, char* data, unsigned int size)
 {
   switch(messageType)
   {
@@ -147,6 +147,8 @@ void DataConnection::handleMessage(DataProtocol::MessageType messageType, char* 
       QString errorMessage(errorResponse->errorMessage);
       callback->receivedErrorResponse(errorMessage);
     }
+    break;
+  default:
     break;
   }
 }

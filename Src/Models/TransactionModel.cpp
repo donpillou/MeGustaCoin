@@ -161,6 +161,8 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
         return sellIcon;
       case Transaction::Type::buy:
         return buyIcon;
+      default:
+        break;
       }
     break;
   case Qt::DisplayRole:
@@ -173,6 +175,8 @@ QVariant TransactionModel::data(const QModelIndex& index, int role) const
         return buyStr;
       case Transaction::Type::sell:
         return sellStr;
+      default:
+        break;
       }
     case Column::date:
       return transaction.date.toString(dateFormat);

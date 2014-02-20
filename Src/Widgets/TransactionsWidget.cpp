@@ -44,6 +44,8 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Dat
         return leftTransaction->fee < rightTransaction->fee;
       case TransactionModel::Column::total:
         return leftTransaction->total < rightTransaction->total;
+      default:
+        break;
       }
       return QSortFilterProxyModel::lessThan(left, right);
     }

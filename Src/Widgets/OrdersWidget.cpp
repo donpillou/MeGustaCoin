@@ -59,6 +59,8 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& data
         return leftOrder->price < rightOrder->price;
       case OrderModel::Column::total:
         return leftOrder->total < rightOrder->total;
+      default:
+        break;
       }
       return QSortFilterProxyModel::lessThan(left, right);
     }
@@ -126,7 +128,7 @@ void OrdersWidget::addOrder(OrderModel::Order::Type type)
   const QString& marketName = dataModel.getMarketName();
   if(marketName.isEmpty())
     return;
-  const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
+  //const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
   double price = 0;
   // TODO: fix this
   //if(publicDataModel.graphModel.tickerSamples.isEmpty())
@@ -204,6 +206,8 @@ void OrdersWidget::cancelOrder()
         marketService.cancelOrder(order->id);
         break;
       }
+    default:
+      break;
     }
   }
   while(!rowsToRemove.isEmpty())
