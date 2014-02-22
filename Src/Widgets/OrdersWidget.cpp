@@ -272,6 +272,7 @@ void OrdersWidget::updateToolBarButtons()
 void OrdersWidget::refresh()
 {
   marketService.loadOrders();
+  marketService.loadBalance();
 }
 
 void OrdersWidget::updateTitle()

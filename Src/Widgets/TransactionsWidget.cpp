@@ -102,6 +102,7 @@ void TransactionsWidget::updateToolBarButtons()
 void TransactionsWidget::refresh()
 {
   marketService.loadTransactions();
+  marketService.loadBalance();
 }
 
 void TransactionsWidget::updateTitle()

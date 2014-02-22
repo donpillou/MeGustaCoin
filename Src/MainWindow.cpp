@@ -218,8 +218,9 @@ void MainWindow::logout()
 
 void MainWindow::refresh()
 {
-  ordersWidget->refresh();
-  transactionsWidget->refresh();
+  marketService.loadOrders();
+  marketService.loadTransactions();
+  marketService.loadBalance();
 }
 
 void MainWindow::open(const QString& marketName, const QString& userName, const QString& key, const QString& secret)
@@ -233,7 +234,8 @@ void MainWindow::open(const QString& marketName, const QString& userName, const 
 
   // request data
   marketService.loadBalance();
-  refresh();
+  marketService.loadOrders();
+  marketService.loadTransactions();
   dataService.subscribe(marketName);
 }
 
