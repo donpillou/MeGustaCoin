@@ -32,13 +32,8 @@ void GraphView::setEnabledData(unsigned int data)
 
 void GraphView::paintEvent(QPaintEvent* event)
 {
-  if(!graphModel)
+  if(!graphModel || !graphModel->synced)
     return;
-
-  QRect rect = this->rect();
-  QPainter painter(this);
-  painter.setRenderHint(QPainter::Antialiasing);
-  painter.setPen(Qt::black);
 
   if(!graphModel->tradeSamples.isEmpty())
   {
@@ -72,15 +67,21 @@ void GraphView::paintEvent(QPaintEvent* event)
     }
   }
 
-  double vmin = totalMin;
-  double vmax = qMax(totalMax, vmin + 1.);
-  const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, publicDataModel->formatPrice(totalMax == 0. ? 0. : vmax));
-
-  QRect plotRect(10, 10, rect.width() - (10 + priceSize.width() + 8), rect.height() - 20 - priceSize.height() + 5);
-  if(plotRect.width() <= 0 || plotRect.height() <= 0)
-    return; // too small
-
+  for(;;)
   {
+    QRect rect = this->rect();
+    QPainter painter(this);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::black);
+
+    double vmin = totalMin;
+    double vmax = qMax(totalMax, vmin + 1.);
+    const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, publicDataModel->formatPrice(totalMax == 0. ? 0. : vmax));
+
+    QRect plotRect(10, 10, rect.width() - (10 + priceSize.width() + 8), rect.height() - 20 - priceSize.height() + 5);
+    if(plotRect.width() <= 0 || plotRect.height() <= 0)
+      return; // too small
+
     double lastTotalMin = totalMin;
     double lastTotalMax = totalMax;
     double lastVolumeMax = volumeMax;
@@ -119,25 +120,25 @@ void GraphView::paintEvent(QPaintEvent* event)
 
     if(totalMax == 0.)
       return; // no data to draw
-    if(!(totalMin == lastTotalMin && totalMax == lastTotalMax /*&& qAbs(lastVolumeMax -  volumeMax) < volumeMax * 0.5*/))
-    {
-      update();
-      return;
-    }
+    totalMin = floor(totalMin);
+    totalMax = ceil(totalMax);
+    if(!(totalMin == lastTotalMin && totalMax == lastTotalMax && (!(enabledData & (int)Data::tradeVolume) || qAbs(lastVolumeMax -  volumeMax) <= volumeMax * 0.5)))
+      continue;
+
+    drawAxesLables(painter, plotRect, vmin, vmax, priceSize);
+    if(enabledData & (int)Data::orderBook && !graphModel->bookSamples.isEmpty())
+      drawBookPolyline(painter, plotRect, vmin, vmax);
+
+    drawTradePolylines(painter);
+
+    if(enabledData & (int)Data::regressionLines)
+      drawRegressionLines(painter, plotRect, vmin, vmax);
+    if(enabledData & (int)Data::expRegressionLines)
+      drawExpRegressionLines(painter, plotRect, vmin, vmax);
+    //if(enabledData  & (int)Data::estimates && !graphModel->tradeSamples.isEmpty())
+    //  drawEstimates(painter, plotRect, vmin, vmax);
+    break;
   }
-
-  drawAxesLables(painter, plotRect, vmin, vmax, priceSize);
-  if(enabledData & (int)Data::orderBook && !graphModel->bookSamples.isEmpty())
-    drawBookPolyline(painter, plotRect, vmin, vmax);
-
-  drawTradePolylines(painter);
-
-  if(enabledData & (int)Data::regressionLines)
-    drawRegressionLines(painter, plotRect, vmin, vmax);
-  if(enabledData & (int)Data::expRegressionLines)
-    drawExpRegressionLines(painter, plotRect, vmin, vmax);
-  //if(enabledData  & (int)Data::estimates && !graphModel->tradeSamples.isEmpty())
-  //  drawEstimates(painter, plotRect, vmin, vmax);
 }
 
 void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin, double vmax, const QSize& priceSize)

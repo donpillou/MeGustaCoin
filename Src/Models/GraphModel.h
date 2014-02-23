@@ -503,6 +503,7 @@ public:
   };
   */
 
+  bool synced;
   QList<TradeSample> tradeSamples;
   QList<BookSample> bookSamples;
   //QList<TickerSample> tickerSamples;

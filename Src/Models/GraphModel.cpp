@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-GraphModel::GraphModel()
+GraphModel::GraphModel() : synced(false)
 {
 //  for(int i = 0; i < sizeof(estimations) / sizeof(*estimations); ++i)
 //  {
@@ -76,7 +76,10 @@ void GraphModel::addTrade(quint64 id, quint64 time, double price, double amount,
     tradeSamples.pop_front();
 
   if(isSyncOrLive)
+  {
+    synced = true;
     emit dataAdded();
+  }
 }
 
 void GraphModel::addBookSample(const BookSample& bookSample)
