@@ -119,6 +119,10 @@ void GraphView::paintEvent(QPaintEvent* event)
     drawTradePolyline(painter, plotRect, vmin, vmax, lastVolumeMax, *graphModel, enabledData, 1., QColor(0, 0, 0));
   if(enabledData & (int)Data::regressionLines && !graphModel->tradeSamples.isEmpty())
     drawRegressionLines(painter, plotRect, vmin, vmax);
+  if(enabledData & (int)Data::expRegressionLines && !graphModel->tradeSamples.isEmpty())
+    drawExpRegressionLines(painter, plotRect, vmin, vmax);
+  //if(enabledData  & (int)Data::estimates && !graphModel->tradeSamples.isEmpty())
+  //  drawEstimates(painter, plotRect, vmin, vmax);
 
   if((totalMin != lastTotalMin || totalMax != lastTotalMax || volumeMax != lastVolumeMax) && totalMax != 0.)
     update();
@@ -471,9 +475,6 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
 
   for(int i = 0; i < (int)GraphModel::RegressionDepth::numOfRegressionDepths; ++i)
   {
-    //if(i == (int)GraphModel::RegressionDepth::depth24h)
-    //  continue;
-
     const GraphModel::RegressionLine& rl = graphModel->regressionLines[i];
     quint64 startTime = qMax(rl.startTime, hmin);
     if((qint64)hmin - (qint64)rl.startTime > maxAge / 2)
@@ -491,6 +492,63 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
     painter.drawLine(a, b);
   }
 }
+
+void GraphView::drawExpRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax)
+{
+  double vrange = vmax - vmin;
+  quint64 hmax = time;
+  quint64 hmin = hmax - maxAge;
+  quint64 hrange = hmax - hmin;
+  quint64 width = rect.width();
+  double height = rect.height();
+
+  for(int i = 0; i < (int)GraphModel::RegressionDepth::numOfExpRegessionDepths; ++i)
+  {
+    const GraphModel::RegressionLine& rl = graphModel->expRegressionLines[i];
+    quint64 startTime = qMax(rl.startTime, hmin);
+    if((qint64)hmin - (qint64)rl.startTime > maxAge / 2)
+      break;
+    quint64 endTime = rl.endTime;
+    double val = rl.a - rl.b * (endTime - startTime);
+    QPointF a(rect.left() + (startTime - hmin) * width / hrange, rect.bottom() - (val -  vmin) * height / vrange);
+    QPointF b(rect.right() - (time - endTime) * width / hrange, rect.bottom() - (rl.a -  vmin) * height / vrange);
+
+    int color = qMin((int)((0xdd - 0x64) * qMin(qMax(fabs(rl.b / 0.005), 0.), 1.)), 0xdd - 0x64);
+    QPen pen(rl.b >= 0 ? QColor(0, color + 0x64, 0) : QColor(color + 0x64, 0, 0));
+    pen.setWidth(2);
+    painter.setPen(pen);
+
+    painter.drawLine(a, b);
+  }
+}
+/*
+void GraphView::drawEstimates(QPainter& painter, const QRect& rect, double vmin, double vmax)
+{
+  double vrange = vmax - vmin;
+  quint64 hmax = time;
+  quint64 hmin = hmax - maxAge;
+  quint64 hrange = hmax - hmin;
+  quint64 width = rect.width();
+  double height = rect.height();
+
+  for(int i = 0; i < (int)sizeof(graphModel->estimations) / sizeof(*graphModel->estimations); ++i)
+  {
+    const GraphModel::Estimator& estimator = graphModel->estimations[i];
+    quint64 startTime = hmin;
+    quint64 endTime = time;
+    double bb = estimator.incline;
+    QPointF a(rect.left(), rect.bottom() - (estimator.estimate + (-bb) * (endTime - startTime) -  vmin) * height / vrange);
+    QPointF b(rect.right(), rect.bottom() - (estimator.estimate -  vmin) * height / vrange);
+
+    int color = qMin((int)((0xdd - 0x64) * qMin(qMax(fabs(bb / 0.005), 0.), 1.)), 0xdd - 0x64);
+    QPen pen(estimator.incline >= 0 ? QColor(0, color + 0x64, 0) : QColor(color + 0x64, 0, 0));
+    pen.setWidth(2);
+    painter.setPen(pen);
+
+    painter.drawLine(a, b);
+  }
+}
+*/
 
 void GraphView::setFocusPublicDataModel(const PublicDataModel* publicDataModel)
 {

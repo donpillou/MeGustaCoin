@@ -18,6 +18,8 @@ public:
     orderBook = 0x04,
     regressionLines = 0x08,
     otherMarkets = 0x10,
+    //estimates = 0x20,
+    expRegressionLines = 0x20,
     all = 0xffff,
   };
 
@@ -45,6 +47,8 @@ private:
   void drawTradePolyline(QPainter& painter, const QRect& rect, double hmin, double hmax, double lastVolumeMax, const GraphModel& graphModel, int enabledData, double scale, const QColor& color);
   void drawBookPolyline(QPainter& painter, const QRect& rect, double hmin, double hmax);
   void drawRegressionLines(QPainter& painter, const QRect& rect, double hmin, double hmax);
+  void drawExpRegressionLines(QPainter& painter, const QRect& rect, double hmin, double hmax);
+  //void drawEstimates(QPainter& painter, const QRect& rect, double vmin, double vmax);
 
   inline void addToMinMax(double price)
   {

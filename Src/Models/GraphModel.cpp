@@ -1,6 +1,16 @@
 
 #include "stdafx.h"
 
+GraphModel::GraphModel()
+{
+//  for(int i = 0; i < sizeof(estimations) / sizeof(*estimations); ++i)
+//  {
+//    Estimator& estimator = estimations[i];
+//    estimator.tradeVariance = (i + 1) * 2. * (i + 1) * 2.;
+//    estimator.estimateVariance = 5 * 5;
+//  }
+}
+
 void GraphModel::addTrade(quint64 id, quint64 time, double price, double amount)
 {
   TradeSample* tradeSample;
@@ -35,22 +45,29 @@ void GraphModel::addTrade(quint64 id, quint64 time, double price, double amount)
     */
 
   quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
-  //double depths[] = {10., 20., 50., 100., 200., 500., 1000.};
-  for (int i = 0; i < (int)RegressionDepth::numOfRegressionDepths; ++i)
+  for(int i = 0; i < (int)RegressionDepth::numOfRegressionDepths; ++i)
   {
     averager[i].add(time, amount, price);
     averager[i].limitToAge(depths[i]);
-    //if(i == (int)RegressionDepth::depth24h)
-    //  averager[i].limitToAge(24 * 60 * 60);
-    //else
-    //  averager[i].limitToVolume(depths[i]);
     averager[i].getLine(regressionLines[i].a, regressionLines[i].b, regressionLines[i].startTime, regressionLines[i].endTime);
     regressionLines[i].averagePrice = averager[i].getAveragePrice();
   }
 
+  for(int i = 0; i < (int)RegressionDepth::numOfExpRegessionDepths; ++i)
+  {
+    expAverager[i].add(time, amount, price, depths[i]);
+    expAverager[i].getLine(expRegressionLines[i].a, expRegressionLines[i].b, expRegressionLines[i].startTime, expRegressionLines[i].endTime);
+    expRegressionLines[i].averagePrice = expAverager[i].getAveragePrice();
+  }
+
+//  for(int i = 0; i < sizeof(estimations) / sizeof(*estimations); ++i)
+//  {
+//    Estimator& estimator = estimations[i];
+//    estimator.add(time, amount, price);
+//  }
+
   while(!tradeSamples.isEmpty() && time - tradeSamples.front().time > 7 * 24 * 60 * 60)
     tradeSamples.pop_front();
-
   emit dataAdded();
 }
 

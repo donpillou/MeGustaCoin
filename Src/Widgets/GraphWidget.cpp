@@ -181,13 +181,17 @@ void GraphWidget::updateDataMenu()
   //  dataSignalMapper->setMapping(action, (int)GraphView::Data::orderBook);
   //  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
   //}
-  action = dataMenu->addAction(tr("Regression Lines"));
+  action = dataMenu->addAction(tr("Volume Weighted Regression Lines"));
   action->setCheckable(true);
   dataSignalMapper->setMapping(action, (int)GraphView::Data::regressionLines);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
   action = dataMenu->addAction(tr("Other Markets"));
   action->setCheckable(true);
   dataSignalMapper->setMapping(action, (int)GraphView::Data::otherMarkets);
+  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  action = dataMenu->addAction(tr("Bell Volume Weighted Regession Lines"));
+  action->setCheckable(true);
+  dataSignalMapper->setMapping(action, (int)GraphView::Data::expRegressionLines);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
 
   unsigned int enabledData = graphView->getEnabledData();

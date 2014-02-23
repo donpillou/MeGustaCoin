@@ -6,17 +6,7 @@ class GraphModel : public QObject
   Q_OBJECT
 
 public:
-  //enum class Indicator
-  //{
-  //  reg1m,
-  //  reg3m,
-  //  reg5m,
-  //  reg10m,
-  //  reg15m,
-  //  regSum,
-  //  
-  //  numOfIndicators
-  //};
+  GraphModel();
 
   class TradeSample
   {
@@ -27,8 +17,6 @@ public:
     double first;
     double last;
     double amount;
-
-    //float indicators[(int)Indicator::numOfIndicators];
 
     TradeSample() : amount(0) {}
   };
@@ -65,7 +53,8 @@ public:
     depth5m,
     depth10m,
     depth15m,
-    depth20m,
+    numOfExpRegessionDepths,
+    depth20m = numOfExpRegessionDepths,
     depth30m,
     depth1h,
     depth2h,
@@ -260,10 +249,260 @@ public:
     }
   };
 
+  class ExpAverager
+  {
+  public:
+    ExpAverager() : startTime(0), x(0), sumXY(0.), sumY(0.), sumX(0.), sumXX(0.), sumN(0.) {}
+
+    void add(quint64 time, double amount, double price, quint64 ageDeviation)
+    {
+      if(startTime == 0)
+        startTime = time;
+
+      x = time - startTime;
+      const double& y = price;
+      const double& n = amount;
+
+      data.push_back(DataEntry());
+      DataEntry& dataEntry = data.back();
+      dataEntry.time = time;
+      dataEntry.x = x;
+      dataEntry.y = y;
+      dataEntry.n = n;
+
+      // recompute
+      sumXY = sumY = sumX = sumXX = sumN = 0.;
+      double deviation = ageDeviation;
+      for(QList<DataEntry>::Iterator i = --data.end(), begin = data.begin();; --i)
+      {
+        DataEntry& dataEntry = *i;
+        double dataAge = time - dataEntry.time;
+        double dataWeight = qExp(-0.5 * (dataAge * dataAge) / (deviation * deviation));
+
+        if(dataWeight < 0.01)
+        {
+          int entriesToRemove = i - begin + 1;
+          for(int i = 0; i < entriesToRemove; ++i)
+            data.removeFirst();
+          break;
+        }
+
+        const double n = dataEntry.n * dataWeight;
+        const double nx = n * dataEntry.x;
+        sumXY += nx * dataEntry.y;
+        sumY += n * dataEntry.y;
+        sumX += nx;
+        sumXX += nx * dataEntry.x;
+        sumN += n;
+
+        if(i == begin)
+          break;
+      }
+    }
+
+    void getLine(double& a, double& b, quint64& startTime, quint64& endTime) const
+    {
+      b = (sumN * sumXY - sumX * sumY) / (sumN * sumXX - sumX * sumX);
+      double ar = (sumXX * sumY - sumX * sumXY) / (sumN * sumXX - sumX * sumX);
+      a = ar + b * x;
+      startTime = data.isEmpty() ? startTime : data.front().time;
+      endTime = data.isEmpty() ? startTime : data.back().time;
+    }
+
+    double getAveragePrice() const
+    {
+      return sumY / sumN;
+    }
+
+  private:
+    struct DataEntry
+    {
+      quint64 time;
+      double x;
+      double n;
+      double y;
+    };
+    QList<DataEntry> data;
+    quint64 startTime;
+    double x;
+    double sumXY;
+    double sumY;
+    double sumX;
+    double sumXX;
+    double sumN;
+  };
+
+
+//  class ExpAverager
+//  {
+//  public:
+//    ExpAverager() : startTime(0), endTime(0), x(0), sumXY(0.), sumY(0.), sumX(0.), sumXX(0.), sumN(0.) {}
+//
+//    void add(quint64 time, double amount, double price, quint64 ageDeviation)
+//    {
+//      if(startTime == 0)
+//        endTime = startTime = time;
+//
+//      this->ageDeviation = ageDeviation;
+//      double deviation = ageDeviation;
+//      double dataAge = (time - endTime);
+//      double dataWeight = qExp(-0.5 * (dataAge * dataAge) / (deviation * deviation));
+//
+//      sumXY *= dataWeight;
+//      sumY *= dataWeight;
+//      sumX *= dataWeight;
+//      sumXX *= dataWeight;
+//      sumN *= dataWeight;
+//
+//      x = time - startTime;
+//      const double& y = price;
+//      const double& n = amount;
+//
+//      const double nx = n * x;
+//      const double ny = n * y;
+//      const double nxy = nx * y;
+//      const double nxx = nx * x;
+//
+//      sumXY += nxy;
+//      sumY += ny;
+//      sumX += nx;
+//      sumXX += nxx;
+//      sumN += n;
+//
+//      endTime = time;
+//    }
+//
+//    void getLine(double& a, double& b, quint64& startTime, quint64& endTime) const
+//    {
+//      b = (sumN * sumXY - sumX * sumY) / (sumN * sumXX - sumX * sumX);
+//      double ar = (sumXX * sumY - sumX * sumXY) / (sumN * sumXX - sumX * sumX);
+//      a = ar + b * x;
+//      startTime = this->endTime - ageDeviation;
+//      endTime = this->endTime;
+//    }
+//
+//    double getAveragePrice() const
+//    {
+//      return sumY / sumN;
+//    }
+//
+//  private:
+//    quint64 startTime;
+//    quint64 endTime;
+//    quint64 ageDeviation;
+//    double x;
+//    double sumXY;
+//    double sumY;
+//    double sumX;
+//    double sumXX;
+//    double sumN;
+//  };
+
+  /*
+  class Estimator
+  {
+  public:
+    Estimator() : lastTime(0)
+    {
+      particles[0].incline = 0;
+      int i = 1, j = 16 + 1;
+      for(int k = 0; k < 16; ++k)
+      {
+        particles[i++].incline = (k + 1) / (60. * 60.);
+        particles[j++].incline = (k + 1) / (-60. * 60.);
+      }
+    }
+
+    double tradeVariance; // assumed variance of a trade
+    double estimateVariance; // assumed variance of the estimate
+    quint64 lastTime;
+    double estimate;
+    double incline;
+
+    void add(quint64 time, double amount, double price)
+    {
+      if(lastTime == 0)
+      {
+        for(int i = 0; i < sizeof(particles) / sizeof(*particles); ++i)
+        {
+          Particle& particle = particles[i];
+          particle.variance = estimateVariance;
+          particle.mean = price;
+        }
+        lastTime= time;
+        estimate = price;
+        incline = 0.;
+        return;
+      }
+
+      quint64 deltaTime = time - lastTime;
+      lastTime= time;
+      double maxWeight = 0.;
+      int bestParticle;
+      for(int i = 0; i < sizeof(particles) / sizeof(*particles); ++i)
+      {
+        Particle& particle = particles[i];
+        particle.predict(deltaTime);
+        particle.weight *= particle.getProbabilityOfTrade(price, tradeVariance / amount);
+        if(particle.weight < 0.001)
+          particle.weight = 0.001;
+        particle.integrate(price, amount, tradeVariance);
+        if(particle.weight > maxWeight)
+        {
+          bestParticle = i;
+          maxWeight = particle.weight;
+        }
+      }
+      estimate = particles[bestParticle].mean;
+      incline = particles[bestParticle].incline;
+      for(int i = 0; i < sizeof(particles) / sizeof(*particles); ++i)
+      {
+        Particle& particle = particles[i];
+        particle.mean = estimate;
+        particle.weight /= maxWeight;
+      }
+    }
+
+  private:
+    class Particle
+    {
+    public:
+      double incline; // usd per second
+      double weight;
+      double mean;
+      double variance;
+
+      Particle() : weight(1.) {}
+
+      void predict(quint64 deltaTime)
+      {
+        mean += incline * deltaTime;
+      }
+
+      double getProbabilityOfTrade(double price, double tradeVariance)
+      {
+        double diff = price - mean;
+        double exponent = diff * diff / tradeVariance;
+        double p = qExp(-0.5 * exponent);
+        return qMax(p, 0.0000001);
+      }
+
+      void integrate(double price, double amount, double tradeVariance)
+      {
+        double k = variance / (variance + tradeVariance / amount);
+        mean += k * (price - mean);
+      }
+    };
+    Particle particles[33];
+  };
+  */
+
   QList<TradeSample> tradeSamples;
   QList<BookSample> bookSamples;
   //QList<TickerSample> tickerSamples;
   RegressionLine regressionLines[(int)RegressionDepth::numOfRegressionDepths];
+  RegressionLine expRegressionLines[(int)RegressionDepth::numOfRegressionDepths];
+  //Estimator estimations[10];
 
   void addTrade(quint64 id, quint64 time, double price, double amount);
   void addBookSample(const BookSample& bookSummary);
@@ -283,4 +522,5 @@ signals:
 
 private:
   Averager averager[(int)RegressionDepth::numOfRegressionDepths];
+  ExpAverager expAverager[(int)RegressionDepth::numOfExpRegessionDepths];
 };
