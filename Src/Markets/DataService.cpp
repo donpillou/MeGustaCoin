@@ -220,7 +220,8 @@ void DataService::executeActions()
         if(publicDataModel)
         {
           DataProtocol::Trade& trade = addTradeAction->trade;
-          publicDataModel->addTrade(trade.id, trade.time / 1000ULL, trade.price, trade.amount);
+          bool isSyncOrLive = addTradeAction->trade.flags & DataProtocol::syncFlag || !(addTradeAction->trade.flags & DataProtocol::replayedFlag);
+          publicDataModel->addTrade(trade.id, trade.time / 1000ULL, trade.price, trade.amount, isSyncOrLive);
         }
       }
       break;

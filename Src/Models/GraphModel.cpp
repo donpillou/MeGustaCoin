@@ -11,7 +11,7 @@ GraphModel::GraphModel()
 //  }
 }
 
-void GraphModel::addTrade(quint64 id, quint64 time, double price, double amount)
+void GraphModel::addTrade(quint64 id, quint64 time, double price, double amount, bool isSyncOrLive)
 {
   TradeSample* tradeSample;
   if(tradeSamples.isEmpty() || tradeSamples.last().time != time)
@@ -49,15 +49,21 @@ void GraphModel::addTrade(quint64 id, quint64 time, double price, double amount)
   {
     averager[i].add(time, amount, price);
     averager[i].limitToAge(depths[i]);
-    averager[i].getLine(regressionLines[i].a, regressionLines[i].b, regressionLines[i].startTime, regressionLines[i].endTime);
-    regressionLines[i].averagePrice = averager[i].getAveragePrice();
+    if(isSyncOrLive)
+    {
+      averager[i].getLine(regressionLines[i].a, regressionLines[i].b, regressionLines[i].startTime, regressionLines[i].endTime);
+      regressionLines[i].averagePrice = averager[i].getAveragePrice();
+    }
   }
 
   for(int i = 0; i < (int)RegressionDepth::numOfExpRegessionDepths; ++i)
   {
     expAverager[i].add(time, amount, price, depths[i]);
-    expAverager[i].getLine(expRegressionLines[i].a, expRegressionLines[i].b, expRegressionLines[i].startTime, expRegressionLines[i].endTime);
-    expRegressionLines[i].averagePrice = expAverager[i].getAveragePrice();
+    if(isSyncOrLive)
+    {
+      expAverager[i].getLine(depths[i], expRegressionLines[i].a, expRegressionLines[i].b, expRegressionLines[i].startTime, expRegressionLines[i].endTime);
+      expRegressionLines[i].averagePrice = expAverager[i].getAveragePrice();
+    }
   }
 
 //  for(int i = 0; i < sizeof(estimations) / sizeof(*estimations); ++i)
@@ -68,7 +74,9 @@ void GraphModel::addTrade(quint64 id, quint64 time, double price, double amount)
 
   while(!tradeSamples.isEmpty() && time - tradeSamples.front().time > 7 * 24 * 60 * 60)
     tradeSamples.pop_front();
-  emit dataAdded();
+
+  if(isSyncOrLive)
+    emit dataAdded();
 }
 
 void GraphModel::addBookSample(const BookSample& bookSample)

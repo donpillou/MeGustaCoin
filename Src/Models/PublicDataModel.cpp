@@ -27,11 +27,11 @@ QString PublicDataModel::formatPrice(double price) const
   return QLocale::system().toString(price, 'f', 2);
 }
 
-void PublicDataModel::addTrade(quint64 id, quint64 time, double price, double amount)
+void PublicDataModel::addTrade(quint64 id, quint64 time, double price, double amount, bool isSyncOrLive)
 {
-  if((qint64)startTime - (qint64)time < 60 * 60)
+  if((qint64)startTime - (qint64)time < 30 * 60)
     tradeModel.addTrade(id, time, price, amount);
-  graphModel.addTrade(id, time, price, amount);
+  graphModel.addTrade(id, time, price, amount, isSyncOrLive);
 }
 
 //void PublicDataModel::addTickerData(const MarketStream::TickerData& tickerData)

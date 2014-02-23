@@ -83,6 +83,8 @@ public:
     quint64 startTime;
     quint64 endTime;
     double averagePrice;
+
+    RegressionLine() : endTime(0) {}
   };
 
   class Averager
@@ -270,13 +272,21 @@ public:
       dataEntry.y = y;
       dataEntry.n = n;
 
+      quint64 ageDeviationTimes3 = ageDeviation * 3;
+      while(time - data.front().time > ageDeviationTimes3)
+        data.removeFirst();
+    }
+
+    void getLine(quint64 ageDeviation, double& a, double& b, quint64& startTime, quint64& endTime)
+    {
       // recompute
       sumXY = sumY = sumX = sumXX = sumN = 0.;
       double deviation = ageDeviation;
+      endTime = data.back().time;
       for(QList<DataEntry>::Iterator i = --data.end(), begin = data.begin();; --i)
       {
         DataEntry& dataEntry = *i;
-        double dataAge = time - dataEntry.time;
+        double dataAge = endTime - dataEntry.time;
         double dataWeight = qExp(-0.5 * (dataAge * dataAge) / (deviation * deviation));
 
         if(dataWeight < 0.01)
@@ -298,15 +308,11 @@ public:
         if(i == begin)
           break;
       }
-    }
 
-    void getLine(double& a, double& b, quint64& startTime, quint64& endTime) const
-    {
       b = (sumN * sumXY - sumX * sumY) / (sumN * sumXX - sumX * sumX);
       double ar = (sumXX * sumY - sumX * sumXY) / (sumN * sumXX - sumX * sumX);
       a = ar + b * x;
-      startTime = data.isEmpty() ? startTime : data.front().time;
-      endTime = data.isEmpty() ? startTime : data.back().time;
+      startTime = data.front().time;
     }
 
     double getAveragePrice() const
@@ -504,7 +510,7 @@ public:
   RegressionLine expRegressionLines[(int)RegressionDepth::numOfRegressionDepths];
   //Estimator estimations[10];
 
-  void addTrade(quint64 id, quint64 time, double price, double amount);
+  void addTrade(quint64 id, quint64 time, double price, double amount, bool isSyncOrLive);
   void addBookSample(const BookSample& bookSummary);
   //void addTickerData(const MarketStream::TickerData& tickerData);
 

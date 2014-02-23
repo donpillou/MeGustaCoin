@@ -76,56 +76,68 @@ void GraphView::paintEvent(QPaintEvent* event)
   double vmax = qMax(totalMax, vmin + 1.);
   const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, publicDataModel->formatPrice(totalMax == 0. ? 0. : vmax));
 
-  double lastTotalMin = totalMin;
-  double lastTotalMax = totalMax;
-  double lastVolumeMax = volumeMax;
-
-  totalMin = DBL_MAX;
-  totalMax = 0.;
-  volumeMax = 0.;
-
   QRect plotRect(10, 10, rect.width() - (10 + priceSize.width() + 8), rect.height() - 20 - priceSize.height() + 5);
   if(plotRect.width() <= 0 || plotRect.height() <= 0)
     return; // too small
 
-  if(lastTotalMax != 0.)
-    drawAxesLables(painter, plotRect, vmin, vmax, priceSize);
+  {
+    double lastTotalMin = totalMin;
+    double lastTotalMax = totalMax;
+    double lastVolumeMax = volumeMax;
+
+    totalMin = DBL_MAX;
+    totalMax = 0.;
+    volumeMax = 0.;
+
+    if(enabledData & (int)Data::otherMarkets)
+    {
+      static unsigned int colors[] = { 0x0000FF, 0x8A2BE2, 0xA52A2A, 0x5F9EA0, 0x7FFF00, 0xD2691E, 0xFF7F50, 0x6495ED, 0xDC143C, 0x00FFFF, 0x00008B, 0x008B8B, 0xB8860B, 0xA9A9A9, 0x006400, 0xBDB76B, 0x8B008B, 0x556B2F, 0xFF8C00, 0x9932CC, 0x8B0000, 0xE9967A, 0x8FBC8F, 0x483D8B, 0x2F4F4F, 0x00CED1, 0x9400D3, 0xFF1493, 0x00BFFF, 0x696969, 0x1E90FF, 0xB22222, 0x228B22, 0xFF00FF, 0xFFD700, 0xDAA520, 0x808080, 0x008000, 0xADFF2F, 0xFF69B4, 0xCD5C5C, 0x4B0082 };
+      int nextColorIndex = 0;
+      double averagePrice = graphModel->getVwap24();
+      if(averagePrice > 0.)
+        foreach(const PublicDataModel* publicDataModel, publicDataModels)
+        {
+          if(publicDataModel)
+          {
+            if(publicDataModel != this->publicDataModel || !(enabledData & ((int)Data::trades)))
+            {
+              int colorIndex = nextColorIndex % (sizeof(colors) / sizeof(*colors));
+              double otherAveragePrice = publicDataModel->graphModel.getVwap24();
+              if(otherAveragePrice > 0.)
+              {
+                QColor color(colors[colorIndex]);
+                color.setAlpha(0x70);
+                prepareTradePolyline(plotRect, vmin, vmax, lastVolumeMax, publicDataModel->graphModel, (int)Data::trades, averagePrice / otherAveragePrice, color);
+              }
+            }
+            nextColorIndex++;
+          }
+        }
+    }
+    if(enabledData & ((int)Data::trades | (int)Data::tradeVolume) && !graphModel->tradeSamples.isEmpty())
+      prepareTradePolyline(plotRect, vmin, vmax, lastVolumeMax, *graphModel, enabledData, 1., QColor(0, 0, 0));
+
+    if(totalMax == 0.)
+      return; // no data to draw
+    if(!(totalMin == lastTotalMin && totalMax == lastTotalMax /*&& qAbs(lastVolumeMax -  volumeMax) < volumeMax * 0.5*/))
+    {
+      update();
+      return;
+    }
+  }
+
+  drawAxesLables(painter, plotRect, vmin, vmax, priceSize);
   if(enabledData & (int)Data::orderBook && !graphModel->bookSamples.isEmpty())
     drawBookPolyline(painter, plotRect, vmin, vmax);
 
-  if(enabledData & (int)Data::otherMarkets)
-  {
-    static unsigned int colors[] = { 0x0000FF, 0x8A2BE2, 0xA52A2A, 0x5F9EA0, 0x7FFF00, 0xD2691E, 0xFF7F50, 0x6495ED, 0xDC143C, 0x00FFFF, 0x00008B, 0x008B8B, 0xB8860B, 0xA9A9A9, 0x006400, 0xBDB76B, 0x8B008B, 0x556B2F, 0xFF8C00, 0x9932CC, 0x8B0000, 0xE9967A, 0x8FBC8F, 0x483D8B, 0x2F4F4F, 0x00CED1, 0x9400D3, 0xFF1493, 0x00BFFF, 0x696969, 0x1E90FF, 0xB22222, 0x228B22, 0xFF00FF, 0xFFD700, 0xDAA520, 0x808080, 0x008000, 0xADFF2F, 0xFF69B4, 0xCD5C5C, 0x4B0082 };
-    int nextColorIndex = 0;
-    double averagePrice = graphModel->getVwap24();
-    if(averagePrice > 0.)
-      foreach(const PublicDataModel* publicDataModel, publicDataModels)
-      {
-        if(publicDataModel && (publicDataModel != this->publicDataModel || !(enabledData & ((int)Data::trades))))
-        {
-          int colorIndex = nextColorIndex++ % (sizeof(colors) / sizeof(*colors));
-          double otherAveragePrice = publicDataModel->graphModel.getVwap24();
-          if(otherAveragePrice > 0.)
-          {
-            QColor color(colors[colorIndex]);
-            color.setAlpha(0x70);
-            drawTradePolyline(painter, plotRect, vmin, vmax, lastVolumeMax, publicDataModel->graphModel, (int)Data::trades, averagePrice / otherAveragePrice, color);
-          }
-        }
-      }
-  }
+  drawTradePolylines(painter);
 
-  if(enabledData & ((int)Data::trades | (int)Data::tradeVolume) && !graphModel->tradeSamples.isEmpty())
-    drawTradePolyline(painter, plotRect, vmin, vmax, lastVolumeMax, *graphModel, enabledData, 1., QColor(0, 0, 0));
-  if(enabledData & (int)Data::regressionLines && !graphModel->tradeSamples.isEmpty())
+  if(enabledData & (int)Data::regressionLines)
     drawRegressionLines(painter, plotRect, vmin, vmax);
-  if(enabledData & (int)Data::expRegressionLines && !graphModel->tradeSamples.isEmpty())
+  if(enabledData & (int)Data::expRegressionLines)
     drawExpRegressionLines(painter, plotRect, vmin, vmax);
   //if(enabledData  & (int)Data::estimates && !graphModel->tradeSamples.isEmpty())
   //  drawEstimates(painter, plotRect, vmin, vmax);
-
-  if((totalMin != lastTotalMin || totalMax != lastTotalMax || volumeMax != lastVolumeMax) && totalMax != 0.)
-    update();
 }
 
 void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin, double vmax, const QSize& priceSize)
@@ -219,7 +231,7 @@ void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin
   }
 }
 
-void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double ymin, double ymax, double lastVolumeMax, const GraphModel& graphModel, int enabledData, double scale, const QColor& color)
+void GraphView::prepareTradePolyline(const QRect& rect, double ymin, double ymax, double lastVolumeMax, const GraphModel& graphModel, int enabledData, double scale, const QColor& color)
 {
   double yrange = ymax - ymin;
   quint64 vmax = time;
@@ -231,8 +243,26 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double y
   double height = rect.height();
   quint64 width = rect.width();
 
-  QPointF* polyData = (QPointF*)alloca(rect.width() * 4 * sizeof(QPointF));
-  QPoint* volumeData = (QPoint*)alloca(rect.width() * 2* sizeof(QPoint));
+  GraphModelData& graphModelData = this->graphModelData[&graphModel];
+  unsigned int polyDataSize = rect.width() * 4;
+  unsigned int volumeDataSize = rect.width() * 2;
+  if(graphModelData.polyDataSize < polyDataSize)
+  {
+    delete graphModelData.polyData;
+    graphModelData.polyData = new QPointF[polyDataSize];
+    graphModelData.polyDataSize = polyDataSize;
+  }
+  if(graphModelData.volumeDataSize < volumeDataSize)
+  {
+    delete graphModelData.volumeData;
+    graphModelData.volumeData = new QPoint[volumeDataSize];
+    graphModelData.volumeDataSize = volumeDataSize;
+  }
+  QPointF* polyData = graphModelData.polyData;
+  QPoint* volumeData = graphModelData.volumeData;
+
+  if(&graphModel != this->graphModel)
+    enabledData &= ~(int)Data::tradeVolume;
 
   {
     QPointF* currentPoint = polyData;
@@ -249,9 +279,6 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double y
       if(step > 1)
         step /= 2;
     }
-    //for(; i < count; ++i)
-    //  if(tradeSamples.at(i).time >= vmin) 
-    //    break;
     if(i < count)
     {
       const GraphModel::TradeSample* sample = &tradeSamples.at(i);
@@ -286,16 +313,15 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double y
         continue;
 
       addLine:
-        Q_ASSERT(currentPoint - polyData < rect.width() * 4);
         if(currentEntryCount > 0)
         {
-          if(&graphModel == this->graphModel)
+          if(enabledData & (int)Data::tradeVolume)
           {
             currentVolumePoint->setX(left + pixelX);
             currentVolumePoint->setY(bottomInt);
             ++currentVolumePoint;
             currentVolumePoint->setX(left + pixelX);
-            currentVolumePoint->setY(bottomInt - currentVolume * (height / 3) / lastVolumeMax);
+            currentVolumePoint->setY(bottomInt - currentVolume * (height * (1. / 3.)) / lastVolumeMax);
             ++currentVolumePoint;
 
             if(currentVolume > volumeMax)
@@ -377,19 +403,51 @@ void GraphView::drawTradePolyline(QPainter& painter, const QRect& rect, double y
     Q_ASSERT(currentPoint - polyData <= rect.width() * 4);
     Q_ASSERT(currentVolumePoint - volumeData <= rect.width() * 2);
 
-    if(enabledData & (int)Data::tradeVolume)
+    graphModelData.drawn = true;
+    graphModelData.color = color;
+    graphModelData.polyDataCount = currentPoint - polyData;
+    graphModelData.volumeDataCount = (currentVolumePoint - volumeData) / 2;
+  }
+}
+
+void GraphView::drawTradePolylines(QPainter& painter)
+{
+  bool cleanup = false;
+  for(QHash<const GraphModel*, GraphModelData>::Iterator i = graphModelData.begin(), end = graphModelData.end(); i != end; ++i)
+  {
+    GraphModelData& graphModelData = *i;
+    if(!graphModelData.drawn)
+    {
+      cleanup = true;
+      continue;
+    }
+    const GraphModel* graphMode = i.key();
+    if(graphMode == this->graphModel && graphModelData.volumeDataCount > 0)
     {
       QPen volumePen(Qt::darkBlue);
       painter.setPen(volumePen);
-      painter.drawLines(volumeData, (currentVolumePoint - volumeData) / 2);
+      painter.drawLines(graphModelData.volumeData, graphModelData.volumeDataCount);
     }
 
-    if(enabledData & (int)Data::trades)
+    if(graphModelData.polyDataCount > 0)
     {
-      QPen rangePen(color);
+      QPen rangePen(graphModelData.color);
       rangePen.setWidth(2);
       painter.setPen(rangePen);
-      painter.drawPolyline(polyData, currentPoint - polyData);
+      painter.drawPolyline(graphModelData.polyData, graphModelData.polyDataCount);
+    }
+    graphModelData.drawn = false;
+  }
+  if(cleanup)
+  {
+    for(QHash<const GraphModel*, GraphModelData>::Iterator i = graphModelData.begin(), end = graphModelData.end(); i != end; ++i)
+    {
+      const GraphModelData& graphModelData = *i;
+      if(!graphModelData.drawn)
+      {
+        this->graphModelData.erase(i);
+        break;
+      }
     }
   }
 }
@@ -476,6 +534,9 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
   for(int i = 0; i < (int)GraphModel::RegressionDepth::numOfRegressionDepths; ++i)
   {
     const GraphModel::RegressionLine& rl = graphModel->regressionLines[i];
+    if(rl.endTime == 0)
+      break;
+
     quint64 startTime = qMax(rl.startTime, hmin);
     if((qint64)hmin - (qint64)rl.startTime > maxAge / 2)
       break;
@@ -505,6 +566,9 @@ void GraphView::drawExpRegressionLines(QPainter& painter, const QRect& rect, dou
   for(int i = 0; i < (int)GraphModel::RegressionDepth::numOfExpRegessionDepths; ++i)
   {
     const GraphModel::RegressionLine& rl = graphModel->expRegressionLines[i];
+    if(rl.endTime == 0)
+      break;
+
     quint64 startTime = qMax(rl.startTime, hmin);
     if((qint64)hmin - (qint64)rl.startTime > maxAge / 2)
       break;
