@@ -3,10 +3,10 @@
 
 TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel) :
   QWidget(parent),
-  publicDataModel(publicDataModel), tradeModel(publicDataModel.tradeModel), autoScrollEnabled(false)
+  publicDataModel(publicDataModel), tradeModel(publicDataModel.tradeModel)//, autoScrollEnabled(false)
 {
   connect(&publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-  connect(&tradeModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
+  //connect(&tradeModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
 
   tradeView = new QTreeView(this);
   connect(tradeView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
@@ -47,32 +47,32 @@ void TradesWidget::saveState(QSettings& settings)
 
 void TradesWidget::checkAutoScroll(const QModelIndex& index, int, int)
 {
-  QScrollBar* scrollBar = tradeView->verticalScrollBar();
-  if(scrollBar->value() == scrollBar->maximum())
-    autoScrollEnabled = true;
+//  QScrollBar* scrollBar = tradeView->verticalScrollBar();
+//  if(scrollBar->value() == scrollBar->maximum())
+//    autoScrollEnabled = true;
   QTimer::singleShot(100, this, SLOT(clearAbove()));
 }
-
-void TradesWidget::autoScroll(int, int)
-{
-  if(!autoScrollEnabled)
-    return;
-  QScrollBar* scrollBar = tradeView->verticalScrollBar();
-  scrollBar->setValue(scrollBar->maximum());
-  autoScrollEnabled = false;
-}
+//
+//void TradesWidget::autoScroll(int, int)
+//{
+//  if(!autoScrollEnabled)
+//    return;
+//  QScrollBar* scrollBar = tradeView->verticalScrollBar();
+//  scrollBar->setValue(scrollBar->maximum());
+//  autoScrollEnabled = false;
+//}
 
 void TradesWidget::clearAbove()
 {
-  QScrollBar* scrollBar = tradeView->verticalScrollBar();
-  if(scrollBar->value() == scrollBar->maximum())
-    autoScrollEnabled = true;
+//  QScrollBar* scrollBar = tradeView->verticalScrollBar();
+//  if(scrollBar->value() == scrollBar->maximum())
+//    autoScrollEnabled = true;
   tradeModel.clearAbove(500);
-  if(autoScrollEnabled)
-  {
-    QScrollBar* scrollBar = tradeView->verticalScrollBar();
-    scrollBar->setValue(scrollBar->maximum());
-  }
+//  if(autoScrollEnabled)
+//  {
+//    QScrollBar* scrollBar = tradeView->verticalScrollBar();
+//    scrollBar->setValue(scrollBar->maximum());
+//  }
 }
 
 void TradesWidget::updateTitle()

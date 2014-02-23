@@ -15,12 +15,12 @@ public slots:
 
 private slots:
   void checkAutoScroll(const QModelIndex&, int, int);
-  void autoScroll(int, int);
+  //void autoScroll(int, int);
   void clearAbove();
 
 private:
   PublicDataModel& publicDataModel;
   TradeModel& tradeModel;
   QTreeView* tradeView;
-  bool autoScrollEnabled;
+  //bool autoScrollEnabled;
 };

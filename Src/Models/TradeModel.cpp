@@ -28,14 +28,27 @@ void TradeModel::reset()
 
 void TradeModel::clearAbove(int tradeCount)
 {
-  int maxCount = qMax(tradeCount, 0);
-  if (trades.size() > maxCount)
+//  int maxCount = qMax(tradeCount, 0);
+//  if (trades.size() > maxCount)
+//  {
+//    beginRemoveRows(QModelIndex(), 0, (trades.size() - maxCount) - 1);
+//    for(int i = 0, count = trades.size() - maxCount; i < count; ++i)
+//    {
+//      delete trades[0];
+//      trades.removeAt(0);
+//    }
+//    endRemoveRows();
+//  }
+  int tradesToRemove = trades.size() - tradeCount;
+  if(tradesToRemove > 0)
   {
-    beginRemoveRows(QModelIndex(), 0, (trades.size() - maxCount) - 1);
-    for(int i = 0, count = trades.size() - maxCount; i < count; ++i)
+    beginRemoveRows(QModelIndex(), tradeCount, tradeCount + tradesToRemove - 1);
+    for(int i = trades.size() - 1;; --i)
     {
-      delete trades[0];
-      trades.removeAt(0);
+      delete trades.back();
+      trades.removeLast();
+      if(i == tradeCount)
+        break;
     }
     endRemoveRows();
   }
@@ -43,10 +56,10 @@ void TradeModel::clearAbove(int tradeCount)
 
 void TradeModel::addTrade(quint64 id, quint64 time, double price, double amount)
 {
-  int oldCount = trades.size();
-  double lastPrice = trades.size() > 0 ? trades.back()->price : 0.;
+  //int oldCount = trades.size();
+  double lastPrice = trades.size() > 0 ? trades.front()->price : 0.;
 
-  beginInsertRows(QModelIndex(), oldCount, oldCount);
+  beginInsertRows(QModelIndex(), 0, 0);
   Trade* trade = new Trade;
   trade->id = id;
   trade->time = time;
@@ -60,7 +73,7 @@ void TradeModel::addTrade(quint64 id, quint64 time, double price, double amount)
     else if(trade->price < lastPrice)
       trade->icon = Trade::Icon::down;
   }
-  trades.append(trade);
+  trades.prepend(trade);
   endInsertRows();
 }
 /*
