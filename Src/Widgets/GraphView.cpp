@@ -414,6 +414,7 @@ void GraphView::prepareTradePolyline(const QRect& rect, double ymin, double ymax
 void GraphView::drawTradePolylines(QPainter& painter)
 {
   bool cleanup = false;
+  GraphModelData* focusGraphModelData = 0;
   for(QHash<const GraphModel*, GraphModelData>::Iterator i = graphModelData.begin(), end = graphModelData.end(); i != end; ++i)
   {
     GraphModelData& graphModelData = *i;
@@ -423,21 +424,35 @@ void GraphView::drawTradePolylines(QPainter& painter)
       continue;
     }
     const GraphModel* graphMode = i.key();
-    if(graphMode == this->graphModel && graphModelData.volumeDataCount > 0)
+    if(graphMode == this->graphModel)
+      focusGraphModelData = &graphModelData;
+    else
+    {
+      if(graphModelData.polyDataCount > 0)
+      {
+        QPen rangePen(graphModelData.color);
+        rangePen.setWidth(2);
+        painter.setPen(rangePen);
+        painter.drawPolyline(graphModelData.polyData, graphModelData.polyDataCount);
+      }
+    }
+    graphModelData.drawn = false;
+  }
+  if(focusGraphModelData)
+  {
+    if(focusGraphModelData->volumeDataCount > 0)
     {
       QPen volumePen(Qt::darkBlue);
       painter.setPen(volumePen);
-      painter.drawLines(graphModelData.volumeData, graphModelData.volumeDataCount);
+      painter.drawLines(focusGraphModelData->volumeData, focusGraphModelData->volumeDataCount);
     }
-
-    if(graphModelData.polyDataCount > 0)
+    if(focusGraphModelData->polyDataCount > 0)
     {
-      QPen rangePen(graphModelData.color);
+      QPen rangePen(focusGraphModelData->color);
       rangePen.setWidth(2);
       painter.setPen(rangePen);
-      painter.drawPolyline(graphModelData.polyData, graphModelData.polyDataCount);
+      painter.drawPolyline(focusGraphModelData->polyData, focusGraphModelData->polyDataCount);
     }
-    graphModelData.drawn = false;
   }
   if(cleanup)
   {
