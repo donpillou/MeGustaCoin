@@ -29,7 +29,7 @@ public:
 
   bool loadChannelList();
 
-  bool subscribe(const QString& channel);
+  bool subscribe(const QString& channel, quint64 lastReceivedTradeId);
   bool unsubscribe(const QString& channel);
 
   const QString& getLastError() {return error;}

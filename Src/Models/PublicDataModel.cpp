@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 PublicDataModel::PublicDataModel() :
-  tradeModel(*this)/*, bookModel(*this)*/, state(State::offline) {}
+  tradeModel(*this)/*, bookModel(*this)*/, state(State::offline), lastReceivedTradeId(0) {}
 
 void PublicDataModel::setMarket(const QString& marketName)
 {
@@ -32,6 +32,7 @@ void PublicDataModel::addTrade(quint64 id, quint64 time, double price, double am
   if((qint64)startTime - (qint64)time < 30 * 60)
     tradeModel.addTrade(id, time, price, amount);
   graphModel.addTrade(id, time, price, amount, isSyncOrLive);
+  lastReceivedTradeId = id;
 }
 
 //void PublicDataModel::addTickerData(const MarketStream::TickerData& tickerData)

@@ -79,7 +79,8 @@ private:
   {
   public:
     QString channel;
-    SubscriptionAction(Type type, const QString& channel) : Action(type), channel(channel) {}
+    quint64 lastReceivedTradeId;
+    SubscriptionAction(Type type, const QString& channel, quint64 lastReceivedTradeId) : Action(type), channel(channel), lastReceivedTradeId(lastReceivedTradeId) {}
   };
 
   class SubscribeResponseAction : public Action
@@ -93,6 +94,8 @@ private:
   JobQueue<Action*> actionQueue;
   JobQueue<Action*> subscriptionQueue;
   QHash<quint64, PublicDataModel*> activeSubscriptions;
+  bool isConnected;
+  QSet<QString> subscriptions;
 
 private slots:
   void executeActions();

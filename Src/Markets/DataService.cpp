@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 DataService::DataService(DataModel& dataModel) :
-  dataModel(dataModel), thread(0)
+  dataModel(dataModel), thread(0), isConnected(false)
 {
 }
 
@@ -47,7 +47,7 @@ void DataService::start()
     {
       actionQueue.append(new ChannelInfoAction(channelName));
       QTimer::singleShot(0, &dataService, SLOT(executeActions()));
-      information(QString("Found channel %1.").arg(channelName));
+      //information(QString("Found channel %1.").arg(channelName));
     }
 
     virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId)
@@ -103,11 +103,6 @@ void DataService::start()
       if(!connection.loadChannelList())
         goto error;
 
-      // subscribe to channels
-      foreach(const QString& channel, subscriptions)
-        if(!connection.subscribe(channel))
-          goto error;
-
       // loop
       Action* action;
       for(;;)
@@ -124,23 +119,15 @@ void DataService::start()
           case Action::Type::subscribe:
             {
               SubscriptionAction* subscriptionAction = (SubscriptionAction*)action;
-              if(!subscriptions.contains(subscriptionAction->channel))
-              {
-                subscriptions.insert(subscriptionAction->channel);
-                if(!connection.subscribe(subscriptionAction->channel))
-                  goto error;
-              }
+              if(!connection.subscribe(subscriptionAction->channel, subscriptionAction->lastReceivedTradeId))
+                goto error;
             }
             break;
           case Action::Type::unsubscribe:
             {
               SubscriptionAction* subscriptionAction = (SubscriptionAction*)action;
-              if(subscriptions.contains(subscriptionAction->channel))
-              {
-                subscriptions.remove(subscriptionAction->channel);
-                if(!connection.unsubscribe(subscriptionAction->channel))
-                  goto error;
-              }
+              if(!connection.unsubscribe(subscriptionAction->channel))
+                goto error;
             }
             break;
           default:
@@ -161,7 +148,6 @@ void DataService::start()
     JobQueue<Action*>& actionQueue;
     JobQueue<Action*>& subscriptionQueue;
     DataConnection connection;
-    QSet<QString> subscriptions;
     bool canceled;
   };
 
@@ -186,10 +172,13 @@ void DataService::stop()
 
 void DataService::subscribe(const QString& channel)
 {
-  PublicDataModel& publicDataModel = dataModel.getDataChannel(channel);
-  if(publicDataModel.getState() != PublicDataModel::State::offline)
+  if(subscriptions.contains(channel))
     return;
-  subscriptionQueue.append(new SubscriptionAction(Action::Type::subscribe, channel));
+  subscriptions.insert(channel);
+  if(!isConnected)
+    return;
+  PublicDataModel& publicDataModel = dataModel.getDataChannel(channel);
+  subscriptionQueue.append(new SubscriptionAction(Action::Type::subscribe, channel, publicDataModel.getLastReceivedTradeId()));
   if(thread)
     thread->interrupt();
   publicDataModel.setState(PublicDataModel::State::connecting);
@@ -198,8 +187,14 @@ void DataService::subscribe(const QString& channel)
 
 void DataService::unsubscribe(const QString& channel)
 {
+  QSet<QString>::Iterator it = subscriptions.find(channel);
+  if(it == subscriptions.end())
+    return;
+  subscriptions.erase(it);
+  if(!isConnected)
+    return;
   dataModel.logModel.addMessage(LogModel::Type::information, QString("Unsubscribing from channel %1...").arg(channel));
-  subscriptionQueue.append(new SubscriptionAction(Action::Type::unsubscribe, channel));
+  subscriptionQueue.append(new SubscriptionAction(Action::Type::unsubscribe, channel, 0));
   if(thread)
     thread->interrupt();
 }
@@ -234,21 +229,30 @@ void DataService::executeActions()
     case Action::Type::setState:
       {
         SetStateAction* setStateAction = (SetStateAction*)action;
-        //publicDataModel.setState(setStateAction->state);
         if(setStateAction->state == PublicDataModel::State::connected)
-          for(QMap<QString, PublicDataModel*>::ConstIterator i = dataModel.getDataChannels().begin(), end = dataModel.getDataChannels().end(); i != end; ++i)
+        {
+          isConnected = true;
+          foreach(const QString& channel, subscriptions)
           {
-            PublicDataModel* publicDataModel = i.value();
-            if(publicDataModel)
-              publicDataModel->setState(PublicDataModel::State::connecting);
+            PublicDataModel& publicDataModel = dataModel.getDataChannel(channel);
+            subscriptionQueue.append(new SubscriptionAction(Action::Type::subscribe, channel, publicDataModel.getLastReceivedTradeId()));
+            publicDataModel.setState(PublicDataModel::State::connecting);
+            dataModel.logModel.addMessage(LogModel::Type::information, QString("Subscribing to channel %1...").arg(channel));
           }
-        if(setStateAction->state == PublicDataModel::State::offline)
+          if(thread)
+            thread->interrupt();
+        }
+        else if(setStateAction->state == PublicDataModel::State::offline)
+        {
+          isConnected = false;
           for(QMap<QString, PublicDataModel*>::ConstIterator i = dataModel.getDataChannels().begin(), end = dataModel.getDataChannels().end(); i != end; ++i)
           {
             PublicDataModel* publicDataModel = i.value();
             if(publicDataModel)
               publicDataModel->setState(PublicDataModel::State::offline);
           }
+          activeSubscriptions.clear();
+        }
       }
       break;
     case Action::Type::channelInfo:
@@ -278,7 +282,6 @@ void DataService::executeActions()
         dataModel.logModel.addMessage(LogModel::Type::information, QString("Unsubscribed from channel %1.").arg(unsubscribeResponse->channel));
       }
       break;
-      // todo: unsubscripe response, set channel to offline
     default:
       break;
     }

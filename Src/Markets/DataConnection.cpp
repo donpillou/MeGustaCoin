@@ -77,6 +77,11 @@ bool DataConnection::process(Callback& callback)
     if(bufferSize >= sizeof(DataProtocol::Header))
     {
       DataProtocol::Header* header = (DataProtocol::Header*)buffer;
+      if(header->size < sizeof(DataProtocol::Header))
+      {
+        error = "Received invalid data.";
+        return false;
+      }
       if(bufferSize >= header->size)
       {
         handleMessage((DataProtocol::MessageType)header->messageType, (char*)(header + 1), header->size - sizeof(DataProtocol::Header));
@@ -167,7 +172,7 @@ bool DataConnection::loadChannelList()
   return true;
 }
 
-bool DataConnection::subscribe(const QString& channel)
+bool DataConnection::subscribe(const QString& channel, quint64 lastReceivedTradeId)
 {
   char message[sizeof(DataProtocol::Header) + sizeof(DataProtocol::SubscribeRequest)];
   DataProtocol::Header* header = (DataProtocol::Header*)message;
@@ -178,7 +183,16 @@ bool DataConnection::subscribe(const QString& channel)
   QByteArray channelNameData = channel.toUtf8();
   memcpy(subscribeRequest->channel, channelNameData.constData(), qMin(channelNameData.size() + 1, (int)sizeof(subscribeRequest->channel) - 1));
   subscribeRequest->channel[sizeof(subscribeRequest->channel) - 1] = '\0';
-  subscribeRequest->maxAge = 24ULL * 60ULL * 60ULL * 1000ULL;
+  if(lastReceivedTradeId)
+  {
+    subscribeRequest->maxAge = 0;
+    subscribeRequest->sinceId =  lastReceivedTradeId;
+  }
+  else
+  {
+    subscribeRequest->maxAge = 24ULL * 60ULL * 60ULL * 1000ULL;
+    subscribeRequest->sinceId =  0;
+  }
   if(!connection.send(message, sizeof(message)))
   {
     error = connection.getLastError();

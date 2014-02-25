@@ -52,6 +52,7 @@ public:
   {
     char channel[33];
     quint64 maxAge;
+    quint64 sinceId;
   };
   struct SubscribeResponse
   {
