@@ -88,6 +88,17 @@ void DataService::start()
 
     void process()
     {
+      Action* action;
+      while(subscriptionQueue.get(action, 0))
+      {
+        if(!action)
+        {
+          canceled = true;
+          return;
+        }
+        delete action;
+      }
+
       information("Connecting to data service...");
 
       // create connection
@@ -104,7 +115,6 @@ void DataService::start()
         goto error;
 
       // loop
-      Action* action;
       for(;;)
       {
         while(subscriptionQueue.get(action, 0))
