@@ -303,7 +303,12 @@ bool BitstampMarket::request(const char* url, bool isPublic, const QVariantMap& 
   else
     result = Json::parse(buffer);
 
-  if(result.toMap().contains("error"))
+  if(!result.isValid())
+  {
+    error = "Received unparsable data.";
+    return false;
+  }
+  else if(result.toMap().contains("error"))
   {
     QStringList errors;
     struct ErrorStringCollector
