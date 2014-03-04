@@ -31,6 +31,7 @@ private:
     enum class Type
     {
       addTrade,
+      addTicker,
       logMessage,
       setState,
       subscribe,
@@ -51,6 +52,14 @@ private:
     quint64 channelId;
     DataProtocol::Trade trade;
     AddTradeAction(quint64 channelId, const DataProtocol::Trade& trade) : Action(Type::addTrade), channelId(channelId), trade(trade) {}
+  };
+
+  class AddTickerAction : public Action
+  {
+  public:
+    quint64 channelId;
+    DataProtocol::Ticker ticker;
+    AddTickerAction(quint64 channelId, const DataProtocol::Ticker& ticker) : Action(Type::addTicker), channelId(channelId), ticker(ticker) {}
   };
 
   class LogMessageAction : public Action

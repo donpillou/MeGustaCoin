@@ -11,6 +11,7 @@ public:
   void saveState(QSettings& settings);
 
   void setFocusPublicDataModel(const PublicDataModel* publicDataModel);
+  const PublicDataModel* getFocusPublicDataModel() const {return publicDataModel;}
 
 public slots:
   void updateTitle();

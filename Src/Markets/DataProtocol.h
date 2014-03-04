@@ -24,6 +24,7 @@ public:
     timeRequest,
     timeResponse,
     timeMessage,
+    tickerMessage,
   };
 
   enum TradeFlag
@@ -91,6 +92,19 @@ public:
   struct TimeResponse
   {
     quint64 time;
+  };
+
+  struct Ticker
+  {
+    quint64 time;
+    double bid;
+    double ask;
+  };
+
+  struct TickerMessage
+  {
+    quint64 channelId;
+    Ticker ticker;
   };
 #pragma pack(pop)
 

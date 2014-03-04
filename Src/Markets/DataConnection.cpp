@@ -144,6 +144,13 @@ void DataConnection::handleMessage(DataProtocol::MessageType messageType, char* 
       callback->receivedTrade(tradeMessage->channelId, tradeMessage->trade);
     }
     break;
+  case DataProtocol::MessageType::tickerMessage:
+    {
+      DataProtocol::TickerMessage* tickerMessage = (DataProtocol::TickerMessage*)data;
+      tickerMessage->ticker.time += serverTimeToLocalTime;
+      callback->receivedTicker(tickerMessage->channelId, tickerMessage->ticker);
+    }
+    break;
   case DataProtocol::MessageType::errorResponse:
     if(size >= sizeof(DataProtocol::ErrorResponse))
     {

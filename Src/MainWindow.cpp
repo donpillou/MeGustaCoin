@@ -6,7 +6,6 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 {
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
   connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
-  //connect(&dataModel, SIGNAL(changedTickerData()), this, SLOT(updateWindowTitle()));
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
   connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
 
@@ -255,12 +254,11 @@ void MainWindow::updateWindowTitle()
     title += marketName;
     if(!marketName.isEmpty())
     {
-      //const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
-      //if(!publicDataModel.graphModel.tickerSamples.isEmpty())
-      //{
-      //  const GraphModel::TickerSample& tickerSample = publicDataModel.graphModel.tickerSamples.back();
-      //  title += QString(" - %1 / %2 bid / %3 ask").arg(dataModel.formatPrice(tickerSample.last), dataModel.formatPrice(tickerSample.bid), dataModel.formatPrice(tickerSample.ask));
-      //}
+      const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
+      double bid, ask;
+      if(publicDataModel.getTicker(bid, ask))
+        //title += QString(" - %1 / %2 bid / %3 ask").arg(dataModel.formatPrice(tickerSample.last), dataModel.formatPrice(bid), dataModel.formatPrice(ask));
+        title += QString(" - %1 bid / %2 ask").arg(dataModel.formatPrice(bid), dataModel.formatPrice(ask));
     }
     setWindowTitle(title);
   }
@@ -275,6 +273,9 @@ void MainWindow::updateWindowTitleTicker()
 
 void MainWindow::updateFocusPublicDataModel()
 {
+  const PublicDataModel* oldFocusPublicDataModel = graphWidget->getFocusPublicDataModel();
+  if(oldFocusPublicDataModel)
+    disconnect(oldFocusPublicDataModel, SIGNAL(updatedTicker()), this, SLOT(updateWindowTitle()));
   const QString& marketName = dataModel.getMarketName();
   if(marketName.isEmpty())
   {
@@ -285,6 +286,7 @@ void MainWindow::updateFocusPublicDataModel()
   {
     PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
     graphWidget->setFocusPublicDataModel(&publicDataModel);
+    connect(&publicDataModel, SIGNAL(updatedTicker()), this, SLOT(updateWindowTitle()));
     updateWindowTitle();
   }
 }

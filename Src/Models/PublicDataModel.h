@@ -24,8 +24,10 @@ public:
 
   void addTrade(quint64 id, quint64 time, double price, double amount, bool isSyncOrLive);
   quint64 getLastReceivedTradeId() const {return lastReceivedTradeId;}
-  //void addTickerData(const MarketStream::TickerData& tickerData);
+  void addTicker(quint64 time, double bid, double ask);
   //void setBookData(quint64 time, const QList<MarketStream::OrderBookEntry>& askItems, const QList<MarketStream::OrderBookEntry>& bidItems);
+
+  bool getTicker(double& bid, double& ask) const;
 
   enum class State
   {
@@ -50,4 +52,7 @@ private:
   State state;
   quint64 startTime;
   quint64 lastReceivedTradeId;
+
+  double tickerBid;
+  double tickerAsk;
 };

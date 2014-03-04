@@ -68,6 +68,12 @@ void DataService::start()
       QTimer::singleShot(0, &dataService, SLOT(executeActions()));
     }
 
+    virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker)
+    {
+      actionQueue.append(new AddTickerAction(channelId, ticker));
+      QTimer::singleShot(0, &dataService, SLOT(executeActions()));
+    }
+
     virtual void receivedErrorResponse(const QString& message)
     {
       actionQueue.append(new LogMessageAction(LogModel::Type::error, message));
@@ -227,6 +233,17 @@ void DataService::executeActions()
           DataProtocol::Trade& trade = addTradeAction->trade;
           bool isSyncOrLive = addTradeAction->trade.flags & DataProtocol::syncFlag || !(addTradeAction->trade.flags & DataProtocol::replayedFlag);
           publicDataModel->addTrade(trade.id, trade.time / 1000ULL, trade.price, trade.amount, isSyncOrLive);
+        }
+      }
+      break;
+    case Action::Type::addTicker:
+      {
+        AddTickerAction* addTickerAction = (AddTickerAction*)action;
+        PublicDataModel* publicDataModel = activeSubscriptions[addTickerAction->channelId];
+        if(publicDataModel)
+        {
+          DataProtocol::Ticker& ticker = addTickerAction->ticker;
+          publicDataModel->addTicker(ticker.time / 1000ULL, ticker.bid, ticker.ask);
         }
       }
       break;

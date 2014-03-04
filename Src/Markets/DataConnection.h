@@ -18,8 +18,8 @@ public:
     virtual void receivedChannelInfo(const QString& channelName) = 0;
     virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId) = 0;
     virtual void receivedUnsubscribeResponse(const QString& channelName, quint64 channelId) = 0;
-    //virtual void receivedTickerData(const TickerData& tickerData) = 0;
     virtual void receivedTrade(quint64 channelId, const DataProtocol::Trade& trade) = 0;
+    virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker) = 0;
     virtual void receivedErrorResponse(const QString& message) = 0;
   };
 
