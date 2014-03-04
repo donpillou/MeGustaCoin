@@ -299,6 +299,8 @@ bool BitstampMarket::request(const char* url, bool isPublic, const QVariantMap& 
         result = cancelData;
       }
     }
+    else
+      result = true;
   }
   else
     result = Json::parse(buffer);
