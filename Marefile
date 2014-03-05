@@ -433,13 +433,13 @@ targets = {
         "$(rootDir)/../../tools/shared/symbian/epocroot.cpp" = cppSource,
         "$(rootDir)/../../tools/shared/windows/registry.cpp" = cppSource,
         
-        "$(foreach file,$(mocHeaderFiles),$(buildDir)/moc_$(basename $(notdir $(file))).cpp)" = cppSource + {
+        "$(foreach file,$(mocHeaderFiles),$(buildDir)/moc_$(basename $(notdir $(file)))$(configuration).cpp)" = cppSource + {
           folder = ".Qt"
         }
         
         "$(mocIncludedHeaderFiles) $(mocHeaderFiles)" = {
           //folder = ".Qt"
-          output = "$(buildDir)/moc_$(basename $(notdir $(file))).cpp"
+          output = "$(buildDir)/moc_$(basename $(notdir $(file)))$(configuration).cpp"
           message = "$(notdir $(file)) (Qt moc)"
           command = "Build/$(configuration)/moc/moc.exe $(patsubst %,-D%,$(defines)) $(patsubst %,-I%,$(includePaths)) -D_MSC_VER=1600 -DWIN32 $(file) -o $(output)"
         }
@@ -782,16 +782,16 @@ targets = {
         "$(rootDir)/../3rdparty/libpng/pngwutil.c" = cSource,
         "$(rootDir)/painting/qgrayraster.c" = cSource,
         
-        "$(foreach file,$(mocHeaderFiles),$(buildDir)/moc_$(basename $(notdir $(file))).cpp)" = cppSource + {
+        "$(foreach file,$(mocHeaderFiles),$(buildDir)/moc_$(basename $(notdir $(file)))$(configuration).cpp)" = cppSource + {
           folder = ".Qt"
         }
-        "$(foreach file,$(rccFiles),$(buildDir)/qrc_$(basename $(notdir $(file))).cpp)" = cppSource + {
+        "$(foreach file,$(rccFiles),$(buildDir)/qrc_$(basename $(notdir $(file)))$(configuration).cpp)" = cppSource + {
           folder = ".Qt"
         }
         
         "$(mocIncludedHeaderFiles) $(mocHeaderFiles)" = {
           //folder = ".Qt"
-          output = "$(buildDir)/moc_$(basename $(notdir $(file))).cpp"
+          output = "$(buildDir)/moc_$(basename $(notdir $(file)))$(configuration).cpp"
           message = "$(notdir $(file)) (Qt moc)"
           command = "Build/$(configuration)/moc/moc.exe $(patsubst %,-D%,$(defines)) $(patsubst %,-I%,$(includePaths)) -D_MSC_VER=1600 -DWIN32 $(file) -o $(output)"
         }
@@ -810,7 +810,7 @@ targets = {
         }
         "$(rccFiles)" = {
           //folder = ".Qt"
-          output = "$(buildDir)/qrc_$(basename $(notdir $(file))).cpp"
+          output = "$(buildDir)/qrc_$(basename $(notdir $(file)))$(configuration).cpp"
           message = "$(notdir $(file)) (Qt rcc)"
           command = "Build/$(configuration)/rcc/rcc.exe -name $(basename $(notdir $(file))) $(file) -o $(output)"
         }
@@ -886,7 +886,7 @@ qtRccSource = {
   message = "$(if $(Win32),$(notdir $(file)),$(file)) (Qt rcc)"
   input = file
   name = "$(basename $(notdir $(file)))"
-  output = "$(buildDir)/qrc_$(name).cpp"
+  output = "$(buildDir)/qrc_$(name)$(configuration).cpp"
   if platform == "Win32" { rcc = "Build/$(configuration)/rcc/rcc.exe" } else { rcc = "rcc" }
   command = "$(rcc) -name $(name) $(file) -o $(output)"
 }
@@ -895,7 +895,7 @@ qtMocSource = {
   message = "$(if $(Win32),$(notdir $(file)),$(file)) (Qt moc)"
   input = file
   name = "$(basename $(notdir $(file)))"
-  output = "$(buildDir)/moc_$(name).cpp"
+  output = "$(buildDir)/moc_$(name)$(configuration).cpp"
   if platform == "Win32" { 
     moc = "Build/$(configuration)/moc/moc.exe"
     mocFlags = "-D_MSC_VER=1500"
@@ -908,14 +908,14 @@ qtMocSource = {
 
 qtFiles = {
   "$(qtRccFiles)" = qtRccSource + { input += qtRessourceFiles }
-  "$(foreach file,$(qtRccFiles),$(buildDir)/qrc_$(basename $(notdir $(file))).cpp)" = cppSource + {
+  "$(foreach file,$(qtRccFiles),$(buildDir)/qrc_$(basename $(notdir $(file)))$(configuration).cpp)" = cppSource + {
     folder = ".Qt"
     cppFlags -= "/Yu"
   }
   if tool == "vcxproj" { "$(qtRessourceFiles)" } // list ressource files in Visual Studio
 
   "$(qtMocFiles)" = qtMocSource
-  "$(foreach file,$(qtMocFiles),$(buildDir)/moc_$(basename $(notdir $(file))).cpp)" = cppSource + {
+  "$(foreach file,$(qtMocFiles),$(buildDir)/moc_$(basename $(notdir $(file)))$(configuration).cpp)" = cppSource + {
     folder = ".Qt"
     //cppFlags -= "/Yu"
   }
