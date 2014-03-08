@@ -84,7 +84,7 @@ bool SocketConnection::connect(const QString& host, quint16 port)
     error = QString(curl_easy_strerror(status)) + ".";
     return false;
   }
-  this->s = (void*)s;
+  this->s = (void*)(intptr_t)s;
 
 #ifdef _WIN32
   {
@@ -167,7 +167,7 @@ void SocketConnection::close()
 
 bool SocketConnection::send(const QByteArray& dataArray)
 {
-  if((SOCKET)s == INVALID_SOCKET)
+  if((SOCKET)(intptr_t)s == INVALID_SOCKET)
     return false;
   sendBuffer.append(dataArray);
   return true;
@@ -175,7 +175,7 @@ bool SocketConnection::send(const QByteArray& dataArray)
 
 bool SocketConnection::send(const char* data, int len)
 {
-  if((SOCKET)s == INVALID_SOCKET)
+  if((SOCKET)(intptr_t)s == INVALID_SOCKET)
     return false;
   sendBuffer.append(data, len);
   return true;
@@ -183,7 +183,7 @@ bool SocketConnection::send(const char* data, int len)
 
 bool SocketConnection::recv(QByteArray& data)
 {
-  if((SOCKET)s == INVALID_SOCKET)
+  if((SOCKET)(intptr_t)s == INVALID_SOCKET)
     return false;
 
   // try sending
@@ -251,11 +251,11 @@ bool SocketConnection::recv(QByteArray& data)
   {
     const int timeout = 10000;
     timeval tv = { timeout/1000, (timeout%1000) * 1000 };
-    FD_SET((int)s, &rfds);
+    FD_SET((int)(intptr_t)s, &rfds);
     if(!sendBuffer.isEmpty())
-      FD_SET((int)s, &wfds);
+      FD_SET((int)(intptr_t)s, &wfds);
     FD_SET(cancelPipe[0], &rfds);
-    int selectResult = select(((int)s > cancelPipe[0] ? (int)s : cancelPipe[0]) + 1, &rfds, &wfds, 0, &tv);
+    int selectResult = select(((int)(intptr_t)s > cancelPipe[0] ? (int)(intptr_t)s : cancelPipe[0]) + 1, &rfds, &wfds, 0, &tv);
     if(selectResult == 0)
       continue;
     if(selectResult == -1)
@@ -287,7 +287,7 @@ bool SocketConnection::recv(QByteArray& data)
 #ifdef _WIN32
   if(networkEvents.lNetworkEvents & (FD_READ | FD_CLOSE))
 #else
-  if(FD_ISSET((int)s, &rfds))
+  if(FD_ISSET((int)(intptr_t)s, &rfds))
 #endif
   {
     int bufferSize = data.size();

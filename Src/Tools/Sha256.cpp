@@ -180,7 +180,7 @@ static void Sha256_WriteByteBlock(CSha256 *p)
   Sha256_Transform(p->state, data32);
 }
 
-void Sha256::update(const Byte *data, size_t size)
+void Sha256::update(const Byte *data, unsigned int size)
 {
   CSha256 *p = this;
   UInt32 curBufferPos = (UInt32)p->count & 0x3F;
