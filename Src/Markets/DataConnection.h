@@ -32,6 +32,8 @@ public:
   bool subscribe(const QString& channel, quint64 lastReceivedTradeId);
   bool unsubscribe(const QString& channel);
 
+  bool readTrade(quint64& channelId, DataProtocol::Trade& trade);
+
   const QString& getLastError() {return error;}
 
 private:

@@ -14,6 +14,9 @@
 #include "Markets/Market.h"
 #include "Markets/BitstampMarket.h"
 
+#include "Bots/Bot.h"
+#include "Bots/BuyBot.h"
+
 #include "Models/GraphModel.h"
 #include "Models/OrderModel.h"
 #include "Models/TransactionModel.h"
@@ -22,11 +25,13 @@
 #include "Models/LogModel.h"
 #include "Models/PublicDataModel.h"
 #include "Models/DataModel.h"
+#include "Models/BotsModel.h"
 
 #include "Markets/MarketService.h"
 #include "Markets/DataService.h"
 
 #include "Widgets/OrdersWidget.h"
+#include "Widgets/BotsWidget.h"
 #include "Widgets/TransactionsWidget.h"
 #include "Widgets/TradesWidget.h"
 #include "Widgets/BookWidget.h"

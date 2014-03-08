@@ -226,3 +226,34 @@ bool DataConnection::unsubscribe(const QString& channel)
   }
   return true;
 }
+
+bool DataConnection::readTrade(quint64& channelId, DataProtocol::Trade& trade)
+{
+  struct ReadTradeCallback : public Callback
+  {
+    quint64& channelId;
+    DataProtocol::Trade& trade;
+    bool finished;
+
+    ReadTradeCallback(quint64& channelId, DataProtocol::Trade& trade) : channelId(channelId), trade(trade), finished(false) {}
+
+    virtual void receivedChannelInfo(const QString& channelName) {}
+    virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId) {}
+    virtual void receivedUnsubscribeResponse(const QString& channelName, quint64 channelId) {}
+    virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker) {}
+    virtual void receivedErrorResponse(const QString& message) {}
+
+    virtual void receivedTrade(quint64 channelId, const DataProtocol::Trade& trade)
+    {
+      this->channelId = channelId;
+      this->trade = trade;
+      finished = true;
+    }
+  } callback(channelId, trade);
+  do
+  {
+    if(!process(callback))
+      return false;
+  } while(!callback.finished);
+  return true;
+}

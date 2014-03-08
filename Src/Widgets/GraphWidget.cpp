@@ -78,7 +78,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const PublicDataM
   zoomAction->setMenu(zoomMenu);  
   qobject_cast<QToolButton*>(toolBar->widgetForAction(zoomAction))->setPopupMode(QToolButton::InstantPopup);
   
-  QAction* dataAction = toolBar->addAction(QIcon(":/Icons/chart_curve.png"), tr("Data"));
+  QAction* dataAction = toolBar->addAction(QIcon(":/Icons/chart_curve.png"), tr("&Data"));
   dataMenu = new QMenu(this);
   connect(dataMenu, SIGNAL(aboutToShow()), this, SLOT(updateDataMenu()));
   dataSignalMapper = new QSignalMapper(dataMenu);

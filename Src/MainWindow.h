@@ -13,6 +13,7 @@ private:
   QSettings settings;
 
   OrdersWidget* ordersWidget;
+  BotsWidget* botsWidget;
   TransactionsWidget* transactionsWidget;
   GraphWidget* graphWidget;
   LogWidget* logWidget;

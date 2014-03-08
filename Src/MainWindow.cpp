@@ -33,6 +33,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   ordersWidget = new OrdersWidget(this, settings, dataModel, marketService);
   transactionsWidget = new TransactionsWidget(this, settings, dataModel, marketService);
   graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
+  botsWidget = new BotsWidget(this, settings, dataModel, marketService);
   logWidget = new LogWidget(this, settings, dataModel.logModel);
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
@@ -97,6 +98,11 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
     marketData.tradesDockWidget->hide();
   }
   */
+  QDockWidget* botsDockWidget = new QDockWidget(tr("Bots"), this);
+  botsDockWidget->setObjectName("Bots");
+  botsDockWidget->setWidget(botsWidget);
+  addDockWidget(Qt::TopDockWidgetArea, botsDockWidget);
+  tabifyDockWidget(transactionsDockWidget, botsDockWidget);
 
   QDockWidget* logDockWidget = new QDockWidget(tr("Log"), this);
   logDockWidget->setObjectName("Log");
@@ -172,6 +178,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   ordersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
   graphWidget->saveState(settings);
+  botsWidget->saveState(settings);
 
   QStringList openedLiveTradesWidgets;
   QStringList openedLiveGraphWidgets;
@@ -303,6 +310,7 @@ void MainWindow::updateViewMenu()
   viewMenu->addAction(qobject_cast<QDockWidget*>(transactionsWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(graphWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(logWidget->parent())->toggleViewAction());
+  viewMenu->addAction(qobject_cast<QDockWidget*>(botsWidget->parent())->toggleViewAction());
   viewMenu->addSeparator();
   QMap<QString, PublicDataModel*> publicDataModels = dataModel.getDataChannels();
   for(QMap<QString, PublicDataModel*>::Iterator i = publicDataModels.begin(), end = publicDataModels.end(); i != end; ++i)
