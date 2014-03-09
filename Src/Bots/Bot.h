@@ -4,58 +4,51 @@
 class Bot
 {
 public:
-  enum class Value
+  enum class Regressions
   {
-    firstRegression, // simple volume weighted linear regression lines
-    regression1mA = firstRegression,
-    regression1mB,
-    regression3mA,
-    regression3mB,
-    regression5mA,
-    regression5mB,
-    regression10mA,
-    regression10mB,
-    regression15mA,
-    regression15mB,
-    regression20mA,
-    regression20mB,
-    regression30mA,
-    regression30mB,
-    regression1hA,
-    regression1hB,
-    regression2hA,
-    regression2hB,
-    regression4hA,
-    regression4hB,
-    regression6hA,
-    regression6hB,
-    regression12hA,
-    regression12hB,
-    regression24hA,
-    regression24hB,
-    numOfRegressions = (regression24hB + 1 - firstRegression) / 2,
+    regression1m,
+    regression3m,
+    regression5m,
+    regression10m,
+    regression15m,
+    regression20m,
+    regression30m,
+    regression1h,
+    regression2h,
+    regression4h,
+    regression6h,
+    regression12h,
+    regression24h,
+    numOfRegressions,
+  };
 
-    firstBellRegression = firstRegression + numOfRegressions * 2,
-    bellRegression1mA = firstBellRegression,
-    bellRegression1mB,
-    bellRegression3mA,
-    bellRegression3mB,
-    bellRegression5mA,
-    bellRegression5mB,
-    bellRegression10mA,
-    bellRegression10mB,
-    bellRegression15mA,
-    bellRegression15mB,
-    numOfBellRegressions  = (bellRegression15mB + 1- firstBellRegression) / 2,
+  enum class BellRegressions
+  {
+    bellRegression1m,
+    bellRegression3m,
+    bellRegression5m,
+    bellRegression10m,
+    bellRegression15m,
+    numOfBellRegressions,
+  };
 
-    numOfValues = firstBellRegression + numOfBellRegressions * 2,
+  struct Values
+  {
+    struct RegressionLine
+    {
+      double price; // a
+      double incline; // b
+      double average;
+    };
+    RegressionLine regressions[(int)Regressions::numOfRegressions];
+    RegressionLine bellRegressions[(int)BellRegressions::numOfBellRegressions];
   };
 
   class Session
   {
   public:
     virtual ~Session() {};
-    virtual void handle(const DataProtocol::Trade& trade, double* values) = 0;
+    virtual void handle(const DataProtocol::Trade& trade, const Values& values) = 0;
   };
 
   class Market
@@ -72,25 +65,32 @@ class TradeHandler
 {
 public:
 
-  double values[(int)Bot::Value::numOfValues];
+  Bot::Values values;
 
   void add(const DataProtocol::Trade& trade, bool updateValues)
   {
-      quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
-      for(int i = 0; i < (int)Bot::Value::numOfRegressions; ++i)
+    quint64 time = trade.time / 1000;
+    quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
+    for(int i = 0; i < (int)Bot::Regressions::numOfRegressions; ++i)
+    {
+      averager[i].add(time, trade.amount, trade.price);
+      averager[i].limitToAge(depths[i]);
+      if(updateValues)
       {
-        averager[i].add(trade.time, trade.amount, trade.price);
-        averager[i].limitToAge(depths[i]);
-        if(updateValues)
-          averager[i].getLine(values[(int)Bot::Value::firstRegression + i * 2], values[(int)Bot::Value::firstRegression + i * 2 + 1]);
+        Bot::Values::RegressionLine& rl = values.regressions[i];
+        averager[i].getLine(rl.price, rl.incline, rl.average);
       }
+    }
 
-      for(int i = 0; i < (int)Bot::Value::numOfBellRegressions; ++i)
+    for(int i = 0; i < (int)Bot::BellRegressions::numOfBellRegressions; ++i)
+    {
+      bellAverager[i].add(time, trade.amount, trade.price, depths[i]);
+      if(updateValues)
       {
-        bellAverager[i].add(trade.time, trade.amount, trade.price, depths[i]);
-        if(updateValues)
-          bellAverager[i].getLine(depths[i], values[(int)Bot::Value::firstBellRegression + i * 2], values[(int)Bot::Value::firstBellRegression + i * 2 + 1]);
+        Bot::Values::RegressionLine& rl = values.bellRegressions[i];
+        bellAverager[i].getLine(depths[i], rl.price, rl.incline, rl.average);
       }
+    }
   }
 
 private:
@@ -204,16 +204,12 @@ private:
       }
     }
 
-    void getLine(double& a, double& b) const
+    void getLine(double& a, double& b, double& avg) const
     {
       b = (sumN * sumXY - sumX * sumY) / (sumN * sumXX - sumX * sumX);
       double ar = (sumXX * sumY - sumX * sumXY) / (sumN * sumXX - sumX * sumX);
       a = ar + b * x;
-    }
-
-    double getAveragePrice() const
-    {
-      return sumY / sumN;
+      avg = sumY / sumN;
     }
 
   private:
@@ -282,7 +278,7 @@ private:
         data.removeFirst();
     }
 
-    void getLine(quint64 ageDeviation, double& a, double& b)
+    void getLine(quint64 ageDeviation, double& a, double& b, double& avg)
     {
       // recompute
       sumXY = sumY = sumX = sumXX = sumN = 0.;
@@ -317,12 +313,7 @@ private:
       b = (sumN * sumXY - sumX * sumY) / (sumN * sumXX - sumX * sumX);
       double ar = (sumXX * sumY - sumX * sumXY) / (sumN * sumXX - sumX * sumX);
       a = ar + b * x;
-      startTime = data.front().time;
-    }
-
-    double getAveragePrice() const
-    {
-      return sumY / sumN;
+      avg = sumY / sumN;
     }
 
   private:
@@ -343,6 +334,6 @@ private:
     double sumN;
   };
 
-  Averager averager[(int)Bot::Value::numOfRegressions];
-  BellAverager bellAverager[(int)Bot::Value::numOfBellRegressions];
+  Averager averager[(int)Bot::Regressions::numOfRegressions];
+  BellAverager bellAverager[(int)Bot::BellRegressions::numOfBellRegressions];
 };

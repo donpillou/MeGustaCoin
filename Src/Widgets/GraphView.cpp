@@ -44,16 +44,16 @@ void GraphView::paintEvent(QPaintEvent* event)
       time = tradeSample.time;
   }
 
-  if(!graphModel->bookSamples.isEmpty())
-  {
-    const GraphModel::BookSample& bookSample = graphModel->bookSamples.back();
-    addToMinMax(bookSample.ask);
-    addToMinMax(bookSample.bid);
-    for(int i = 0; i < (int)GraphModel::BookSample::ComPrice::numOfComPrice; ++i)
-      addToMinMax(bookSample.comPrice[i]);
-    if(bookSample.time > time)
-      time = bookSample.time;
-  }
+  //if(!graphModel->bookSamples.isEmpty())
+  //{
+  //  const GraphModel::BookSample& bookSample = graphModel->bookSamples.back();
+  //  addToMinMax(bookSample.ask);
+  //  addToMinMax(bookSample.bid);
+  //  for(int i = 0; i < (int)GraphModel::BookSample::ComPrice::numOfComPrice; ++i)
+  //    addToMinMax(bookSample.comPrice[i]);
+  //  if(bookSample.time > time)
+  //    time = bookSample.time;
+  //}
 
   if(enabledData & (int)Data::otherMarkets)
   {
@@ -90,20 +90,20 @@ void GraphView::paintEvent(QPaintEvent* event)
     totalMax = 0.;
     volumeMax = 0.;
 
-    if(enabledData & (int)Data::otherMarkets)
+    if(enabledData & (int)Data::otherMarkets && graphModel->values)
     {
       static unsigned int colors[] = { 0x0000FF, 0x8A2BE2, 0xA52A2A, 0x5F9EA0, 0x7FFF00, 0xD2691E, 0xFF7F50, 0x6495ED, 0xDC143C, 0x00FFFF, 0x00008B, 0x008B8B, 0xB8860B, 0xA9A9A9, 0x006400, 0xBDB76B, 0x8B008B, 0x556B2F, 0xFF8C00, 0x9932CC, 0x8B0000, 0xE9967A, 0x8FBC8F, 0x483D8B, 0x2F4F4F, 0x00CED1, 0x9400D3, 0xFF1493, 0x00BFFF, 0x696969, 0x1E90FF, 0xB22222, 0x228B22, 0xFF00FF, 0xFFD700, 0xDAA520, 0x808080, 0x008000, 0xADFF2F, 0xFF69B4, 0xCD5C5C, 0x4B0082 };
       int nextColorIndex = 0;
-      double averagePrice = graphModel->getVwap24();
+      double averagePrice = graphModel->values->regressions[(int)Bot::Regressions::regression24h].average;
       if(averagePrice > 0.)
         foreach(const PublicDataModel* publicDataModel, publicDataModels)
         {
-          if(publicDataModel)
+          if(publicDataModel && publicDataModel->graphModel.values)
           {
             if(publicDataModel != this->publicDataModel || !(enabledData & ((int)Data::trades)))
             {
               int colorIndex = nextColorIndex % (sizeof(colors) / sizeof(*colors));
-              double otherAveragePrice = publicDataModel->graphModel.getVwap24();
+              double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::Regressions::regression24h].average;
               if(otherAveragePrice > 0.)
               {
                 QColor color(colors[colorIndex]);
@@ -126,8 +126,8 @@ void GraphView::paintEvent(QPaintEvent* event)
       continue;
 
     drawAxesLables(painter, plotRect, vmin, vmax, priceSize);
-    if(enabledData & (int)Data::orderBook && !graphModel->bookSamples.isEmpty())
-      drawBookPolyline(painter, plotRect, vmin, vmax);
+    //if(enabledData & (int)Data::orderBook && !graphModel->bookSamples.isEmpty())
+    //  drawBookPolyline(painter, plotRect, vmin, vmax);
 
     drawTradePolylines(painter);
 
@@ -470,76 +470,79 @@ void GraphView::drawTradePolylines(QPainter& painter)
 
 void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double ymin, double ymax)
 {
-  double yrange = ymax - ymin;
-  quint64 vmax = time;
-  quint64 vmin = vmax - maxAge;
-  quint64 vrange = vmax - vmin;
-  int left = rect.left();
-  double bottom = rect.bottom();
-  double height = rect.height();
-  quint64 width = rect.width();
-
-  QPointF* polyData = (QPointF*)alloca(rect.width() * sizeof(QPointF));
-
-  for (int type = 0; type < (int)GraphModel::BookSample::ComPrice::numOfComPrice; ++type)
-  {
-    QPointF* currentPoint = polyData;
-
-    const QList<GraphModel::BookSample>& bookSummaries = graphModel->bookSamples;
-    int i = 0, count = bookSummaries.size();
-    for(; i < count; ++i) // todo: optimize this
-      if(bookSummaries.at(i).time >= vmin) 
-        break;
-    if(i < count)
-    {
-      const GraphModel::BookSample* sample = &bookSummaries.at(i);
-
-      int pixelX = 0;
-      quint64 currentTimeMax = vmin + vrange / rect.width();
-      double currentVal = sample->comPrice[type];
-      int currentEntryCount = 0;
-
-      for(;;)
-      {
-        if(sample->time > currentTimeMax)
-          goto addLine;
-
-        currentVal = sample->comPrice[type];
-        ++currentEntryCount;
-        if(currentVal > totalMax)
-          totalMax = currentVal;
-        if(currentVal < totalMin)
-          totalMin = currentVal;
-
-        if(++i >= count)
-          goto addLine;
-        sample = &bookSummaries.at(i);
-        continue;
-
-      addLine:
-        if(currentEntryCount > 0)
-        {
-          currentPoint->setX(left + pixelX);
-          currentPoint->setY(bottom - (currentVal - ymin) * height / yrange);
-          ++currentPoint;
-        }
-        if(i >= count)
-          break;
-        ++pixelX;
-        currentTimeMax = vmin + vrange * (pixelX + 1) / width;
-        currentVal = sample->comPrice[type];
-        currentEntryCount = 0;
-      }
-    }
-
-    int color = type * 0xff / (int)GraphModel::BookSample::ComPrice::numOfComPrice;
-    painter.setPen(QColor(0xff - color, 0, color));
-    painter.drawPolyline(polyData, currentPoint - polyData);
-  }
+//  double yrange = ymax - ymin;
+//  quint64 vmax = time;
+//  quint64 vmin = vmax - maxAge;
+//  quint64 vrange = vmax - vmin;
+//  int left = rect.left();
+//  double bottom = rect.bottom();
+//  double height = rect.height();
+//  quint64 width = rect.width();
+//
+//  QPointF* polyData = (QPointF*)alloca(rect.width() * sizeof(QPointF));
+//
+//  for (int type = 0; type < (int)GraphModel::BookSample::ComPrice::numOfComPrice; ++type)
+//  {
+//    QPointF* currentPoint = polyData;
+//
+//    const QList<GraphModel::BookSample>& bookSummaries = graphModel->bookSamples;
+//    int i = 0, count = bookSummaries.size();
+//    for(; i < count; ++i) // todo: optimize this
+//      if(bookSummaries.at(i).time >= vmin) 
+//        break;
+//    if(i < count)
+//    {
+//      const GraphModel::BookSample* sample = &bookSummaries.at(i);
+//
+//      int pixelX = 0;
+//      quint64 currentTimeMax = vmin + vrange / rect.width();
+//      double currentVal = sample->comPrice[type];
+//      int currentEntryCount = 0;
+//
+//      for(;;)
+//      {
+//        if(sample->time > currentTimeMax)
+//          goto addLine;
+//
+//        currentVal = sample->comPrice[type];
+//        ++currentEntryCount;
+//        if(currentVal > totalMax)
+//          totalMax = currentVal;
+//        if(currentVal < totalMin)
+//          totalMin = currentVal;
+//
+//        if(++i >= count)
+//          goto addLine;
+//        sample = &bookSummaries.at(i);
+//        continue;
+//
+//      addLine:
+//        if(currentEntryCount > 0)
+//        {
+//          currentPoint->setX(left + pixelX);
+//          currentPoint->setY(bottom - (currentVal - ymin) * height / yrange);
+//          ++currentPoint;
+//        }
+//        if(i >= count)
+//          break;
+//        ++pixelX;
+//        currentTimeMax = vmin + vrange * (pixelX + 1) / width;
+//        currentVal = sample->comPrice[type];
+//        currentEntryCount = 0;
+//      }
+//    }
+//
+//    int color = type * 0xff / (int)GraphModel::BookSample::ComPrice::numOfComPrice;
+//    painter.setPen(QColor(0xff - color, 0, color));
+//    painter.drawPolyline(polyData, currentPoint - polyData);
+//  }
 }
 
 void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax)
 {
+  if(!graphModel->values)
+    return;
+
   double vrange = vmax - vmin;
   quint64 hmax = time;
   quint64 hmin = hmax - maxAge;
@@ -547,22 +550,22 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
   quint64 width = rect.width();
   double height = rect.height();
 
-  for(int i = 0; i < (int)GraphModel::RegressionDepth::numOfRegressionDepths; ++i)
+  static quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
+  for(int i = 0; i < (int)Bot::Regressions::numOfRegressions; ++i)
   {
-    const GraphModel::RegressionLine& rl = graphModel->regressionLines[i];
-    if(rl.endTime == 0)
-      break;
+    const Bot::Values::RegressionLine& rl = graphModel->values->regressions[i];
 
-    quint64 startTime = qMax(rl.startTime, hmin);
-    if((qint64)hmin - (qint64)rl.startTime > maxAge / 2)
+    const quint64& endTime = time;
+    quint64 startTime = qMax(time - depths[i], hmin);
+    if((qint64)hmin - (qint64)startTime > maxAge / 2)
       break;
-    quint64 endTime = rl.endTime;
-    double val = rl.a - rl.b * (endTime - startTime);
+    
+    double val = rl.price - rl.incline * (endTime - startTime);
     QPointF a(rect.left() + (startTime - hmin) * width / hrange, rect.bottom() - (val -  vmin) * height / vrange);
-    QPointF b(rect.right() - (time - endTime) * width / hrange, rect.bottom() - (rl.a -  vmin) * height / vrange);
+    QPointF b(rect.right() - (time - endTime) * width / hrange, rect.bottom() - (rl.price -  vmin) * height / vrange);
 
-    int color = qMin((int)((0xdd - 0x64) * qMin(qMax(fabs(rl.b / 0.005), 0.), 1.)), 0xdd - 0x64);
-    QPen pen(rl.b >= 0 ? QColor(0, color + 0x64, 0) : QColor(color + 0x64, 0, 0));
+    int color = qMin((int)((0xdd - 0x64) * qMin(qMax(fabs(rl.incline / 0.005), 0.), 1.)), 0xdd - 0x64);
+    QPen pen(rl.incline >= 0 ? QColor(0, color + 0x64, 0) : QColor(color + 0x64, 0, 0));
     pen.setWidth(2);
     painter.setPen(pen);
 
@@ -572,6 +575,9 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
 
 void GraphView::drawExpRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax)
 {
+  if(!graphModel->values)
+    return;
+
   double vrange = vmax - vmin;
   quint64 hmax = time;
   quint64 hmin = hmax - maxAge;
@@ -579,22 +585,22 @@ void GraphView::drawExpRegressionLines(QPainter& painter, const QRect& rect, dou
   quint64 width = rect.width();
   double height = rect.height();
 
-  for(int i = 0; i < (int)GraphModel::RegressionDepth::numOfExpRegessionDepths; ++i)
+  static quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
+  for(int i = 0; i < (int)Bot::BellRegressions::numOfBellRegressions; ++i)
   {
-    const GraphModel::RegressionLine& rl = graphModel->expRegressionLines[i];
-    if(rl.endTime == 0)
+    const Bot::Values::RegressionLine& rl = graphModel->values->bellRegressions[i];
+
+    const quint64& endTime = time;
+    quint64 startTime = qMax(time - depths[i] * 3, hmin);
+    if((qint64)hmin - (qint64)startTime > maxAge / 2)
       break;
 
-    quint64 startTime = qMax(rl.startTime, hmin);
-    if((qint64)hmin - (qint64)rl.startTime > maxAge / 2)
-      break;
-    quint64 endTime = rl.endTime;
-    double val = rl.a - rl.b * (endTime - startTime);
+    double val = rl.price - rl.incline * (endTime - startTime);
     QPointF a(rect.left() + (startTime - hmin) * width / hrange, rect.bottom() - (val -  vmin) * height / vrange);
-    QPointF b(rect.right() - (time - endTime) * width / hrange, rect.bottom() - (rl.a -  vmin) * height / vrange);
+    QPointF b(rect.right() - (time - endTime) * width / hrange, rect.bottom() - (rl.price -  vmin) * height / vrange);
 
-    int color = qMin((int)((0xdd - 0x64) * qMin(qMax(fabs(rl.b / 0.005), 0.), 1.)), 0xdd - 0x64);
-    QPen pen(rl.b >= 0 ? QColor(0, color + 0x64, 0) : QColor(color + 0x64, 0, 0));
+    int color = qMin((int)((0xdd - 0x64) * qMin(qMax(fabs(rl.incline / 0.005), 0.), 1.)), 0xdd - 0x64);
+    QPen pen(rl.incline >= 0 ? QColor(0, color + 0x64, 0) : QColor(color + 0x64, 0, 0));
     pen.setWidth(2);
     painter.setPen(pen);
 

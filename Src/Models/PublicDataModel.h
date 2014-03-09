@@ -22,7 +22,7 @@ public:
   QString formatAmount(double amount) const;
   QString formatPrice(double price) const;
 
-  void addTrade(quint64 id, quint64 time, double price, double amount, bool isSyncOrLive);
+  void addTrade(const DataProtocol::Trade& trade);
   quint64 getLastReceivedTradeId() const {return lastReceivedTradeId;}
   void addTicker(quint64 time, double bid, double ask);
   //void setBookData(quint64 time, const QList<MarketStream::OrderBookEntry>& askItems, const QList<MarketStream::OrderBookEntry>& bidItems);

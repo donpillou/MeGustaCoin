@@ -28,12 +28,13 @@ QString PublicDataModel::formatPrice(double price) const
   return QLocale::system().toString(price, 'f', 2);
 }
 
-void PublicDataModel::addTrade(quint64 id, quint64 time, double price, double amount, bool isSyncOrLive)
+void PublicDataModel::addTrade(const DataProtocol::Trade& trade)
 {
+  quint64 time = trade.time / 1000;
   if((qint64)startTime - (qint64)time < 30 * 60)
-    tradeModel.addTrade(id, time, price, amount);
-  graphModel.addTrade(id, time, price, amount, isSyncOrLive);
-  lastReceivedTradeId = id;
+    tradeModel.addTrade(trade.id, time, trade.price, trade.amount);
+  graphModel.addTrade(trade);
+  lastReceivedTradeId = trade.id;
 }
 
 void PublicDataModel::addTicker(quint64 time, double bid, double ask)

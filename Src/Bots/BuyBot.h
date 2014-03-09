@@ -16,7 +16,7 @@ private:
 
     virtual ~Session() {}
 
-    virtual void handle(const DataProtocol::Trade& trade, double* values);
+    virtual void handle(const DataProtocol::Trade& trade, const Values& values);
   };
 
   virtual Session* createSession(Market& market) {return new Session(market);};

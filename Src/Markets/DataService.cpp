@@ -229,11 +229,7 @@ void DataService::executeActions()
         AddTradeAction* addTradeAction = (AddTradeAction*)action;
         PublicDataModel* publicDataModel = activeSubscriptions[addTradeAction->channelId];
         if(publicDataModel)
-        {
-          DataProtocol::Trade& trade = addTradeAction->trade;
-          bool isSyncOrLive = addTradeAction->trade.flags & DataProtocol::syncFlag || !(addTradeAction->trade.flags & DataProtocol::replayedFlag);
-          publicDataModel->addTrade(trade.id, trade.time / 1000ULL, trade.price, trade.amount, isSyncOrLive);
-        }
+          publicDataModel->addTrade(addTradeAction->trade);
       }
       break;
     case Action::Type::addTicker:
