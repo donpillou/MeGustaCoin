@@ -94,7 +94,9 @@ void GraphView::paintEvent(QPaintEvent* event)
     {
       static unsigned int colors[] = { 0x0000FF, 0x8A2BE2, 0xA52A2A, 0x5F9EA0, 0x7FFF00, 0xD2691E, 0xFF7F50, 0x6495ED, 0xDC143C, 0x00FFFF, 0x00008B, 0x008B8B, 0xB8860B, 0xA9A9A9, 0x006400, 0xBDB76B, 0x8B008B, 0x556B2F, 0xFF8C00, 0x9932CC, 0x8B0000, 0xE9967A, 0x8FBC8F, 0x483D8B, 0x2F4F4F, 0x00CED1, 0x9400D3, 0xFF1493, 0x00BFFF, 0x696969, 0x1E90FF, 0xB22222, 0x228B22, 0xFF00FF, 0xFFD700, 0xDAA520, 0x808080, 0x008000, 0xADFF2F, 0xFF69B4, 0xCD5C5C, 0x4B0082 };
       int nextColorIndex = 0;
-      double averagePrice = graphModel->values->regressions[(int)Bot::Regressions::regression24h].average;
+      //double averagePrice = graphModel->values->regressions[(int)Bot::Regressions::regression24h].average;
+      double averagePrice = graphModel->values->regressions[(int)Bot::Regressions::regression6h].average;
+      //double averagePrice = graphModel->values->bellRegressions[(int)Bot::BellRegressions::bellRegression15m].average;
       if(averagePrice > 0.)
         foreach(const PublicDataModel* publicDataModel, publicDataModels)
         {
@@ -103,7 +105,9 @@ void GraphView::paintEvent(QPaintEvent* event)
             if(publicDataModel != this->publicDataModel || !(enabledData & ((int)Data::trades)))
             {
               int colorIndex = nextColorIndex % (sizeof(colors) / sizeof(*colors));
-              double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::Regressions::regression24h].average;
+              //double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::Regressions::regression24h].average;
+              double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::Regressions::regression6h].average;
+              //double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::BellRegressions::bellRegression15m].average;
               if(otherAveragePrice > 0.)
               {
                 QColor color(colors[colorIndex]);
@@ -137,6 +141,8 @@ void GraphView::paintEvent(QPaintEvent* event)
       drawExpRegressionLines(painter, plotRect, vmin, vmax);
     //if(enabledData  & (int)Data::estimates && !graphModel->tradeSamples.isEmpty())
     //  drawEstimates(painter, plotRect, vmin, vmax);
+
+    drawMarkers(painter, plotRect, vmin, vmax);
     break;
   }
 }
@@ -607,6 +613,59 @@ void GraphView::drawExpRegressionLines(QPainter& painter, const QRect& rect, dou
     painter.drawLine(a, b);
   }
 }
+
+void GraphView::drawMarkers(QPainter& painter, const QRect& rect, double vmin, double vmax)
+{
+  if(graphModel->markers.isEmpty())
+    return;
+
+  int leftInt = rect.left();
+  int widthInt = rect.width();
+  int bottomInt = rect.bottom();
+  int topInt = rect.top();
+  int midInt = (rect.bottom() + rect.top()) / 2;
+  int bottomMidInt = (rect.bottom() + midInt) / 2;
+  int topMidInt = (rect.top() + midInt) / 2;
+  quint64 hmax = time;
+  quint64 hmin = hmax - maxAge;
+
+  QPoint* lineData = (QPoint*)alloca(graphModel->markers.size() * 2 * sizeof(QPoint));
+  QPoint* currentLinePoint = lineData;
+  for(QMap<quint64, GraphModel::Marker>::Iterator i = graphModel->markers.begin(), end = graphModel->markers.end(); i != end; ++i)
+  {
+    const quint64& time = i.key();
+    if(time < hmin)
+      continue;
+    int x = leftInt + (time - hmin) * widthInt / maxAge;
+    currentLinePoint[0].setX(x);
+    currentLinePoint[1].setX(x);
+    switch(i.value())
+    {
+    case GraphModel::Marker::buyMarker:
+      currentLinePoint[0].setY(bottomInt);
+      currentLinePoint[1].setY(midInt);
+      break;
+    case GraphModel::Marker::buyAttemptMarker:
+      currentLinePoint[0].setY(bottomInt);
+      currentLinePoint[1].setY(bottomMidInt);
+      break;
+    case GraphModel::Marker::sellMarker:
+      currentLinePoint[0].setY(midInt);
+      currentLinePoint[1].setY(topInt);
+      break;
+    case GraphModel::Marker::sellAttemptMarker:
+      currentLinePoint[0].setY(topMidInt);
+      currentLinePoint[1].setY(topInt);
+      break;
+    }
+    currentLinePoint += 2;
+  }
+
+  QPen markerPen(Qt::darkCyan);
+  painter.setPen(markerPen);
+  painter.drawLines(lineData, (currentLinePoint - lineData) / 2);
+}
+
 /*
 void GraphView::drawEstimates(QPainter& painter, const QRect& rect, double vmin, double vmax)
 {

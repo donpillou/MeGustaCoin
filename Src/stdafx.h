@@ -16,6 +16,7 @@
 
 #include "Bots/Bot.h"
 #include "Bots/BuyBot.h"
+#include "Bots/ParticleSwarm.h"
 
 #include "Models/GraphModel.h"
 #include "Models/OrderModel.h"

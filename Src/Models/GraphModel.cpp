@@ -44,6 +44,20 @@ void GraphModel::addTrade(const DataProtocol::Trade& trade)
   }
 }
 
+void GraphModel::addMarker(quint64 time, Marker marker)
+{
+  markers.insert(time, marker);
+  emit dataAdded();
+}
+
+void GraphModel::clearMarkers()
+{
+  if(markers.isEmpty())
+    return;
+  markers.clear();
+  emit dataAdded();
+}
+
 //void GraphModel::addBookSample(const BookSample& bookSample)
 //{
 //  bookSamples.append(bookSample);

@@ -65,13 +65,14 @@ private:
 
   virtual void paintEvent(QPaintEvent* );
 
-  void drawAxesLables(QPainter& painter, const QRect& rect, double hmin, double hmax, const QSize& priceSize);
-  void prepareTradePolyline(const QRect& rect, double hmin, double hmax, double lastVolumeMax, const GraphModel& graphModel, int enabledData, double scale, const QColor& color);
+  void drawAxesLables(QPainter& painter, const QRect& rect, double vmin, double vmax, const QSize& priceSize);
+  void prepareTradePolyline(const QRect& rect, double vmin, double vmax, double lastVolumeMax, const GraphModel& graphModel, int enabledData, double scale, const QColor& color);
   void drawTradePolylines(QPainter& painer);
-  void drawBookPolyline(QPainter& painter, const QRect& rect, double hmin, double hmax);
-  void drawRegressionLines(QPainter& painter, const QRect& rect, double hmin, double hmax);
-  void drawExpRegressionLines(QPainter& painter, const QRect& rect, double hmin, double hmax);
+  void drawBookPolyline(QPainter& painter, const QRect& rect, double vmin, double vmax);
+  void drawRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax);
+  void drawExpRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax);
   //void drawEstimates(QPainter& painter, const QRect& rect, double vmin, double vmax);
+  void drawMarkers(QPainter& painter, const QRect& rect, double vmin, double vmax);
 
   inline void addToMinMax(double price)
   {

@@ -75,7 +75,12 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const PublicDataM
   zoomActionGroup->addAction(action);
   zoomSignalMapper->setMapping(action, 3 * 24 * 60 * 60);
   connect(action, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
-  zoomAction->setMenu(zoomMenu);  
+  action = zoomMenu->addAction(tr("7 Days"));
+  action->setCheckable(true);
+  zoomActionGroup->addAction(action);
+  zoomSignalMapper->setMapping(action, 7 * 24 * 60 * 60);
+  connect(action, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
+  zoomAction->setMenu(zoomMenu);
   qobject_cast<QToolButton*>(toolBar->widgetForAction(zoomAction))->setPopupMode(QToolButton::InstantPopup);
   
   QAction* dataAction = toolBar->addAction(QIcon(":/Icons/chart_curve.png"), tr("&Data"));

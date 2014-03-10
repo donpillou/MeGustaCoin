@@ -65,7 +65,8 @@ void DataService::start()
     virtual void receivedTrade(quint64 channelId, const DataProtocol::Trade& trade)
     {
       actionQueue.append(new AddTradeAction(channelId, trade));
-      QTimer::singleShot(0, &dataService, SLOT(executeActions()));
+      if(trade.flags & DataProtocol::syncFlag || !(trade.flags & DataProtocol::replayedFlag))
+        QTimer::singleShot(0, &dataService, SLOT(executeActions()));
     }
 
     virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker)

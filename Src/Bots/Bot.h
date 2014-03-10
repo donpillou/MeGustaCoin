@@ -29,6 +29,10 @@ public:
     bellRegression5m,
     bellRegression10m,
     bellRegression15m,
+    bellRegression20m,
+    bellRegression30m,
+    bellRegression1h,
+    bellRegression2h,
     numOfBellRegressions,
   };
 
@@ -44,21 +48,56 @@ public:
     RegressionLine bellRegressions[(int)BellRegressions::numOfBellRegressions];
   };
 
+  class Market
+  {
+  public:
+    class Transaction
+    {
+    public:
+      enum class Type
+      {
+        buy,
+        sell,
+      };
+
+      quint64 id;
+      double price;
+      double amount;
+      double fee;
+      Type type;
+    };
+
+    virtual bool buy(double price, double amount, quint64 timeout) = 0;
+    virtual bool sell(double price, double amount, quint64 timeout) = 0;
+    virtual double getBalanceBase() const = 0;
+    virtual double getBalanceComm() const = 0;
+    virtual double getFee() const = 0;
+    virtual unsigned int getOpenBuyOrderCount() const = 0;
+    virtual unsigned int getOpenSellOrderCount() const = 0;
+    virtual quint64 getTimeSinceLastBuy() const = 0;
+    virtual quint64 getTimeSinceLastSell() const = 0;
+
+    virtual void getTransactions(QList<Transaction>& transactions) const = 0;
+    virtual void getBuyTransactions(QList<Transaction>& transactions) const = 0;
+    virtual void getSellTransactions(QList<Transaction>& transactions) const = 0;
+    virtual void removeTransaction(quint64 id) = 0;
+    virtual void updateTransaction(quint64 id, const Transaction& transaction) = 0;
+
+    virtual void warning(const QString& message) = 0;
+  };
+
   class Session
   {
   public:
     virtual ~Session() {};
+    virtual void setParameters(double* parameters) = 0;
     virtual void handle(const DataProtocol::Trade& trade, const Values& values) = 0;
-  };
-
-  class Market
-  {
-  public:
-    virtual bool buy(double price, double amount, quint64 timeout) = 0;
-    virtual bool sell(double price, double amount, quint64 timeout) = 0;
+    virtual void handleBuy(const Market::Transaction& transaction) = 0;
+    virtual void handleSell(const Market::Transaction& transaction) = 0;
   };
 
   virtual Session* createSession(Market& market) = 0;
+  virtual unsigned int getParameterCount() const = 0;
 };
 
 class TradeHandler

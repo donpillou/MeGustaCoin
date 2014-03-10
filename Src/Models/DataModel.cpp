@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
 
+DataModel::DataModel() : orderModel(*this), transactionModel(*this), publicDataModel(0) {}
+
 DataModel::~DataModel()
 {
   for(QMap<QString, PublicDataModel*>::Iterator i = publicDataModels.begin(), end = publicDataModels.end(); i != end; ++i)
@@ -16,6 +18,7 @@ void DataModel::setMarket(const QString& marketName, const QString& coinCurrency
   this->marketName = marketName;
   this->coinCurrency = coinCurrency;
   this->marketCurrency = marketCurrency;
+  this->publicDataModel = marketName.isEmpty() ? 0 : &getDataChannel(marketName);
   emit changedMarket();
 }
 
@@ -31,12 +34,12 @@ void DataModel::setBalance(const Market::Balance& balance)
 //  emit changedTickerData();
 //}
 
-QString DataModel::formatAmount(double amount) const
+QString DataModel::formatAmount(double amount)
 {
   return QLocale::system().toString(fabs(amount), 'f', 8);
 }
 
-QString DataModel::formatPrice(double price) const
+QString DataModel::formatPrice(double price)
 {
   return QLocale::system().toString(price, 'f', 2);
 }

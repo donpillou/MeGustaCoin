@@ -197,7 +197,7 @@ bool DataConnection::subscribe(const QString& channel, quint64 lastReceivedTrade
   }
   else
   {
-    subscribeRequest->maxAge = 24ULL * 60ULL * 60ULL * 1000ULL;
+    subscribeRequest->maxAge = 24ULL * 60ULL * 60ULL * 1000ULL * 7ULL;
     subscribeRequest->sinceId =  0;
   }
   if(!connection.send(message, sizeof(message)))

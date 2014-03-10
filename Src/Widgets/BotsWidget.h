@@ -13,6 +13,7 @@ public:
 
 public slots:
   void simulate();
+  void updateToolBarButtons();
 
 private:
   class Action
@@ -24,17 +25,20 @@ private:
   class Thread : public QThread
   {
   public:
-    Thread(BotsWidget& widget, Bot& botFactory, const QString& marketName) : widget(widget), botFactory(botFactory), marketName(marketName) {}
+    Thread(BotsWidget& widget, Bot& botFactory, const QString& marketName, double fee) : widget(widget), botFactory(botFactory), marketName(marketName), fee(fee) {}
 
   private:
     BotsWidget& widget;
     Bot& botFactory;
     QString marketName;
+    double fee;
 
     virtual void run();
 
     void logMessage(LogModel::Type type, const QString& message);
     void quit(LogModel::Type type, const QString& message);
+    void clearMarkers();
+    void addMarker(quint64 time, GraphModel::Marker marker);
   };
 
   DataModel& dataModel;
@@ -45,6 +49,8 @@ private:
   JobQueue<Action*> actionQueue;
 
   QTreeView* botsView;
+
+  QAction* simulateAction;
 
   QList<QModelIndex> getSelectedRows();
 

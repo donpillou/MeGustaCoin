@@ -10,11 +10,13 @@ public:
   TransactionModel transactionModel;
   LogModel logModel;
 
-  DataModel() : orderModel(*this), transactionModel(*this) {}
+  DataModel();
   ~DataModel();
 
   void setMarket(const QString& marketName, const QString& coinCurrency, const QString& marketCurrency);
   void setBalance(const Market::Balance& balance);
+
+  PublicDataModel* getPublicDataModel() {return publicDataModel;}
 
   void addDataChannel(const QString& channel);
   void clearDataChannel(const QString& channel);
@@ -26,8 +28,8 @@ public:
   const QString& getMarketCurrency() const {return marketCurrency;}
   const Market::Balance& getBalance() const {return balance;}
 
-  QString formatAmount(double amount) const;
-  QString formatPrice(double price) const;
+  static QString formatAmount(double amount);
+  static QString formatPrice(double price);
 
 signals:
   void changedMarket();
@@ -39,4 +41,5 @@ private:
   QString marketCurrency;
   Market::Balance balance;
   QMap<QString, PublicDataModel*> publicDataModels;
+  PublicDataModel* publicDataModel;
 };
