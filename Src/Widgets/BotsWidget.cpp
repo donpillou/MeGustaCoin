@@ -149,7 +149,7 @@ void BotsWidget::Thread::run()
   particleSwarm.start();
 
   double bestRating = 0.;
-  unsigned int iterations = 300;
+  unsigned int iterations = 200;
   for(unsigned int i = 0; i < iterations; ++i)
   {
     particleSwarm.next();
@@ -167,7 +167,7 @@ void BotsWidget::Thread::run()
         for(int i = 0; i < buyOrders.size(); ++i)
         {
           const Order& order = buyOrders[i];
-          balanceBase += order.amount * order.price * (1. + fee);
+          balanceBase += order.amount * order.price + order.fee;
         }
         buyOrders.clear();
         for(int i = 0; i < sellOrders.size(); ++i)
@@ -206,8 +206,6 @@ void BotsWidget::Thread::run()
             lastBuyTime = time;
             balanceComm += order.amount;
 
-            balanceBase += 1; // todo: remove this
-
             buyOrders.removeAt(i);
             session->handleBuy(transaction);
           }
@@ -238,8 +236,6 @@ void BotsWidget::Thread::run()
 
             lastSellTime = time;
             balanceBase += order.amount * order.price - transaction.fee;
-
-            balanceBase += 2; // todo: remove this
 
             sellOrders.removeAt(i);
 
@@ -286,8 +282,8 @@ void BotsWidget::Thread::run()
       {
         double fee = amount * price * this->fee;
         double charge = amount * price + fee;
-        //if(charge > balanceBase)
-        //  return false;
+        if(charge > balanceBase)
+          return false;
 
         Order order = {price, amount, fee, time + timeout};
         buyOrders.append(order);
@@ -297,8 +293,8 @@ void BotsWidget::Thread::run()
       };
       virtual bool sell(double price, double amount, quint64 timeout)
       {
-        //if(amount > balanceComm)
-        //  return false;
+        if(amount > balanceComm)
+          return false;
 
         double fee = amount * price * this->fee;
         Order order = {price, amount, fee, time + timeout};
@@ -352,7 +348,7 @@ void BotsWidget::Thread::run()
 
     // create simulation agent
     Bot::Session* botSession = botFactory.createSession(simMarket);
-    botSession->setParameters(i == iterations - 1 ? bestParameters : parameters);
+    botSession->setParameters(i == iterations - 1 && iterations > 1 ? bestParameters : parameters);
     simMarket.session = botSession;
     if(!botSession)
     {
@@ -393,9 +389,27 @@ void BotsWidget::Thread::run()
     QString report =  QString("Completed simulation with %1 and %2 ~= %3 (best = %4).").arg(DataModel::formatPrice(balanceBase), balanceComm < 0. ? (QString("-") + DataModel::formatAmount(balanceComm)) : DataModel::formatAmount(balanceComm), 
       DataModel::formatPrice(rating), DataModel::formatPrice(bestRating));
     particleSwarm.setRating(-rating);
-    
 
     logMessage(LogModel::Type::information, report);
+
+    if(i == iterations - 1)
+    {
+      QList<Bot::Market::Transaction> transactions;
+      ((Bot::Market*)&simMarket)->getBuyTransactions(transactions);
+      double highestPrice = lastPrice;
+      foreach(const Bot::Market::Transaction& transaction, transactions)
+      {
+        balanceBase += transaction.price * (1. + fee) * transaction.amount;
+        balanceComm -= transaction.amount;
+        if(transaction.price > highestPrice)
+          highestPrice = transaction.price;
+      }
+      double rating2 = balanceBase + balanceComm * highestPrice * (1. - fee);
+      QString report =  QString("Or maybe even with %1 and %2 ~= %3.").arg(DataModel::formatPrice(balanceBase), balanceComm < 0. ? (QString("-") + DataModel::formatAmount(balanceComm)) : DataModel::formatAmount(balanceComm), 
+        DataModel::formatPrice(rating2));
+
+      logMessage(LogModel::Type::information, report);
+    }
   }
 
   quit(LogModel::Type::information, "Finished optimization.");

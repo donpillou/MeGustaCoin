@@ -4,6 +4,9 @@
 BuyBot::Session::Session(Market& market) : market(market)
 {
   memset(&parameters, 0, sizeof(Session::Parameters));
+
+  balanceBtc = market.getBalanceComm();
+  balanceUsd = market.getBalanceBase();
 }
 
 void BuyBot::Session::setParameters(double* parameters)
@@ -19,6 +22,52 @@ void BuyBot::Session::handle(const DataProtocol::Trade& trade, const Values& val
 
 void BuyBot::Session::handleBuy(const Market::Transaction& transaction)
 {
+  double price = transaction.price;
+  double amount = transaction.amount;
+
+  // get sell transaction list
+  QList<Market::Transaction> transactions;
+  market.getSellTransactions(transactions);
+
+  // sort sell transaction list by price
+  QMap<double, Market::Transaction> sortedTransactions;
+  balanceUsd = market.getBalanceBase();
+  foreach(const Market::Transaction& transaction, transactions)
+  {
+    sortedTransactions.insert(transaction.price, transaction);
+    balanceUsd -= transaction.amount * transaction.price + transaction.fee;
+  }
+
+  // iterate over sorted transaction list (ascending)
+  double fee = market.getFee();
+  double invest = 0.;
+  for(QMap<double, Market::Transaction>::Iterator i = sortedTransactions.begin(), end = sortedTransactions.end(); i != end; ++i)
+  {
+    Market::Transaction& transaction = i.value();
+    if(transaction.price >= price * (1. + fee * 2))
+    {
+      if(transaction.amount > amount)
+      {
+        invest += amount * transaction.price * (1. - fee);
+        transaction.amount -= amount;
+        market.updateTransaction(transaction.id, transaction);
+        amount = 0.;
+        break;
+      }
+      else
+      {
+        invest += transaction.amount * transaction.price * (1. - fee);
+        market.removeTransaction(transaction.id);
+        amount -= transaction.amount;
+        if(amount == 0.)
+          break;
+      }
+    }
+  }
+  if(amount == 0.)
+    market.warning(QString("Earned %1.").arg(DataModel::formatPrice(invest - price * transaction.amount * (1. + fee))));
+  else
+    market.warning("Bought something without profit.");
 }
 
 void BuyBot::Session::handleSell(const Market::Transaction& transaction)
@@ -32,10 +81,14 @@ void BuyBot::Session::handleSell(const Market::Transaction& transaction)
 
   // sort buy transaction list by price
   QMap<double, Market::Transaction> sortedTransactions;
+  balanceBtc = market.getBalanceComm();
   foreach(const Market::Transaction& transaction, transactions)
+  {
     sortedTransactions.insert(transaction.price, transaction);
+    balanceBtc -= transaction.amount;
+  }
 
-  // iterator over sorted transaction list (descending)
+  // iterate over sorted transaction list (descending)
   double fee = market.getFee();
   double invest = 0.;
   if(!sortedTransactions.isEmpty())
@@ -66,54 +119,111 @@ void BuyBot::Session::handleSell(const Market::Transaction& transaction)
         break;
     }
   }
-  market.removeTransaction(transaction.id);
-  if(amount > 0.)
-    market.warning("Sold something without profit.");
-  else
+  if(amount == 0.)
     market.warning(QString("Earned %1.").arg(DataModel::formatPrice(price * transaction.amount * (1. - fee) - invest)));
+  else
+    market.warning("Sold something without profit.");
 }
+
+bool BuyBot::Session::isGoodBuy(const Values& values)
+{
+  for(int i = 0; i < (int)BellRegressions::bellRegression2h; ++i)
+    if(values.bellRegressions[i].incline > 0.)
+      return false; // price is not falling enough
+  return true;
+}
+
+bool BuyBot::Session::isVeryGoodBuy(const Values& values)
+{
+  for(int i = 0; i < (int)Regressions::regression24h; ++i)
+    if(values.regressions[i].incline > 0.)
+      return false; // price is not falling enough
+  return true;
+}
+
+bool BuyBot::Session::isGoodSell(const Values& values)
+{
+  for(int i = 0; i < (int)BellRegressions::bellRegression2h; ++i)
+    if(values.bellRegressions[i].incline < 0.)
+      return false; // price is not rising enough
+  return true;
+}
+
+bool BuyBot::Session::isVeryGoodSell(const Values& values)
+{
+  for(int i = 0; i < (int)Regressions::regression24h; ++i)
+    if(values.regressions[i].incline < 0.)
+      return false; // price is not rising enough
+  return true;
+}
+
 
 void BuyBot::Session::checkBuy(const DataProtocol::Trade& trade, const Values& values)
 {
   if(market.getOpenBuyOrderCount() > 0)
     return; // there is already an open buy order
-  if(market.getTimeSinceLastBuy() < 60 * 30)
+  if(market.getTimeSinceLastBuy() < 60 * 60)
     return; // do not buy too often
-  //const double minFall = 0.000005;
-  for(int i = 0; i < (int)BellRegressions::numOfBellRegressions; ++i)
-    if(values.bellRegressions[i].incline / values.bellRegressions[i].price > -parameters.minFall[i] * 0.00001)
-      return; // price is not falling enough
 
-  // try to buy something
-  market.buy(trade.price * (1. + parameters.buyGain * 0.01), 0.01, 60 * 60);
+  double fee = market.getFee();
+
+  if(isVeryGoodBuy(values) && balanceUsd >= trade.price * 0.02 * (1. + fee))
+  {
+    market.buy(trade.price, 0.02, 60 * 60);
+    return;
+  }
+
+  if(isGoodBuy(values))
+  {
+    double price = trade.price;
+    double fee = market.getFee() * (1. + parameters.buyProfitGain);
+
+    QList<Market::Transaction> transactions;
+    market.getSellTransactions(transactions);
+    double profitableAmount = 0.;
+    foreach(const Market::Transaction& transaction, transactions)
+    {
+      if(price * (1. + fee * 2.) < transaction.price)
+        profitableAmount += transaction.amount;
+    }
+    if(profitableAmount >= 0.01)
+    {
+      market.buy(trade.price, qMax(0.01, profitableAmount * 0.5), 60 * 60);
+      return;
+    }
+  }
 }
 
 void BuyBot::Session::checkSell(const DataProtocol::Trade& trade, const Values& values)
 {
   if(market.getOpenSellOrderCount() > 0)
     return; // there is already an open sell order
-  if(market.getTimeSinceLastSell() < 60 * 30)
+  if(market.getTimeSinceLastSell() < 60 * 60)
     return; // do not sell too often
-  for(int i = 0; i < (int)BellRegressions::numOfBellRegressions; ++i)
-    if(values.bellRegressions[i].incline / values.bellRegressions[i].price < parameters.minRise[i] * 0.00001)
-      return; // price is not rising enough
-  
-  double price = trade.price;
-  double fee = market.getFee();
-  /*
-  fee *= 1. + parameters.minProfit * 2.;
 
-  QList<Market::Transaction> transactions;
-  market.getBuyTransactions(transactions);
-  double profitableAmount = 0.;
-  foreach(const Market::Transaction& transaction, transactions)
+  if(isVeryGoodSell(values) && balanceBtc >= 0.02)
   {
-    if(price > transaction.price * (1. + fee * 2.))
-      profitableAmount += transaction.amount;
+    market.sell(trade.price, 0.02, 60 * 60);
+    return;
   }
-  if(profitableAmount < 0.01)
-    return; // selling would not be profitable
-  */
-  // try to sell something
-  market.sell(trade.price * (1. + parameters.sellGain * 0.01), 0.01/*profitableAmount*/, 60 * 60);
+
+  if(isGoodSell(values))
+  {
+    double price = trade.price;
+    double fee = market.getFee() * (1. + parameters.sellProfitGain);
+
+    QList<Market::Transaction> transactions;
+    market.getBuyTransactions(transactions);
+    double profitableAmount = 0.;
+    foreach(const Market::Transaction& transaction, transactions)
+    {
+      if(price > transaction.price * (1. + fee * 2.))
+        profitableAmount += transaction.amount;
+    }
+    if(profitableAmount >= 0.01)
+    {
+      market.sell(trade.price, qMax(0.01, profitableAmount * 0.5), 60 * 60);
+      return;
+    }
+  }
 }

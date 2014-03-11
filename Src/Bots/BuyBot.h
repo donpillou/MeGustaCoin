@@ -11,11 +11,10 @@ private:
   public:
     struct Parameters
     {
-      double minFall[(int)BellRegressions::numOfBellRegressions];
-      double minRise[(int)BellRegressions::numOfBellRegressions];
-      double minProfit;
-      double sellGain;
-      double buyGain;
+      double sellProfitGain;
+      double buyProfitGain;
+      //double sellPriceGain;
+      //double buyPriceGain;
     };
 
     Session(Market& market);
@@ -25,6 +24,9 @@ private:
 
     Parameters parameters;
 
+    double balanceUsd;
+    double balanceBtc;
+
     virtual ~Session() {}
 
     virtual void setParameters(double* parameters);
@@ -32,6 +34,11 @@ private:
     virtual void handle(const DataProtocol::Trade& trade, const Values& values);
     virtual void handleBuy(const Market::Transaction& transaction);
     virtual void handleSell(const Market::Transaction& transaction);
+
+    bool isGoodBuy(const Values& values);
+    bool isVeryGoodBuy(const Values& values);
+    bool isGoodSell(const Values& values);
+    bool isVeryGoodSell(const Values& values);
 
     void checkBuy(const DataProtocol::Trade& trade, const Values& values);
     void checkSell(const DataProtocol::Trade& trade, const Values& values);
