@@ -2,15 +2,11 @@
 #include "stdafx.h"
 
 DataService::DataService(DataModel& dataModel) :
-  dataModel(dataModel), thread(0), isConnected(false)
-{
-}
+  dataModel(dataModel), thread(0), isConnected(false) {}
 
 DataService::~DataService()
 {
   stop();
-
-  qDeleteAll(actionQueue.getAll());
 }
 
 void DataService::start()
@@ -18,157 +14,7 @@ void DataService::start()
   if(thread)
     return;
 
-  struct MyWorkerThread : public WorkerThread, public DataConnection::Callback
-  {
-    MyWorkerThread(DataService& dataService, JobQueue<Action*>& actionQueue, JobQueue<Action*>& subscriptionQueue) :
-      dataService(dataService), actionQueue(actionQueue), subscriptionQueue(subscriptionQueue), canceled(false) {}
-
-    virtual void run()
-    {
-      while(!canceled)
-      {
-        actionQueue.append(new SetStateAction(PublicDataModel::State::connecting));
-        QTimer::singleShot(0, &dataService, SLOT(executeActions()));
-        process();
-        actionQueue.append(new SetStateAction(PublicDataModel::State::offline));
-        QTimer::singleShot(0, &dataService, SLOT(executeActions()));
-        if(canceled)
-          return;
-        sleep(10);
-      }
-    }
-
-    virtual void interrupt()
-    {
-      connection.interrupt();
-    }
-
-    virtual void receivedChannelInfo(const QString& channelName)
-    {
-      actionQueue.append(new ChannelInfoAction(channelName));
-      QTimer::singleShot(0, &dataService, SLOT(executeActions()));
-      //information(QString("Found channel %1.").arg(channelName));
-    }
-
-    virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId)
-    {
-      actionQueue.append(new SubscribeResponseAction(Action::Type::subscribeResponse, channelName, channelId));
-      QTimer::singleShot(0, &dataService, SLOT(executeActions()));
-    }
-
-    virtual void receivedUnsubscribeResponse(const QString& channelName, quint64 channelId)
-    {
-      actionQueue.append(new SubscribeResponseAction(Action::Type::unsubscribeResponse, channelName, channelId));
-      QTimer::singleShot(0, &dataService, SLOT(executeActions()));
-    }
-
-    virtual void receivedTrade(quint64 channelId, const DataProtocol::Trade& trade)
-    {
-      actionQueue.append(new AddTradeAction(channelId, trade));
-      if(trade.flags & DataProtocol::syncFlag || !(trade.flags & DataProtocol::replayedFlag))
-        QTimer::singleShot(0, &dataService, SLOT(executeActions()));
-    }
-
-    virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker)
-    {
-      actionQueue.append(new AddTickerAction(channelId, ticker));
-      QTimer::singleShot(0, &dataService, SLOT(executeActions()));
-    }
-
-    virtual void receivedErrorResponse(const QString& message)
-    {
-      actionQueue.append(new LogMessageAction(LogModel::Type::error, message));
-      QTimer::singleShot(0, &dataService, SLOT(executeActions()));
-    }
-
-    virtual void information(const QString& message)
-    {
-      actionQueue.append(new LogMessageAction(LogModel::Type::information, message));
-      QTimer::singleShot(0, &dataService, SLOT(executeActions()));
-    }
-
-    void connected()
-    {
-      actionQueue.append(new SetStateAction(PublicDataModel::State::connected));
-      QTimer::singleShot(0, &dataService, SLOT(executeActions()));
-    }
-
-    void process()
-    {
-      Action* action;
-      while(subscriptionQueue.get(action, 0))
-      {
-        if(!action)
-        {
-          canceled = true;
-          return;
-        }
-        delete action;
-      }
-
-      information("Connecting to data service...");
-
-      // create connection
-      if(!connection.connect())
-      {
-        receivedErrorResponse(QString("Could not connect to data service: %1").arg(connection.getLastError()));
-        return;
-      }
-      information("Connected to data service.");
-      connected();
-
-      // load channel list
-      if(!connection.loadChannelList())
-        goto error;
-
-      // loop
-      for(;;)
-      {
-        while(subscriptionQueue.get(action, 0))
-        {
-          if(!action)
-          {
-            canceled = true;
-            return;
-          }
-          switch(action->type)
-          {
-          case Action::Type::subscribe:
-            {
-              SubscriptionAction* subscriptionAction = (SubscriptionAction*)action;
-              if(!connection.subscribe(subscriptionAction->channel, subscriptionAction->lastReceivedTradeId))
-                goto error;
-            }
-            break;
-          case Action::Type::unsubscribe:
-            {
-              SubscriptionAction* subscriptionAction = (SubscriptionAction*)action;
-              if(!connection.unsubscribe(subscriptionAction->channel))
-                goto error;
-            }
-            break;
-          default:
-            break;
-          }
-          delete action;
-        }
-
-        if(!connection.process(*this))
-          break;
-      }
-
-    error:
-      receivedErrorResponse(QString("Lost connection to data service: %1").arg(connection.getLastError()));
-    }
-
-    DataService& dataService;
-    JobQueue<Action*>& actionQueue;
-    JobQueue<Action*>& subscriptionQueue;
-    DataConnection connection;
-    bool canceled;
-  };
-
-  thread = new MyWorkerThread(*this, actionQueue, subscriptionQueue);
+  thread = new WorkerThread(*this, eventQueue, jobQueue);
   thread->start();
 }
 
@@ -177,14 +23,14 @@ void DataService::stop()
   if(!thread)
     return;
 
-  subscriptionQueue.append(0); // cancel thread message
+  jobQueue.append(0); // cancel worker thread
   thread->interrupt();
   thread->wait();
   delete thread;
   thread = 0;
 
-  executeActions(); // better than qDeleteAll(actionQueue.getAll()); ;)
-  qDeleteAll(subscriptionQueue.getAll());
+  handleEvents(); // better than qDeleteAll(eventQueue.getAll()); ;)
+  qDeleteAll(jobQueue.getAll());
 }
 
 void DataService::subscribe(const QString& channel)
@@ -194,12 +40,29 @@ void DataService::subscribe(const QString& channel)
   subscriptions.insert(channel);
   if(!isConnected)
     return;
+
+  class SubscriptionJob : public Job
+  {
+  public:
+    SubscriptionJob(const QString& channel, quint64 lastReceivedTradeId) : channel(channel), lastReceivedTradeId(lastReceivedTradeId) {}
+  private:
+    QString channel;
+    quint64 lastReceivedTradeId;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.subscribe(channel, lastReceivedTradeId))
+        return false;
+      return true;
+    }
+  };
+
+  dataModel.logModel.addMessage(LogModel::Type::information, QString("Subscribing to channel %1...").arg(channel));
   PublicDataModel& publicDataModel = dataModel.getDataChannel(channel);
-  subscriptionQueue.append(new SubscriptionAction(Action::Type::subscribe, channel, publicDataModel.getLastReceivedTradeId()));
+  jobQueue.append(new SubscriptionJob(channel, publicDataModel.getLastReceivedTradeId()));
   if(thread)
     thread->interrupt();
   publicDataModel.setState(PublicDataModel::State::connecting);
-  dataModel.logModel.addMessage(LogModel::Type::information, QString("Subscribing to channel %1...").arg(channel));
 }
 
 void DataService::unsubscribe(const QString& channel)
@@ -210,106 +73,281 @@ void DataService::unsubscribe(const QString& channel)
   subscriptions.erase(it);
   if(!isConnected)
     return;
+
+  class UnsubscriptionJob : public Job
+  {
+  public:
+    UnsubscriptionJob(const QString& channel) : channel(channel) {}
+  private:
+    QString channel;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.unsubscribe(channel))
+        return false;
+      return true;
+    }
+  };
+
   dataModel.logModel.addMessage(LogModel::Type::information, QString("Unsubscribing from channel %1...").arg(channel));
-  subscriptionQueue.append(new SubscriptionAction(Action::Type::unsubscribe, channel, 0));
+  jobQueue.append(new UnsubscriptionJob(channel));
   if(thread)
     thread->interrupt();
 }
 
-void DataService::executeActions()
+void DataService::handleEvents()
 {
   for(;;)
   {
-    Action* action = 0;
-    if(!actionQueue.get(action, 0) || !action)
+    Event* event = 0;
+    if(!eventQueue.get(event, 0) || !event)
       break;
-    switch(action->type)
+    event->handle(*this);
+    delete event;
+  }
+}
+
+void DataService::WorkerThread::interrupt()
+{
+  connection.interrupt();
+}
+
+void DataService::WorkerThread::addMessage(LogModel::Type type, const QString& message)
+{
+  class LogMessageEvent : public Event
+  {
+  public:
+    LogMessageEvent(LogModel::Type type, const QString& message) : type(type), message(message) {}
+  private:
+    LogModel::Type type;
+    QString message;
+  public: // Event
+    virtual void handle(DataService& dataService)
     {
-    case Action::Type::addTrade:
+        dataService.dataModel.logModel.addMessage(type, message);
+    }
+  };
+  eventQueue.append(new LogMessageEvent(type, message));
+  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+}
+
+void DataService::WorkerThread::setState(PublicDataModel::State state)
+{
+  class SetStateEvent : public Event
+  {
+  public:
+    SetStateEvent(PublicDataModel::State state) : state(state) {}
+  private:
+    PublicDataModel::State state;
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      if(state == PublicDataModel::State::connected)
       {
-        AddTradeAction* addTradeAction = (AddTradeAction*)action;
-        PublicDataModel* publicDataModel = activeSubscriptions[addTradeAction->channelId];
-        if(publicDataModel)
-          publicDataModel->addTrade(addTradeAction->trade);
+        dataService.isConnected = true;
+        QSet<QString> subscriptions;
+        subscriptions.swap(dataService.subscriptions);
+        foreach(const QString& channel, subscriptions)
+          dataService.subscribe(channel);
       }
-      break;
-    case Action::Type::addTicker:
+      else if(state == PublicDataModel::State::offline)
       {
-        AddTickerAction* addTickerAction = (AddTickerAction*)action;
-        PublicDataModel* publicDataModel = activeSubscriptions[addTickerAction->channelId];
-        if(publicDataModel)
+        dataService.isConnected = false;
+        for(QMap<QString, PublicDataModel*>::ConstIterator i = dataService.dataModel.getDataChannels().begin(), end = dataService.dataModel.getDataChannels().end(); i != end; ++i)
         {
-          DataProtocol::Ticker& ticker = addTickerAction->ticker;
-          publicDataModel->addTicker(ticker.time / 1000ULL, ticker.bid, ticker.ask);
+          PublicDataModel* publicDataModel = i.value();
+          if(publicDataModel)
+            publicDataModel->setState(PublicDataModel::State::offline);
         }
+        dataService.activeSubscriptions.clear();
       }
-      break;
-    case Action::Type::logMessage:
+    }
+  };
+
+  eventQueue.append(new SetStateEvent(state));
+  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+}
+
+void DataService::WorkerThread::process()
+{
+  Job* job;
+  while(jobQueue.get(job, 0))
+  {
+    if(!job)
+    {
+      canceled = true;
+      return;
+    }
+    delete job;
+  }
+
+  addMessage(LogModel::Type::information, "Connecting to data service...");
+
+  // create connection
+  if(!connection.connect())
+  {
+    addMessage(LogModel::Type::error, QString("Could not connect to data service: %1").arg(connection.getLastError()));
+    return;
+  }
+  addMessage(LogModel::Type::information, "Connected to data service.");
+  setState(PublicDataModel::State::connected);
+
+  // load channel list
+  if(!connection.loadChannelList())
+    goto error;
+
+  // loop
+  for(;;)
+  {
+    while(jobQueue.get(job, 0))
+    {
+      if(!job)
       {
-        LogMessageAction* logMessageAction = (LogMessageAction*)action;
-        dataModel.logModel.addMessage(logMessageAction->type, logMessageAction->message);
+        canceled = true;
+        return;
       }
-      break;
-    case Action::Type::setState:
-      {
-        SetStateAction* setStateAction = (SetStateAction*)action;
-        if(setStateAction->state == PublicDataModel::State::connected)
-        {
-          isConnected = true;
-          foreach(const QString& channel, subscriptions)
-          {
-            PublicDataModel& publicDataModel = dataModel.getDataChannel(channel);
-            subscriptionQueue.append(new SubscriptionAction(Action::Type::subscribe, channel, publicDataModel.getLastReceivedTradeId()));
-            publicDataModel.setState(PublicDataModel::State::connecting);
-            dataModel.logModel.addMessage(LogModel::Type::information, QString("Subscribing to channel %1...").arg(channel));
-          }
-          if(thread)
-            thread->interrupt();
-        }
-        else if(setStateAction->state == PublicDataModel::State::offline)
-        {
-          isConnected = false;
-          for(QMap<QString, PublicDataModel*>::ConstIterator i = dataModel.getDataChannels().begin(), end = dataModel.getDataChannels().end(); i != end; ++i)
-          {
-            PublicDataModel* publicDataModel = i.value();
-            if(publicDataModel)
-              publicDataModel->setState(PublicDataModel::State::offline);
-          }
-          activeSubscriptions.clear();
-        }
-      }
-      break;
-    case Action::Type::channelInfo:
-      {
-        ChannelInfoAction* channelInfo = (ChannelInfoAction*)action;
-        dataModel.addDataChannel(channelInfo->channel);
-      }
-      break;
-    case Action::Type::subscribeResponse:
-      {
-        SubscribeResponseAction* subscribeResponse = (SubscribeResponseAction*)action;
-        PublicDataModel& publicDataModel = dataModel.getDataChannel(subscribeResponse->channel);
-        activeSubscriptions[subscribeResponse->channelId] = &publicDataModel;
-        publicDataModel.setState(PublicDataModel::State::connected);
-        dataModel.logModel.addMessage(LogModel::Type::information, QString("Subscribed to channel %1.").arg(subscribeResponse->channel));
-      }
-      break;
-    case Action::Type::unsubscribeResponse:
-      {
-        SubscribeResponseAction* unsubscribeResponse = (SubscribeResponseAction*)action;
-        PublicDataModel& publicDataModel = dataModel.getDataChannel(unsubscribeResponse->channel);
-        activeSubscriptions.remove(unsubscribeResponse->channelId);
-        if(publicDataModel.getState() == PublicDataModel::State::connected)
-        {
-          publicDataModel.setState(PublicDataModel::State::offline);
-        }
-        dataModel.logModel.addMessage(LogModel::Type::information, QString("Unsubscribed from channel %1.").arg(unsubscribeResponse->channel));
-      }
-      break;
-    default:
-      break;
+      if(!job->execute(*this))
+        goto error;
+      delete job;
     }
 
-    delete action;
+    if(!connection.process(*this))
+      break;
   }
+
+error:
+  addMessage(LogModel::Type::error, QString("Lost connection to data service: %1").arg(connection.getLastError()));
+}
+
+void DataService::WorkerThread::run()
+{
+  while(!canceled)
+  {
+    setState(PublicDataModel::State::connecting);
+    process();
+    setState(PublicDataModel::State::offline);
+    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+    if(canceled)
+      return;
+    sleep(10);
+  }
+}
+
+void DataService::WorkerThread::receivedChannelInfo(const QString& channelName)
+{
+  class ChannelInfoEvent : public Event
+  {
+  public:
+    ChannelInfoEvent(const QString& channelName) : channelName(channelName) {}
+  private:
+    QString channelName;
+  public: // Event
+    virtual void handle(DataService& dataService)
+    {
+      dataService.dataModel.addDataChannel(channelName);
+    }
+  };
+
+  eventQueue.append(new ChannelInfoEvent(channelName));
+  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+  //information(QString("Found channel %1.").arg(channelName));
+}
+
+void DataService::WorkerThread::receivedSubscribeResponse(const QString& channelName, quint64 channelId)
+{
+  class SubscribeResponseEvent : public Event
+  {
+  public:
+    SubscribeResponseEvent(const QString& channelName, quint64 channelId) : channelName(channelName), channelId(channelId) {}
+  private:
+    QString channelName;
+    quint64 channelId;
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      DataModel& dataModel = dataService.dataModel;
+      PublicDataModel& publicDataModel = dataModel.getDataChannel(channelName);
+      dataService.activeSubscriptions[channelId] = &publicDataModel;
+      publicDataModel.setState(PublicDataModel::State::connected);
+      dataModel.logModel.addMessage(LogModel::Type::information, QString("Subscribed to channel %1.").arg(channelName));
+    }
+  };
+
+  eventQueue.append(new SubscribeResponseEvent(channelName, channelId));
+  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+}
+
+void DataService::WorkerThread::receivedUnsubscribeResponse(const QString& channelName, quint64 channelId)
+{
+  class UnsubscribeResponseEvent : public Event
+  {
+  public:
+    UnsubscribeResponseEvent(const QString& channelName, quint64 channelId) : channelName(channelName), channelId(channelId) {}
+  private:
+    QString channelName;
+    quint64 channelId;
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      DataModel& dataModel = dataService.dataModel;
+      PublicDataModel& publicDataModel = dataModel.getDataChannel(channelName);
+      dataService.activeSubscriptions.remove(channelId);
+      if(publicDataModel.getState() == PublicDataModel::State::connected)
+        publicDataModel.setState(PublicDataModel::State::offline);
+      dataModel.logModel.addMessage(LogModel::Type::information, QString("Unsubscribed from channel %1.").arg(channelName));
+    }
+  };
+
+  eventQueue.append(new UnsubscribeResponseEvent(channelName, channelId));
+  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+}
+
+void DataService::WorkerThread::receivedTrade(quint64 channelId, const DataProtocol::Trade& trade)
+{
+  class AddTradeEvent : public Event
+  {
+  public:
+    AddTradeEvent(quint64 channelId, const DataProtocol::Trade& trade) : channelId(channelId), trade(trade) {}
+  private:
+    quint64 channelId;
+    DataProtocol::Trade trade;
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      PublicDataModel* publicDataModel = dataService.activeSubscriptions[channelId];
+      if(publicDataModel)
+        publicDataModel->addTrade(trade);
+    }
+  };
+
+  eventQueue.append(new AddTradeEvent(channelId, trade));
+  if(trade.flags & DataProtocol::syncFlag || !(trade.flags & DataProtocol::replayedFlag))
+    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+}
+
+void DataService::WorkerThread::receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker)
+{
+  class AddTickerEvent : public Event
+  {
+  public:
+    AddTickerEvent(quint64 channelId, const DataProtocol::Ticker& ticker) : channelId(channelId), ticker(ticker) {}
+  private:
+    quint64 channelId;
+    DataProtocol::Ticker ticker;
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      PublicDataModel* publicDataModel = dataService.activeSubscriptions[channelId];
+      if(publicDataModel)
+        publicDataModel->addTicker(ticker.time / 1000ULL, ticker.bid, ticker.ask);
+    }
+  };
+
+  eventQueue.append(new AddTickerEvent(channelId, ticker));
+  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+}
+
+void DataService::WorkerThread::receivedErrorResponse(const QString& message)
+{
+  addMessage(LogModel::Type::error, message);
 }

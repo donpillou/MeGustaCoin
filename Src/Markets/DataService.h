@@ -16,96 +16,63 @@ public:
   void unsubscribe(const QString& channel);
 
 private:
-  class WorkerThread : public QThread
+  class WorkerThread;
+
+  class Job
   {
   public:
-    virtual void interrupt() = 0;
+    virtual ~Job() {}
+    virtual bool execute(WorkerThread& workerThread) = 0;
+  };
+
+  class Event
+  {
+  public:
+    virtual ~Event() {}
+    virtual void handle(DataService& dataService) = 0;
+  };
+
+  class WorkerThread : public QThread, public DataConnection::Callback
+  {
+  public:
+    WorkerThread(DataService& dataService, JobQueue<Event*>& eventQueue, JobQueue<Job*>& jobQueue) :
+      dataService(dataService), eventQueue(eventQueue), jobQueue(jobQueue), canceled(false) {}
+
+    void interrupt();
+
+  public:
+    DataService& dataService;
+    JobQueue<Event*>& eventQueue;
+    JobQueue<Job*>& jobQueue;
+    DataConnection connection;
+    bool canceled;
+
+  private:
+    void addMessage(LogModel::Type type, const QString& message);
+    void setState(PublicDataModel::State state);
+    void process();
+
+  private: // QThread
+    virtual void run();
+
+  private: // DataConnection::Callback
+    virtual void receivedChannelInfo(const QString& channelName);
+    virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId);
+    virtual void receivedUnsubscribeResponse(const QString& channelName, quint64 channelId);
+    virtual void receivedTrade(quint64 channelId, const DataProtocol::Trade& trade);
+    virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker);
+    virtual void receivedErrorResponse(const QString& message);
   };
 
   DataModel& dataModel;
   WorkerThread* thread;
 
-  class Action
-  {
-  public:
-    enum class Type
-    {
-      addTrade,
-      addTicker,
-      logMessage,
-      setState,
-      subscribe,
-      unsubscribe,
-      channelInfo,
-      subscribeResponse,
-      unsubscribeResponse,
-    };
-    Type type;
-
-    Action(Type type) : type(type) {}
-    virtual ~Action() {}
-  };
-
-  class AddTradeAction : public Action
-  {
-  public:
-    quint64 channelId;
-    DataProtocol::Trade trade;
-    AddTradeAction(quint64 channelId, const DataProtocol::Trade& trade) : Action(Type::addTrade), channelId(channelId), trade(trade) {}
-  };
-
-  class AddTickerAction : public Action
-  {
-  public:
-    quint64 channelId;
-    DataProtocol::Ticker ticker;
-    AddTickerAction(quint64 channelId, const DataProtocol::Ticker& ticker) : Action(Type::addTicker), channelId(channelId), ticker(ticker) {}
-  };
-
-  class LogMessageAction : public Action
-  {
-  public:
-    LogModel::Type type;
-    QString message;
-    LogMessageAction(LogModel::Type type, const QString& message) : Action(Type::logMessage), type(type), message(message) {}
-  };
-
-  class SetStateAction : public Action
-  {
-  public:
-    PublicDataModel::State state;
-    SetStateAction(PublicDataModel::State state) : Action(Type::setState), state(state) {}
-  };
-
-  class ChannelInfoAction : public Action
-  {
-  public:
-    QString channel;
-    ChannelInfoAction(const QString& channel) : Action(Type::channelInfo), channel(channel) {}
-  };
-
-  class SubscriptionAction : public Action
-  {
-  public:
-    QString channel;
-    quint64 lastReceivedTradeId;
-    SubscriptionAction(Type type, const QString& channel, quint64 lastReceivedTradeId) : Action(type), channel(channel), lastReceivedTradeId(lastReceivedTradeId) {}
-  };
-
-  class SubscribeResponseAction : public Action
-  {
-  public:
-    QString channel;
-    quint64 channelId;
-    SubscribeResponseAction(Type type, const QString& channel, quint64 channelId) : Action(type), channel(channel), channelId(channelId) {}
-  };
-
-  JobQueue<Action*> actionQueue;
-  JobQueue<Action*> subscriptionQueue;
+  JobQueue<Event*> eventQueue;
+  JobQueue<Job*> jobQueue;
   QHash<quint64, PublicDataModel*> activeSubscriptions;
   bool isConnected;
   QSet<QString> subscriptions;
 
 private slots:
-  void executeActions();
+  void handleEvents();
 };
