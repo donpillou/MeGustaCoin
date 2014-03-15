@@ -268,7 +268,7 @@ void DataService::WorkerThread::receivedSubscribeResponse(const QString& channel
       DataModel& dataModel = dataService.dataModel;
       PublicDataModel& publicDataModel = dataModel.getDataChannel(channelName);
       dataService.activeSubscriptions[channelId] = &publicDataModel;
-      publicDataModel.setState(PublicDataModel::State::connected);
+      publicDataModel.setState(PublicDataModel::State::loading);
       dataModel.logModel.addMessage(LogModel::Type::information, QString("Subscribed to channel %1.").arg(channelName));
     }
   };
@@ -304,25 +304,60 @@ void DataService::WorkerThread::receivedUnsubscribeResponse(const QString& chann
 
 void DataService::WorkerThread::receivedTrade(quint64 channelId, const DataProtocol::Trade& trade)
 {
-  class AddTradeEvent : public Event
+  if(trade.flags & DataProtocol::replayedFlag)
   {
-  public:
-    AddTradeEvent(quint64 channelId, const DataProtocol::Trade& trade) : channelId(channelId), trade(trade) {}
-  private:
-    quint64 channelId;
-    DataProtocol::Trade trade;
-  private: // Event
-    virtual void handle(DataService& dataService)
-    {
-      PublicDataModel* publicDataModel = dataService.activeSubscriptions[channelId];
-      if(publicDataModel)
-        publicDataModel->addTrade(trade);
-    }
-  };
+    QList<DataProtocol::Trade>& trades = replayedTrades[channelId];
+    trades.append(trade);
 
-  eventQueue.append(new AddTradeEvent(channelId, trade));
-  if(trade.flags & DataProtocol::syncFlag || !(trade.flags & DataProtocol::replayedFlag))
+    if(trade.flags & DataProtocol::syncFlag)
+    {
+      class SetTradesEvent : public Event
+      {
+      public:
+        SetTradesEvent(quint64 channelId) : channelId(channelId) {}
+        QList<DataProtocol::Trade> trades;
+      private:
+        quint64 channelId;
+      private: // Event
+        virtual void handle(DataService& dataService)
+        {
+          PublicDataModel* publicDataModel = dataService.activeSubscriptions[channelId];
+          if(publicDataModel)
+          {
+            publicDataModel->setTrades(trades);
+            publicDataModel->setState(PublicDataModel::State::connected);
+          }
+        }
+      };
+
+      SetTradesEvent* setTradesEvent = new SetTradesEvent(channelId);
+      setTradesEvent->trades.swap(trades);
+      eventQueue.append(setTradesEvent);
+      QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+      replayedTrades.remove(channelId);
+    }
+  }
+  else
+  {
+    class AddTradeEvent : public Event
+    {
+    public:
+      AddTradeEvent(quint64 channelId, const DataProtocol::Trade& trade) : channelId(channelId), trade(trade) {}
+    private:
+      quint64 channelId;
+      DataProtocol::Trade trade;
+    private: // Event
+      virtual void handle(DataService& dataService)
+      {
+        PublicDataModel* publicDataModel = dataService.activeSubscriptions[channelId];
+        if(publicDataModel)
+          publicDataModel->addTrade(trade);
+      }
+    };
+
+    eventQueue.append(new AddTradeEvent(channelId, trade));
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+  }
 }
 
 void DataService::WorkerThread::receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker)

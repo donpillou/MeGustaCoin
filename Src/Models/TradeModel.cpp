@@ -20,25 +20,18 @@ void TradeModel::updateHeader()
 
 void TradeModel::reset()
 {
-  beginResetModel();
-  trades.clear();
-  endResetModel();
-  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
+  if(!trades.isEmpty())
+  {
+    beginResetModel();
+    qDeleteAll(trades);
+    trades.clear();
+    endResetModel();
+    emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
+  }
 }
 
 void TradeModel::clearAbove(int tradeCount)
 {
-//  int maxCount = qMax(tradeCount, 0);
-//  if (trades.size() > maxCount)
-//  {
-//    beginRemoveRows(QModelIndex(), 0, (trades.size() - maxCount) - 1);
-//    for(int i = 0, count = trades.size() - maxCount; i < count; ++i)
-//    {
-//      delete trades[0];
-//      trades.removeAt(0);
-//    }
-//    endRemoveRows();
-//  }
   int tradesToRemove = trades.size() - tradeCount;
   if(tradesToRemove > 0)
   {
@@ -54,17 +47,51 @@ void TradeModel::clearAbove(int tradeCount)
   }
 }
 
-void TradeModel::addTrade(quint64 id, quint64 time, double price, double amount)
+void TradeModel::setTrades(const QList<DataProtocol::Trade>& tradesData)
 {
-  //int oldCount = trades.size();
+  reset();
+
+  int tradesToInsert = qMin(tradesData.size(), 100);
+  if(tradesToInsert == 0)
+    return;
+
+  beginInsertRows(QModelIndex(), 0, tradesToInsert - 1);
+  trades.reserve(tradesToInsert);
+  for(int i = 0; i < tradesToInsert; ++i)
+    trades.append(new Trade);
+
+  double lastPrice = 0.;
+  for(int i = tradesData.size() - tradesToInsert, end = tradesData.size(), j = tradesToInsert - 1; i < end; ++i, --j)
+  {
+    const DataProtocol::Trade& tradeData = tradesData[i];
+    Trade* trade = trades[j];
+    trade->id = tradeData.id;
+    trade->time = tradeData.time / 1000ULL;
+    trade->price = tradeData.price;
+    trade->amount = tradeData.amount;
+    trade->icon = Trade::Icon::neutral;
+    if(lastPrice != 0.)
+    {
+      if(trade->price > lastPrice)
+        trade->icon = Trade::Icon::up;
+      else if(trade->price < lastPrice)
+        trade->icon = Trade::Icon::down;
+    }
+    lastPrice = tradeData.price;
+  }
+  endInsertRows();
+}
+
+void TradeModel::addTrade(const DataProtocol::Trade& tradeData)
+{
   double lastPrice = trades.size() > 0 ? trades.front()->price : 0.;
 
   beginInsertRows(QModelIndex(), 0, 0);
   Trade* trade = new Trade;
-  trade->id = id;
-  trade->time = time;
-  trade->price = price;
-  trade->amount = amount;
+  trade->id = tradeData.id;
+  trade->time = tradeData.time / 1000ULL;
+  trade->price = tradeData.price;
+  trade->amount = tradeData.amount;
   trade->icon = Trade::Icon::neutral;
   if(lastPrice != 0.)
   {
@@ -76,42 +103,6 @@ void TradeModel::addTrade(quint64 id, quint64 time, double price, double amount)
   trades.prepend(trade);
   endInsertRows();
 }
-/*
-void TradeModel::addData(const QList<Market::Trade>& newTrades)
-{
-  QList<const Market::Trade*> tradesToAdd;
-  tradesToAdd.reserve(newTrades.size());
-  foreach(const Market::Trade& trade, newTrades)
-  {
-    if(!ids.contains(trade.id))
-      tradesToAdd.append(&trade);
-  }
-
-  int oldCount = trades.size();
-  double lastPrice = trades.size() > 0 ? trades.back()->price : 0.;
-
-  beginInsertRows(QModelIndex(), oldCount, oldCount + tradesToAdd.size() - 1);
-
-  foreach(const Market::Trade* trade, tradesToAdd)
-  {
-    Trade* newTrade = new Trade(*trade);
-    if(lastPrice != 0.)
-    {
-      if(newTrade->price > lastPrice)
-        newTrade->icon = Trade::Icon::up;
-      else if(newTrade->price < lastPrice)
-        newTrade->icon = Trade::Icon::down;
-    }
-    lastPrice = newTrade->price;
-    trades.append(newTrade);
-    ids.insert(newTrade->id, 0);
-
-    graphModel.addTrade(trade->date, trade->price, trade->amount);
-  }
-
-  endInsertRows();
-}
-*/
 
 QModelIndex TradeModel::index(int row, int column, const QModelIndex& parent) const
 {

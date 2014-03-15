@@ -29,12 +29,11 @@ public:
     sellAttemptMarker,
   };
 
-  bool synced;
   QList<TradeSample> tradeSamples;
   Bot::Values* values;
   QMap<quint64, Marker> markers;
 
-  void addTrade(const DataProtocol::Trade& trade);
+  void addTrade(const DataProtocol::Trade& trade, bool update);
   void addMarker(quint64 time, Marker marker);
   void clearMarkers();
 
@@ -43,5 +42,4 @@ signals:
 
 private:
   TradeHandler tradeHander;
-  double vwap24;
 };

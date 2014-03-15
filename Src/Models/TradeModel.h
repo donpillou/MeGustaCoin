@@ -38,7 +38,8 @@ public:
 
   void reset();
 
-  void addTrade(quint64 id, quint64 time, double price, double amount);
+  void setTrades(const QList<DataProtocol::Trade>& trades);
+  void addTrade(const DataProtocol::Trade& trade);
 
   void clearAbove(int tradeCount);
 

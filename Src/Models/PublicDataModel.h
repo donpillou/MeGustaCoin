@@ -22,6 +22,7 @@ public:
   QString formatAmount(double amount) const;
   QString formatPrice(double price) const;
 
+  void setTrades(const QList<DataProtocol::Trade>& trades);
   void addTrade(const DataProtocol::Trade& trade);
   quint64 getLastReceivedTradeId() const {return lastReceivedTradeId;}
   void addTicker(quint64 time, double bid, double ask);
@@ -32,6 +33,7 @@ public:
   enum class State
   {
     connecting,
+    loading,
     connected,
     offline,
   };

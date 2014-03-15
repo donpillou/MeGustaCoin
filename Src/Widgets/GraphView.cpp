@@ -32,7 +32,7 @@ void GraphView::setEnabledData(unsigned int data)
 
 void GraphView::paintEvent(QPaintEvent* event)
 {
-  if(!graphModel || !graphModel->synced)
+  if(!graphModel)
     return;
 
   if(!graphModel->tradeSamples.isEmpty())

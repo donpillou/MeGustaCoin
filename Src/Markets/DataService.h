@@ -46,6 +46,7 @@ private:
     JobQueue<Job*>& jobQueue;
     DataConnection connection;
     bool canceled;
+    QHash<quint64, QList<DataProtocol::Trade> > replayedTrades;
 
   private:
     void addMessage(LogModel::Type type, const QString& message);

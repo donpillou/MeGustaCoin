@@ -1,17 +1,12 @@
 
 #include "stdafx.h"
 
-GraphModel::GraphModel() : synced(false), vwap24(0.), values(0)
+GraphModel::GraphModel() : values(0)
 {
-//  for(int i = 0; i < sizeof(estimations) / sizeof(*estimations); ++i)
-//  {
-//    Estimator& estimator = estimations[i];
-//    estimator.tradeVariance = (i + 1) * 2. * (i + 1) * 2.;
-//    estimator.estimateVariance = 5 * 5;
-//  }
+  tradeSamples.reserve(7 * 24 * 60 * 60 + 1000);
 }
 
-void GraphModel::addTrade(const DataProtocol::Trade& trade)
+void GraphModel::addTrade(const DataProtocol::Trade& trade, bool update)
 {
   quint64 time = trade.time / 1000;
 
@@ -33,13 +28,11 @@ void GraphModel::addTrade(const DataProtocol::Trade& trade)
   while(!tradeSamples.isEmpty() && time - tradeSamples.front().time > 7 * 24 * 60 * 60)
     tradeSamples.pop_front();
 
-  bool isSyncOrLive = trade.flags & DataProtocol::syncFlag || !(trade.flags & DataProtocol::replayedFlag);
-  tradeHander.add(trade, isSyncOrLive);
+  tradeHander.add(trade, update);
 
-  if(isSyncOrLive)
+  if(update)
   {
     values = &tradeHander.values;
-    synced = true;
     emit dataAdded();
   }
 }
@@ -57,24 +50,3 @@ void GraphModel::clearMarkers()
   markers.clear();
   emit dataAdded();
 }
-
-//void GraphModel::addBookSample(const BookSample& bookSample)
-//{
-//  bookSamples.append(bookSample);
-//
-//  quint64 time = bookSample.time;
-//  while(!bookSamples.isEmpty() && time - bookSamples.front().time > 7 * 24 * 60 * 60)
-//    bookSamples.pop_front();
-//
-//  emit dataAdded();
-//}
-
-//void GraphModel::addTickerData(const MarketStream::TickerData& tickerData)
-//{
-//  tickerSamples.append(tickerData);
-//
-//  while(!tickerSamples.isEmpty() && tickerData.date - tickerSamples.front().date > 7 * 24 * 60 * 60)
-//    tickerSamples.pop_front();
-//
-//  emit dataAdded();
-//}
