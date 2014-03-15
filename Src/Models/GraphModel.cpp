@@ -6,7 +6,7 @@ GraphModel::GraphModel() : values(0)
   tradeSamples.reserve(7 * 24 * 60 * 60 + 1000);
 }
 
-void GraphModel::addTrade(const DataProtocol::Trade& trade, bool update)
+void GraphModel::addTrade(const DataProtocol::Trade& trade, quint64 tradeAge)
 {
   quint64 time = trade.time / 1000;
 
@@ -25,15 +25,18 @@ void GraphModel::addTrade(const DataProtocol::Trade& trade, bool update)
     tradeSample->max = trade.price;
   tradeSample->amount += trade.amount;
 
-  while(!tradeSamples.isEmpty() && time - tradeSamples.front().time > 7 * 24 * 60 * 60)
-    tradeSamples.pop_front();
-
-  tradeHander.add(trade, update);
-
-  if(update)
+  if(tradeAge < 24ULL * 60ULL * 60ULL * 1000ULL)
   {
-    values = &tradeHander.values;
-    emit dataAdded();
+    tradeHander.add(trade, tradeAge);
+
+    if(tradeAge == 0)
+    {
+      while(!tradeSamples.isEmpty() && time - tradeSamples.front().time > 7ULL * 24ULL * 60ULL * 60ULL)
+        tradeSamples.pop_front();
+
+      values = &tradeHander.values;
+      emit dataAdded();
+    }
   }
 }
 

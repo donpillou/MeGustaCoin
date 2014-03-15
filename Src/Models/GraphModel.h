@@ -33,7 +33,7 @@ public:
   Bot::Values* values;
   QMap<quint64, Marker> markers;
 
-  void addTrade(const DataProtocol::Trade& trade, bool update);
+  void addTrade(const DataProtocol::Trade& trade, quint64 tradeAge);
   void addMarker(quint64 time, Marker marker);
   void clearMarkers();
 

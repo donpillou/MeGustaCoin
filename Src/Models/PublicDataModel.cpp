@@ -33,14 +33,16 @@ void PublicDataModel::setTrades(const QList<DataProtocol::Trade>& trades)
   if(trades.isEmpty())
     return;
 
+  quint64 time = trades.back().time;
+
   for(QList<DataProtocol::Trade>::ConstIterator i = trades.begin(), end = --trades.end(); i != end; ++i)
   {
     const DataProtocol::Trade& trade = *i;
-    graphModel.addTrade(trade, false);
+    graphModel.addTrade(trade, time - trade.time);
   }
 
   const DataProtocol::Trade& trade = trades.back();
-  graphModel.addTrade(trade, true);
+  graphModel.addTrade(trade, 0ULL);
   tradeModel.setTrades(trades);
   lastReceivedTradeId = trade.id;
 }

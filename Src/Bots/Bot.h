@@ -106,28 +106,36 @@ public:
 
   Bot::Values values;
 
-  void add(const DataProtocol::Trade& trade, bool updateValues)
+  void add(const DataProtocol::Trade& trade, quint64 tradeAge)
   {
-    quint64 time = trade.time / 1000;
+    quint64 tradeAgeSecs = tradeAge / 1000ULL;
+    bool updateValues = tradeAge == 0;
+    quint64 time = trade.time / 1000ULL;
     quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
     for(int i = 0; i < (int)Bot::Regressions::numOfRegressions; ++i)
     {
-      averager[i].add(time, trade.amount, trade.price);
-      averager[i].limitToAge(depths[i]);
-      if(updateValues)
+      if(tradeAgeSecs <= depths[i])
       {
-        Bot::Values::RegressionLine& rl = values.regressions[i];
-        averager[i].getLine(rl.price, rl.incline, rl.average);
+        averager[i].add(time, trade.amount, trade.price);
+        averager[i].limitToAge(depths[i]);
+        if(updateValues)
+        {
+          Bot::Values::RegressionLine& rl = values.regressions[i];
+          averager[i].getLine(rl.price, rl.incline, rl.average);
+        }
       }
     }
 
     for(int i = 0; i < (int)Bot::BellRegressions::numOfBellRegressions; ++i)
     {
-      bellAverager[i].add(time, trade.amount, trade.price, depths[i]);
-      if(updateValues)
+      if(tradeAgeSecs <= depths[i] * 3ULL)
       {
-        Bot::Values::RegressionLine& rl = values.bellRegressions[i];
-        bellAverager[i].getLine(depths[i], rl.price, rl.incline, rl.average);
+        bellAverager[i].add(time, trade.amount, trade.price, depths[i]);
+        if(updateValues)
+        {
+          Bot::Values::RegressionLine& rl = values.bellRegressions[i];
+          bellAverager[i].getLine(depths[i], rl.price, rl.incline, rl.average);
+        }
       }
     }
   }
