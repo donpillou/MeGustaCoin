@@ -48,7 +48,7 @@ public:
     RegressionLine bellRegressions[(int)BellRegressions::numOfBellRegressions];
   };
 
-  class Market
+  class Broker
   {
   public:
     class Transaction
@@ -92,11 +92,11 @@ public:
     virtual ~Session() {};
     virtual void setParameters(double* parameters) = 0;
     virtual void handle(const DataProtocol::Trade& trade, const Values& values) = 0;
-    virtual void handleBuy(const Market::Transaction& transaction) = 0;
-    virtual void handleSell(const Market::Transaction& transaction) = 0;
+    virtual void handleBuy(const Broker::Transaction& transaction) = 0;
+    virtual void handleSell(const Broker::Transaction& transaction) = 0;
   };
 
-  virtual Session* createSession(Market& market) = 0;
+  virtual Session* createSession(Broker& broker) = 0;
   virtual unsigned int getParameterCount() const = 0;
 };
 

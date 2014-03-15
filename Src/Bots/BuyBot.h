@@ -17,10 +17,10 @@ private:
       //double buyPriceGain;
     };
 
-    Session(Market& market);
+    Session(Broker& broker);
 
   private:
-    Market& market;
+    Broker& broker;
 
     Parameters parameters;
 
@@ -32,8 +32,8 @@ private:
     virtual void setParameters(double* parameters);
 
     virtual void handle(const DataProtocol::Trade& trade, const Values& values);
-    virtual void handleBuy(const Market::Transaction& transaction);
-    virtual void handleSell(const Market::Transaction& transaction);
+    virtual void handleBuy(const Broker::Transaction& transaction);
+    virtual void handleSell(const Broker::Transaction& transaction);
 
     bool isGoodBuy(const Values& values);
     bool isVeryGoodBuy(const Values& values);
@@ -44,6 +44,6 @@ private:
     void checkSell(const DataProtocol::Trade& trade, const Values& values);
   };
 
-  virtual Session* createSession(Market& market) {return new Session(market);};
+  virtual Session* createSession(Broker& broker) {return new Session(broker);};
   virtual unsigned int getParameterCount() const {return sizeof(Session::Parameters) / sizeof(double);}
 };

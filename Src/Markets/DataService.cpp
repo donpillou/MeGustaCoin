@@ -226,10 +226,9 @@ void DataService::WorkerThread::run()
     setState(PublicDataModel::State::connecting);
     process();
     setState(PublicDataModel::State::offline);
-    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
     if(canceled)
       return;
-    sleep(10);
+    sleep(10 * 1000);
   }
 }
 

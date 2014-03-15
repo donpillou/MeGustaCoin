@@ -155,12 +155,12 @@ void BotsWidget::Thread::run()
     particleSwarm.next();
 
     // create simulation market
-    class SimMarket : public Bot::Market
+    class SimBroker : public Bot::Broker
     {
     public:
       Bot::Session* session;
 
-      SimMarket(Thread& thread, double balanceBase, double balanceComm, double fee) : session(0), thread(thread), lastBuyTime(0), lastSellTime(0), balanceBase(balanceBase), balanceComm(balanceComm), fee(fee), nextTransactionId(1) {}
+      SimBroker(Thread& thread, double balanceBase, double balanceComm, double fee) : session(0), thread(thread), lastBuyTime(0), lastSellTime(0), balanceBase(balanceBase), balanceComm(balanceComm), fee(fee), nextTransactionId(1) {}
 
       void cancelAllOrders()
       {
@@ -238,7 +238,6 @@ void BotsWidget::Thread::run()
             balanceBase += order.amount * order.price - transaction.fee;
 
             sellOrders.removeAt(i);
-
             session->handleSell(transaction);
           }
           else
@@ -344,12 +343,12 @@ void BotsWidget::Thread::run()
         destTransaction.id = id;
       }
 
-    } simMarket(*this, 100., 0., fee);
+    } simBroker(*this, 100., 0., fee);
 
     // create simulation agent
-    Bot::Session* botSession = botFactory.createSession(simMarket);
+    Bot::Session* botSession = botFactory.createSession(simBroker);
     botSession->setParameters(i == iterations - 1 && iterations > 1 ? bestParameters : parameters);
-    simMarket.session = botSession;
+    simBroker.session = botSession;
     if(!botSession)
     {
       quit(LogModel::Type::error, "Could not create bot session.");
@@ -366,7 +365,7 @@ void BotsWidget::Thread::run()
       {
         const DataProtocol::Trade& trade = *i;
         tradeHandler.add(trade, true);
-        simMarket.update(trade);
+        simBroker.update(trade);
         if(trade.time - startTime > 45 * 60 * 1000)
           botSession->handle(trade, tradeHandler.values);
       }
@@ -377,8 +376,8 @@ void BotsWidget::Thread::run()
 
     double balanceBase, balanceComm;
     double lastPrice = trades.isEmpty() ? 0 : trades.back().price;
-    simMarket.cancelAllOrders();
-    simMarket.getBalance(balanceBase, balanceComm);
+    simBroker.cancelAllOrders();
+    simBroker.getBalance(balanceBase, balanceComm);
     double rating = balanceBase + balanceComm * lastPrice * (1. - fee);
     if(rating > bestRating)
     {
@@ -394,10 +393,10 @@ void BotsWidget::Thread::run()
 
     if(i == iterations - 1)
     {
-      QList<Bot::Market::Transaction> transactions;
-      ((Bot::Market*)&simMarket)->getBuyTransactions(transactions);
+      QList<Bot::Broker::Transaction> transactions;
+      ((Bot::Broker*)&simBroker)->getBuyTransactions(transactions);
       double highestPrice = lastPrice;
-      foreach(const Bot::Market::Transaction& transaction, transactions)
+      foreach(const Bot::Broker::Transaction& transaction, transactions)
       {
         balanceBase += transaction.price * (1. + fee) * transaction.amount;
         balanceComm -= transaction.amount;

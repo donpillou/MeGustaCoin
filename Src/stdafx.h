@@ -17,7 +17,6 @@
 #include "Bots/Bot.h"
 #include "Bots/BuyBot.h"
 #include "Bots/ParticleSwarm.h"
-#include "Bots/BotService.h"
 
 #include "Models/GraphModel.h"
 #include "Models/OrderModel.h"
@@ -29,6 +28,7 @@
 #include "Models/DataModel.h"
 #include "Models/BotsModel.h"
 
+#include "Bots/BotService.h"
 #include "Markets/MarketService.h"
 #include "Markets/DataService.h"
 
