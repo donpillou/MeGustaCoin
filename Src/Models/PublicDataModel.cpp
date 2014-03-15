@@ -50,7 +50,7 @@ void PublicDataModel::setTrades(const QList<DataProtocol::Trade>& trades)
 void PublicDataModel::addTrade(const DataProtocol::Trade& trade)
 {
   tradeModel.addTrade(trade);
-  graphModel.addTrade(trade, true);
+  graphModel.addTrade(trade, 0ULL);
   lastReceivedTradeId = trade.id;
 }
 
