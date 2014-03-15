@@ -364,7 +364,7 @@ void BotsWidget::Thread::run()
       for(QList<DataProtocol::Trade>::ConstIterator i = trades.begin(), end = trades.end(); i != end; ++i)
       {
         const DataProtocol::Trade& trade = *i;
-        tradeHandler.add(trade, true);
+        tradeHandler.add(trade, 0);
         simBroker.update(trade);
         if(trade.time - startTime > 45 * 60 * 1000)
           botSession->handle(trade, tradeHandler.values);
