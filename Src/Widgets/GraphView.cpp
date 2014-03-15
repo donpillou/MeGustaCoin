@@ -631,7 +631,7 @@ void GraphView::drawMarkers(QPainter& painter, const QRect& rect, double vmin, d
 
   QPoint* lineData = (QPoint*)alloca(graphModel->markers.size() * 2 * sizeof(QPoint));
   QPoint* currentLinePoint = lineData;
-  for(QMap<quint64, GraphModel::Marker>::Iterator i = graphModel->markers.begin(), end = graphModel->markers.end(); i != end; ++i)
+  for(QMap<quint64, GraphModel::Marker>::ConstIterator i = graphModel->markers.begin(), end = graphModel->markers.end(); i != end; ++i)
   {
     const quint64& time = i.key();
     if(time < hmin)
