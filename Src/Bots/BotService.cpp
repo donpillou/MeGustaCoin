@@ -262,7 +262,7 @@ void BotService::WorkerThread::addTransaction(const Bot::Broker::Transaction& tr
   transaction2.amount = transactionData.type == Bot::Broker::Transaction::Type::buy ? transactionData.amount : -transactionData.amount;
   transaction2.price = transactionData.price;
   transaction2.fee = transactionData.fee;
-  transaction2.total = transaction2.amount * transactionData.price - transactionData.fee;
+  transaction2.total = -transaction2.amount * transactionData.price - transactionData.fee;
 
   eventQueue.append(new AddTransactionEvent(transaction2));
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
@@ -354,7 +354,7 @@ void BotService::BotBroker::update(const DataProtocol::Trade& trade, Bot::Sessio
       break;
     }
 
-  cancelTimedOutOrders();
+  cancelTimedOutOrders(session);
 }
 
 void BotService::BotBroker::refreshOrders(Bot::Session& session)
@@ -395,16 +395,22 @@ void BotService::BotBroker::refreshOrders(Bot::Session& session)
       workerThread.removeOrder(order);
       openOrders.erase(i++);
       if(order.amount >= 0.)
+      {
+        workerThread.addMarker(time, GraphModel::Marker::buyMarker);
         session.handleBuy(transaction);
+      }
       else
+      {
+        workerThread.addMarker(time, GraphModel::Marker::sellMarker);
         session.handleSell(transaction);
+      }
     }
     else
       ++i;
   }
 }
 
-void BotService::BotBroker::cancelTimedOutOrders()
+void BotService::BotBroker::cancelTimedOutOrders(Bot::Session& session)
 {
   for(QList<Order>::Iterator i = openOrders.begin(); i != openOrders.end();)
   {
@@ -422,6 +428,11 @@ void BotService::BotBroker::cancelTimedOutOrders()
         openOrders.erase(i++);
         continue;
       }
+      else
+      {
+        refreshOrders(session);
+        return;
+      }
     }
     ++i;
   }
@@ -438,6 +449,7 @@ bool BotService::BotBroker::buy(double price, double amount, quint64 timeout)
   if(!market.createOrder(amount, price, order))
     return false;
   workerThread.addOrder(order);
+  workerThread.addMarker(time, GraphModel::Marker::buyAttemptMarker);
   openOrders.append(Order(order, time + timeout));
   balanceBase -= charge;
   return true;
@@ -452,6 +464,7 @@ bool BotService::BotBroker::sell(double price, double amount, quint64 timeout)
   if(!market.createOrder(-amount, price, order))
     return false;
   workerThread.addOrder(order);
+  workerThread.addMarker(time, GraphModel::Marker::sellAttemptMarker);
   openOrders.append(Order(order, time + timeout));
   balanceComm -= amount;
   return true;

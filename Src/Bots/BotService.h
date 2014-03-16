@@ -106,7 +106,7 @@ private:
 
   public:
     void refreshOrders(Bot::Session& session);
-    void cancelTimedOutOrders();
+    void cancelTimedOutOrders(Bot::Session& session);
 
   private: // Broker
     virtual void update(const DataProtocol::Trade& trade, Bot::Session& session);
