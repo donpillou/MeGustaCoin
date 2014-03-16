@@ -94,3 +94,36 @@ private:
 private slots:
   void updateHeader();
 };
+
+class TransactionSortProxyModel : public QSortFilterProxyModel
+{
+public:
+  TransactionSortProxyModel(QObject* parent, TransactionModel& transactionModel) : QSortFilterProxyModel(parent), transactionModel(transactionModel) {}
+
+private:
+  TransactionModel& transactionModel;
+
+  virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
+  {
+    const TransactionModel::Transaction* leftTransaction = transactionModel.getTransaction(left);
+    const TransactionModel::Transaction* rightTransaction = transactionModel.getTransaction(right);
+    switch((TransactionModel::Column)left.column())
+    {
+    case TransactionModel::Column::date:
+      return leftTransaction->date.msecsTo(rightTransaction->date) > 0;
+    case TransactionModel::Column::value:
+      return leftTransaction->amount * leftTransaction->price < rightTransaction->amount * rightTransaction->price;
+    case TransactionModel::Column::amount:
+      return leftTransaction->amount < rightTransaction->amount;
+    case TransactionModel::Column::price:
+      return leftTransaction->price < rightTransaction->price;
+    case TransactionModel::Column::fee:
+      return leftTransaction->fee < rightTransaction->fee;
+    case TransactionModel::Column::total:
+      return leftTransaction->total < rightTransaction->total;
+    default:
+      break;
+    }
+    return QSortFilterProxyModel::lessThan(left, right);
+  }
+};

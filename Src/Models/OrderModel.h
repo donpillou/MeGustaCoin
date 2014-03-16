@@ -128,3 +128,34 @@ private:
 private slots:
   void updateHeader();
 };
+
+class OrderSortProxyModel : public QSortFilterProxyModel
+{
+public:
+  OrderSortProxyModel(QObject* parent, OrderModel& orderModel) : QSortFilterProxyModel(parent), orderModel(orderModel) {}
+
+private:
+  OrderModel& orderModel;
+
+  virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
+  {
+    const OrderModel::Order* leftOrder = orderModel.getOrder(left);
+    const OrderModel::Order* rightOrder = orderModel.getOrder(right);
+    switch((OrderModel::Column)left.column())
+    {
+    case OrderModel::Column::date:
+      return leftOrder->date.msecsTo(rightOrder->date) > 0;
+    case OrderModel::Column::value:
+      return leftOrder->amount * leftOrder->price < rightOrder->amount * rightOrder->price;
+    case OrderModel::Column::amount:
+      return leftOrder->amount < rightOrder->amount;
+    case OrderModel::Column::price:
+      return leftOrder->price < rightOrder->price;
+    case OrderModel::Column::total:
+      return leftOrder->total < rightOrder->total;
+    default:
+      break;
+    }
+    return QSortFilterProxyModel::lessThan(left, right);
+  }
+};
