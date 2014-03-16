@@ -20,14 +20,11 @@ void TradeModel::updateHeader()
 
 void TradeModel::reset()
 {
-  if(!trades.isEmpty())
-  {
-    beginResetModel();
-    qDeleteAll(trades);
-    trades.clear();
-    endResetModel();
-    emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
-  }
+  beginResetModel();
+  qDeleteAll(trades);
+  trades.clear();
+  endResetModel();
+  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
 }
 
 void TradeModel::clearAbove(int tradeCount)

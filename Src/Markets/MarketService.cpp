@@ -34,6 +34,7 @@ void MarketService::login(const QString& marketName, const QString& userName, co
   thread = new WorkerThread(*this);
   thread->start();
 
+  dataModel.setLoginData(userName, key, secret);
   dataModel.setMarket(marketName, market->getCoinCurrency(), market->getMarketCurrency());
   dataModel.logModel.addMessage(LogModel::Type::information, QString(tr("Opened %1")).arg(marketName));
 }

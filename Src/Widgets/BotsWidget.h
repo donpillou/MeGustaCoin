@@ -13,6 +13,7 @@ public:
 
 public slots:
   void simulate();
+  void activate(bool enabled);
   void updateToolBarButtons();
 
 private:
@@ -43,16 +44,19 @@ private:
 
   DataModel& dataModel;
   MarketService& marketService;
-  BotsModel botsModel;
+  BotService botService;
 
   QThread* thread;
   JobQueue<Action*> actionQueue;
 
-  QTreeView* botsView;
+  QSplitter* splitter;
+  QTreeView* orderView;
+  QTreeView* transactionView;
 
   QAction* simulateAction;
+  QAction* activateAction;
 
-  QList<QModelIndex> getSelectedRows();
+  //QList<QModelIndex> getSelectedRows();
 
 private slots:
   void executeActions();

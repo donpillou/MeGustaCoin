@@ -39,6 +39,7 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& data
   orderView->setUniformRowHeights(true);
   proxyModel = new OrderSortProxyModel(this, orderModel);
   proxyModel->setDynamicSortFilter(true);
+  proxyModel->setSourceModel(&orderModel);
   orderView->setModel(proxyModel);
   orderView->setSortingEnabled(true);
   orderView->setRootIsDecorated(false);
@@ -57,7 +58,6 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& data
   connect(&orderModel, SIGNAL(editedDraft(const QModelIndex&)), this, SLOT(updateDraft(const QModelIndex&)));
   connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
 
-  proxyModel->setSourceModel(&orderModel);
   QHeaderView* headerView = orderView->header();
   headerView->resizeSection(0, 50);
   headerView->resizeSection(1, 60);

@@ -46,6 +46,7 @@ void TransactionModel::updateHeader()
 void TransactionModel::reset()
 {
   emit beginResetModel();
+  qDeleteAll(transactions);
   transactions.clear();
   emit endResetModel();
   emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
@@ -97,6 +98,45 @@ void TransactionModel::setData(const QList<Market::Transaction>& updatedTransact
     }
 
     endInsertRows();
+  }
+}
+
+void TransactionModel::addTransaction(const Market::Transaction& newTransaction)
+{
+  int i = 0;
+  foreach(Transaction* transaction, transactions)
+  {
+    if(transaction->id == newTransaction.id)
+    {
+      *transaction = newTransaction;
+      emit dataChanged(createIndex(i, (int)Column::first, 0), createIndex(i, (int)Column::last, 0));
+      return;
+    }
+    ++i;
+  }
+
+  int oldTransactionCount = transactions.size();
+  beginInsertRows(QModelIndex(), oldTransactionCount, oldTransactionCount);
+  Transaction* transaction = new Transaction;
+  *transaction = newTransaction;
+  transactions.append(transaction);
+  endInsertRows();
+}
+
+void TransactionModel::removeTransaction(const QString& id)
+{
+  int i = 0;
+  foreach(Transaction* transaction, transactions)
+  {
+    if(transaction->id == id)
+    {
+      beginRemoveRows(QModelIndex(), i, i);
+      delete transaction;
+      transactions.removeAt(i);
+      endRemoveRows();
+      return;
+    }
+    ++i;
   }
 }
 

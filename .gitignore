@@ -1,5 +1,5 @@
 Build/
-icons/
+/icons/
 *.sdf
 *.opensdf
 *.suo

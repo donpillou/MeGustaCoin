@@ -10,10 +10,15 @@ public:
   TransactionModel transactionModel;
   LogModel logModel;
 
+  OrderModel botOrderModel;
+  TransactionModel botTransactionModel;
+
   DataModel();
   ~DataModel();
 
   void setMarket(const QString& marketName, const QString& coinCurrency, const QString& marketCurrency);
+  void setLoginData(const QString& userName, const QString& key, const QString& secret);
+  void getLoginData(QString& userName, QString& key, QString& secret);
   void setBalance(const Market::Balance& balance);
 
   PublicDataModel* getPublicDataModel() {return publicDataModel;}
@@ -36,6 +41,9 @@ signals:
   void changedBalance();
 
 private:
+  QString userName;
+  QString key;
+  QString secret;
   QString marketName;
   QString coinCurrency;
   QString marketCurrency;

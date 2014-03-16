@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-DataModel::DataModel() : orderModel(*this), transactionModel(*this), publicDataModel(0) {}
+DataModel::DataModel() : orderModel(*this), transactionModel(*this), botOrderModel(*this), botTransactionModel(*this), publicDataModel(0) {}
 
 DataModel::~DataModel()
 {
@@ -11,6 +11,20 @@ DataModel::~DataModel()
     if(publicDataModel)
       delete publicDataModel;
   }
+}
+
+void DataModel::setLoginData(const QString& userName, const QString& key, const QString& secret)
+{
+  this->userName = userName;
+  this->key = key;
+  this->secret = secret;
+}
+
+void DataModel::getLoginData(QString& userName, QString& key, QString& secret)
+{
+  userName = this->userName;
+  key = this->key;
+  secret = this->secret;
 }
 
 void DataModel::setMarket(const QString& marketName, const QString& coinCurrency, const QString& marketCurrency)

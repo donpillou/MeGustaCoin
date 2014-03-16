@@ -5,6 +5,11 @@ BuyBot::Session::Session(Broker& broker) : broker(broker)
 {
   memset(&parameters, 0, sizeof(Session::Parameters));
 
+  //parameters.sellProfitGain = 0.8;
+  //parameters.buyProfitGain = 0.6;
+  parameters.sellProfitGain = 0.2;
+  parameters.buyProfitGain = 0.2;
+
   balanceBtc = broker.getBalanceComm();
   balanceUsd = broker.getBalanceBase();
 }

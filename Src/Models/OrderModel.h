@@ -80,6 +80,8 @@ public:
   void reset();
 
   void setData(const QList<Market::Order>& orders);
+  void addOrder(const Market::Order& order);
+  void removeOrder(const QString& id);
   void updateOrder(const QString& id, const Market::Order& order);
   void setOrderState(const QString& id, Order::State state);
   void setOrderNewAmount(const QString& id, double newAmount);

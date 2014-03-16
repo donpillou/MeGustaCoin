@@ -66,7 +66,9 @@ public:
 
   void reset();
 
-  void setData(const QList<Market::Transaction>& order);
+  void setData(const QList<Market::Transaction>& transactions);
+  void addTransaction(const Market::Transaction& transaction);
+  void removeTransaction(const QString& id);
 
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
  

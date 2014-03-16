@@ -2,12 +2,13 @@
 #include "stdafx.h"
 
 BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService) :
-  QWidget(parent), dataModel(dataModel),  marketService(marketService), thread(0)
+  QWidget(parent), dataModel(dataModel),  marketService(marketService),
+  botService(dataModel), thread(0)
 {
   //connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
 
-  botsModel.addBot("BuyBot", *new BuyBot);
+  //botsModel.addBot("BuyBot", *new BuyBot);
 
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -17,38 +18,55 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, DataModel& dataMode
   simulateAction->setEnabled(false);
   connect(simulateAction, SIGNAL(triggered()), this, SLOT(simulate()));
 
-  /*
-  textEdit = new QTextEdit(this);
-  QFont font("");
-  font.setStyleHint(QFont::TypeWriter);
-  textEdit->setFont(font);
-  textEdit->setLineWrapMode(QTextEdit::NoWrap);
-  textEdit->setAcceptRichText(false);
-  */
-  botsView = new QTreeView(this);
-  botsView->setUniformRowHeights(true);
-  botsView->setModel(&botsModel);
-  //logView->setSortingEnabled(true);
-  botsView->setRootIsDecorated(false);
-  botsView->setAlternatingRowColors(true);
+  activateAction = toolBar->addAction(QIcon(":/Icons/user_gray_go.png"), tr("&Activate"));
+  activateAction->setEnabled(false);
+  activateAction->setCheckable(true);
+  connect(activateAction, SIGNAL(triggered(bool)), this, SLOT(activate(bool)));
+
+  orderView = new QTreeView(this);
+  orderView->setUniformRowHeights(true);
+  OrderSortProxyModel* proxyModel = new OrderSortProxyModel(this, dataModel.botOrderModel);
+  proxyModel->setDynamicSortFilter(true);
+  proxyModel->setSourceModel(&dataModel.botOrderModel);
+  orderView->setModel(proxyModel);
+  orderView->setSortingEnabled(true);
+  orderView->setRootIsDecorated(false);
+  orderView->setAlternatingRowColors(true);
+  orderView->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::DoubleClicked);
+  orderView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+
+  transactionView = new QTreeView(this);
+  transactionView->setUniformRowHeights(true);
+  TransactionSortProxyModel* tproxyModel = new TransactionSortProxyModel(this, dataModel.botTransactionModel);
+  tproxyModel->setDynamicSortFilter(true);
+  tproxyModel->setSourceModel(&dataModel.botTransactionModel);
+  transactionView->setModel(tproxyModel);
+  transactionView->setSortingEnabled(true);
+  transactionView->setRootIsDecorated(false);
+  transactionView->setAlternatingRowColors(true);
+
+  splitter = new QSplitter(Qt::Vertical, this);
+  splitter->setHandleWidth(1);
+  splitter->addWidget(orderView);
+  splitter->addWidget(transactionView);
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);
   layout->setSpacing(0);
   layout->addWidget(toolBar);
-  layout->addWidget(botsView);
+  layout->addWidget(splitter);
   setLayout(layout);
 
-  connect(botsView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
+  //connect(botsView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
 
-  QHeaderView* headerView = botsView->header();
-  headerView->resizeSection(0, 300);
-  headerView->resizeSection(1, 110);
-  headerView->setStretchLastSection(false);
-  headerView->setResizeMode(0, QHeaderView::Stretch);
-  settings.beginGroup("Bots");
-  headerView->restoreState(settings.value("HeaderState").toByteArray());
-  settings.endGroup();
+  //QHeaderView* headerView = botsView->header();
+  //headerView->resizeSection(0, 300);
+  //headerView->resizeSection(1, 110);
+  //headerView->setStretchLastSection(false);
+  //headerView->setResizeMode(0, QHeaderView::Stretch);
+  //settings.beginGroup("Bots");
+  //headerView->restoreState(settings.value("HeaderState").toByteArray());
+  //settings.endGroup();
 }
 
 BotsWidget::~BotsWidget()
@@ -65,21 +83,44 @@ BotsWidget::~BotsWidget()
 void BotsWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("Bots");
-  settings.setValue("HeaderState", botsView->header()->saveState());
+  //settings.setValue("HeaderState", botsView->header()->saveState());
   settings.endGroup();
 }
 
-QList<QModelIndex> BotsWidget::getSelectedRows()
-{ // since orderView->selectionModel()->selectedRows(); does not work
-  QList<QModelIndex> result;
-  QItemSelection selection = botsView->selectionModel()->selection();
-  foreach(const QItemSelectionRange& range, selection)
+//QList<QModelIndex> BotsWidget::getSelectedRows()
+//{ // since orderView->selectionModel()->selectedRows(); does not work
+//  QList<QModelIndex> result;
+//  QItemSelection selection = botsView->selectionModel()->selection();
+//  foreach(const QItemSelectionRange& range, selection)
+//  {
+//    QModelIndex parent = range.parent();
+//    for(int i = range.top(), end = range.bottom() + 1; i < end; ++i)
+//      result.append(range.model()->index(i, 0, parent));
+//  }
+//  return result;
+//}
+
+void BotsWidget::activate(bool enable)
+{
+  if(enable)
   {
-    QModelIndex parent = range.parent();
-    for(int i = range.top(), end = range.bottom() + 1; i < end; ++i)
-      result.append(range.model()->index(i, 0, parent));
+    PublicDataModel* publicDataModel = dataModel.getPublicDataModel();
+    if(publicDataModel)
+      publicDataModel->graphModel.clearMarkers();
+
+    QString userName, key, secret;
+    dataModel.getLoginData(userName, key, secret);
+    botService.start("BuyBot", dataModel.getMarketName(), userName, key, secret);
   }
-  return result;
+  else
+  {
+    botService.stop();
+    dataModel.botOrderModel.reset();
+    dataModel.botTransactionModel.reset();
+    PublicDataModel* publicDataModel = dataModel.getPublicDataModel();
+    if(publicDataModel)
+      publicDataModel->graphModel.clearMarkers();
+  }
 }
 
 void BotsWidget::simulate()
@@ -88,15 +129,16 @@ void BotsWidget::simulate()
     return;
 
   // get selected bot
-  QList<QModelIndex> seletedIndices = getSelectedRows();
-  Bot* botFactory = 0;
-  foreach(const QModelIndex& index, seletedIndices)
-  {
-    botFactory = botsModel.getBotFactory(index);
-    break;
-  }
-  if(!botFactory)
-    return;
+  //QList<QModelIndex> seletedIndices = getSelectedRows();
+  //Bot* botFactory = 0;
+  //foreach(const QModelIndex& index, seletedIndices)
+  //{
+  //  botFactory = botsModel.getBotFactory(index);
+  //  break;
+  //}
+  //if(!botFactory)
+  //  return;
+  Bot* botFactory = new BuyBot(); // TODO: fix memory leak
 
   // start thread
   thread = new Thread(*this, *botFactory, dataModel.getMarketName(), dataModel.getBalance().fee);
@@ -404,6 +446,9 @@ void BotsWidget::Thread::run()
           highestPrice = transaction.price;
       }
       double rating2 = balanceBase + balanceComm * highestPrice * (1. - fee);
+      for(unsigned int i = 0; i < parameterCount; ++i)
+        logMessage(LogModel::Type::information, QString("parameter%1=%2").arg(i).arg(bestParameters[i]));
+
       QString report =  QString("Or maybe even with %1 and %2 ~= %3.").arg(DataModel::formatPrice(balanceBase), balanceComm < 0. ? (QString("-") + DataModel::formatAmount(balanceComm)) : DataModel::formatAmount(balanceComm), 
         DataModel::formatPrice(rating2));
 
@@ -503,10 +548,11 @@ void BotsWidget::executeActions()
 
 void BotsWidget::updateToolBarButtons()
 {
-  QList<QModelIndex> selectedRows = getSelectedRows();
+  //QList<QModelIndex> selectedRows = getSelectedRows();
 
   bool hasMarket = marketService.isReady();
-  bool canSimulate = getSelectedRows().size() > 0;
+  //bool canSimulate = getSelectedRows().size() > 0;
 
-  simulateAction->setEnabled(hasMarket && canSimulate);
+  simulateAction->setEnabled(hasMarket /*&& canSimulate*/);
+  activateAction->setEnabled(hasMarket);
 }

@@ -49,6 +49,7 @@ void OrderModel::updateHeader()
 void OrderModel::reset()
 {
   emit beginResetModel();
+  qDeleteAll(orders);
   orders.clear();
   emit endResetModel();
   emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
@@ -98,6 +99,27 @@ void OrderModel::setData(const QList<Market::Order>& updatedOrders)
     }
 
     endInsertRows();
+  }
+}
+
+void OrderModel::addOrder(const Market::Order& order)
+{
+  updateOrder(order.id, order);
+}
+
+void OrderModel::removeOrder(const QString& id)
+{
+  for(int i = 0, count = orders.size(); i < count; ++i)
+  {
+    Order* order = orders[i];
+    if(order->id == id)
+    {
+      beginRemoveRows(QModelIndex(), i, i);
+      delete order;
+      orders.removeAt(i);
+      endRemoveRows();
+      return;
+    }
   }
 }
 

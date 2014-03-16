@@ -61,12 +61,14 @@ public:
       };
 
       quint64 id;
+      quint64 date;
       double price;
       double amount;
       double fee;
       Type type;
     };
 
+    virtual ~Broker() {}
     virtual bool buy(double price, double amount, quint64 timeout) = 0;
     virtual bool sell(double price, double amount, quint64 timeout) = 0;
     virtual double getBalanceBase() const = 0;

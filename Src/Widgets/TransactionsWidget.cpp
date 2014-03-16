@@ -21,6 +21,7 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Dat
   transactionView = new QTreeView(this);
   transactionView->setUniformRowHeights(true);
   proxyModel = new TransactionSortProxyModel(this, transactionModel);
+  proxyModel->setSourceModel(&transactionModel);
   proxyModel->setDynamicSortFilter(true);
   transactionView->setModel(proxyModel);
   transactionView->setSortingEnabled(true);
@@ -35,7 +36,6 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Dat
   layout->addWidget(transactionView);
   setLayout(layout);
 
-  proxyModel->setSourceModel(&transactionModel);
   QHeaderView* headerView = transactionView->header();
   headerView->resizeSection(0, 50);
   headerView->resizeSection(1, 110);
