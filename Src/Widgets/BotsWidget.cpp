@@ -14,9 +14,14 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, DataModel& dataMode
   toolBar->setStyleSheet("QToolBar { border: 0px }");
   toolBar->setIconSize(QSize(16, 16));
   toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-  simulateAction = toolBar->addAction(QIcon(":/Icons/chart_curve.png"), tr("&Simulate"));
+  optimizeAction = toolBar->addAction(QIcon(":/Icons/chart_curve.png"), tr("&Optimize"));
+  optimizeAction->setEnabled(false);
+  connect(optimizeAction, SIGNAL(triggered()), this, SLOT(optimize()));
+
+  simulateAction = toolBar->addAction(QIcon(":/Icons/user_gray_go_gray.png"), tr("&Simulate"));
   simulateAction->setEnabled(false);
-  connect(simulateAction, SIGNAL(triggered()), this, SLOT(simulate()));
+  simulateAction->setCheckable(true);
+  connect(simulateAction, SIGNAL(triggered(bool)), this, SLOT(simulate(bool)));
 
   activateAction = toolBar->addAction(QIcon(":/Icons/user_gray_go.png"), tr("&Activate"));
   activateAction->setEnabled(false);
@@ -87,43 +92,44 @@ void BotsWidget::saveState(QSettings& settings)
   settings.endGroup();
 }
 
-//QList<QModelIndex> BotsWidget::getSelectedRows()
-//{ // since orderView->selectionModel()->selectedRows(); does not work
-//  QList<QModelIndex> result;
-//  QItemSelection selection = botsView->selectionModel()->selection();
-//  foreach(const QItemSelectionRange& range, selection)
-//  {
-//    QModelIndex parent = range.parent();
-//    for(int i = range.top(), end = range.bottom() + 1; i < end; ++i)
-//      result.append(range.model()->index(i, 0, parent));
-//  }
-//  return result;
-//}
-
 void BotsWidget::activate(bool enable)
 {
   if(enable)
-  {
+    startWorkerThread(false);
+  else
+    stopWorkerThread();
+}
+
+void BotsWidget::simulate(bool enable)
+{
+  if(enable)
+    startWorkerThread(true);
+  else
+    stopWorkerThread();
+}
+
+void BotsWidget::startWorkerThread(bool simulation)
+{
     PublicDataModel* publicDataModel = dataModel.getPublicDataModel();
     if(publicDataModel)
       publicDataModel->graphModel.clearMarkers();
 
     QString userName, key, secret;
     dataModel.getLoginData(userName, key, secret);
-    botService.start("BuyBot", dataModel.getMarketName(), userName, key, secret);
-  }
-  else
-  {
+    botService.start("BuyBot", simulation, dataModel.getMarketName(), userName, key, secret);
+}
+
+void BotsWidget::stopWorkerThread()
+{
     botService.stop();
     dataModel.botOrderModel.reset();
     dataModel.botTransactionModel.reset();
     PublicDataModel* publicDataModel = dataModel.getPublicDataModel();
     if(publicDataModel)
       publicDataModel->graphModel.clearMarkers();
-  }
 }
 
-void BotsWidget::simulate()
+void BotsWidget::optimize()
 {
   if(thread)
     return;
@@ -553,6 +559,7 @@ void BotsWidget::updateToolBarButtons()
   bool hasMarket = marketService.isReady();
   //bool canSimulate = getSelectedRows().size() > 0;
 
-  simulateAction->setEnabled(hasMarket /*&& canSimulate*/);
+  optimizeAction->setEnabled(hasMarket /*&& canSimulate*/);
+  simulateAction->setEnabled(hasMarket);
   activateAction->setEnabled(hasMarket);
 }

@@ -8,12 +8,12 @@ BotService::~BotService()
   stop();
 }
 
-void BotService::start(const QString& botName, const QString& marketName, const QString& userName, const QString& key, const QString& secret)
+void BotService::start(const QString& botName, bool simulation, const QString& marketName, const QString& userName, const QString& key, const QString& secret)
 {
   if(thread)
     return;
 
-  thread = new WorkerThread(*this, eventQueue, botName, marketName, userName, key, secret);
+  thread = new WorkerThread(*this, eventQueue, botName, simulation, marketName, userName, key, secret);
   thread->start();
 }
 
@@ -105,8 +105,41 @@ void BotService::WorkerThread::run()
   if(!bot)
     return;
   
-  //broker = new BotBroker(*this, *market, balance.availableUsd, /*balance.availableBtc*/0., balance.fee);
-  broker = new SimBroker(*this, 100., /*balance.availableBtc*/0., balance.fee);
+  if(simulation)
+    broker = new SimBroker(*this, 100., 0., balance.fee);
+  else
+  {
+    QSettings file(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "BotData");
+    double balanceBase = file.value("balanceBase", balance.availableUsd).toDouble();
+    double balanceComm = file.value("balanceComm", balance.availableBtc).toDouble();
+
+    BotBroker* botBroker = new BotBroker(*this, *market, balanceBase, balanceComm, balance.fee);
+    broker = botBroker;
+
+    int transactionCount = file.beginReadArray("Transactions");
+    Bot::Broker::Transaction transaction;
+    for(int i = 0; i < transactionCount; ++i)
+    {
+      file.setArrayIndex(i);
+      transaction.id = file.value("id").toULongLong();
+      transaction.date = file.value("date").toULongLong();
+      transaction.price = file.value("price").toDouble();
+      transaction.amount = file.value("amount").toDouble();
+      transaction.fee = file.value("fee").toDouble();
+      switch((Bot::Broker::Transaction::Type)file.value("type").toUInt())
+      {
+      case Bot::Broker::Transaction::Type::buy:
+        transaction.type = Bot::Broker::Transaction::Type::buy;
+        botBroker->loadTransaction(transaction);
+        break;
+      case Bot::Broker::Transaction::Type::sell:
+        transaction.type = Bot::Broker::Transaction::Type::sell;
+        botBroker->loadTransaction(transaction);
+        break;
+      }
+    }
+    file.endArray();
+  }
   session = bot->createSession(*broker);
   if(!session)
     goto cleanup;
@@ -168,21 +201,52 @@ void BotService::WorkerThread::addMarker(quint64 time, GraphModel::Marker marker
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
+void BotService::WorkerThread::saveTransactionsFile(double balanceBase, double balanceComm, const QHash<quint64, Bot::Broker::Transaction>& transactions)
+{
+  class SaveTransactionEvent : public Event
+  {
+  public:
+    SaveTransactionEvent(bool simulation, double balanceBase, double balanceComm, const QHash<quint64, Bot::Broker::Transaction>& transactions) :
+      simulation(simulation), balanceBase(balanceBase), balanceComm(balanceComm), transactions(transactions) {}
+  private:
+    bool simulation;
+    double balanceBase;
+    double balanceComm;
+    QHash<quint64, Bot::Broker::Transaction> transactions;
 
-void BotService::WorkerThread::addTransaction(const Bot::Broker::Transaction& transaction)
+  public: // Event
+    virtual void handle(BotService& botService)
+    {
+      QSettings file(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", simulation ? "BotDataSimulation" : "BotData");
+      file.clear();
+      file.setValue("balanceBase", balanceBase);
+      file.setValue("balanceComm", balanceComm);
+
+      file.beginWriteArray("Transactions");
+      int i = 0;
+      foreach(const Bot::Broker::Transaction& transaction, transactions)
+      {
+        file.setArrayIndex(i++);
+        file.setValue("id", transaction.id);
+        file.setValue("date", transaction.date);
+        file.setValue("price", transaction.price);
+        file.setValue("amount", transaction.amount);
+        file.setValue("fee", transaction.fee);
+        file.setValue("type", (unsigned int)transaction.type);
+      }
+      file.endArray();
+    }
+  };
+
+  eventQueue.append(new SaveTransactionEvent(simulation, balanceBase, balanceComm, transactions));
+  QTimer::singleShot(0, &botService, SLOT(handleEvents()));}
+
+void BotService::WorkerThread::addTransaction(const Bot::Broker::Transaction& transactionData)
 {
   class AddTransactionEvent : public Event
   {
   public:
-    AddTransactionEvent(const Bot::Broker::Transaction& transaction)
-    {
-      this->transaction.id = QString::number(transaction.id);
-      this->transaction.date = transaction.date;
-      this->transaction.amount = transaction.type == Bot::Broker::Transaction::Type::buy ? transaction.amount : -transaction.amount;
-      this->transaction.price = transaction.price;
-      this->transaction.fee = transaction.fee;
-      this->transaction.total = transaction.amount * transaction.price + transaction.fee;
-    }
+    AddTransactionEvent(const Market::Transaction& transaction) : transaction(transaction) {}
   private:
     Market::Transaction transaction;
   public: // Event
@@ -191,7 +255,16 @@ void BotService::WorkerThread::addTransaction(const Bot::Broker::Transaction& tr
       botService.dataModel.botTransactionModel.addTransaction(transaction);
     }
   };
-  eventQueue.append(new AddTransactionEvent(transaction));
+
+  Market::Transaction transaction2;
+  transaction2.id = QString::number(transactionData.id);
+  transaction2.date = transactionData.date;
+  transaction2.amount = transactionData.type == Bot::Broker::Transaction::Type::buy ? transactionData.amount : -transactionData.amount;
+  transaction2.price = transactionData.price;
+  transaction2.fee = transactionData.fee;
+  transaction2.total = transaction2.amount * transactionData.price - transactionData.fee;
+
+  eventQueue.append(new AddTransactionEvent(transaction2));
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
@@ -257,18 +330,15 @@ void BotService::WorkerThread::removeOrder(const Market::Order& order)
 void BotService::WorkerThread::receivedTrade(quint64 channelId, const DataProtocol::Trade& trade)
 {
   tradeHandler.add(trade, 0ULL);
-  if(forReal)
-  {
-    if(trade.flags & DataProtocol::replayedFlag)
-      return;
-  }
-  else
+  if(simulation)
   {
     if(startTime == 0)
       startTime = trade.time;
     if(trade.time - startTime <= 45 * 60 * 1000)
       return;
   }
+  else if(trade.flags & DataProtocol::replayedFlag)
+    return;
   broker->update(trade, *session);
   session->handle(trade, tradeHandler.values);
 }
@@ -320,6 +390,7 @@ void BotService::BotBroker::refreshOrders(Bot::Session& session)
         lastSellTime = time;
         balanceBase += qAbs(order.amount) * order.price - order.fee;
       }
+      workerThread.saveTransactionsFile(balanceBase, balanceComm, transactions);
 
       workerThread.removeOrder(order);
       openOrders.erase(i++);
@@ -426,12 +497,13 @@ void BotService::BotBroker::getSellTransactions(QList<Transaction>& transactions
 
 void BotService::BotBroker::removeTransaction(quint64 id)
 {
-  QMap<quint64, Transaction>::Iterator it = transactions.find(id);
+  QHash<quint64, Transaction>::Iterator it = transactions.find(id);
   if(it == transactions.end())
     return;
   const Transaction& transaction = it.value();
   workerThread.removeTransaction(transaction);
   transactions.erase(it);
+  workerThread.saveTransactionsFile(balanceBase, balanceComm, transactions);
 }
 
 void BotService::BotBroker::updateTransaction(quint64 id, const Transaction& transaction)
@@ -440,6 +512,16 @@ void BotService::BotBroker::updateTransaction(quint64 id, const Transaction& tra
   destTransaction = transaction;
   destTransaction.id = id;
   workerThread.updateTransaction(destTransaction);
+  workerThread.saveTransactionsFile(balanceBase, balanceComm, transactions);
+}
+
+void BotService::BotBroker::loadTransaction(const Transaction& transaction)
+{
+  transactions.insert(transaction.id, transaction);
+  workerThread.addTransaction(transaction);
+  if(transaction.id >= nextTransactionId)
+    nextTransactionId = transaction.id + 1;
+  // don not call savetransactionsFile here
 }
 
 void BotService::SimBroker::update(const DataProtocol::Trade& trade, Bot::Session& session)
@@ -483,6 +565,7 @@ void BotService::SimBroker::update(const DataProtocol::Trade& trade, Bot::Sessio
         lastSellTime = time;
         balanceBase += qAbs(order.amount) * order.price - order.fee;
       }
+      workerThread.saveTransactionsFile(balanceBase, balanceComm, transactions);
 
       workerThread.removeOrder(order);
       openOrders.erase(i++);
@@ -518,7 +601,7 @@ bool BotService::SimBroker::buy(double price, double amount, quint64 timeout)
   order.amount = amount;
   order.price = price;
   order.fee = fee;
-  order.total = order.amount * order.price + order.fee;
+  order.total = order.amount * order.price - order.fee;
 
   workerThread.addOrder(order);
   workerThread.addMarker(time, GraphModel::Marker::buyAttemptMarker);
@@ -538,7 +621,7 @@ bool BotService::SimBroker::sell(double price, double amount, quint64 timeout)
   order.amount = -amount;
   order.price = price;
   order.fee = ceil(amount * price * this->fee * 100.) / 100.;
-  order.total = order.amount * order.price + order.fee;
+  order.total = order.amount * order.price - order.fee;
 
   workerThread.addOrder(order);
   workerThread.addMarker(time, GraphModel::Marker::sellAttemptMarker);
@@ -587,12 +670,13 @@ void BotService::SimBroker::getSellTransactions(QList<Transaction>& transactions
 
 void BotService::SimBroker::removeTransaction(quint64 id)
 {
-  QMap<quint64, Transaction>::Iterator it = transactions.find(id);
+  QHash<quint64, Transaction>::Iterator it = transactions.find(id);
   if(it == transactions.end())
     return;
   const Transaction& transaction = it.value();
   workerThread.removeTransaction(transaction);
   transactions.erase(it);
+  workerThread.saveTransactionsFile(balanceBase, balanceComm, transactions);
 }
 
 void BotService::SimBroker::updateTransaction(quint64 id, const Transaction& transaction)
@@ -601,5 +685,5 @@ void BotService::SimBroker::updateTransaction(quint64 id, const Transaction& tra
   destTransaction = transaction;
   destTransaction.id = id;
   workerThread.updateTransaction(destTransaction);
+  workerThread.saveTransactionsFile(balanceBase, balanceComm, transactions);
 }
-

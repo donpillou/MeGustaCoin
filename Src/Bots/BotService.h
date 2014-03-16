@@ -9,7 +9,7 @@ public:
   BotService(DataModel& dataModel);
   ~BotService();
 
-  void start(const QString& botName, const QString& marketName, const QString& userName, const QString& key, const QString& secret);
+  void start(const QString& botName, bool simulation, const QString& marketName, const QString& userName, const QString& key, const QString& secret);
   void stop();
 
 private:
@@ -29,10 +29,10 @@ private:
   class WorkerThread : public QThread, public DataConnection::Callback
   {
   public:
-    WorkerThread(BotService& botService, JobQueue<Event*>& eventQueue, const QString& botName, const QString& marketName, const QString& userName, const QString& key, const QString& secret) :
+    WorkerThread(BotService& botService, JobQueue<Event*>& eventQueue, const QString& botName, bool simulation, const QString& marketName, const QString& userName, const QString& key, const QString& secret) :
       botService(botService), eventQueue(eventQueue),
-      botName(botName), marketName(marketName), userName(userName), key(key), secret(secret),
-      broker(0), session(0), canceled(false), forReal(false), startTime(0) {}
+      botName(botName), simulation(simulation), marketName(marketName), userName(userName), key(key), secret(secret),
+      broker(0), session(0), canceled(false), startTime(0) {}
 
     void interrupt();
     void addMessage(LogModel::Type type, const QString& message);
@@ -40,6 +40,7 @@ private:
     void addTransaction(const Bot::Broker::Transaction& transaction);
     void removeTransaction(const Bot::Broker::Transaction& transaction);
     void updateTransaction(const Bot::Broker::Transaction& transaction);
+    void saveTransactionsFile(double balanceBase, double balanceComm, const QHash<quint64, Bot::Broker::Transaction>& transactions);
     void addOrder(const Market::Order& order);
     void removeOrder(const Market::Order& order);
 
@@ -47,6 +48,7 @@ private:
     BotService& botService;
     JobQueue<Event*>& eventQueue;
     QString botName;
+    bool simulation;
     QString marketName;
     QString userName;
     QString key;
@@ -56,7 +58,6 @@ private:
     Bot::Session* session;
     bool canceled;
     TradeHandler tradeHandler;
-    bool forReal;
     quint64 startTime;
 
   private:
@@ -80,6 +81,8 @@ private:
     BotBroker(WorkerThread& workerThread, Market& market, double balanceBase, double balanceComm, double fee) : workerThread(workerThread), market(market), balanceBase(balanceBase), balanceComm(balanceComm), fee(fee),
       time(0), lastBuyTime(0), lastSellTime(0), nextTransactionId(1) {}
 
+    void loadTransaction(const Transaction& transaction);
+
   private:
     class Order : public Market::Order
     {
@@ -98,7 +101,7 @@ private:
     quint64 time;
     quint64 lastBuyTime;
     quint64 lastSellTime;
-    QMap<quint64, Transaction> transactions;
+    QHash<quint64, Transaction> transactions;
     quint64 nextTransactionId;
 
   public:
@@ -151,7 +154,7 @@ private:
     quint64 time;
     quint64 lastBuyTime;
     quint64 lastSellTime;
-    QMap<quint64, Transaction> transactions;
+    QHash<quint64, Transaction> transactions;
     quint64 nextOrderId;
     quint64 nextTransactionId;
 

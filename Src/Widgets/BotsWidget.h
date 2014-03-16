@@ -12,7 +12,8 @@ public:
   void saveState(QSettings& settings);
 
 public slots:
-  void simulate();
+  void optimize();
+  void simulate(bool enabled);
   void activate(bool enabled);
   void updateToolBarButtons();
 
@@ -53,10 +54,12 @@ private:
   QTreeView* orderView;
   QTreeView* transactionView;
 
+  QAction* optimizeAction;
   QAction* simulateAction;
   QAction* activateAction;
 
-  //QList<QModelIndex> getSelectedRows();
+  void startWorkerThread(bool simulation);
+  void stopWorkerThread();
 
 private slots:
   void executeActions();
