@@ -28,6 +28,7 @@ bool BitstampMarket::createOrderDraft(double amount, double price, Market::Order
   order.amount = amount;
   order.price = price;
   order.total = getOrderCharge(order.amount, order.price);
+  order.fee = qAbs(order.total) - qAbs(order.price * order.amount);
   return true;
 }
 
@@ -74,6 +75,7 @@ bool BitstampMarket::createOrder(double amount, double price, Market::Order& ord
   if(!buy)
     order.amount = -order.amount;
   order.total = getOrderCharge(order.amount, order.price);
+  order.fee = qAbs(order.total) - qAbs(order.price * order.amount);
   this->orders.insert(order.id, order);
 
   // update balance

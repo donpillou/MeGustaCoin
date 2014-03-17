@@ -1,17 +1,48 @@
 
 #include "stdafx.h"
 
-BuyBot::Session::Session(Broker& broker) : broker(broker)
+BuyBot::Session::Session(Broker& broker) : broker(broker), minBuyInPrice(0.), maxSellInPrice(0.)
 {
   memset(&parameters, 0, sizeof(Session::Parameters));
 
   //parameters.sellProfitGain = 0.8;
   //parameters.buyProfitGain = 0.6;
+  
   parameters.sellProfitGain = 0.2;
   parameters.buyProfitGain = 0.2;
 
+  //parameters.sellProfitGain = 0.;
+  //parameters.buyProfitGain = 0.127171;
+
+  updateBalance();
+}
+
+void BuyBot::Session::updateBalance()
+{
   balanceBtc = broker.getBalanceComm();
   balanceUsd = broker.getBalanceBase();
+  double fee = broker.getFee();
+
+  maxSellInPrice = 0.;
+  minBuyInPrice = 0.;
+
+  QList<Broker::Transaction> transactions;
+  broker.getSellTransactions(transactions);
+  foreach(const Broker::Transaction& transaction, transactions)
+  {
+    balanceUsd -= transaction.amount * transaction.price * (1. + fee);
+    if(maxSellInPrice == 0. || transaction.price > maxSellInPrice)
+      maxSellInPrice = transaction.price;
+  }
+
+  transactions.clear();
+  broker.getBuyTransactions(transactions);
+  foreach(const Broker::Transaction& transaction, transactions)
+  {
+    balanceBtc -= transaction.amount;
+    if(minBuyInPrice == 0. || transaction.price < minBuyInPrice)
+      minBuyInPrice = transaction.price;
+  }
 }
 
 void BuyBot::Session::setParameters(double* parameters)
@@ -36,12 +67,8 @@ void BuyBot::Session::handleBuy(const Broker::Transaction& transaction)
 
   // sort sell transaction list by price
   QMap<double, Broker::Transaction> sortedTransactions;
-  balanceUsd = broker.getBalanceBase();
   foreach(const Broker::Transaction& transaction, transactions)
-  {
     sortedTransactions.insert(transaction.price, transaction);
-    balanceUsd -= transaction.amount * transaction.price + transaction.fee;
-  }
 
   // iterate over sorted transaction list (ascending)
   double fee = broker.getFee();
@@ -53,7 +80,8 @@ void BuyBot::Session::handleBuy(const Broker::Transaction& transaction)
     {
       if(transaction.amount > amount)
       {
-        invest += amount * transaction.price * (1. - fee);
+        invest += amount * transaction.price / (1. + fee);
+        transaction.fee *= (transaction.amount - amount) / transaction.amount;
         transaction.amount -= amount;
         broker.updateTransaction(transaction.id, transaction);
         amount = 0.;
@@ -61,7 +89,7 @@ void BuyBot::Session::handleBuy(const Broker::Transaction& transaction)
       }
       else
       {
-        invest += transaction.amount * transaction.price * (1. - fee);
+        invest += transaction.amount * transaction.price / (1. + fee);
         broker.removeTransaction(transaction.id);
         amount -= transaction.amount;
         if(amount == 0.)
@@ -73,6 +101,8 @@ void BuyBot::Session::handleBuy(const Broker::Transaction& transaction)
     broker.warning(QString("Earned %1.").arg(DataModel::formatPrice(invest - price * transaction.amount * (1. + fee))));
   else
     broker.warning("Bought something without profit.");
+
+  updateBalance();
 }
 
 void BuyBot::Session::handleSell(const Broker::Transaction& transaction)
@@ -86,12 +116,8 @@ void BuyBot::Session::handleSell(const Broker::Transaction& transaction)
 
   // sort buy transaction list by price
   QMap<double, Broker::Transaction> sortedTransactions;
-  balanceBtc = broker.getBalanceComm();
   foreach(const Broker::Transaction& transaction, transactions)
-  {
     sortedTransactions.insert(transaction.price, transaction);
-    balanceBtc -= transaction.amount;
-  }
 
   // iterate over sorted transaction list (descending)
   double fee = broker.getFee();
@@ -106,6 +132,7 @@ void BuyBot::Session::handleSell(const Broker::Transaction& transaction)
         if(transaction.amount > amount)
         {
           invest += amount * transaction.price * (1. + fee);
+          transaction.fee *= (transaction.amount - amount) / transaction.amount;
           transaction.amount -= amount;
           broker.updateTransaction(transaction.id, transaction);
           amount = 0.;
@@ -125,9 +152,11 @@ void BuyBot::Session::handleSell(const Broker::Transaction& transaction)
     }
   }
   if(amount == 0.)
-    broker.warning(QString("Earned %1.").arg(DataModel::formatPrice(price * transaction.amount * (1. - fee) - invest)));
+    broker.warning(QString("Earned %1.").arg(DataModel::formatPrice(price * transaction.amount / (1. + fee) - invest)));
   else
     broker.warning("Sold something without profit.");
+
+  updateBalance();
 }
 
 bool BuyBot::Session::isGoodBuy(const Values& values)
@@ -172,9 +201,10 @@ void BuyBot::Session::checkBuy(const DataProtocol::Trade& trade, const Values& v
 
   double fee = broker.getFee();
 
-  if(isVeryGoodBuy(values) && balanceUsd >= trade.price * 0.02 * (1. + fee))
+  if(isVeryGoodBuy(values) && balanceUsd >= trade.price * 0.02 * (1. + fee) && (minBuyInPrice == 0. || trade.price * (1. + broker.getFee() * 2.) < minBuyInPrice))
   {
-    broker.buy(trade.price, 0.02, 60 * 60);
+    if(broker.buy(trade.price, 0.02, 60 * 60))
+      return;
     return;
   }
 
@@ -193,7 +223,8 @@ void BuyBot::Session::checkBuy(const DataProtocol::Trade& trade, const Values& v
     }
     if(profitableAmount >= 0.01)
     {
-      broker.buy(trade.price, qMax(0.01, profitableAmount * 0.5), 60 * 60);
+      if(broker.buy(trade.price, qMax(0.01, profitableAmount * 0.5), 60 * 60))
+        return;
       return;
     }
   }
@@ -206,9 +237,10 @@ void BuyBot::Session::checkSell(const DataProtocol::Trade& trade, const Values& 
   if(broker.getTimeSinceLastSell() < 60 * 60)
     return; // do not sell too often
 
-  if(isVeryGoodSell(values) && balanceBtc >= 0.02)
+  if(isVeryGoodSell(values) && balanceBtc >= 0.02 && (maxSellInPrice == 0. || trade.price > maxSellInPrice * (1. + broker.getFee() *.2)))
   {
-    broker.sell(trade.price, 0.02, 60 * 60);
+    if(broker.sell(trade.price, 0.02, 60 * 60))
+      return;
     return;
   }
 
@@ -227,7 +259,8 @@ void BuyBot::Session::checkSell(const DataProtocol::Trade& trade, const Values& 
     }
     if(profitableAmount >= 0.01)
     {
-      broker.sell(trade.price, qMax(0.01, profitableAmount * 0.5), 60 * 60);
+      if(broker.sell(trade.price, qMax(0.01, profitableAmount * 0.5), 60 * 60))
+        return;
       return;
     }
   }

@@ -197,7 +197,7 @@ void BotsWidget::Thread::run()
   particleSwarm.start();
 
   double bestRating = 0.;
-  unsigned int iterations = 200;
+  unsigned int iterations = 1000;
   for(unsigned int i = 0; i < iterations; ++i)
   {
     particleSwarm.next();
@@ -327,7 +327,7 @@ void BotsWidget::Thread::run()
     private:
       virtual bool buy(double price, double amount, quint64 timeout)
       {
-        double fee = amount * price * this->fee;
+        double fee = ceil(amount * price * this->fee * 100.) / 100.;
         double charge = amount * price + fee;
         if(charge > balanceBase)
           return false;
@@ -343,7 +343,7 @@ void BotsWidget::Thread::run()
         if(amount > balanceComm)
           return false;
 
-        double fee = amount * price * this->fee;
+        double fee = ceil(amount * price * this->fee * 100.) / 100.;
         Order order = {price, amount, fee, time + timeout};
         sellOrders.append(order);
         balanceComm -= amount;

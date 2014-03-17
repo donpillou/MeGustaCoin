@@ -27,6 +27,9 @@ private:
     double balanceUsd;
     double balanceBtc;
 
+    double minBuyInPrice;
+    double maxSellInPrice;
+
     virtual ~Session() {}
 
     virtual void setParameters(double* parameters);
@@ -40,6 +43,7 @@ private:
     bool isGoodSell(const Values& values);
     bool isVeryGoodSell(const Values& values);
 
+    void updateBalance();
     void checkBuy(const DataProtocol::Trade& trade, const Values& values);
     void checkSell(const DataProtocol::Trade& trade, const Values& values);
   };
