@@ -8,7 +8,8 @@ BuyBot::Session::Session(Broker& broker) : broker(broker), minBuyInPrice(0.), ma
   //parameters.sellProfitGain = 0.8;
   //parameters.buyProfitGain = 0.6;
   
-  parameters.sellProfitGain = 0.2;
+  //parameters.sellProfitGain = 0.2;
+  parameters.sellProfitGain = 0.4;
   parameters.buyProfitGain = 0.2;
 
   //parameters.sellProfitGain = 0.;
@@ -98,7 +99,7 @@ void BuyBot::Session::handleBuy(const Broker::Transaction& transaction)
     }
   }
   if(amount == 0.)
-    broker.warning(QString("Earned %1.").arg(DataModel::formatPrice(invest - price * transaction.amount * (1. + fee))));
+    broker.warning(QString("Earned? %1.").arg(DataModel::formatPrice(invest - price * transaction.amount * (1. + fee))));
   else
     broker.warning("Bought something without profit.");
 
@@ -223,7 +224,7 @@ void BuyBot::Session::checkBuy(const DataProtocol::Trade& trade, const Values& v
     }
     if(profitableAmount >= 0.01)
     {
-      if(broker.buy(trade.price, qMax(0.01, profitableAmount * 0.5), 60 * 60))
+      if(broker.buy(trade.price, qMax(qMin(0.02, profitableAmount), profitableAmount * 0.5), 60 * 60))
         return;
       return;
     }
@@ -259,7 +260,7 @@ void BuyBot::Session::checkSell(const DataProtocol::Trade& trade, const Values& 
     }
     if(profitableAmount >= 0.01)
     {
-      if(broker.sell(trade.price, qMax(0.01, profitableAmount * 0.5), 60 * 60))
+      if(broker.sell(trade.price, qMax(qMin(0.02, profitableAmount), profitableAmount * 0.5), 60 * 60))
         return;
       return;
     }
