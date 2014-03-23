@@ -14,6 +14,8 @@
 #include "Markets/Market.h"
 #include "Markets/BitstampMarket.h"
 
+#include "Bots/BotProtocol.h"
+#include "Bots/BotConnection.h"
 #include "Bots/Bot.h"
 #include "Bots/BuyBot.h"
 #include "Bots/ParticleSwarm.h"
@@ -42,4 +44,5 @@
 #include "Widgets/LogWidget.h"
 
 #include "LoginDialog.h"
+#include "OptionsDialog.h"
 #include "MainWindow.h"

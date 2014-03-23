@@ -17,7 +17,11 @@ public:
 
   enum class State
   {
-    inactive,
+    connecting,
+    connected,
+    offline,
+
+    inactive, // que?
     active,
   };
 

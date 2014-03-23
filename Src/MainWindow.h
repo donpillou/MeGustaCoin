@@ -23,6 +23,7 @@ private:
   DataModel dataModel;
   MarketService marketService;
   DataService dataService;
+  BotService botService;
 
   struct ChannelData
   {
@@ -37,6 +38,9 @@ private:
   QSignalMapper liveGraphSignalMapper;
 
   void open(const QString& market, const QString& userName, const QString& key, const QString& secret);
+  void startDataService();
+  void startBotService();
+
 
   virtual void closeEvent(QCloseEvent* event);
 
@@ -49,6 +53,7 @@ private slots:
   void updateFocusPublicDataModel();
   void updateViewMenu();
   void about();
+  void showOptions();
   void enableTradesUpdates(bool enable);
   void enableGraphUpdates(bool enable);
   void createLiveTradeWidget(const QString& channel);

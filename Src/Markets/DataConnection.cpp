@@ -1,13 +1,12 @@
 
 #include "stdafx.h"
 
-bool DataConnection::connect()
+bool DataConnection::connect(const QString& server, quint16 port)
 {
   connection.close();
   recvBuffer.clear();
 
-  if(!connection.connect("192.168.0.49", 40123))
-  //if(!connection.connect("127.0.0.1", 40123))
+  if(!connection.connect(server, port == 0 ? 40123 : port))
   {
     error = connection.getLastError();
     return false;

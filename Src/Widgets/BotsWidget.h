@@ -6,8 +6,7 @@ class BotsWidget : public QWidget
   Q_OBJECT
 
 public:
-  BotsWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService);
-  ~BotsWidget();
+  BotsWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, BotService& botService);
 
   void saveState(QSettings& settings);
 
@@ -18,37 +17,8 @@ public slots:
   void updateToolBarButtons();
 
 private:
-  class Action
-  {
-  public:
-    virtual void execute(BotsWidget& widget) = 0;
-  };
-
-  class Thread : public QThread
-  {
-  public:
-    Thread(BotsWidget& widget, Bot& botFactory, const QString& marketName, double fee) : widget(widget), botFactory(botFactory), marketName(marketName), fee(fee) {}
-
-  private:
-    BotsWidget& widget;
-    Bot& botFactory;
-    QString marketName;
-    double fee;
-
-    virtual void run();
-
-    void logMessage(LogModel::Type type, const QString& message);
-    void quit(LogModel::Type type, const QString& message);
-    void clearMarkers();
-    void addMarker(quint64 time, GraphModel::Marker marker);
-  };
-
   DataModel& dataModel;
-  MarketService& marketService;
-  BotService botService;
-
-  QThread* thread;
-  JobQueue<Action*> actionQueue;
+  BotService& botService;
 
   QSplitter* splitter;
   QTreeView* orderView;
@@ -57,10 +27,4 @@ private:
   QAction* optimizeAction;
   QAction* simulateAction;
   QAction* activateAction;
-
-  void startWorkerThread(bool simulation);
-  void stopWorkerThread();
-
-private slots:
-  void executeActions();
 };

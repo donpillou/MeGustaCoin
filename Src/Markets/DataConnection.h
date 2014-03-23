@@ -23,7 +23,7 @@ public:
     virtual void receivedErrorResponse(const QString& message) = 0;
   };
 
-  bool connect();
+  bool connect(const QString& server, quint16 port);
   bool process(Callback& callback);
   void interrupt();
 

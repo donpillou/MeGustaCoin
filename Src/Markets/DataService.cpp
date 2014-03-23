@@ -9,12 +9,17 @@ DataService::~DataService()
   stop();
 }
 
-void DataService::start()
+void DataService::start(const QString& server)
 {
   if(thread)
-    return;
+  {
+     if(server == thread->getServer())
+       return;
+     stop();
+     Q_ASSERT(!thread);
+  }
 
-  thread = new WorkerThread(*this, eventQueue, jobQueue);
+  thread = new WorkerThread(*this, eventQueue, jobQueue, server);
   thread->start();
 }
 
@@ -184,7 +189,8 @@ void DataService::WorkerThread::process()
   addMessage(LogModel::Type::information, "Connecting to data service...");
 
   // create connection
-  if(!connection.connect())
+  QStringList addr = server.split(':');
+  if(!connection.connect(addr.size() > 0 ? addr[0] : QString(), addr.size() > 1 ? addr[1].toULong() : 0))
   {
     addMessage(LogModel::Type::error, QString("Could not connect to data service: %1").arg(connection.getLastError()));
     return;
@@ -228,7 +234,7 @@ void DataService::WorkerThread::run()
     setState(PublicDataModel::State::offline);
     if(canceled)
       return;
-    sleep(10 * 1000);
+    sleep(10);
   }
 }
 

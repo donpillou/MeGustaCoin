@@ -9,7 +9,7 @@ public:
   DataService(DataModel& dataModel);
   ~DataService();
 
-  void start();
+  void start(const QString& server);
   void stop();
 
   void subscribe(const QString& channel);
@@ -35,9 +35,11 @@ private:
   class WorkerThread : public QThread, public DataConnection::Callback
   {
   public:
-    WorkerThread(DataService& dataService, JobQueue<Event*>& eventQueue, JobQueue<Job*>& jobQueue) :
-      dataService(dataService), eventQueue(eventQueue), jobQueue(jobQueue), canceled(false) {}
+    WorkerThread(DataService& dataService, JobQueue<Event*>& eventQueue, JobQueue<Job*>& jobQueue, const QString& server) :
+      dataService(dataService), eventQueue(eventQueue), jobQueue(jobQueue), canceled(false), 
+      server(server) {}
 
+    const QString& getServer() const {return server;}
     void interrupt();
 
   public:
@@ -46,6 +48,7 @@ private:
     JobQueue<Job*>& jobQueue;
     DataConnection connection;
     bool canceled;
+    QString server;
     QHash<quint64, QList<DataProtocol::Trade> > replayedTrades;
 
   private:

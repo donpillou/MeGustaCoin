@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "MeGustaCoin", "MeGustaCoin"),
-  marketService(dataModel), dataService(dataModel)
+  marketService(dataModel), dataService(dataModel), botService(dataModel)
 {
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
   connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
@@ -33,7 +33,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   ordersWidget = new OrdersWidget(this, settings, dataModel, marketService);
   transactionsWidget = new TransactionsWidget(this, settings, dataModel, marketService);
   graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
-  botsWidget = new BotsWidget(this, settings, dataModel, marketService);
+  botsWidget = new BotsWidget(this, settings, dataModel, botService);
   logWidget = new LogWidget(this, settings, dataModel.logModel);
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
@@ -125,6 +125,9 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   viewMenu = menuBar->addMenu(tr("&View"));
   connect(viewMenu, SIGNAL(aboutToShow()), this, SLOT(updateViewMenu()));
 
+  QMenu* toolsMenu = menuBar->addMenu(tr("&Tools"));
+  connect(toolsMenu->addAction(tr("&Options...")), SIGNAL(triggered()), this, SLOT(showOptions()));
+
   menu = menuBar->addMenu(tr("&Help"));
   connect(menu->addAction(tr("&About...")), SIGNAL(triggered()), this, SLOT(about()));
   connect(menu->addAction(tr("About &Qt...")), SIGNAL(triggered()), qApp, SLOT(aboutQt()));
@@ -151,22 +154,47 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   }
   else
     settings.endGroup();
-
   if(!marketService.isReady())
     QTimer::singleShot(0, this, SLOT(login()));
-  dataService.start();
+
+  startDataService();
+  startBotService();
+}
+
+void MainWindow::startDataService()
+{
+  settings.beginGroup("DataServer");
+  QString dataServer = settings.value("Address", "127.0.0.1:40123").toString();
+  dataService.start(dataServer);
+  settings.endGroup();
+}
+
+void MainWindow::startBotService()
+{
+  settings.beginGroup("BotServer");
+  QString botServer = settings.value("Address", "127.0.0.1:40124").toString();
+  QString botUser = settings.value("User").toString();
+  QString botPassword = settings.value("Password").toString();
+  botService.start(botServer, botUser, botPassword);
+  settings.endGroup();
 }
 
 MainWindow::~MainWindow()
 {
   logout();
 
+  // manually delete widgets since they hold a reference to the data model
   for(QHash<QString, ChannelData>::Iterator i = channelDataMap.begin(), end = channelDataMap.end(); i != end; ++i)
   {
     ChannelData& channelData = i.value();
     delete channelData.tradesWidget;
     delete channelData.graphWidget;
   }
+  delete ordersWidget;
+  delete transactionsWidget;
+  delete graphWidget;
+  delete botsWidget;
+  delete logWidget;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -379,6 +407,16 @@ void MainWindow::createLiveGraphWidget(const QString& channelName)
   addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
 
   dataService.subscribe(channelName);
+}
+
+void MainWindow::showOptions()
+{
+  OptionsDialog optionsDialog(this, &settings);
+  if(optionsDialog.exec() != QDialog::Accepted)
+    return;
+
+  startDataService();
+  startBotService();
 }
 
 void MainWindow::about()
