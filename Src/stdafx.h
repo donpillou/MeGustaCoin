@@ -27,8 +27,8 @@
 #include "Models/BookModel.h"
 #include "Models/LogModel.h"
 #include "Models/PublicDataModel.h"
-#include "Models/DataModel.h"
 #include "Models/BotsModel.h"
+#include "Models/DataModel.h"
 
 #include "Bots/BotService.h"
 #include "Markets/MarketService.h"

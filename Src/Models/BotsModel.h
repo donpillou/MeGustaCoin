@@ -3,7 +3,10 @@
 
 class BotsModel : public QAbstractItemModel
 {
+  Q_OBJECT
+
 public:
+
   BotsModel();
   ~BotsModel();
 
@@ -31,6 +34,13 @@ public:
 
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
 
+  State getState() const {return state;}
+  QString getStateName() const;
+  void setState(State state);
+
+signals:
+  void changedState();
+
 private:
   struct Bot
   {
@@ -39,6 +49,7 @@ private:
     ::Bot* botFactory;
   };
 
+  State state;
   QList<Bot> bots;
   QVariant activeStr;
   QVariant inactiveStr;

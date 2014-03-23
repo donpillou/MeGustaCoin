@@ -42,6 +42,7 @@ targets = {
       //"Src/Models/BookModel.h"
       "Src/Models/TradeModel.h"
       "Src/Models/TransactionModel.h"
+      "Src/Models/BotsModel.h"
       "Src/Markets/MarketService.h"
       "Src/Markets/DataService.h"
       "Src/Bots/BotService.h"

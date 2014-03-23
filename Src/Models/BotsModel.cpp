@@ -1,12 +1,35 @@
 
 #include "stdafx.h"
 
-BotsModel::BotsModel() : activeStr(tr("active")), inactiveStr(tr("inactive")) {}
+BotsModel::BotsModel() : state(State::offline), activeStr(tr("active")), inactiveStr(tr("inactive")) {}
 
 BotsModel::~BotsModel()
 {
   foreach(const Bot& bot, bots)
     delete bot.botFactory;
+}
+
+QString BotsModel::getStateName() const
+{
+  switch(state)
+  {
+  case State::connecting:
+    return tr("connecting...");
+  case State::offline:
+    return tr("offline");
+  case State::connected:
+    return QString();
+  }
+  Q_ASSERT(false);
+  return QString();
+}
+
+void BotsModel::setState(State state)
+{
+  if(this->state == state)
+    return;
+  this->state = state;
+  emit changedState();
 }
 
 void BotsModel::addBot(const QString& name, ::Bot& botFactory)

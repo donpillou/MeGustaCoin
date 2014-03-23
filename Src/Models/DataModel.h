@@ -10,8 +10,9 @@ public:
   TransactionModel transactionModel;
   LogModel logModel;
 
-  OrderModel botOrderModel;
-  TransactionModel botTransactionModel;
+  BotsModel botsModel;
+  OrderModel botOrderModel; // todo: move this to BotsModel?
+  TransactionModel botTransactionModel; // todo: move this to BotsModel?
 
   DataModel();
   ~DataModel();

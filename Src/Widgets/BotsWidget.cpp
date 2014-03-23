@@ -4,8 +4,8 @@
 BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, BotService& botService) :
   QWidget(parent), dataModel(dataModel),  botService(botService)
 {
-  //connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
+  connect(&dataModel.botsModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
+  connect(&dataModel.botsModel, SIGNAL(changedState()), this, SLOT(updateToolBarButtons()));
 
   //botsModel.addBot("BuyBot", *new BuyBot);
 
@@ -13,6 +13,11 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, DataModel& dataMode
   toolBar->setStyleSheet("QToolBar { border: 0px }");
   toolBar->setIconSize(QSize(16, 16));
   toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
+  addAction = toolBar->addAction(QIcon(":/Icons/user_gray_add.png"), tr("&Add"));
+  addAction->setEnabled(false);
+  connect(addAction, SIGNAL(triggered()), this, SLOT(addBot()));
+
   optimizeAction = toolBar->addAction(QIcon(":/Icons/chart_curve.png"), tr("&Optimize"));
   optimizeAction->setEnabled(false);
   connect(optimizeAction, SIGNAL(triggered()), this, SLOT(optimize()));
@@ -80,6 +85,10 @@ void BotsWidget::saveState(QSettings& settings)
   settings.endGroup();
 }
 
+void BotsWidget::addBot()
+{
+}
+
 void BotsWidget::activate(bool enable)
 {
 
@@ -94,10 +103,26 @@ void BotsWidget::optimize()
 {
 }
 
+void BotsWidget::updateTitle()
+{
+  QString stateStr = dataModel.botsModel.getStateName();
+
+  QString title;
+  if(stateStr.isEmpty())
+    title = tr("Bots");
+  else
+    title = tr("Bots (%2)").arg(stateStr);
+
+  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
+  dockWidget->setWindowTitle(title);
+  dockWidget->toggleViewAction()->setText(tr("Bots"));
+}
+
 void BotsWidget::updateToolBarButtons()
 {
   bool connected = botService.isConnected();
-  optimizeAction->setEnabled(connected);
-  simulateAction->setEnabled(connected);
-  activateAction->setEnabled(connected);
+  addAction->setEnabled(connected);
+  //optimizeAction->setEnabled(connected);
+  //simulateAction->setEnabled(connected);
+  //activateAction->setEnabled(connected);
 }

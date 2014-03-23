@@ -90,6 +90,7 @@ void BotService::WorkerThread::setState(BotsModel::State state)
         botService.connected = true;
       else if(state == BotsModel::State::offline)
         botService.connected = false;
+      botService.dataModel.botsModel.setState(state);
     }
   };
   eventQueue.append(new SetStateEvent(state));

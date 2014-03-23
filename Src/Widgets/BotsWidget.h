@@ -10,10 +10,12 @@ public:
 
   void saveState(QSettings& settings);
 
-public slots:
+private slots:
+  void addBot();
   void optimize();
   void simulate(bool enabled);
   void activate(bool enabled);
+  void updateTitle();
   void updateToolBarButtons();
 
 private:
@@ -24,6 +26,7 @@ private:
   QTreeView* orderView;
   QTreeView* transactionView;
 
+  QAction* addAction;
   QAction* optimizeAction;
   QAction* simulateAction;
   QAction* activateAction;
