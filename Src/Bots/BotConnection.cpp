@@ -13,7 +13,32 @@ bool BotConnection::connect(const QString& server, quint16 port, const QString& 
   }
 
   // send login request
-  BotProtocol::Header header;
+  {
+    unsigned char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::LoginRequest)];
+    BotProtocol::Header* header = (BotProtocol::Header*)message;
+    BotProtocol::LoginRequest* loginRequest = (BotProtocol::LoginRequest*)(header + 1);
+    header->size = sizeof(message);
+    header->source = 0;
+    header->destination = 0;
+    header->messageType = BotProtocol::loginRequest;
+    QByteArray userNameData = userName.toUtf8();
+    memcpy(loginRequest->username, userNameData.constData(), qMin(userNameData.size() + 1, (int)sizeof(loginRequest->username) - 1));
+    loginRequest->username[sizeof(loginRequest->username) - 1] = '\0';
+    if(!connection.send((char*)message, sizeof(message)))
+    {
+      error = connection.getLastError();
+      return false;
+    }
+  }
+
+  // receive login response
+  {
+    //unsigned char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::LoginResponse)];
+
+  }
+
+
+
 
   // request server time
   //DataProtocol::Header header;
