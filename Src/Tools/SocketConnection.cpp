@@ -313,6 +313,12 @@ bool SocketConnection::recv(QByteArray& data)
   return true;
 }
 
+bool SocketConnection::recv(const char* data, int len)
+{
+  //bool recv(const char* data, int maxLen, int& len);
+  return false;
+}
+
 QString SocketConnection::getSocketErrorString()
 {
   return getSocketErrorString(ERRNO);

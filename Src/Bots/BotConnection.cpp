@@ -13,22 +13,17 @@ bool BotConnection::connect(const QString& server, quint16 port, const QString& 
   }
 
   // send login request
+  if(!sendLoginRequest(userName))
   {
-    unsigned char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::LoginRequest)];
-    BotProtocol::Header* header = (BotProtocol::Header*)message;
-    BotProtocol::LoginRequest* loginRequest = (BotProtocol::LoginRequest*)(header + 1);
-    header->size = sizeof(message);
-    header->source = 0;
-    header->destination = 0;
-    header->messageType = BotProtocol::loginRequest;
-    QByteArray userNameData = userName.toUtf8();
-    memcpy(loginRequest->username, userNameData.constData(), qMin(userNameData.size() + 1, (int)sizeof(loginRequest->username) - 1));
-    loginRequest->username[sizeof(loginRequest->username) - 1] = '\0';
-    if(!connection.send((char*)message, sizeof(message)))
-    {
-      error = connection.getLastError();
-      return false;
-    }
+    error = connection.getLastError();
+    return false;
+  }
+
+  BotProtocol::MessageType messageType;
+  if(!peekHeader(messageType))
+  {
+    error = connection.getLastError();
+    return false;
   }
 
   // receive login response
@@ -190,4 +185,90 @@ void BotConnection::handleMessage(DataProtocol::MessageType messageType, char* d
   //default:
   //  break;
   //}
+}
+
+bool BotConnection::sendLoginRequest(const QString& userName)
+{
+  unsigned char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::LoginRequest)];
+  BotProtocol::Header* header = (BotProtocol::Header*)message;
+  BotProtocol::LoginRequest* loginRequest = (BotProtocol::LoginRequest*)(header + 1);
+  header->size = sizeof(message);
+  header->source = 0;
+  header->destination = 0;
+  header->messageType = BotProtocol::loginRequest;
+  QByteArray userNameData = userName.toUtf8();
+  memcpy(loginRequest->username, userNameData.constData(), qMin(userNameData.size() + 1, (int)sizeof(loginRequest->username) - 1));
+  loginRequest->username[sizeof(loginRequest->username) - 1] = '\0';
+  if(!connection.send((char*)message, sizeof(message)))
+  {
+    error = connection.getLastError();
+    return false;
+  }
+  return true;
+}
+
+bool BotConnection::peekHeader(BotProtocol::MessageType& type)
+{
+  if(cachedHeader)
+    return true;
+  if(!connection.recv((char*)&header, sizeof(BotProtocol::Header)))
+  {
+    error = connection.getLastError();
+    return false;
+  }
+  cachedHeader = true;
+  return true;
+}
+
+bool BotConnection::peekHeaderExpect(BotProtocol::MessageType expectedType, size_t minSize)
+{
+  BotProtocol::MessageType messageType;
+  if(!peekHeader(messageType))
+    return false;
+  if(messageType != expectedType)
+  {
+    if(messageType == BotProtocol::errorResponse)
+    {
+      BotProtocol::ErrorResponse errorResponse;
+      if(!receiveErrorResponse(errorResponse))
+        return false;
+      error = errorResponse.errorMessage;
+      return false;
+    }
+    error = "Received unexpected message.";
+    return false;
+  }
+  if(header.size < minSize)
+  {
+    error = "Received message is too small.";
+    return false;
+  }
+  return true;
+}
+
+bool BotConnection::receiveErrorResponse(BotProtocol::ErrorResponse& errorResponse)
+{
+  if(!peekHeaderExpect(BotProtocol::loginResponse, sizeof(BotProtocol::ErrorResponse)))
+    return false;
+  if(!connection.recv((char*)&errorResponse, header.size))
+  {
+    error = connection.getLastError();
+    return false;
+  }
+  errorResponse.errorMessage[sizeof(errorResponse.errorMessage) - 1] = '\0';
+  cachedHeader = false;
+  return true;
+}
+
+bool BotConnection::receiveLoginResponse(BotProtocol::LoginResponse& loginResponse)
+{
+  if(!peekHeaderExpect(BotProtocol::loginResponse, sizeof(BotProtocol::LoginResponse)))
+    return false;
+  if(!connection.recv((char*)&loginResponse, header.size))
+  {
+    error = connection.getLastError();
+    return false;
+  }
+  cachedHeader = false;
+  return true;
 }

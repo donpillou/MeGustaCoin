@@ -15,6 +15,8 @@ public:
     //virtual void receivedErrorResponse(const QString& message) = 0;
   };
 
+  BotConnection() : cachedHeader(false) {}
+
   bool connect(const QString& server, quint16 port, const QString& userName, const QString& password);
   bool process(Callback& callback);
   void interrupt();
@@ -27,6 +29,15 @@ private:
   QString error;
   Callback* callback;
   qint64 serverTimeToLocalTime;
+  BotProtocol::Header header;
+  bool cachedHeader;
 
   void handleMessage(DataProtocol::MessageType messageType, char* data, unsigned int dataSize);
+
+  bool sendLoginRequest(const QString& userName);
+
+  bool peekHeader(BotProtocol::MessageType& type);
+  bool peekHeaderExpect(BotProtocol::MessageType expectedType, size_t minSize);
+  bool receiveErrorResponse(BotProtocol::ErrorResponse& errorResponse);
+  bool receiveLoginResponse(BotProtocol::LoginResponse& loginResponse);
 };
