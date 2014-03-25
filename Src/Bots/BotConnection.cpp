@@ -19,8 +19,8 @@ bool BotConnection::connect(const QString& server, quint16 port, const QString& 
     return false;
 
   QByteArray passwordData = password.toUtf8();
-  QByteArray pwhmac = Sha256::hmac(QByteArray((char*)loginResponse.userkey, 64), passwordData);
-  QByteArray signature = Sha256::hmac(QByteArray((char*)loginResponse.loginkey, 64), pwhmac);
+  QByteArray pwhmac = Sha256::hmac(QByteArray((char*)loginResponse.userkey, 32), passwordData);
+  QByteArray signature = Sha256::hmac(QByteArray((char*)loginResponse.loginkey, 32), pwhmac);
   if(!sendAuthRequest(signature))
     return false;
   if(!receiveAuthResponse())
@@ -49,17 +49,17 @@ bool BotConnection::process(Callback& callback)
 
   for(;;)
   {
-    if(bufferSize >= sizeof(DataProtocol::Header))
+    if(bufferSize >= sizeof(BotProtocol::Header))
     {
-      DataProtocol::Header* header = (DataProtocol::Header*)buffer;
-      if(header->size < sizeof(DataProtocol::Header))
+      BotProtocol::Header* header = (BotProtocol::Header*)buffer;
+      if(header->size < sizeof(BotProtocol::Header))
       {
         error = "Received invalid data.";
         return false;
       }
       if(bufferSize >= header->size)
       {
-        handleMessage((DataProtocol::MessageType)header->messageType, (char*)(header + 1), header->size - sizeof(DataProtocol::Header));
+        handleMessage((BotProtocol::MessageType)header->messageType, (char*)(header + 1), header->size - sizeof(BotProtocol::Header));
         buffer += header->size;
         bufferSize -= header->size;
         continue;
@@ -77,7 +77,7 @@ bool BotConnection::process(Callback& callback)
   return true;
 }
 
-void BotConnection::handleMessage(DataProtocol::MessageType messageType, char* data, unsigned int size)
+void BotConnection::handleMessage(BotProtocol::MessageType messageType, char* data, unsigned int size)
 {
   switch(messageType)
   {
@@ -88,8 +88,8 @@ void BotConnection::handleMessage(DataProtocol::MessageType messageType, char* d
   case BotProtocol::authResponse:
     callback->receivedAuthResponse();
     break;
-  case BotProtocol::MessageType::errorResponse:
-    if(size >= sizeof(DataProtocol::ErrorResponse))
+  case BotProtocol::errorResponse:
+    if(size >= sizeof(BotProtocol::ErrorResponse))
     {
       BotProtocol::ErrorResponse* errorResponse = (BotProtocol::ErrorResponse*)data;
       errorResponse->errorMessage[sizeof(errorResponse->errorMessage) - 1] = '\0';
@@ -130,9 +130,9 @@ bool BotConnection::sendAuthRequest(const QByteArray& signature)
   header->size = sizeof(message);
   header->source = 0;
   header->destination = 0;
-  header->messageType = BotProtocol::loginRequest;
-  Q_ASSERT(signature.size() == 64);
-  memcpy(authRequest->signature, signature.constData(), 64);
+  header->messageType = BotProtocol::authRequest;
+  Q_ASSERT(signature.size() == 32);
+  memcpy(authRequest->signature, signature.constData(), 32);
   if(!connection.send((char*)message, sizeof(message)))
   {
     error = connection.getLastError();
@@ -140,59 +140,6 @@ bool BotConnection::sendAuthRequest(const QByteArray& signature)
   }
   return true;
 }
-
-//bool BotConnection::peekHeader(BotProtocol::MessageType& type)
-//{
-//  if(cachedHeader)
-//    return true;
-//  if(!connection.recv((char*)&header, sizeof(BotProtocol::Header)))
-//  {
-//    error = connection.getLastError();
-//    return false;
-//  }
-//  cachedHeader = true;
-//  return true;
-//}
-//
-//bool BotConnection::peekHeaderExpect(BotProtocol::MessageType expectedType, size_t minSize)
-//{
-//  BotProtocol::MessageType messageType;
-//  if(!peekHeader(messageType))
-//    return false;
-//  if(messageType != expectedType)
-//  {
-//    if(messageType == BotProtocol::errorResponse)
-//    {
-//      BotProtocol::ErrorResponse errorResponse;
-//      if(!receiveErrorResponse(errorResponse))
-//        return false;
-//      error = errorResponse.errorMessage;
-//      return false;
-//    }
-//    error = "Received unexpected message.";
-//    return false;
-//  }
-//  if(header.size < sizeof(BotProtocol::Header) + minSize)
-//  {
-//    error = "Received message is too small.";
-//    return false;
-//  }
-//  return true;
-//}
-//
-//bool BotConnection::receiveErrorResponse(BotProtocol::ErrorResponse& errorResponse)
-//{
-//  if(!peekHeaderExpect(BotProtocol::loginResponse, sizeof(BotProtocol::ErrorResponse)))
-//    return false;
-//  if(!connection.recv((char*)&errorResponse, header.size))
-//  {
-//    error = connection.getLastError();
-//    return false;
-//  }
-//  errorResponse.errorMessage[sizeof(errorResponse.errorMessage) - 1] = '\0';
-//  cachedHeader = false;
-//  return true;
-//}
 
 bool BotConnection::receiveLoginResponse(BotProtocol::LoginResponse& loginResponse)
 {

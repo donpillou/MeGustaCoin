@@ -46,13 +46,13 @@ public:
 
   struct LoginResponse
   {
-    unsigned char userkey[64];
-    unsigned char loginkey[64];
+    unsigned char userkey[32];
+    unsigned char loginkey[32];
   };
 
   struct AuthRequest
   {
-    unsigned char signature[64];
+    unsigned char signature[32];
   };
 
   struct CreateSimSessionRequest

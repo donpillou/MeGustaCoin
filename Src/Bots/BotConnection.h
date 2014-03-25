@@ -29,7 +29,7 @@ private:
   //BotProtocol::Header header;
   //bool cachedHeader;
 
-  void handleMessage(DataProtocol::MessageType messageType, char* data, unsigned int dataSize);
+  void handleMessage(BotProtocol::MessageType messageType, char* data, unsigned int dataSize);
 
   bool sendLoginRequest(const QString& userName);
   bool sendAuthRequest(const QByteArray& signature);
