@@ -7,15 +7,12 @@ public:
   class Callback
   {
   public:
-    //virtual void receivedChannelInfo(const QString& channelName) = 0;
-    //virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId) = 0;
-    //virtual void receivedUnsubscribeResponse(const QString& channelName, quint64 channelId) = 0;
-    //virtual void receivedTrade(quint64 channelId, const DataProtocol::Trade& trade) = 0;
-    //virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker) = 0;
-    //virtual void receivedErrorResponse(const QString& message) = 0;
+    virtual void receivedLoginResponse(const BotProtocol::LoginResponse& response) {};
+    virtual void receivedAuthResponse() {};
+    virtual void receivedErrorResponse(const QString& errorMessage) {};
   };
 
-  BotConnection() : cachedHeader(false) {}
+  BotConnection()/* : cachedHeader(false)*/ {}
 
   bool connect(const QString& server, quint16 port, const QString& userName, const QString& password);
   bool process(Callback& callback);
@@ -29,15 +26,17 @@ private:
   QString error;
   Callback* callback;
   qint64 serverTimeToLocalTime;
-  BotProtocol::Header header;
-  bool cachedHeader;
+  //BotProtocol::Header header;
+  //bool cachedHeader;
 
   void handleMessage(DataProtocol::MessageType messageType, char* data, unsigned int dataSize);
 
   bool sendLoginRequest(const QString& userName);
+  bool sendAuthRequest(const QByteArray& signature);
 
-  bool peekHeader(BotProtocol::MessageType& type);
-  bool peekHeaderExpect(BotProtocol::MessageType expectedType, size_t minSize);
-  bool receiveErrorResponse(BotProtocol::ErrorResponse& errorResponse);
+  //bool peekHeader(BotProtocol::MessageType& type);
+  //bool peekHeaderExpect(BotProtocol::MessageType expectedType, size_t minSize);
+  //bool receiveErrorResponse(BotProtocol::ErrorResponse& errorResponse);
   bool receiveLoginResponse(BotProtocol::LoginResponse& loginResponse);
+  bool receiveAuthResponse();
 };

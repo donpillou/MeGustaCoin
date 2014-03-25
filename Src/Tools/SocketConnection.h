@@ -15,8 +15,6 @@ public:
   bool send(const QByteArray& data);
   bool send(const char* data, int len);
   bool recv(QByteArray& data);
-  bool recv(const char* data, int maxLen, int& len);
-  bool recv(const char* data, int len);
 
   void interrupt();
 

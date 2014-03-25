@@ -12,66 +12,19 @@ bool BotConnection::connect(const QString& server, quint16 port, const QString& 
     return false;
   }
 
-  // send login request
   if(!sendLoginRequest(userName))
-  {
-    error = connection.getLastError();
     return false;
-  }
-
-  BotProtocol::MessageType messageType;
-  if(!peekHeader(messageType))
-  {
-    error = connection.getLastError();
+  BotProtocol::LoginResponse loginResponse;
+  if(!receiveLoginResponse(loginResponse))
     return false;
-  }
 
-  // receive login response
-  {
-    //unsigned char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::LoginResponse)];
-
-  }
-
-
-
-
-  // request server time
-  //DataProtocol::Header header;
-  //header.size = sizeof(header);
-  //header.destination = header.source = 0;
-  //header.messageType = DataProtocol::timeRequest;
-  //if(!connection.send((char*)&header, sizeof(header)))
-  //{
-  //  error = connection.getLastError();
-  //  return false;
-  //}
-  //qint64 localRequestTime = QDateTime::currentDateTime().toTime_t() * 1000ULL;
-  //QByteArray recvBuffer;
-  //recvBuffer.reserve(sizeof(DataProtocol::Header) + sizeof(DataProtocol::TimeResponse));
-  //do
-  //{
-  //  if(!connection.recv(recvBuffer))
-  //  {
-  //    error = connection.getLastError();
-  //    return false;
-  //  }
-  //} while((unsigned int)recvBuffer.length() < sizeof(DataProtocol::Header) + sizeof(DataProtocol::TimeResponse));
-  //qint64 localResponseTime = QDateTime::currentDateTime().toTime_t() * 1000ULL;
-  //{
-  //  DataProtocol::Header* header = (DataProtocol::Header*)recvBuffer.data();
-  //  DataProtocol::TimeResponse* timeResponse2 = (DataProtocol::TimeResponse*)(header + 1);
-  //  if(header->size != sizeof(DataProtocol::Header) + sizeof(DataProtocol::TimeResponse))
-  //  {
-  //    error = "Received invalid data.";
-  //    return false;
-  //  }
-  //  if(header->messageType != DataProtocol::timeResponse)
-  //  {
-  //    error = "Could not request server time.";
-  //    return false;
-  //  }
-  //  serverTimeToLocalTime = (localResponseTime - localRequestTime) / 2 + localRequestTime - timeResponse2->time;
-  //}
+  QByteArray passwordData = password.toUtf8();
+  QByteArray pwhmac = Sha256::hmac(QByteArray((char*)loginResponse.userkey, 64), passwordData);
+  QByteArray signature = Sha256::hmac(QByteArray((char*)loginResponse.loginkey, 64), pwhmac);
+  if(!sendAuthRequest(signature))
+    return false;
+  if(!receiveAuthResponse())
+    return false;
 
   return true;
 }
@@ -126,65 +79,27 @@ bool BotConnection::process(Callback& callback)
 
 void BotConnection::handleMessage(DataProtocol::MessageType messageType, char* data, unsigned int size)
 {
-  //switch(messageType)
-  //{
-  //case DataProtocol::MessageType::channelResponse:
-  //  {
-  //    int count = size / sizeof(DataProtocol::Channel);
-  //    DataProtocol::Channel* channel = (DataProtocol::Channel*)data;
-  //    for(int i = 0; i < count; ++i, ++channel)
-  //    {
-  //      channel->channel[sizeof(channel->channel) - 1] = '\0';
-  //      QString channelName(channel->channel);
-  //      callback->receivedChannelInfo(channelName);
-  //    }
-  //  }
-  //  break;
-  //case DataProtocol::MessageType::subscribeResponse:
-  //  if(size >= sizeof(DataProtocol::SubscribeResponse))
-  //  {
-  //    DataProtocol::SubscribeResponse* subscribeResponse = (DataProtocol::SubscribeResponse*)data;
-  //    subscribeResponse->channel[sizeof(subscribeResponse->channel) - 1] = '\0';
-  //    QString channelName(subscribeResponse->channel);
-  //    callback->receivedSubscribeResponse(channelName, subscribeResponse->channelId);
-  //  }
-  //  break;
-  //case DataProtocol::MessageType::unsubscribeResponse:
-  //  if(size >= sizeof(DataProtocol::SubscribeResponse))
-  //  {
-  //    DataProtocol::SubscribeResponse* unsubscribeResponse = (DataProtocol::SubscribeResponse*)data;
-  //    unsubscribeResponse->channel[sizeof(unsubscribeResponse->channel) - 1] = '\0';
-  //    QString channelName(unsubscribeResponse->channel);
-  //    callback->receivedUnsubscribeResponse(channelName, unsubscribeResponse->channelId);
-  //  }
-  //  break;
-  //case DataProtocol::MessageType::tradeMessage:
-  //  if(size >= sizeof(DataProtocol::TradeMessage))
-  //  {
-  //    DataProtocol::TradeMessage* tradeMessage = (DataProtocol::TradeMessage*)data;
-  //    tradeMessage->trade.time += serverTimeToLocalTime;
-  //    callback->receivedTrade(tradeMessage->channelId, tradeMessage->trade);
-  //  }
-  //  break;
-  //case DataProtocol::MessageType::tickerMessage:
-  //  {
-  //    DataProtocol::TickerMessage* tickerMessage = (DataProtocol::TickerMessage*)data;
-  //    tickerMessage->ticker.time += serverTimeToLocalTime;
-  //    callback->receivedTicker(tickerMessage->channelId, tickerMessage->ticker);
-  //  }
-  //  break;
-  //case DataProtocol::MessageType::errorResponse:
-  //  if(size >= sizeof(DataProtocol::ErrorResponse))
-  //  {
-  //    DataProtocol::ErrorResponse* errorResponse = (DataProtocol::ErrorResponse*)data;
-  //    errorResponse->errorMessage[sizeof(errorResponse->errorMessage) - 1] = '\0';
-  //    QString errorMessage(errorResponse->errorMessage);
-  //    callback->receivedErrorResponse(errorMessage);
-  //  }
-  //  break;
-  //default:
-  //  break;
-  //}
+  switch(messageType)
+  {
+  case BotProtocol::loginResponse:
+    if(size >= sizeof(BotProtocol::LoginResponse))
+      callback->receivedLoginResponse(*(BotProtocol::LoginResponse*)data);
+    break;
+  case BotProtocol::authResponse:
+    callback->receivedAuthResponse();
+    break;
+  case BotProtocol::MessageType::errorResponse:
+    if(size >= sizeof(DataProtocol::ErrorResponse))
+    {
+      BotProtocol::ErrorResponse* errorResponse = (BotProtocol::ErrorResponse*)data;
+      errorResponse->errorMessage[sizeof(errorResponse->errorMessage) - 1] = '\0';
+      QString errorMessage(errorResponse->errorMessage);
+      callback->receivedErrorResponse(errorMessage);
+    }
+    break;
+  default:
+    break;
+  }
 }
 
 bool BotConnection::sendLoginRequest(const QString& userName)
@@ -207,68 +122,144 @@ bool BotConnection::sendLoginRequest(const QString& userName)
   return true;
 }
 
-bool BotConnection::peekHeader(BotProtocol::MessageType& type)
+bool BotConnection::sendAuthRequest(const QByteArray& signature)
 {
-  if(cachedHeader)
-    return true;
-  if(!connection.recv((char*)&header, sizeof(BotProtocol::Header)))
+  unsigned char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::AuthRequest)];
+  BotProtocol::Header* header = (BotProtocol::Header*)message;
+  BotProtocol::AuthRequest* authRequest = (BotProtocol::AuthRequest*)(header + 1);
+  header->size = sizeof(message);
+  header->source = 0;
+  header->destination = 0;
+  header->messageType = BotProtocol::loginRequest;
+  Q_ASSERT(signature.size() == 64);
+  memcpy(authRequest->signature, signature.constData(), 64);
+  if(!connection.send((char*)message, sizeof(message)))
   {
     error = connection.getLastError();
-    return false;
-  }
-  cachedHeader = true;
-  return true;
-}
-
-bool BotConnection::peekHeaderExpect(BotProtocol::MessageType expectedType, size_t minSize)
-{
-  BotProtocol::MessageType messageType;
-  if(!peekHeader(messageType))
-    return false;
-  if(messageType != expectedType)
-  {
-    if(messageType == BotProtocol::errorResponse)
-    {
-      BotProtocol::ErrorResponse errorResponse;
-      if(!receiveErrorResponse(errorResponse))
-        return false;
-      error = errorResponse.errorMessage;
-      return false;
-    }
-    error = "Received unexpected message.";
-    return false;
-  }
-  if(header.size < minSize)
-  {
-    error = "Received message is too small.";
     return false;
   }
   return true;
 }
 
-bool BotConnection::receiveErrorResponse(BotProtocol::ErrorResponse& errorResponse)
-{
-  if(!peekHeaderExpect(BotProtocol::loginResponse, sizeof(BotProtocol::ErrorResponse)))
-    return false;
-  if(!connection.recv((char*)&errorResponse, header.size))
-  {
-    error = connection.getLastError();
-    return false;
-  }
-  errorResponse.errorMessage[sizeof(errorResponse.errorMessage) - 1] = '\0';
-  cachedHeader = false;
-  return true;
-}
+//bool BotConnection::peekHeader(BotProtocol::MessageType& type)
+//{
+//  if(cachedHeader)
+//    return true;
+//  if(!connection.recv((char*)&header, sizeof(BotProtocol::Header)))
+//  {
+//    error = connection.getLastError();
+//    return false;
+//  }
+//  cachedHeader = true;
+//  return true;
+//}
+//
+//bool BotConnection::peekHeaderExpect(BotProtocol::MessageType expectedType, size_t minSize)
+//{
+//  BotProtocol::MessageType messageType;
+//  if(!peekHeader(messageType))
+//    return false;
+//  if(messageType != expectedType)
+//  {
+//    if(messageType == BotProtocol::errorResponse)
+//    {
+//      BotProtocol::ErrorResponse errorResponse;
+//      if(!receiveErrorResponse(errorResponse))
+//        return false;
+//      error = errorResponse.errorMessage;
+//      return false;
+//    }
+//    error = "Received unexpected message.";
+//    return false;
+//  }
+//  if(header.size < sizeof(BotProtocol::Header) + minSize)
+//  {
+//    error = "Received message is too small.";
+//    return false;
+//  }
+//  return true;
+//}
+//
+//bool BotConnection::receiveErrorResponse(BotProtocol::ErrorResponse& errorResponse)
+//{
+//  if(!peekHeaderExpect(BotProtocol::loginResponse, sizeof(BotProtocol::ErrorResponse)))
+//    return false;
+//  if(!connection.recv((char*)&errorResponse, header.size))
+//  {
+//    error = connection.getLastError();
+//    return false;
+//  }
+//  errorResponse.errorMessage[sizeof(errorResponse.errorMessage) - 1] = '\0';
+//  cachedHeader = false;
+//  return true;
+//}
 
 bool BotConnection::receiveLoginResponse(BotProtocol::LoginResponse& loginResponse)
 {
-  if(!peekHeaderExpect(BotProtocol::loginResponse, sizeof(BotProtocol::LoginResponse)))
-    return false;
-  if(!connection.recv((char*)&loginResponse, header.size))
+  struct LoginCallback : public Callback
   {
-    error = connection.getLastError();
+    BotProtocol::LoginResponse& loginResponse;
+    QString error;
+    bool finished;
+  
+    LoginCallback(BotProtocol::LoginResponse& loginResponse) : loginResponse(loginResponse), finished(false) {}
+  
+  public:
+    virtual void receivedLoginResponse(const BotProtocol::LoginResponse& response)
+    {
+      loginResponse = response;
+      finished = true;
+    };
+    virtual void receivedErrorResponse(const QString& errorMessage)
+    {
+      error = errorMessage;
+      finished = true;
+    };
+  } callback(loginResponse);
+
+  do
+  {
+    if(!process(callback))
+      return false;
+  } while(!callback.finished);
+  if(!callback.error.isEmpty())
+  {
+    error = callback.error;
     return false;
   }
-  cachedHeader = false;
+  return true;
+}
+
+bool BotConnection::receiveAuthResponse()
+{
+  struct AuthCallback : public Callback
+  {
+    QString error;
+    bool finished;
+  
+    AuthCallback() : finished(false) {}
+  
+  public:
+    virtual void receivedAuthResponse()
+    {
+      finished = true;
+    };
+    virtual void receivedErrorResponse(const QString& errorMessage)
+    {
+      error = errorMessage;
+      finished = true;
+    };
+  } callback;
+
+  do
+  {
+    if(!process(callback))
+      return false;
+  } while(!callback.finished);
+  if(!callback.error.isEmpty())
+  {
+    error = callback.error;
+    return false;
+  }
   return true;
 }
