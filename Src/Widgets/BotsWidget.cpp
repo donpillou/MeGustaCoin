@@ -87,6 +87,9 @@ void BotsWidget::saveState(QSettings& settings)
 
 void BotsWidget::addBot()
 {
+  BotDialog botDialog(this);
+  if(botDialog.exec() != QDialog::Accepted)
+    return;
 }
 
 void BotsWidget::activate(bool enable)

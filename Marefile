@@ -48,7 +48,7 @@ targets = {
       "Src/Bots/BotService.h"
       "Src/MainWindow.h"
       "Src/LoginDialog.h"
-      "Src/OptionsDialog.h"
+      "Src/Bots/BotDialog.h"
     }
     files += qtFiles
     
