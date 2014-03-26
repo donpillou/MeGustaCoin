@@ -9,7 +9,7 @@ if(platform == "Linux") {
 
 targets = {
 
-  MeGustaCoin = cppApplication + {
+  MegucoClient = cppApplication + {
     buildDir = "Build/$(configuration)"
 
     defines += { "QT_SHARED", "QT_GUI_LIB", "QT_CORE_LIB", "QT_NO_DEBUG" }
