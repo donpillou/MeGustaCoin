@@ -12,6 +12,8 @@ public:
   void start(const QString& server, const QString& userName, const QString& password);
   void stop();
 
+  void createSession(const QString& name, const QString& engine);
+
   bool isConnected() const {return connected;}
 
 private:
@@ -65,12 +67,8 @@ private:
     virtual void run();
 
   private: // BotConnection::Callback
-    //virtual void receivedChannelInfo(const QString& channelName);
-    //virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId);
-    //virtual void receivedUnsubscribeResponse(const QString& channelName, quint64 channelId);
-    //virtual void receivedTrade(quint64 channelId, const DataProtocol::Trade& trade);
-    //virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker);
-    //virtual void receivedErrorResponse(const QString& message);
+    virtual void receivedErrorResponse(const QString& errorMessage);
+    virtual void receivedEngine(const QString& engine);
   };
 
   DataModel& dataModel;

@@ -62,7 +62,7 @@ bool BotConnection::process(Callback& callback)
         handleMessage((BotProtocol::MessageType)header->messageType, (char*)(header + 1), header->size - sizeof(BotProtocol::Header));
         buffer += header->size;
         bufferSize -= header->size;
-        continue;
+        break;
       }
     }
     break;
@@ -95,6 +95,14 @@ void BotConnection::handleMessage(BotProtocol::MessageType messageType, char* da
       errorResponse->errorMessage[sizeof(errorResponse->errorMessage) - 1] = '\0';
       QString errorMessage(errorResponse->errorMessage);
       callback->receivedErrorResponse(errorMessage);
+    }
+    break;
+  case BotProtocol::engineMessage:
+    if(size >= sizeof(BotProtocol::EngineMessage))
+    {
+      BotProtocol::EngineMessage* engineMessage = (BotProtocol::EngineMessage*)data;
+      engineMessage->name[sizeof(engineMessage->name) - 1] = '\0';
+      callback->receivedEngine(engineMessage->name);
     }
     break;
   default:
@@ -206,6 +214,32 @@ bool BotConnection::receiveAuthResponse()
   if(!callback.error.isEmpty())
   {
     error = callback.error;
+    return false;
+  }
+  return true;
+}
+
+bool BotConnection::createSession(const QString& name, const QString& engine)
+{
+  unsigned char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::CreateSessionRequest)];
+  BotProtocol::Header* header = (BotProtocol::Header*)message;
+  BotProtocol::CreateSessionRequest* createSession = (BotProtocol::CreateSessionRequest*)(header + 1);
+  header->size = sizeof(message);
+  header->source = 0;
+  header->destination = 0;
+  header->messageType = BotProtocol::createSessionRequest;
+
+  QByteArray engineData = engine.toUtf8();
+  memcpy(createSession->engine, engineData.constData(), qMin(engineData.size() + 1, (int)sizeof(createSession->engine) - 1));
+  createSession->engine[sizeof(createSession->engine) - 1] = '\0';
+
+  QByteArray nameData = name.toUtf8();
+  memcpy(createSession->name, nameData.constData(), qMin(nameData.size() + 1, (int)sizeof(createSession->name) - 1));
+  createSession->name[sizeof(createSession->name) - 1] = '\0';
+
+  if(!connection.send((char*)message, sizeof(message)))
+  {
+    error = connection.getLastError();
     return false;
   }
   return true;

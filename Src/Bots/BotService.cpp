@@ -38,6 +38,26 @@ void BotService::stop()
   qDeleteAll(jobQueue.getAll());
 }
 
+void BotService::createSession(const QString& name, const QString& engine)
+{
+  class CreateSessionJob : public Job
+  {
+  public:
+    CreateSessionJob(const QString& name, const QString& engine) : name(name), engine(engine) {}
+  private:
+    QString name;
+    QString engine;
+  public: // Event
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      return workerThread.connection.createSession(name, engine);
+    }
+  };
+
+  jobQueue.append(new CreateSessionJob(name, engine));
+  if(thread)
+    thread->interrupt();
+}
 
 void BotService::handleEvents()
 {
@@ -157,3 +177,27 @@ void BotService::WorkerThread::run()
     sleep(10);
   }
 }
+
+void BotService::WorkerThread::receivedErrorResponse(const QString& errorMessage)
+{
+  addMessage(LogModel::Type::error, errorMessage);
+}
+
+void BotService::WorkerThread::receivedEngine(const QString& engine)
+{
+  class EngineMessageEvent : public Event
+  {
+  public:
+    EngineMessageEvent(const QString& engine) : engine(engine) {}
+  private:
+    QString engine;
+  public: // Event
+    virtual void handle(BotService& botService)
+    {
+        botService.dataModel.botsModel.addEngine(engine);
+    }
+  };
+  eventQueue.append(new EngineMessageEvent(engine));
+  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+}
+

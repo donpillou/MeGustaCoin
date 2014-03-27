@@ -38,6 +38,9 @@ public:
   QString getStateName() const;
   void setState(State state);
 
+  void addEngine(const QString& engine) {engines.append(engine);}
+  const QList<QString>& getEngines() const {return engines;}
+
 signals:
   void changedState();
 
@@ -50,6 +53,7 @@ private:
   };
 
   State state;
+  QList<QString> engines;
   QList<Bot> bots;
   QVariant activeStr;
   QVariant inactiveStr;

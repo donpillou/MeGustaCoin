@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BotDialog::BotDialog(QWidget* parent) : QDialog(parent)
+BotDialog::BotDialog(QWidget* parent, const QList<QString>& engines) : QDialog(parent)
 {
   setWindowTitle(tr("Add Bot"));
 
@@ -9,7 +9,8 @@ BotDialog::BotDialog(QWidget* parent) : QDialog(parent)
   connect(nameEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged()));
 
   engineComboBox = new QComboBox;
-  engineComboBox->addItem("Bitstamp/USD");
+  foreach(const QString& engine, engines)
+    engineComboBox->addItem(engine);
 
   QGridLayout *contentLayout = new QGridLayout;
   contentLayout->addWidget(new QLabel(tr("Name:")), 0, 0);

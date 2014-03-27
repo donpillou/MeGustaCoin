@@ -11,14 +11,14 @@ public:
     loginResponse,
     authRequest,
     authResponse,
-    createSimSessionRequest,
-    createSimSessionResponse,
     createSessionRequest,
     createSessionResponse,
     //simSessionMessage,
     //simSessionRemoveMessage,
     //sessionMessage,
     //sessionRemoveMessage,
+
+    engineMessage,
 
     registerBotRequest,
     registerBotResponse,
@@ -55,7 +55,7 @@ public:
     unsigned char signature[32];
   };
 
-  struct CreateSimSessionRequest
+  struct CreateSessionRequest
   {
     char name[33];
     char engine[33];
@@ -63,21 +63,14 @@ public:
     double balanceComm;
   };
 
-  struct CreateSimSessionResponse
-  {
-    quint32 id;
-  };
-
-  struct CreateSessionRequest
-  {
-    quint32 simSessionId;
-    double balanceBase;
-    double balanceComm;
-  };
-
   struct CreateSessionResponse
   {
     quint32 id;
+  };
+
+  struct EngineMessage
+  {
+    char name[33];
   };
 
   struct RegisterBotRequest

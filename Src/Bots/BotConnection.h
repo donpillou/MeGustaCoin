@@ -10,6 +10,7 @@ public:
     virtual void receivedLoginResponse(const BotProtocol::LoginResponse& response) {};
     virtual void receivedAuthResponse() {};
     virtual void receivedErrorResponse(const QString& errorMessage) {};
+    virtual void receivedEngine(const QString& engine) {};
   };
 
   BotConnection()/* : cachedHeader(false)*/ {}
@@ -17,6 +18,8 @@ public:
   bool connect(const QString& server, quint16 port, const QString& userName, const QString& password);
   bool process(Callback& callback);
   void interrupt();
+
+  bool createSession(const QString& name, const QString& engine);
 
   const QString& getLastError() {return error;}
 
