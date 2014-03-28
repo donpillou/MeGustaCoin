@@ -19,6 +19,8 @@ QString BotsModel::getStateName() const
     return tr("offline");
   case State::connected:
     return QString();
+  default:
+    break;
   }
   Q_ASSERT(false);
   return QString();
@@ -30,6 +32,10 @@ void BotsModel::setState(State state)
     return;
   this->state = state;
   emit changedState();
+}
+
+void BotsModel::addSession(quint32 id, const QString& name, const QString& engine)
+{
 }
 
 void BotsModel::addBot(const QString& name, ::Bot& botFactory)
@@ -112,6 +118,8 @@ QVariant BotsModel::data(const QModelIndex& index, int role) const
         return activeStr;
       case State::inactive:
         return inactiveStr;
+      default:
+        break;
       }
       break;
     }

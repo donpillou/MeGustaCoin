@@ -11,6 +11,7 @@ public:
     virtual void receivedAuthResponse() {};
     virtual void receivedErrorResponse(const QString& errorMessage) {};
     virtual void receivedEngine(const QString& engine) {};
+    virtual void receivedSession(quint32 id, const QString& name, const QString& engine) {};
   };
 
   BotConnection()/* : cachedHeader(false)*/ {}

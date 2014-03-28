@@ -105,6 +105,17 @@ void BotConnection::handleMessage(BotProtocol::MessageType messageType, char* da
       callback->receivedEngine(engineMessage->name);
     }
     break;
+  case BotProtocol::sessionMessage:
+    if(size >= sizeof(BotProtocol::SessionMessage))
+    {
+      BotProtocol::SessionMessage* sessionMessage = (BotProtocol::SessionMessage*)data;
+      sessionMessage->name[sizeof(sessionMessage->name) - 1] = '\0';
+      sessionMessage->engine[sizeof(sessionMessage->engine) - 1] = '\0';
+      callback->receivedSession(sessionMessage->id, sessionMessage->name, sessionMessage->engine);
+    }
+    break;
+  case BotProtocol::sessionRemoveMessage:
+    break;
   default:
     break;
   }

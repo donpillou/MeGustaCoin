@@ -41,6 +41,8 @@ public:
   void addEngine(const QString& engine) {engines.append(engine);}
   const QList<QString>& getEngines() const {return engines;}
 
+  void addSession(quint32 id, const QString& name, const QString& engine);
+
 signals:
   void changedState();
 

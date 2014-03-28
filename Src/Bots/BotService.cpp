@@ -201,3 +201,22 @@ void BotService::WorkerThread::receivedEngine(const QString& engine)
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
+void BotService::WorkerThread::receivedSession(quint32 id, const QString& name, const QString& engine)
+{
+  class SessionMessageEvent : public Event
+  {
+  public:
+    SessionMessageEvent(quint32 id, const QString& name, const QString& engine) : id(id), name(name), engine(engine) {}
+  private:
+    quint32 id;
+    QString name;
+    QString engine;
+  public: // Event
+    virtual void handle(BotService& botService)
+    {
+        botService.dataModel.botsModel.addSession(id, name, engine);
+    }
+  };
+  eventQueue.append(new SessionMessageEvent(id, name, engine));
+  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+}
