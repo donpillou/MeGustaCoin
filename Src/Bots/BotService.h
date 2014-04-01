@@ -67,9 +67,11 @@ private:
     virtual void run();
 
   private: // BotConnection::Callback
-    virtual void receivedErrorResponse(const QString& errorMessage);
-    virtual void receivedEngine(const QString& engine);
-    virtual void receivedSession(quint32 id, const QString& name, const QString& engine);
+    virtual void receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size);
+    virtual void receivedRemoveEntity(const BotProtocol::Header& header);
+    //virtual void receivedErrorResponse(const QString& errorMessage);
+    //virtual void receivedEngine(const QString& engine);
+    //virtual void receivedSession(quint32 id, const QString& name, const QString& engine);
   };
 
   DataModel& dataModel;

@@ -178,45 +178,53 @@ void BotService::WorkerThread::run()
   }
 }
 
-void BotService::WorkerThread::receivedErrorResponse(const QString& errorMessage)
+void BotService::WorkerThread::receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size)
 {
-  addMessage(LogModel::Type::error, errorMessage);
 }
 
-void BotService::WorkerThread::receivedEngine(const QString& engine)
+void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Header& header)
 {
-  class EngineMessageEvent : public Event
-  {
-  public:
-    EngineMessageEvent(const QString& engine) : engine(engine) {}
-  private:
-    QString engine;
-  public: // Event
-    virtual void handle(BotService& botService)
-    {
-        botService.dataModel.botsModel.addEngine(engine);
-    }
-  };
-  eventQueue.append(new EngineMessageEvent(engine));
-  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
-void BotService::WorkerThread::receivedSession(quint32 id, const QString& name, const QString& engine)
-{
-  class SessionMessageEvent : public Event
-  {
-  public:
-    SessionMessageEvent(quint32 id, const QString& name, const QString& engine) : id(id), name(name), engine(engine) {}
-  private:
-    quint32 id;
-    QString name;
-    QString engine;
-  public: // Event
-    virtual void handle(BotService& botService)
-    {
-        botService.dataModel.botsModel.addSession(id, name, engine);
-    }
-  };
-  eventQueue.append(new SessionMessageEvent(id, name, engine));
-  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
-}
+//void BotService::WorkerThread::receivedErrorResponse(const QString& errorMessage)
+//{
+//  addMessage(LogModel::Type::error, errorMessage);
+//}
+
+//void BotService::WorkerThread::receivedEngine(const QString& engine)
+//{
+//  class EngineMessageEvent : public Event
+//  {
+//  public:
+//    EngineMessageEvent(const QString& engine) : engine(engine) {}
+//  private:
+//    QString engine;
+//  public: // Event
+//    virtual void handle(BotService& botService)
+//    {
+//        botService.dataModel.botsModel.addEngine(engine);
+//    }
+//  };
+//  eventQueue.append(new EngineMessageEvent(engine));
+//  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+//}
+
+//void BotService::WorkerThread::receivedSession(quint32 id, const QString& name, const QString& engine)
+//{
+//  class SessionMessageEvent : public Event
+//  {
+//  public:
+//    SessionMessageEvent(quint32 id, const QString& name, const QString& engine) : id(id), name(name), engine(engine) {}
+//  private:
+//    quint32 id;
+//    QString name;
+//    QString engine;
+//  public: // Event
+//    virtual void handle(BotService& botService)
+//    {
+//        botService.dataModel.botsModel.addSession(id, name, engine);
+//    }
+//  };
+//  eventQueue.append(new SessionMessageEvent(id, name, engine));
+//  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+//}

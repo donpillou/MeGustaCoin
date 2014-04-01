@@ -59,7 +59,7 @@ bool BotConnection::process(Callback& callback)
       }
       if(bufferSize >= header->size)
       {
-        handleMessage((BotProtocol::MessageType)header->messageType, (char*)(header + 1), header->size - sizeof(BotProtocol::Header));
+        handleMessage(*header, (char*)(header + 1), header->size - sizeof(BotProtocol::Header));
         buffer += header->size;
         bufferSize -= header->size;
         break;
@@ -77,9 +77,9 @@ bool BotConnection::process(Callback& callback)
   return true;
 }
 
-void BotConnection::handleMessage(BotProtocol::MessageType messageType, char* data, unsigned int size)
+void BotConnection::handleMessage(const BotProtocol::Header& header, char* data, unsigned int size)
 {
-  switch(messageType)
+  switch((BotProtocol::MessageType)header.messageType)
   {
   case BotProtocol::loginResponse:
     if(size >= sizeof(BotProtocol::LoginResponse))
@@ -88,33 +88,11 @@ void BotConnection::handleMessage(BotProtocol::MessageType messageType, char* da
   case BotProtocol::authResponse:
     callback->receivedAuthResponse();
     break;
-  case BotProtocol::errorResponse:
-    if(size >= sizeof(BotProtocol::ErrorResponse))
-    {
-      BotProtocol::ErrorResponse* errorResponse = (BotProtocol::ErrorResponse*)data;
-      errorResponse->errorMessage[sizeof(errorResponse->errorMessage) - 1] = '\0';
-      QString errorMessage(errorResponse->errorMessage);
-      callback->receivedErrorResponse(errorMessage);
-    }
+  case BotProtocol::updateEntity:
+    callback->receivedUpdateEntity(header, data, size);
     break;
-  case BotProtocol::engineMessage:
-    if(size >= sizeof(BotProtocol::EngineMessage))
-    {
-      BotProtocol::EngineMessage* engineMessage = (BotProtocol::EngineMessage*)data;
-      engineMessage->name[sizeof(engineMessage->name) - 1] = '\0';
-      callback->receivedEngine(engineMessage->name);
-    }
-    break;
-  case BotProtocol::sessionMessage:
-    if(size >= sizeof(BotProtocol::SessionMessage))
-    {
-      BotProtocol::SessionMessage* sessionMessage = (BotProtocol::SessionMessage*)data;
-      sessionMessage->name[sizeof(sessionMessage->name) - 1] = '\0';
-      sessionMessage->engine[sizeof(sessionMessage->engine) - 1] = '\0';
-      callback->receivedSession(sessionMessage->id, sessionMessage->name, sessionMessage->engine);
-    }
-    break;
-  case BotProtocol::sessionRemoveMessage:
+  case BotProtocol::removeEntity:
+    callback->receivedRemoveEntity(header);
     break;
   default:
     break;
@@ -127,9 +105,9 @@ bool BotConnection::sendLoginRequest(const QString& userName)
   BotProtocol::Header* header = (BotProtocol::Header*)message;
   BotProtocol::LoginRequest* loginRequest = (BotProtocol::LoginRequest*)(header + 1);
   header->size = sizeof(message);
-  header->source = 0;
-  header->destination = 0;
   header->messageType = BotProtocol::loginRequest;
+  header->entityId = 0;
+  header->entityType = 0;
   QByteArray userNameData = userName.toUtf8();
   memcpy(loginRequest->username, userNameData.constData(), qMin(userNameData.size() + 1, (int)sizeof(loginRequest->username) - 1));
   loginRequest->username[sizeof(loginRequest->username) - 1] = '\0';
@@ -147,9 +125,9 @@ bool BotConnection::sendAuthRequest(const QByteArray& signature)
   BotProtocol::Header* header = (BotProtocol::Header*)message;
   BotProtocol::AuthRequest* authRequest = (BotProtocol::AuthRequest*)(header + 1);
   header->size = sizeof(message);
-  header->source = 0;
-  header->destination = 0;
   header->messageType = BotProtocol::authRequest;
+  header->entityId = 0;
+  header->entityType = 0;
   Q_ASSERT(signature.size() == 32);
   memcpy(authRequest->signature, signature.constData(), 32);
   if(!connection.send((char*)message, sizeof(message)))
@@ -176,10 +154,13 @@ bool BotConnection::receiveLoginResponse(BotProtocol::LoginResponse& loginRespon
       loginResponse = response;
       finished = true;
     };
-    virtual void receivedErrorResponse(const QString& errorMessage)
+    virtual void receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size)
     {
-      error = errorMessage;
-      finished = true;
+      if((BotProtocol::EntityType)header.entityType == BotProtocol::error && size >= sizeof(BotProtocol::Error))
+      {
+        error = ((BotProtocol::Error*)data)->errorMessage;
+        finished = true;
+      }
     };
   } callback(loginResponse);
 
@@ -210,10 +191,13 @@ bool BotConnection::receiveAuthResponse()
     {
       finished = true;
     };
-    virtual void receivedErrorResponse(const QString& errorMessage)
+    virtual void receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size)
     {
-      error = errorMessage;
-      finished = true;
+      if((BotProtocol::EntityType)header.entityType == BotProtocol::error && size >= sizeof(BotProtocol::Error))
+      {
+        error = ((BotProtocol::Error*)data)->errorMessage;
+        finished = true;
+      }
     };
   } callback;
 
@@ -236,9 +220,9 @@ bool BotConnection::createSession(const QString& name, const QString& engine)
   BotProtocol::Header* header = (BotProtocol::Header*)message;
   BotProtocol::CreateSessionRequest* createSession = (BotProtocol::CreateSessionRequest*)(header + 1);
   header->size = sizeof(message);
-  header->source = 0;
-  header->destination = 0;
   header->messageType = BotProtocol::createSessionRequest;
+  header->entityId = 0;
+  header->entityType = 0;
 
   QByteArray engineData = engine.toUtf8();
   memcpy(createSession->engine, engineData.constData(), qMin(engineData.size() + 1, (int)sizeof(createSession->engine) - 1));

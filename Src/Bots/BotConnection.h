@@ -9,9 +9,11 @@ public:
   public:
     virtual void receivedLoginResponse(const BotProtocol::LoginResponse& response) {};
     virtual void receivedAuthResponse() {};
-    virtual void receivedErrorResponse(const QString& errorMessage) {};
-    virtual void receivedEngine(const QString& engine) {};
-    virtual void receivedSession(quint32 id, const QString& name, const QString& engine) {};
+    virtual void receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size) {}
+    virtual void receivedRemoveEntity(const BotProtocol::Header& header) {}
+    //virtual void receivedErrorResponse(const QString& errorMessage) {};
+    //virtual void receivedEngine(const QString& engine) {};
+    //virtual void receivedSession(quint32 id, const QString& name, const QString& engine) {};
   };
 
   BotConnection()/* : cachedHeader(false)*/ {}
@@ -33,7 +35,7 @@ private:
   //BotProtocol::Header header;
   //bool cachedHeader;
 
-  void handleMessage(BotProtocol::MessageType messageType, char* data, unsigned int dataSize);
+  void handleMessage(const BotProtocol::Header& header, char* data, unsigned int dataSize);
 
   bool sendLoginRequest(const QString& userName);
   bool sendAuthRequest(const QByteArray& signature);

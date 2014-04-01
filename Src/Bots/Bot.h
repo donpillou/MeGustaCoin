@@ -98,6 +98,7 @@ public:
     virtual void handleSell(const Broker::Transaction& transaction) = 0;
   };
 
+  virtual ~Bot() {}
   virtual Session* createSession(Broker& broker) = 0;
   virtual unsigned int getParameterCount() const = 0;
 };
