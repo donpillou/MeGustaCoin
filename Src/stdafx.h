@@ -8,13 +8,21 @@
 #include "Tools/Sha256.h"
 #include "Tools/Json.h"
 #include "Tools/JobQueue.h"
+#include "Tools/Entity.h"
 
 #include "Markets/DataProtocol.h"
+#include "Bots/BotProtocol.h"
+
+#include "Entities/EType.h"
+#include "Entities/EBotEngine.h"
+#include "Entities/EBotService.h"
+#include "Entities/EMarket.h"
+#include "Entities/EOrder.h"
+
 #include "Markets/DataConnection.h"
 #include "Markets/Market.h"
 #include "Markets/BitstampMarket.h"
 
-#include "Bots/BotProtocol.h"
 #include "Bots/BotConnection.h"
 #include "Bots/Bot.h"
 #include "Bots/BuyBot.h"
@@ -23,7 +31,9 @@
 
 #include "Models/GraphModel.h"
 #include "Models/OrderModel.h"
+#include "Models/OrderModel2.h"
 #include "Models/TransactionModel.h"
+#include "Models/TransactionModel2.h"
 #include "Models/TradeModel.h"
 #include "Models/BookModel.h"
 #include "Models/LogModel.h"

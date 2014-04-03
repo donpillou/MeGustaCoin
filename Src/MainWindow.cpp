@@ -2,8 +2,11 @@
 #include "stdafx.h"
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "Meguco", "MegucoClient"),
-  marketService(dataModel), dataService(dataModel), botService(dataModel)
+  marketService(dataModel), dataService(dataModel), botService(dataModel, botEntityManager)
 {
+  botEntityManager.delegateEntity(*new EBotService);
+  botEntityManager.delegateEntity(*new EMarket);
+
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
   connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
@@ -33,7 +36,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   ordersWidget = new OrdersWidget(this, settings, dataModel, marketService);
   transactionsWidget = new TransactionsWidget(this, settings, dataModel, marketService);
   graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
-  botsWidget = new BotsWidget(this, settings, dataModel, botService);
+  botsWidget = new BotsWidget(this, settings, botEntityManager, botService);
   logWidget = new LogWidget(this, settings, dataModel.logModel);
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));

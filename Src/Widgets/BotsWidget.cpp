@@ -1,11 +1,10 @@
 
 #include "stdafx.h"
 
-BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, BotService& botService) :
-  QWidget(parent), dataModel(dataModel),  botService(botService)
+BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
+  QWidget(parent), entityManager(entityManager),  botService(botService), orderModel(entityManager), transactionModel(entityManager)
 {
-  connect(&dataModel.botsModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-  connect(&dataModel.botsModel, SIGNAL(changedState()), this, SLOT(updateToolBarButtons()));
+  entityManager.registerListener<EBotService>(*this);
 
   //botsModel.addBot("BuyBot", *new BuyBot);
 
@@ -34,9 +33,9 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, DataModel& dataMode
 
   orderView = new QTreeView(this);
   orderView->setUniformRowHeights(true);
-  OrderSortProxyModel* proxyModel = new OrderSortProxyModel(this, dataModel.botOrderModel);
+  OrderSortProxyModel2* proxyModel = new OrderSortProxyModel2(this, orderModel);
   proxyModel->setDynamicSortFilter(true);
-  proxyModel->setSourceModel(&dataModel.botOrderModel);
+  proxyModel->setSourceModel(&orderModel);
   orderView->setModel(proxyModel);
   orderView->setSortingEnabled(true);
   orderView->setRootIsDecorated(false);
@@ -46,9 +45,9 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, DataModel& dataMode
 
   transactionView = new QTreeView(this);
   transactionView->setUniformRowHeights(true);
-  TransactionSortProxyModel* tproxyModel = new TransactionSortProxyModel(this, dataModel.botTransactionModel);
+  TransactionSortProxyModel2* tproxyModel = new TransactionSortProxyModel2(this, transactionModel);
   tproxyModel->setDynamicSortFilter(true);
-  tproxyModel->setSourceModel(&dataModel.botTransactionModel);
+  tproxyModel->setSourceModel(&transactionModel);
   transactionView->setModel(tproxyModel);
   transactionView->setSortingEnabled(true);
   transactionView->setRootIsDecorated(false);
@@ -78,6 +77,11 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, DataModel& dataMode
   //settings.endGroup();
 }
 
+BotsWidget::~BotsWidget()
+{
+  entityManager.unregisterListener<EBotService>(*this);
+}
+
 void BotsWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("Bots");
@@ -87,11 +91,14 @@ void BotsWidget::saveState(QSettings& settings)
 
 void BotsWidget::addBot()
 {
-  BotDialog botDialog(this, dataModel.botsModel.getEngines());
+  QList<EBotEngine*> engines;
+  entityManager.getAllEntities<EBotEngine>(engines);
+
+  BotDialog botDialog(this, engines);
   if(botDialog.exec() != QDialog::Accepted)
     return;
-
-  botService.createSession(botDialog.getName(), botDialog.getEngine());
+  
+  //botService.createSession(botDialog.getName(), botDialog.getEngine());
 }
 
 void BotsWidget::activate(bool enable)
@@ -108,9 +115,9 @@ void BotsWidget::optimize()
 {
 }
 
-void BotsWidget::updateTitle()
+void BotsWidget::updateTitle(EBotService& eBotService)
 {
-  QString stateStr = dataModel.botsModel.getStateName();
+  QString stateStr = eBotService.getStateName();
 
   QString title;
   if(stateStr.isEmpty())
@@ -130,4 +137,17 @@ void BotsWidget::updateToolBarButtons()
   //optimizeAction->setEnabled(connected);
   //simulateAction->setEnabled(connected);
   //activateAction->setEnabled(connected);
+}
+
+void BotsWidget::updatedEntitiy(Entity& entity)
+{
+  switch ((EType)entity.getType())
+  {
+  case EType::botService:
+    updateTitle(*dynamic_cast<EBotService*>(&entity));
+    updateToolBarButtons();
+    break;
+  default:
+    break;
+  }
 }

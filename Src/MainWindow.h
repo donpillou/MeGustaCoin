@@ -21,6 +21,7 @@ private:
   QMenu* viewMenu;
 
   DataModel dataModel;
+  Entity::Manager botEntityManager;
   MarketService marketService;
   DataService dataService;
   BotService botService;

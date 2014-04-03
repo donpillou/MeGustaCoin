@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-BotService::BotService(DataModel& dataModel) :
-  dataModel(dataModel), thread(0), connected(false) {}
+BotService::BotService(DataModel& dataModel, Entity::Manager& entityManager) :
+  dataModel(dataModel), entityManager(entityManager), thread(0), connected(false) {}
 
 BotService::~BotService()
 {
@@ -95,22 +95,24 @@ void BotService::WorkerThread::addMessage(LogModel::Type type, const QString& me
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
-void BotService::WorkerThread::setState(BotsModel::State state)
+void BotService::WorkerThread::setState(EBotService::State state)
 {
   class SetStateEvent : public Event
   {
   public:
-    SetStateEvent(BotsModel::State state) : state(state) {}
+    SetStateEvent(EBotService::State state) : state(state) {}
   private:
-    BotsModel::State state;
+    EBotService::State state;
   private: // Event
     virtual void handle(BotService& botService)
     {
-      if(state == BotsModel::State::connected)
+      if(state == EBotService::State::connected)
         botService.connected = true;
-      else if(state == BotsModel::State::offline)
+      else if(state == EBotService::State::offline)
         botService.connected = false;
-      botService.dataModel.botsModel.setState(state);
+      EBotService* eBotService = botService.entityManager.getEntity<EBotService>(0);
+      eBotService->setState(state);
+      //botService.dataModel.botsModel.setState(state);
     }
   };
   eventQueue.append(new SetStateEvent(state));
@@ -140,7 +142,7 @@ void BotService::WorkerThread::process()
     return;
   }
   addMessage(LogModel::Type::information, "Connected to bot service.");
-  setState(BotsModel::State::connected);
+  setState(EBotService::State::connected);
 
   // loop
   for(;;)
@@ -169,9 +171,9 @@ void BotService::WorkerThread::run()
 {
   while(!canceled)
   {
-    setState(BotsModel::State::connecting);
+    setState(EBotService::State::connecting);
     process();
-    setState(BotsModel::State::offline);
+    setState(EBotService::State::offline);
     if(canceled)
       return;
     sleep(10);
@@ -180,6 +182,33 @@ void BotService::WorkerThread::run()
 
 void BotService::WorkerThread::receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size)
 {
+  Entity* entity = 0;
+  switch((BotProtocol::EntityType)header.entityType)
+  {
+  case BotProtocol::engine:
+    if(size >= sizeof(BotProtocol::Engine))
+      entity = new EBotEngine(header.entityId, *(BotProtocol::Engine*)data);
+    break;
+  default:
+    return;
+  }
+  if(!entity)
+    return;
+
+  class UpdateEntityEvent : public Event
+  {
+  public:
+    UpdateEntityEvent(Entity& entity) : entity(entity) {}
+  private:
+    Entity& entity;
+  public: // Event
+    virtual void handle(BotService& botService)
+    {
+        botService.entityManager.delegateEntity(entity);
+    }
+  };
+  eventQueue.append(new UpdateEntityEvent(*entity));
+  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
 void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Header& header)

@@ -6,7 +6,7 @@ class BotDialog : public QDialog
   Q_OBJECT
 
 public:
-  BotDialog(QWidget* parent, const QList<QString>& engines);
+  BotDialog(QWidget* parent, const QList<EBotEngine*>& engines);
 
   QString getName() const {return nameEdit->text();}
   QString getEngine() const {return engineComboBox->currentText();}
