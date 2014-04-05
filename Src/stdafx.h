@@ -35,6 +35,7 @@
 #include "Models/OrderModel2.h"
 #include "Models/TransactionModel.h"
 #include "Models/TransactionModel2.h"
+#include "Models/BotSessionModel.h"
 #include "Models/TradeModel.h"
 #include "Models/BookModel.h"
 #include "Models/LogModel.h"

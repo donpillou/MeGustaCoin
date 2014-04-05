@@ -104,7 +104,7 @@ public:
   TransactionSortProxyModel2(QObject* parent, TransactionModel2& transactionModel) : QSortFilterProxyModel(parent), transactionModel(transactionModel) {}
 
 private:
-  TransactionModel2& transactionModel;
+  TransactionModel2& transactionModel; // todo: remove this
 
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {

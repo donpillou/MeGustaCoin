@@ -21,10 +21,12 @@ private:
   Entity::Manager& entityManager;
   BotService& botService;
 
+  BotSessionModel botSessionModel;
   OrderModel2 orderModel;
   TransactionModel2 transactionModel;
 
   QSplitter* splitter;
+  QTreeView* sessionView;
   QTreeView* orderView;
   QTreeView* transactionView;
 

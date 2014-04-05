@@ -1,0 +1,138 @@
+
+#include "stdafx.h"
+
+BotSessionModel::BotSessionModel(Entity::Manager& entityManager) : entityManager(entityManager),
+  inactiveVar(tr("inactive")), activeVar(tr("active"))
+{
+  entityManager.registerListener<EBotSession>(*this);
+}
+
+BotSessionModel::~BotSessionModel()
+{
+  entityManager.unregisterListener<EBotSession>(*this);
+}
+
+QModelIndex BotSessionModel::index(int row, int column, const QModelIndex& parent) const
+{
+  if(row < 0)
+    return QModelIndex();
+  return createIndex(row, column, sessions.at(row));
+}
+
+QModelIndex BotSessionModel::parent(const QModelIndex& child) const
+{
+  return QModelIndex();
+}
+
+int BotSessionModel::rowCount(const QModelIndex& parent) const
+{
+  return parent.isValid() ? 0 : sessions.size();
+}
+
+int BotSessionModel::columnCount(const QModelIndex& parent) const
+{
+  return (int)Column::last + 1;
+}
+
+QVariant BotSessionModel::data(const QModelIndex& index, int role) const
+{
+  const EBotSession* eSession = (const EBotSession*)index.internalPointer();
+  if(!eSession)
+    return QVariant();
+
+  switch(role)
+  {
+  case Qt::DisplayRole:
+    switch((Column)index.column())
+    {
+    case Column::name:
+      return eSession->getName();
+    case Column::engine:
+      return eSession->getEngine();
+    case Column::state:
+      switch(eSession->getState())
+      {
+      case EBotSession::State::inactive:
+        return inactiveVar;
+      case EBotSession::State::active:
+        return activeVar;
+      }
+      break;
+    }
+  }
+  return QVariant();
+}
+
+QVariant BotSessionModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+  if(orientation != Qt::Horizontal)
+    return QVariant();
+  switch(role)
+  {
+  case Qt::DisplayRole:
+    switch((Column)section)
+    {
+      case Column::name:
+        return tr("Name");
+      case Column::engine:
+        return tr("Engine");
+      case Column::state:
+        return tr("State");
+    }
+  }
+  return QVariant();
+}
+
+void BotSessionModel::addedEntity(Entity& entity)
+{
+  EBotSession* eSession = dynamic_cast<EBotSession*>(&entity);
+  if(eSession)
+  {
+    int index = sessions.size();
+    beginInsertRows(QModelIndex(), index, index);
+    sessions.append(eSession);
+    endInsertRows();
+    return;
+  }
+  Q_ASSERT(false);
+}
+
+void BotSessionModel::updatedEntitiy(Entity& entity)
+{
+  EBotSession* eSession = dynamic_cast<EBotSession*>(&entity);
+  if(eSession)
+  {
+    int index = sessions.indexOf(eSession);
+    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, eSession);
+    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, eSession);
+    emit dataChanged(leftModelIndex, rightModelIndex);
+    return;
+  }
+  Q_ASSERT(false);
+}
+
+void BotSessionModel::removedEntity(Entity& entity)
+{
+  EBotSession* eSession = dynamic_cast<EBotSession*>(&entity);
+  if(eSession)
+  {
+    int index = sessions.indexOf(eSession);
+    beginRemoveRows(QModelIndex(), index, index);
+    sessions.removeAt(index);
+    endRemoveRows();
+    return;
+  }
+  Q_ASSERT(false);
+}
+
+void BotSessionModel::removedAll(quint32 type)
+{
+  if((EType)type == EType::botSession)
+  {
+    emit beginResetModel();
+    sessions.clear();
+    emit endResetModel();
+    return;
+  }
+  Q_ASSERT(false);
+}

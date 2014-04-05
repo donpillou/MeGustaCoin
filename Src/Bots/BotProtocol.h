@@ -70,8 +70,15 @@ public:
   
   struct Session
   {
+    enum State
+    {
+      inactive,
+      active,
+    };
+
     char name[33];
     char engine[33];
+    unsigned char state;
   };
 
   struct Engine

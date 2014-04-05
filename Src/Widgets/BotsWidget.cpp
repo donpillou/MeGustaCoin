@@ -2,11 +2,9 @@
 #include "stdafx.h"
 
 BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(parent), entityManager(entityManager),  botService(botService), orderModel(entityManager), transactionModel(entityManager)
+  QWidget(parent), entityManager(entityManager),  botService(botService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
-
-  //botsModel.addBot("BuyBot", *new BuyBot);
 
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -31,12 +29,22 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, Entity::Manager& en
   activateAction->setCheckable(true);
   connect(activateAction, SIGNAL(triggered(bool)), this, SLOT(activate(bool)));
 
+  sessionView = new QTreeView(this);
+  sessionView->setUniformRowHeights(true);
+  QSortFilterProxyModel* sessionProxyModel = new QSortFilterProxyModel(this);
+  sessionProxyModel->setDynamicSortFilter(true);
+  sessionProxyModel->setSourceModel(&botSessionModel);
+  sessionView->setModel(sessionProxyModel);
+  sessionView->setSortingEnabled(true);
+  sessionView->setRootIsDecorated(false);
+  sessionView->setAlternatingRowColors(true);
+
   orderView = new QTreeView(this);
   orderView->setUniformRowHeights(true);
-  OrderSortProxyModel2* proxyModel = new OrderSortProxyModel2(this, orderModel);
-  proxyModel->setDynamicSortFilter(true);
-  proxyModel->setSourceModel(&orderModel);
-  orderView->setModel(proxyModel);
+  OrderSortProxyModel2* orderProxyModel = new OrderSortProxyModel2(this);
+  orderProxyModel->setDynamicSortFilter(true);
+  orderProxyModel->setSourceModel(&orderModel);
+  orderView->setModel(orderProxyModel);
   orderView->setSortingEnabled(true);
   orderView->setRootIsDecorated(false);
   orderView->setAlternatingRowColors(true);
@@ -45,16 +53,17 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, Entity::Manager& en
 
   transactionView = new QTreeView(this);
   transactionView->setUniformRowHeights(true);
-  TransactionSortProxyModel2* tproxyModel = new TransactionSortProxyModel2(this, transactionModel);
-  tproxyModel->setDynamicSortFilter(true);
-  tproxyModel->setSourceModel(&transactionModel);
-  transactionView->setModel(tproxyModel);
+  TransactionSortProxyModel2* transactionProxyModel = new TransactionSortProxyModel2(this, transactionModel);
+  transactionProxyModel->setDynamicSortFilter(true);
+  transactionProxyModel->setSourceModel(&transactionModel);
+  transactionView->setModel(transactionProxyModel);
   transactionView->setSortingEnabled(true);
   transactionView->setRootIsDecorated(false);
   transactionView->setAlternatingRowColors(true);
 
   splitter = new QSplitter(Qt::Vertical, this);
   splitter->setHandleWidth(1);
+  splitter->addWidget(sessionView);
   splitter->addWidget(orderView);
   splitter->addWidget(transactionView);
 
@@ -98,7 +107,7 @@ void BotsWidget::addBot()
   if(botDialog.exec() != QDialog::Accepted)
     return;
   
-  //botService.createSession(botDialog.getName(), botDialog.getEngine());
+  botService.createSession(botDialog.getName(), botDialog.getEngine());
 }
 
 void BotsWidget::activate(bool enable)

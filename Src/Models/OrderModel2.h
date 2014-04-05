@@ -112,11 +112,9 @@ private: // Entity::Listener
 class OrderSortProxyModel2 : public QSortFilterProxyModel
 {
 public:
-  OrderSortProxyModel2(QObject* parent, OrderModel2& orderModel) : QSortFilterProxyModel(parent), orderModel(orderModel) {}
+  OrderSortProxyModel2(QObject* parent) : QSortFilterProxyModel(parent) {}
 
 private:
-  OrderModel2& orderModel;
-
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
     const EOrder* leftOrder = (const EOrder*)left.internalPointer();

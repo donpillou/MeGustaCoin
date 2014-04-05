@@ -38,12 +38,20 @@ bool BotConnection::process(Callback& callback)
 {
   this->callback = &callback;
 
+  if(!recvBuffer.isEmpty())
+  {
+    unsigned int bufferSize = recvBuffer.size();
+    if(bufferSize >= sizeof(BotProtocol::Header) && bufferSize >= ((const BotProtocol::Header*)recvBuffer.data())->size)
+      goto handle; // skip recv
+  }
+
   if(!connection.recv(recvBuffer))
   {
     error = connection.getLastError();
     return false;
   }
 
+handle:
   char* buffer = recvBuffer.data();
   unsigned int bufferSize = recvBuffer.size();
 
