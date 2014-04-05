@@ -4,7 +4,8 @@
 enum class EType
 {
   market,
+  order,
   botService,
   botEngine,
-  order,
+  botSession,
 };

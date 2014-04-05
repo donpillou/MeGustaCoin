@@ -60,6 +60,11 @@ public:
         delete entity;
       }
     }
+
+    template <typename E> void removeEntity(E type, quint32 id)
+    {
+      removeEntity((quint32)type, id);
+    }
   
     void removeAll(quint32 type)
     {

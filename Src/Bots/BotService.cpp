@@ -189,6 +189,19 @@ void BotService::WorkerThread::receivedUpdateEntity(const BotProtocol::Header& h
     if(size >= sizeof(BotProtocol::Engine))
       entity = new EBotEngine(header.entityId, *(BotProtocol::Engine*)data);
     break;
+  case BotProtocol::session:
+    if(size >= sizeof(BotProtocol::Session))
+      entity = new EBotSession(header.entityId, *(BotProtocol::Session*)data);
+    break;
+  case BotProtocol::error:
+    if(size >= sizeof(BotProtocol::Error))
+    {
+      BotProtocol::Error* error = (BotProtocol::Error*)data;
+      error->errorMessage[sizeof(error->errorMessage) - 1] = '\0';
+      addMessage(LogModel::Type::error, error->errorMessage);
+      return;
+    }
+    break;
   default:
     return;
   }
@@ -213,6 +226,29 @@ void BotService::WorkerThread::receivedUpdateEntity(const BotProtocol::Header& h
 
 void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Header& header)
 {
+  EType eType = (EType)0;
+  switch(header.entityType)
+  {
+  case BotProtocol::session:
+    eType = EType::botSession;
+    break;
+  }
+
+  class RemoveEntityEvent : public Event
+  {
+  public:
+    RemoveEntityEvent(EType eType, quint32 id) : eType(eType), id(id) {}
+  private:
+    EType eType;
+    quint32 id;
+  public: // Event
+    virtual void handle(BotService& botService)
+    {
+        botService.entityManager.removeEntity(eType, id);
+    }
+  };
+  eventQueue.append(new RemoveEntityEvent(eType, header.entityId));
+  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
 //void BotService::WorkerThread::receivedErrorResponse(const QString& errorMessage)
