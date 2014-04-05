@@ -294,7 +294,7 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
   {
   case Qt::DecorationRole:
     if((Column)index.column() == Column::type)
-      switch(eOrder->type)
+      switch(eOrder->getType())
       {
       case EOrder::Type::sell:
         return sellIcon;
@@ -308,7 +308,7 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
     switch((Column)index.column())
     {
     case Column::type:
-      switch(eOrder->type)
+      switch(eOrder->getType())
       {
       case EOrder::Type::buy:
         return buyStr;
@@ -319,15 +319,15 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
       }
       break;
     case Column::date:
-      return eOrder->date.toString(dateFormat);
+      return eOrder->getDate().toString(dateFormat);
     case Column::amount:
-      return eMarket->formatAmount(eOrder->amount);
+      return eMarket->formatAmount(eOrder->getAmount());
     case Column::price:
-      return eMarket->formatPrice(eOrder->price);
+      return eMarket->formatPrice(eOrder->getPrice());
     case Column::value:
-      return eMarket->formatPrice(eOrder->amount * eOrder->price);
+      return eMarket->formatPrice(eOrder->getAmount() * eOrder->getPrice());
     case Column::state:
-      switch(eOrder->state)
+      switch(eOrder->getState())
       {
       case EOrder::State::draft:
         return draftStr;
@@ -344,7 +344,7 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
       }
       break;
     case Column::total:
-        return eOrder->total > 0 ? (QString("+") + eMarket->formatPrice(eOrder->total)) : eMarket->formatPrice(eOrder->total);
+        return eOrder->getTotal() > 0 ? (QString("+") + eMarket->formatPrice(eOrder->getTotal())) : eMarket->formatPrice(eOrder->getTotal());
     }
   }
   return QVariant();

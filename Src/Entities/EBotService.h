@@ -6,6 +6,7 @@ class EBotService : public Entity
 public:
   static const EType eType = EType::botService;
 
+public:
   enum class State
   {
     connecting,
@@ -13,6 +14,7 @@ public:
     offline,
   };
 
+public:
   EBotService() : Entity(eType, 0), state(State::offline) {}
 
   State getState() const {return state;}
@@ -38,9 +40,6 @@ public:
     Q_ASSERT(false);
     return QString();
   }
-
-public: // Entity
-  virtual quint32 getType() const {return (quint32)EType::botService;}
 
 private:
   State state;

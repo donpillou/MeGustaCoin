@@ -6,6 +6,7 @@ class EMarket : public Entity
 public:
   static const EType eType = EType::market;
 
+public:
   EMarket() : Entity(eType, 0) {}
 
   const QString& getBaseCurrency() const {return baseCurrency;}

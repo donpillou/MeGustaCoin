@@ -122,15 +122,15 @@ private:
     switch((OrderModel2::Column)left.column())
     {
     case OrderModel2::Column::date:
-      return leftOrder->date.msecsTo(rightOrder->date) > 0;
+      return leftOrder->getDate().msecsTo(rightOrder->getDate()) > 0;
     case OrderModel2::Column::value:
-      return leftOrder->amount * leftOrder->price < rightOrder->amount * rightOrder->price;
+      return leftOrder->getAmount() * leftOrder->getPrice() < rightOrder->getAmount() * rightOrder->getPrice();
     case OrderModel2::Column::amount:
-      return leftOrder->amount < rightOrder->amount;
+      return leftOrder->getAmount() < rightOrder->getAmount();
     case OrderModel2::Column::price:
-      return leftOrder->price < rightOrder->price;
+      return leftOrder->getPrice() < rightOrder->getPrice();
     case OrderModel2::Column::total:
-      return leftOrder->total < rightOrder->total;
+      return leftOrder->getTotal() < rightOrder->getTotal();
     default:
       break;
     }
