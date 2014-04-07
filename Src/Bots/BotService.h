@@ -13,6 +13,9 @@ public:
   void stop();
 
   void createSession(const QString& name, const QString& engine);
+  void removeSession(quint32 id);
+  void startSessionSimulation(quint32 id);
+  void stopSession(quint32 id);
 
   bool isConnected() const {return connected;}
 
@@ -69,11 +72,9 @@ private:
   private: // BotConnection::Callback
     virtual void receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size);
     virtual void receivedRemoveEntity(const BotProtocol::Header& header);
-    //virtual void receivedErrorResponse(const QString& errorMessage);
-    //virtual void receivedEngine(const QString& engine);
-    //virtual void receivedSession(quint32 id, const QString& name, const QString& engine);
   };
 
+private:
   DataModel& dataModel;
   Entity::Manager& entityManager;
   WorkerThread* thread;
@@ -81,6 +82,21 @@ private:
   JobQueue<Event*> eventQueue;
   JobQueue<Job*> jobQueue;
   bool connected;
+
+private:
+  void createEntity(BotProtocol::EntityType type, const void* args, size_t size);
+  void removeEntity(BotProtocol::EntityType type, quint32 id);
+  void controlEntity(BotProtocol::EntityType type, quint32 id, const void* args, size_t size);
+
+  template<size_t N> void setString(char(&str)[N], const QString& value)
+  {
+    QByteArray buf = value.toUtf8();
+    size_t size = buf.length() + 1;
+    if(size > N - 1)
+      size = N - 1;
+    memcpy(str, buf.constData(), size);
+    str[N - 1] = '\0';
+  }
 
 private slots:
   void handleEvents();

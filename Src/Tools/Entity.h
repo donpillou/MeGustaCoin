@@ -8,7 +8,7 @@ public:
   {
   public:
     virtual void addedEntity(Entity& entity) {};
-    virtual void updatedEntitiy(Entity& entity) {};
+    virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity) {};
     virtual void removedEntity(Entity& entity) {};
     //virtual void addedAll(const QHash<quint32, Entity*>& entities) = 0;
     virtual void removedAll(quint32 type) {};
@@ -31,11 +31,11 @@ public:
       }
       else
       {
+        entity.entityManager = this;
         Entity* oldEntity = *it;
         *it = &entity;
-        entity.entityManager = this;
         for(QSet<Listener*>::iterator i = table.listeners.begin(), end = table.listeners.end(); i != end; ++i)
-          (*i)->updatedEntitiy(entity);
+          (*i)->updatedEntitiy(*oldEntity, entity);
         delete oldEntity;
       }
     }
@@ -44,7 +44,7 @@ public:
     {
       EntityTable& table = tables[entity.getType()];
       for(QSet<Listener*>::iterator i = table.listeners.begin(), end = table.listeners.end(); i != end; ++i)
-          (*i)->updatedEntitiy(entity);
+          (*i)->updatedEntitiy(entity, entity);
     }
   
     void removeEntity(quint32 type, quint32 id)

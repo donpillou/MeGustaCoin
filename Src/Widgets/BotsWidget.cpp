@@ -21,23 +21,26 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, Entity::Manager& en
 
   simulateAction = toolBar->addAction(QIcon(":/Icons/user_gray_go_gray.png"), tr("&Simulate"));
   simulateAction->setEnabled(false);
-  simulateAction->setCheckable(true);
-  connect(simulateAction, SIGNAL(triggered(bool)), this, SLOT(simulate(bool)));
+  connect(simulateAction, SIGNAL(triggered()), this, SLOT(simulate()));
 
   activateAction = toolBar->addAction(QIcon(":/Icons/user_gray_go.png"), tr("&Activate"));
   activateAction->setEnabled(false);
-  activateAction->setCheckable(true);
-  connect(activateAction, SIGNAL(triggered(bool)), this, SLOT(activate(bool)));
+  connect(activateAction, SIGNAL(triggered()), this, SLOT(activate()));
+
+  cancelAction = toolBar->addAction(QIcon(":/Icons/cancel2.png"), tr("&Cancel"));
+  cancelAction->setEnabled(false);
+  connect(cancelAction, SIGNAL(triggered()), this, SLOT(cancelBot()));
 
   sessionView = new QTreeView(this);
   sessionView->setUniformRowHeights(true);
-  QSortFilterProxyModel* sessionProxyModel = new QSortFilterProxyModel(this);
+  sessionProxyModel = new QSortFilterProxyModel(this);
   sessionProxyModel->setDynamicSortFilter(true);
   sessionProxyModel->setSourceModel(&botSessionModel);
   sessionView->setModel(sessionProxyModel);
   sessionView->setSortingEnabled(true);
   sessionView->setRootIsDecorated(false);
   sessionView->setAlternatingRowColors(true);
+  connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(updateToolBarButtons()));
 
   orderView = new QTreeView(this);
   orderView->setUniformRowHeights(true);
@@ -110,14 +113,34 @@ void BotsWidget::addBot()
   botService.createSession(botDialog.getName(), botDialog.getEngine());
 }
 
-void BotsWidget::activate(bool enable)
+void BotsWidget::cancelBot()
+{
+  QModelIndexList selection = sessionView->selectionModel()->selectedRows();
+  foreach(const QModelIndex& proxyIndex, selection)
+  {
+    QModelIndex index = sessionProxyModel->mapToSource(proxyIndex);
+    EBotSession* eSession = (EBotSession*)index.internalPointer();
+    if(eSession->getState() == EBotSession::State::inactive)
+      botService.removeSession(eSession->getId());
+    else
+      botService.stopSession(eSession->getId());
+  }
+}
+
+void BotsWidget::activate()
 {
 
 }
 
-void BotsWidget::simulate(bool enable)
+void BotsWidget::simulate()
 {
-
+  QModelIndexList selection = sessionView->selectionModel()->selectedRows();
+  foreach(const QModelIndex& proxyIndex, selection)
+  {
+    QModelIndex index = sessionProxyModel->mapToSource(proxyIndex);
+    EBotSession* eSession = (EBotSession*)index.internalPointer();
+    botService.startSessionSimulation(eSession->getId());
+  }
 }
 
 void BotsWidget::optimize()
@@ -143,17 +166,29 @@ void BotsWidget::updateToolBarButtons()
 {
   bool connected = botService.isConnected();
   addAction->setEnabled(connected);
-  //optimizeAction->setEnabled(connected);
-  //simulateAction->setEnabled(connected);
-  //activateAction->setEnabled(connected);
+
+  QModelIndexList selection = sessionView->selectionModel()->selectedRows();
+  bool sessionSelected = !selection.isEmpty();
+  bool sessionInactive = false;
+  if(sessionSelected)
+  {
+    QModelIndex index = sessionProxyModel->mapToSource(selection.front());
+    EBotSession* eSession = (EBotSession*)index.internalPointer();
+    sessionInactive = eSession->getState() == EBotSession::State::inactive;
+  }
+
+  //optimizeAction->setEnabled(connected && sessionSelected);
+  simulateAction->setEnabled(connected && sessionSelected && sessionInactive);
+  //activateAction->setEnabled(connected && sessionSelected);
+  cancelAction->setEnabled(connected && sessionSelected);
 }
 
-void BotsWidget::updatedEntitiy(Entity& entity)
+void BotsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  switch ((EType)entity.getType())
+  switch ((EType)newEntity.getType())
   {
   case EType::botService:
-    updateTitle(*dynamic_cast<EBotService*>(&entity));
+    updateTitle(*dynamic_cast<EBotService*>(&newEntity));
     updateToolBarButtons();
     break;
   default:

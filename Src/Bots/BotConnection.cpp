@@ -107,19 +107,15 @@ void BotConnection::handleMessage(const BotProtocol::Header& header, char* data,
   }
 }
 
-bool BotConnection::sendLoginRequest(const QString& userName)
+bool BotConnection::sendMessage(BotProtocol::MessageType type, const void* data, size_t size)
 {
-  unsigned char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::LoginRequest)];
-  BotProtocol::Header* header = (BotProtocol::Header*)message;
-  BotProtocol::LoginRequest* loginRequest = (BotProtocol::LoginRequest*)(header + 1);
-  header->size = sizeof(message);
-  header->messageType = BotProtocol::loginRequest;
-  header->entityId = 0;
-  header->entityType = 0;
-  QByteArray userNameData = userName.toUtf8();
-  memcpy(loginRequest->username, userNameData.constData(), qMin(userNameData.size() + 1, (int)sizeof(loginRequest->username) - 1));
-  loginRequest->username[sizeof(loginRequest->username) - 1] = '\0';
-  if(!connection.send((char*)message, sizeof(message)))
+  BotProtocol::Header header;
+  header.size = sizeof(header) + size;
+  header.messageType = type;
+  header.entityId = 0;
+  header.entityType = 0;
+  if(!connection.send((const char*)&header, sizeof(header)) ||
+     !connection.send((const char*)data, size))
   {
     error = connection.getLastError();
     return false;
@@ -127,23 +123,66 @@ bool BotConnection::sendLoginRequest(const QString& userName)
   return true;
 }
 
-bool BotConnection::sendAuthRequest(const QByteArray& signature)
+bool BotConnection::createEntity(BotProtocol::EntityType type, const void* args, size_t size)
 {
-  unsigned char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::AuthRequest)];
-  BotProtocol::Header* header = (BotProtocol::Header*)message;
-  BotProtocol::AuthRequest* authRequest = (BotProtocol::AuthRequest*)(header + 1);
-  header->size = sizeof(message);
-  header->messageType = BotProtocol::authRequest;
-  header->entityId = 0;
-  header->entityType = 0;
-  Q_ASSERT(signature.size() == 32);
-  memcpy(authRequest->signature, signature.constData(), 32);
-  if(!connection.send((char*)message, sizeof(message)))
+  BotProtocol::Header header;
+  header.size = sizeof(header) + size;
+  header.messageType = BotProtocol::createEntity;
+  header.entityId = 0;
+  header.entityType = type;
+  if(!connection.send((const char*)&header, sizeof(header)) ||
+     !connection.send((const char*)args, size))
   {
     error = connection.getLastError();
     return false;
   }
   return true;
+}
+
+bool BotConnection::removeEntity(BotProtocol::EntityType type, quint32 id)
+{
+  BotProtocol::Header header;
+  header.size = sizeof(header);
+  header.messageType = BotProtocol::removeEntity;
+  header.entityId = id;
+  header.entityType = type;
+  if(!connection.send((const char*)&header, sizeof(header)))
+  {
+    error = connection.getLastError();
+    return false;
+  }
+  return true;
+}
+
+bool BotConnection::controlEntity(BotProtocol::EntityType type, quint32 id, const void* args, size_t size)
+{
+  BotProtocol::Header header;
+  header.size = sizeof(header) + size;
+  header.messageType = BotProtocol::controlEntity;
+  header.entityId = id;
+  header.entityType = type;
+  if(!connection.send((const char*)&header, sizeof(header)) ||
+     !connection.send((const char*)args, size))
+  {
+    error = connection.getLastError();
+    return false;
+  }
+  return true;
+}
+
+bool BotConnection::sendLoginRequest(const QString& userName)
+{
+  BotProtocol::LoginRequest loginRequest;
+  setString(loginRequest.username, userName);
+  return sendMessage(BotProtocol::loginRequest, &loginRequest, sizeof(loginRequest));
+}
+
+bool BotConnection::sendAuthRequest(const QByteArray& signature)
+{
+  BotProtocol::AuthRequest authRequest;
+  Q_ASSERT(signature.size() == 32);
+  memcpy(authRequest.signature, signature.constData(), 32);
+  return sendMessage(BotProtocol::authRequest, &authRequest, sizeof(authRequest));
 }
 
 bool BotConnection::receiveLoginResponse(BotProtocol::LoginResponse& loginResponse)
@@ -222,28 +261,19 @@ bool BotConnection::receiveAuthResponse()
   return true;
 }
 
-bool BotConnection::createSession(const QString& name, const QString& engine)
-{
-  unsigned char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::CreateSessionRequest)];
-  BotProtocol::Header* header = (BotProtocol::Header*)message;
-  BotProtocol::CreateSessionRequest* createSession = (BotProtocol::CreateSessionRequest*)(header + 1);
-  header->size = sizeof(message);
-  header->messageType = BotProtocol::createSessionRequest;
-  header->entityId = 0;
-  header->entityType = 0;
+//bool BotConnection::createSession(const QString& name, const QString& engine)
+//{
+//  BotProtocol::CreateSessionRequest createSession;
+//  setString(createSession.engine, engine);
+//  setString(createSession.name, name);
+//  return sendMessage(BotProtocol::createSessionRequest, &createSession, sizeof(createSession));
+//}
+//
+//bool BotConnection::startSession(quint32 id, BotProtocol::StartSessionRequest::Mode mode)
+//{
+//  BotProtocol::StartSessionRequest startSession;
+//  startSession.id = id;
+//  startSession.mode = mode;
+//  return sendMessage(BotProtocol::startSessionRequest, &startSession, sizeof(startSession));
+//}
 
-  QByteArray engineData = engine.toUtf8();
-  memcpy(createSession->engine, engineData.constData(), qMin(engineData.size() + 1, (int)sizeof(createSession->engine) - 1));
-  createSession->engine[sizeof(createSession->engine) - 1] = '\0';
-
-  QByteArray nameData = name.toUtf8();
-  memcpy(createSession->name, nameData.constData(), qMin(nameData.size() + 1, (int)sizeof(createSession->name) - 1));
-  createSession->name[sizeof(createSession->name) - 1] = '\0';
-
-  if(!connection.send((char*)message, sizeof(message)))
-  {
-    error = connection.getLastError();
-    return false;
-  }
-  return true;
-}

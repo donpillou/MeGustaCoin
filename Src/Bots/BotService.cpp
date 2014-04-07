@@ -38,25 +38,96 @@ void BotService::stop()
   qDeleteAll(jobQueue.getAll());
 }
 
-void BotService::createSession(const QString& name, const QString& engine)
+void BotService::createEntity(BotProtocol::EntityType type, const void* args, size_t size)
 {
-  class CreateSessionJob : public Job
+  class CreateEntityJob : public Job
   {
   public:
-    CreateSessionJob(const QString& name, const QString& engine) : name(name), engine(engine) {}
+    CreateEntityJob(BotProtocol::EntityType type, const QByteArray& args) : type(type), args(args) {}
   private:
-    QString name;
-    QString engine;
+    BotProtocol::EntityType type;
+    QByteArray args;
   public: // Event
     virtual bool execute(WorkerThread& workerThread)
     {
-      return workerThread.connection.createSession(name, engine);
+      return workerThread.connection.createEntity(type, args.constData(), args.size());
     }
   };
 
-  jobQueue.append(new CreateSessionJob(name, engine));
+  jobQueue.append(new CreateEntityJob(type, QByteArray((const char*)args, (int)size)));
   if(thread)
     thread->interrupt();
+}
+
+void BotService::removeEntity(BotProtocol::EntityType type, quint32 id)
+{
+  class RemoveEntityJob : public Job
+  {
+  public:
+    RemoveEntityJob(BotProtocol::EntityType type, quint32 id) : type(type), id(id) {}
+  private:
+    BotProtocol::EntityType type;
+    quint32 id;
+  public: // Event
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      return workerThread.connection.removeEntity(type, id);
+    }
+  };
+
+  jobQueue.append(new RemoveEntityJob(type, id));
+  if(thread)
+    thread->interrupt();
+}
+
+void BotService::controlEntity(BotProtocol::EntityType type, quint32 id, const void* args, size_t size)
+{
+  class ControlEntityJob : public Job
+  {
+  public:
+    ControlEntityJob(BotProtocol::EntityType type, quint32 id, const QByteArray& args) : type(type), id(id), args(args) {}
+  private:
+    BotProtocol::EntityType type;
+    quint32 id;
+    QByteArray args;
+  public: // Event
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      return workerThread.connection.controlEntity(type, id, args.constData(), args.size());
+    }
+  };
+
+  jobQueue.append(new ControlEntityJob(type, id, QByteArray((const char*)args, (int)size)));
+  if(thread)
+    thread->interrupt();
+}
+
+
+void BotService::createSession(const QString& name, const QString& engine)
+{
+  BotProtocol::CreateSessionArgs createSession;
+  setString(createSession.name, name);
+  setString(createSession.engine, engine);
+  createEntity(BotProtocol::session, &createSession, sizeof(createSession));
+}
+
+void BotService::removeSession(quint32 id)
+{
+  removeEntity(BotProtocol::session, id);
+}
+
+void BotService::startSessionSimulation(quint32 id)
+{
+  BotProtocol::ControlSessionArgs controlSession;
+  controlSession.cmd = BotProtocol::ControlSessionArgs::startSimulation;
+  controlEntity(BotProtocol::session, id, &controlSession, sizeof(controlSession));
+}
+
+void BotService::stopSession(quint32 id)
+{
+  BotProtocol::ControlSessionArgs controlSession;
+  controlSession.cmd = BotProtocol::ControlSessionArgs::stop;
+  controlEntity(BotProtocol::session, id, &controlSession, sizeof(controlSession));
 }
 
 void BotService::handleEvents()
@@ -250,46 +321,3 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Header& h
   eventQueue.append(new RemoveEntityEvent(eType, header.entityId));
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
-
-//void BotService::WorkerThread::receivedErrorResponse(const QString& errorMessage)
-//{
-//  addMessage(LogModel::Type::error, errorMessage);
-//}
-
-//void BotService::WorkerThread::receivedEngine(const QString& engine)
-//{
-//  class EngineMessageEvent : public Event
-//  {
-//  public:
-//    EngineMessageEvent(const QString& engine) : engine(engine) {}
-//  private:
-//    QString engine;
-//  public: // Event
-//    virtual void handle(BotService& botService)
-//    {
-//        botService.dataModel.botsModel.addEngine(engine);
-//    }
-//  };
-//  eventQueue.append(new EngineMessageEvent(engine));
-//  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
-//}
-
-//void BotService::WorkerThread::receivedSession(quint32 id, const QString& name, const QString& engine)
-//{
-//  class SessionMessageEvent : public Event
-//  {
-//  public:
-//    SessionMessageEvent(quint32 id, const QString& name, const QString& engine) : id(id), name(name), engine(engine) {}
-//  private:
-//    quint32 id;
-//    QString name;
-//    QString engine;
-//  public: // Event
-//    virtual void handle(BotService& botService)
-//    {
-//        botService.dataModel.botsModel.addSession(id, name, engine);
-//    }
-//  };
-//  eventQueue.append(new SessionMessageEvent(id, name, engine));
-//  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
-//}

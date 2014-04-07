@@ -459,23 +459,26 @@ void OrderModel2::addedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void OrderModel2::updatedEntitiy(Entity& entity)
+void OrderModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EOrder* eOrder = dynamic_cast<EOrder*>(&entity);
-  if(eOrder)
+  EOrder* oldEOrder = dynamic_cast<EOrder*>(&oldEntity);
+  if(oldEOrder)
   {
-    int index = orders.indexOf(eOrder);
-    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, eOrder);
-    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, eOrder);
+    EOrder* newEOrder = dynamic_cast<EOrder*>(&newEntity);
+    int index = orders.indexOf(oldEOrder);
+    orders[index] = newEOrder; 
+    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEOrder);
+    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEOrder);
     emit dataChanged(leftModelIndex, rightModelIndex);
     return;
   }
 
-  EMarket* eMarket = dynamic_cast<EMarket*>(&entity);
-  if(eMarket)
+  EMarket* oldEMarket = dynamic_cast<EMarket*>(&oldEntity);
+  if(oldEMarket)
   {
-    Q_ASSERT(entity.getId() == 0);
-    this->eMarket = eMarket;
+    Q_ASSERT(newEntity.getId() == 0);
+    EMarket* newEMarket = dynamic_cast<EMarket*>(&newEntity);
+    this->eMarket = newEMarket;
     emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
     return;
   }

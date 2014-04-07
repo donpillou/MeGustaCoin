@@ -11,6 +11,7 @@ public:
   {
     inactive = BotProtocol::Session::inactive,
     active = BotProtocol::Session::active,
+    simulating = BotProtocol::Session::simulating,
   };
 
 public:

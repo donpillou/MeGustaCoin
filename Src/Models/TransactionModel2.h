@@ -95,7 +95,7 @@ private: // QAbstractItemModel
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 private: // Entity::Listener
-  virtual void updatedEntitiy(Entity& entity);
+  virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
 };
 
 class TransactionSortProxyModel2 : public QSortFilterProxyModel

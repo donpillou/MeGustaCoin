@@ -23,6 +23,7 @@ private:
 
   QVariant inactiveVar;
   QVariant activeVar;
+  QVariant simulatingVar;
 
 private: // QAbstractItemModel
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
@@ -34,7 +35,7 @@ private: // QAbstractItemModel
 
 private: // Entity::Listener
   virtual void addedEntity(Entity& entity);
-  virtual void updatedEntitiy(Entity& entity);
+  virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
   virtual void removedEntity(Entity& entity);
   virtual void removedAll(quint32 type);
 };

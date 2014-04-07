@@ -10,12 +10,12 @@ public:
     loginResponse,
     authRequest,
     authResponse,
-    createSessionRequest,
-    createSessionResponse,
     registerBotRequest,
     registerBotResponse,
     updateEntity,
     removeEntity,
+    controlEntity,
+    createEntity,
   };
   
   enum EntityType
@@ -55,30 +55,18 @@ public:
     unsigned char signature[32];
   };
 
-  struct CreateSessionRequest
-  {
-    char name[33];
-    char engine[33];
-    double balanceBase;
-    double balanceComm;
-  };
-
-  struct CreateSessionResponse
-  {
-    quint32 id;
-  };
-  
   struct Session
   {
     enum State
     {
       inactive,
       active,
+      simulating,
     };
 
     char name[33];
     char engine[33];
-    unsigned char state;
+    quint8 state;
   };
 
   struct Engine
@@ -93,9 +81,28 @@ public:
   
   struct RegisterBotResponse
   {
-    unsigned char isSimulation;
+    quint8 isSimulation;
     double balanceBase;
     double balanceComm;
+  };
+
+  struct CreateSessionArgs
+  {
+    char name[33];
+    char engine[33];
+    double balanceBase;
+    double balanceComm;
+  };
+
+  struct ControlSessionArgs
+  {
+    enum Command
+    {
+      startSimulation,
+      stop,
+    };
+
+    quint8 cmd;
   };
 
 #pragma pack(pop)

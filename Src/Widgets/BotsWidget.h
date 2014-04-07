@@ -14,8 +14,10 @@ public:
 private slots:
   void addBot();
   void optimize();
-  void simulate(bool enabled);
-  void activate(bool enabled);
+  void simulate();
+  void activate();
+  void cancelBot();
+  void updateToolBarButtons();
 
 private:
   Entity::Manager& entityManager;
@@ -29,16 +31,17 @@ private:
   QTreeView* sessionView;
   QTreeView* orderView;
   QTreeView* transactionView;
+  QSortFilterProxyModel* sessionProxyModel;
 
   QAction* addAction;
   QAction* optimizeAction;
   QAction* simulateAction;
   QAction* activateAction;
+  QAction* cancelAction;
 
 private:
   void updateTitle(EBotService& eBotService);
-  void updateToolBarButtons();
 
 private: // Entity::Listener
-  virtual void updatedEntitiy(Entity& entity);
+  virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
 };

@@ -283,12 +283,12 @@ QVariant TransactionModel2::headerData(int section, Qt::Orientation orientation,
   return QVariant();
 }
 
-void TransactionModel2::updatedEntitiy(Entity& entity)
+void TransactionModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  switch((EType)entity.getType())
+  switch((EType)newEntity.getType())
   {
   case EType::market:
-    eMarket = dynamic_cast<EMarket*>(&entity);
+    eMarket = dynamic_cast<EMarket*>(&newEntity);
     emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
     break;
   default:

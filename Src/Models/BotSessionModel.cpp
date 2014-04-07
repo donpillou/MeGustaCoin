@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotSessionModel::BotSessionModel(Entity::Manager& entityManager) : entityManager(entityManager),
-  inactiveVar(tr("inactive")), activeVar(tr("active"))
+  inactiveVar(tr("inactive")), activeVar(tr("active")), simulatingVar(tr("simulating"))
 {
   entityManager.registerListener<EBotSession>(*this);
 }
@@ -56,6 +56,8 @@ QVariant BotSessionModel::data(const QModelIndex& index, int role) const
         return inactiveVar;
       case EBotSession::State::active:
         return activeVar;
+      case EBotSession::State::simulating:
+        return simulatingVar;
       }
       break;
     }
@@ -97,14 +99,16 @@ void BotSessionModel::addedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void BotSessionModel::updatedEntitiy(Entity& entity)
+void BotSessionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EBotSession* eSession = dynamic_cast<EBotSession*>(&entity);
-  if(eSession)
+  EBotSession* oldESession = dynamic_cast<EBotSession*>(&oldEntity);
+  if(oldESession)
   {
-    int index = sessions.indexOf(eSession);
-    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, eSession);
-    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, eSession);
+    EBotSession* newESession = dynamic_cast<EBotSession*>(&newEntity);
+    int index = sessions.indexOf(oldESession);
+    sessions[index] = newESession;
+    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, oldESession);
+    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, oldESession);
     emit dataChanged(leftModelIndex, rightModelIndex);
     return;
   }

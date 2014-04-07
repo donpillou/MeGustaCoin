@@ -104,7 +104,7 @@ private: // QAbstractItemModel
 
 private: // Entity::Listener
   virtual void addedEntity(Entity& entity);
-  virtual void updatedEntitiy(Entity& entity);
+  virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
   virtual void removedEntity(Entity& entity);
   virtual void removedAll(quint32 type);
 };
