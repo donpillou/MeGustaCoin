@@ -105,12 +105,13 @@ void BotsWidget::addBot()
 {
   QList<EBotEngine*> engines;
   entityManager.getAllEntities<EBotEngine>(engines);
+  EMarket* eMarket = entityManager.getEntity<EMarket>(0);
 
-  BotDialog botDialog(this, engines);
+  BotDialog botDialog(this, engines, eMarket->getBaseCurrency(), eMarket->getCommCurrency());
   if(botDialog.exec() != QDialog::Accepted)
     return;
   
-  botService.createSession(botDialog.getName(), botDialog.getEngine());
+  botService.createSession(botDialog.getName(), botDialog.getEngine(), botDialog.getBalanceBase(), botDialog.getBalanceComm());
 }
 
 void BotsWidget::cancelBot()
