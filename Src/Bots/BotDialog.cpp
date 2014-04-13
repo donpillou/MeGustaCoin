@@ -13,7 +13,13 @@ BotDialog::BotDialog(QWidget* parent, const QList<EBotEngine*>& engines, const Q
     engineComboBox->addItem(engine->getName());
 
   balanceBaseSpinBox = new QDoubleSpinBox(this);
+  balanceBaseSpinBox->setValue(100.);
+  balanceBaseSpinBox->setMinimum(0.);
+  balanceBaseSpinBox->setMaximum(9999999.);
   balanceCommSpinBox = new QDoubleSpinBox(this);
+  balanceCommSpinBox->setValue(0.);
+  balanceCommSpinBox->setMinimum(0.);
+  balanceCommSpinBox->setMaximum(9999999.);
 
   QGridLayout *contentLayout = new QGridLayout;
   contentLayout->addWidget(new QLabel(tr("Name:")), 0, 0);
