@@ -104,10 +104,11 @@ void BotsWidget::saveState(QSettings& settings)
 void BotsWidget::addBot()
 {
   QList<EBotEngine*> engines;
+  QList<EBotMarket*> markets;
   entityManager.getAllEntities<EBotEngine>(engines);
-  EMarket* eMarket = entityManager.getEntity<EMarket>(0);
+  entityManager.getAllEntities<EBotMarket>(markets);
 
-  BotDialog botDialog(this, engines, eMarket->getBaseCurrency(), eMarket->getCommCurrency());
+  BotDialog botDialog(this, engines, markets);
   if(botDialog.exec() != QDialog::Accepted)
     return;
   

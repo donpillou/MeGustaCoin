@@ -77,7 +77,7 @@ public:
 
 private:
   Entity::Manager& entityManager;
-  EMarket* eMarket;
+  EBotMarket* eBotMarket;
   QList<Transaction*> transactions;
   QVariant buyStr;
   QVariant sellStr;

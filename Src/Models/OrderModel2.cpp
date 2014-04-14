@@ -7,16 +7,15 @@ OrderModel2::OrderModel2(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<EMarket>(*this);
+  //entityManager.registerListener<EBotMarket>(*this);
   entityManager.registerListener<EOrder>(*this);
 
-  eMarket = entityManager.getEntity<EMarket>(0);
-  Q_ASSERT(eMarket);
+  eBotMarket = 0;
 }
 
 OrderModel2::~OrderModel2()
 {
-  entityManager.unregisterListener<EMarket>(*this);
+  //entityManager.unregisterListener<EBotMarket>(*this);
   entityManager.unregisterListener<EOrder>(*this);
 }
 
@@ -321,11 +320,11 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
     case Column::date:
       return eOrder->getDate().toString(dateFormat);
     case Column::amount:
-      return eMarket->formatAmount(eOrder->getAmount());
+      return eBotMarket->formatAmount(eOrder->getAmount());
     case Column::price:
-      return eMarket->formatPrice(eOrder->getPrice());
+      return eBotMarket->formatPrice(eOrder->getPrice());
     case Column::value:
-      return eMarket->formatPrice(eOrder->getAmount() * eOrder->getPrice());
+      return eBotMarket->formatPrice(eOrder->getAmount() * eOrder->getPrice());
     case Column::state:
       switch(eOrder->getState())
       {
@@ -344,7 +343,7 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
       }
       break;
     case Column::total:
-        return eOrder->getTotal() > 0 ? (QString("+") + eMarket->formatPrice(eOrder->getTotal())) : eMarket->formatPrice(eOrder->getTotal());
+        return eOrder->getTotal() > 0 ? (QString("+") + eBotMarket->formatPrice(eOrder->getTotal())) : eBotMarket->formatPrice(eOrder->getTotal());
     }
   }
   return QVariant();
@@ -375,15 +374,15 @@ QVariant OrderModel2::headerData(int section, Qt::Orientation orientation, int r
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount %1").arg(eMarket->getCommCurrency());
+        return tr("Amount %1").arg(eBotMarket ? eBotMarket->getCommCurrency() : QString());
       case Column::price:
-        return tr("Price %1").arg(eMarket->getBaseCurrency());
+        return tr("Price %1").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString());
       case Column::value:
-        return tr("Value %1").arg(eMarket->getBaseCurrency());
+        return tr("Value %1").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString());
       case Column::state:
         return tr("Status");
       case Column::total:
-        return tr("Total %1").arg(eMarket->getBaseCurrency());
+        return tr("Total %1").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString());
     }
   }
   return QVariant();
@@ -473,15 +472,15 @@ void OrderModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
     return;
   }
 
-  EMarket* oldEMarket = dynamic_cast<EMarket*>(&oldEntity);
-  if(oldEMarket)
-  {
-    Q_ASSERT(newEntity.getId() == 0);
-    EMarket* newEMarket = dynamic_cast<EMarket*>(&newEntity);
-    this->eMarket = newEMarket;
-    emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
-    return;
-  }
+  //EMarket* oldEMarket = dynamic_cast<EMarket*>(&oldEntity);
+  //if(oldEMarket)
+  //{
+  //  Q_ASSERT(newEntity.getId() == 0);
+  //  EMarket* newEMarket = dynamic_cast<EMarket*>(&newEntity);
+  //  this->eMarket = newEMarket;
+  //  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
+  //  return;
+  //}
   Q_ASSERT(false);
 }
 

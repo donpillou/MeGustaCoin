@@ -7,14 +7,14 @@ TransactionModel2::TransactionModel2(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<EMarket>(*this);
+  //entityManager.registerListener<EBotMarket>(*this);
 
-  eMarket = entityManager.getEntity<EMarket>(0);
+  eBotMarket = 0;
 }
 
 TransactionModel2::~TransactionModel2()
 {
-  entityManager.unregisterListener<EMarket>(*this);
+  //entityManager.unregisterListener<EBotMarket>(*this);
   //entityManager.unregisterListener<EMarket>(*this);
 }
 
@@ -219,23 +219,23 @@ QVariant TransactionModel2::data(const QModelIndex& index, int role) const
     case Column::date:
       return transaction.date.toString(dateFormat);
     case Column::amount:
-      return eMarket->formatAmount(transaction.amount);
+      return eBotMarket->formatAmount(transaction.amount);
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.amount, 'f', 8), market->getCoinCurrency());
       //return QString().sprintf("%.08f %s", transaction.amount, market->getCoinCurrency());
     case Column::price:
-      return eMarket->formatPrice(transaction.price);
+      return eBotMarket->formatPrice(transaction.price);
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.price, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%.02f %s", transaction.price, market->getMarketCurrency());
     case Column::value:
-      return eMarket->formatPrice(transaction.amount * transaction.price);
+      return eBotMarket->formatPrice(transaction.amount * transaction.price);
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.amount * transaction.price, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%.02f %s", transaction.amount * transaction.price, market->getMarketCurrency());
     case Column::fee:
-      return eMarket->formatPrice(transaction.fee);
+      return eBotMarket->formatPrice(transaction.fee);
       //return QString("%1 %2").arg(QLocale::system().toString(transaction.fee, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%.02f %s", transaction.fee, market->getMarketCurrency());
     case Column::total:
-      return transaction.total > 0 ? (QString("+") + eMarket->formatPrice(transaction.total)) : eMarket->formatPrice(transaction.total);
+      return transaction.total > 0 ? (QString("+") + eBotMarket->formatPrice(transaction.total)) : eBotMarket->formatPrice(transaction.total);
       //return QString(transaction.balanceChange > 0 ? "+%1 %2" : "%1 %2").arg(QLocale::system().toString(transaction.balanceChange, 'f', 2), market->getMarketCurrency());
       //return QString().sprintf("%+.02f %s", transaction.balanceChange, market->getMarketCurrency());
     }
@@ -269,15 +269,15 @@ QVariant TransactionModel2::headerData(int section, Qt::Orientation orientation,
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount %1").arg(eMarket->getCommCurrency());
+        return tr("Amount %1").arg(eBotMarket ? eBotMarket->getCommCurrency() : QString());
       case Column::price:
-        return tr("Price %1").arg(eMarket->getBaseCurrency());
+        return tr("Price %1").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString());
       case Column::value:
-        return tr("Value %1").arg(eMarket->getBaseCurrency());
+        return tr("Value %1").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString());
       case Column::fee:
-        return tr("Fee %1").arg(eMarket->getBaseCurrency());
+        return tr("Fee %1").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString());
       case Column::total:
-        return tr("Total %1").arg(eMarket->getBaseCurrency());
+        return tr("Total %1").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString());
     }
   }
   return QVariant();
@@ -285,13 +285,15 @@ QVariant TransactionModel2::headerData(int section, Qt::Orientation orientation,
 
 void TransactionModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  switch((EType)newEntity.getType())
-  {
-  case EType::market:
-    eMarket = dynamic_cast<EMarket*>(&newEntity);
-    emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
-    break;
-  default:
-    break;
-  }
+  //switch((EType)newEntity.getType())
+  //{
+  //case EType::botMarket:
+  //  eBotMarket = dynamic_cast<EBotMarket*>(&newEntity);
+  //  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
+  //  break;
+  //default:
+  //  break;
+  //}
+
+  Q_ASSERT(false);
 }

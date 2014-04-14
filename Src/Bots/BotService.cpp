@@ -266,6 +266,10 @@ void BotService::WorkerThread::receivedUpdateEntity(const BotProtocol::Header& h
     if(size >= sizeof(BotProtocol::Session))
       entity = new EBotSession(header.entityId, *(BotProtocol::Session*)data);
     break;
+  case BotProtocol::market:
+    if(size >= sizeof(BotProtocol::Market))
+      entity = new EBotMarket(header.entityId, *(BotProtocol::Market*)data);
+    break;
   case BotProtocol::error:
     if(size >= sizeof(BotProtocol::Error))
     {

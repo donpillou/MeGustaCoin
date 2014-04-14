@@ -23,6 +23,7 @@ public:
     error,
     session,
     engine,
+    market,
   };
 
 #pragma pack(push, 1)
@@ -72,6 +73,13 @@ public:
   struct Engine
   {
     char name[33];
+  };
+
+  struct Market
+  {
+    char name[33];
+    char currencyBase[33];
+    char currencyComm[33];
   };
 
   struct RegisterBotRequest

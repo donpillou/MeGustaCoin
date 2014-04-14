@@ -17,7 +17,7 @@
 #include "Entities/EBotEngine.h"
 #include "Entities/EBotSession.h"
 #include "Entities/EBotService.h"
-#include "Entities/EMarket.h"
+#include "Entities/EBotMarket.h"
 #include "Entities/EOrder.h"
 
 #include "Markets/DataConnection.h"

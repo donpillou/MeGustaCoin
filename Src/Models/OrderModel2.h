@@ -80,7 +80,7 @@ public:
 
 private:
   Entity::Manager& entityManager;
-  EMarket* eMarket;
+  EBotMarket* eBotMarket;
   QList<EOrder*> orders;
   QVariant draftStr;
   QVariant submittingStr;

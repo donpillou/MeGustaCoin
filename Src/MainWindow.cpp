@@ -5,7 +5,6 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   marketService(dataModel), dataService(dataModel), botService(dataModel, botEntityManager)
 {
   botEntityManager.delegateEntity(*new EBotService);
-  botEntityManager.delegateEntity(*new EMarket);
 
   connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
   connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
