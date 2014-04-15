@@ -103,16 +103,11 @@ void BotsWidget::saveState(QSettings& settings)
 
 void BotsWidget::addBot()
 {
-  QList<EBotEngine*> engines;
-  QList<EBotMarket*> markets;
-  entityManager.getAllEntities<EBotEngine>(engines);
-  entityManager.getAllEntities<EBotMarket>(markets);
-
-  BotDialog botDialog(this, engines, markets);
+  BotDialog botDialog(this, entityManager);
   if(botDialog.exec() != QDialog::Accepted)
     return;
   
-  botService.createSession(botDialog.getName(), botDialog.getEngine(), botDialog.getBalanceBase(), botDialog.getBalanceComm());
+  botService.createSession(botDialog.getName(), botDialog.getEngineId(), botDialog.getMarketId(), botDialog.getBalanceBase(), botDialog.getBalanceComm());
 }
 
 void BotsWidget::cancelBot()

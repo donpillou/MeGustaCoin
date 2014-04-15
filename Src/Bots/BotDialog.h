@@ -6,10 +6,11 @@ class BotDialog : public QDialog
   Q_OBJECT
 
 public:
-  BotDialog(QWidget* parent, const QList<EBotEngine*>& engines, const QList<EBotMarket*>& markets);
+  BotDialog(QWidget* parent, Entity::Manager& entityManager);
 
   QString getName() const {return nameEdit->text();}
-  QString getEngine() const {return engineComboBox->currentText();}
+  quint32 getEngineId() const;
+  quint32 getMarketId() const;
   double getBalanceBase() const {return balanceBaseSpinBox->value();}
   double getBalanceComm() const {return balanceCommSpinBox->value();}
 

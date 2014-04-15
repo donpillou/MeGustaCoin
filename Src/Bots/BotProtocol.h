@@ -66,7 +66,8 @@ public:
     };
 
     char name[33];
-    char engine[33];
+    quint32 engineId;
+    quint32 marketId;
     quint8 state;
   };
 
@@ -97,7 +98,8 @@ public:
   struct CreateSessionArgs
   {
     char name[33];
-    char engine[33];
+    quint32 engineId;
+    quint32 marketId;
     double balanceBase;
     double balanceComm;
   };

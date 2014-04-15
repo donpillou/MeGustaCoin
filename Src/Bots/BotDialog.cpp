@@ -1,19 +1,24 @@
 
 #include "stdafx.h"
 
-BotDialog::BotDialog(QWidget* parent, const QList<EBotEngine*>& engines, const QList<EBotMarket*>& markets) : QDialog(parent)
+BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(parent)
 {
   setWindowTitle(tr("Add Bot"));
 
   nameEdit = new QLineEdit(this);
   connect(nameEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged()));
 
+  QList<EBotEngine*> engines;
+  QList<EBotMarket*> markets;
+  entityManager.getAllEntities<EBotEngine>(engines);
+  entityManager.getAllEntities<EBotMarket>(markets);
+
   engineComboBox = new QComboBox(this);
   foreach(const EBotEngine* engine, engines)
-    engineComboBox->addItem(engine->getName());
+    engineComboBox->addItem(engine->getName(), engine->getId());
   marketComboBox = new QComboBox(this);
   foreach(const EBotMarket* market, markets)
-    marketComboBox->addItem(market->getName(), QVariant((quint64)market));
+    marketComboBox->addItem(market->getName(), market->getId());
 
   balanceBaseSpinBox = new QDoubleSpinBox(this);
   balanceBaseSpinBox->setValue(100.);
@@ -32,7 +37,7 @@ BotDialog::BotDialog(QWidget* parent, const QList<EBotEngine*>& engines, const Q
   contentLayout->addWidget(new QLabel(tr("Market:")), 2, 0);
   contentLayout->addWidget(marketComboBox, 2, 1);
   int botMarketIndex = marketComboBox->currentIndex();
-  const EBotMarket* eBotMarket = botMarketIndex >= 0 ? (const EBotMarket*)marketComboBox->itemData(botMarketIndex).toULongLong() : 0;
+  const EBotMarket* eBotMarket = botMarketIndex >= 0 ? entityManager.getEntity<EBotMarket>(marketComboBox->itemData(botMarketIndex).toUInt()) : 0;
   contentLayout->addWidget(new QLabel(tr("Balance %1:").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString())), 3, 0);
   contentLayout->addWidget(balanceBaseSpinBox, 3, 1);
   contentLayout->addWidget(new QLabel(tr("Balance %1:").arg(eBotMarket ? eBotMarket->getCommCurrency() : QString())), 4, 0);
@@ -49,6 +54,22 @@ BotDialog::BotDialog(QWidget* parent, const QList<EBotEngine*>& engines, const Q
   layout->addWidget(buttonBox);
 
   setLayout(layout);
+}
+
+quint32 BotDialog::getEngineId() const
+{
+  int index = engineComboBox->currentIndex();
+  if(index >= 0)
+    return engineComboBox->itemData(index).toUInt();
+  return 0;
+}
+
+quint32 BotDialog::getMarketId() const
+{
+  int index = marketComboBox->currentIndex();
+  if(index >= 0)
+    return marketComboBox->itemData(index).toUInt();
+  return 0;
 }
 
 void BotDialog::showEvent(QShowEvent* event)

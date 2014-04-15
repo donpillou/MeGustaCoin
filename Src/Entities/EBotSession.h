@@ -18,19 +18,21 @@ public:
   EBotSession(quint32 id, BotProtocol::Session& data) : Entity(eType, id)
   {
     data.name[sizeof(data.name) - 1] = '\0';
-    data.engine[sizeof(data.engine) - 1] = '\0';
     name = data.name;
-    engine = data.engine;
+    engineId = data.engineId;
+    marketId = data.marketId;
     state = (State)data.state;
   }
 
   const QString& getName() const {return name;}
-  const QString& getEngine() const {return engine;}
+  quint32 getEngineId() const {return engineId;}
+  quint32 getMarketId() const {return marketId;}
   State getState() const {return state;}
 
 private:
   QString name;
-  QString engine;
+  quint32 engineId;
+  quint32 marketId;
   State state;
 };
 

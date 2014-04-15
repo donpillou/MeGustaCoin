@@ -12,7 +12,7 @@ public:
   void start(const QString& server, const QString& userName, const QString& password);
   void stop();
 
-  void createSession(const QString& name, const QString& engine, double balanceBase, double balanceComm);
+  void createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm);
   void removeSession(quint32 id);
   void startSessionSimulation(quint32 id);
   void stopSession(quint32 id);

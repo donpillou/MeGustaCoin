@@ -48,7 +48,10 @@ QVariant BotSessionModel::data(const QModelIndex& index, int role) const
     case Column::name:
       return eSession->getName();
     case Column::engine:
-      return eSession->getEngine();
+    {
+      EBotEngine* eEngine = entityManager.getEntity<EBotEngine>(eSession->getEngineId());
+      return eEngine ? eEngine->getName() : QVariant();
+    }
     case Column::state:
       switch(eSession->getState())
       {

@@ -103,11 +103,12 @@ void BotService::controlEntity(BotProtocol::EntityType type, quint32 id, const v
 }
 
 
-void BotService::createSession(const QString& name, const QString& engine, double balanceBase, double balanceComm)
+void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)
 {
   BotProtocol::CreateSessionArgs createSession;
   setString(createSession.name, name);
-  setString(createSession.engine, engine);
+  createSession.engineId = engineId;
+  createSession.marketId = marketId;
   createSession.balanceBase = balanceBase;
   createSession.balanceComm = balanceComm;
   createEntity(BotProtocol::session, &createSession, sizeof(createSession));
