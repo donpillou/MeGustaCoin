@@ -9,6 +9,7 @@ public:
       first,
       name = first,
       engine,
+      market,
       state,
       last = state,
   };
