@@ -16,6 +16,7 @@ public:
   void removeSession(quint32 id);
   void startSessionSimulation(quint32 id);
   void stopSession(quint32 id);
+  void selectSession(quint32 id);
 
   bool isConnected() const {return connected;}
 

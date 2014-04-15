@@ -133,6 +133,13 @@ void BotService::stopSession(quint32 id)
   controlEntity(BotProtocol::session, id, &controlSession, sizeof(controlSession));
 }
 
+void BotService::selectSession(quint32 id)
+{
+  BotProtocol::ControlSessionArgs controlSession;
+  controlSession.cmd = BotProtocol::ControlSessionArgs::select;
+  controlEntity(BotProtocol::session, id, &controlSession, sizeof(controlSession));
+}
+
 void BotService::handleEvents()
 {
   for(;;)

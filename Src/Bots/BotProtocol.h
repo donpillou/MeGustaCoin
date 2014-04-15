@@ -110,6 +110,7 @@ public:
     {
       startSimulation,
       stop,
+      select,
     };
 
     quint8 cmd;
