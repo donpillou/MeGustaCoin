@@ -7,56 +7,6 @@ public:
   OrderModel2(Entity::Manager& entityManager);
   ~OrderModel2();
 
-  //enum class State
-  //{
-  //  empty,
-  //  loading,
-  //  loaded,
-  //  error,
-  //};
-
-  //class Order
-  //{
-  //public:
-  //  QString id;
-  //  enum class Type
-  //  {
-  //    unknown,
-  //    buy,
-  //    sell,
-  //  } type;
-  //  QDateTime date;
-  //  double amount;
-  //  double price;
-  //  double total;
-  //  double newAmount;
-  //  double newPrice;
-  //  enum class State
-  //  {
-  //    draft,
-  //    submitting,
-  //    open,
-  //    canceling,
-  //    canceled,
-  //    closed,
-  //  } state;
-  //
-  //  Order() : type(Type::unknown), amount(0.), price(0.), newAmount(0.), newPrice(0.), state(State::open) {}
-  //
-  //  Order& operator=(const Market::Order& order)
-  //  {
-  //    id = order.id;
-  //    date = QDateTime::fromTime_t(order.date).toLocalTime();
-  //    amount = fabs(order.amount);
-  //    price = order.price;
-  //    total = order.total;
-  //    newAmount = newPrice = 0.;
-  //    state = Order::State::open;
-  //    type = order.amount > 0. ? Type::buy : Type::sell;
-  //    return *this;
-  //  }
-  //};
-
   enum class Column
   {
       first,
@@ -69,14 +19,6 @@ public:
       total,
       last = total,
   };
-
-  //void setState(State state);
-  //QString getStateName() const;
-
-//signals:
-//  void editedOrder(const QModelIndex& index);
-//  void changedState();
-//  void editedDraft(const QModelIndex& index);
 
 private:
   Entity::Manager& entityManager;

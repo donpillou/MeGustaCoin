@@ -24,6 +24,8 @@ public:
     session,
     engine,
     market,
+    transaction,
+    order,
   };
 
 #pragma pack(push, 1)
@@ -81,6 +83,36 @@ public:
     char name[33];
     char currencyBase[33];
     char currencyComm[33];
+  };
+
+  struct Transaction
+  {
+    enum Type
+    {
+      buy,
+      sell
+    };
+
+    qint64 date;
+    double price;
+    double amount;
+    double fee;
+    quint8 type;
+  };
+
+  struct Order
+  {
+    enum Type
+    {
+      buy,
+      sell,
+    };
+
+    Type type;
+    qint64 date;
+    double amount;
+    double price;
+    double total;
   };
 
   struct RegisterBotRequest

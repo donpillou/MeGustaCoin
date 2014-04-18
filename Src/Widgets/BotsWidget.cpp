@@ -41,6 +41,7 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, Entity::Manager& en
   sessionView->setRootIsDecorated(false);
   sessionView->setAlternatingRowColors(true);
   connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(updateToolBarButtons()));
+  connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(sessionSelectionChanged()));
 
   orderView = new QTreeView(this);
   orderView->setUniformRowHeights(true);
@@ -56,7 +57,7 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, Entity::Manager& en
 
   transactionView = new QTreeView(this);
   transactionView->setUniformRowHeights(true);
-  TransactionSortProxyModel2* transactionProxyModel = new TransactionSortProxyModel2(this, transactionModel);
+  TransactionSortProxyModel2* transactionProxyModel = new TransactionSortProxyModel2(this);
   transactionProxyModel->setDynamicSortFilter(true);
   transactionProxyModel->setSourceModel(&transactionModel);
   transactionView->setModel(transactionProxyModel);
@@ -178,6 +179,17 @@ void BotsWidget::updateToolBarButtons()
   simulateAction->setEnabled(connected && sessionSelected && sessionInactive);
   //activateAction->setEnabled(connected && sessionSelected);
   cancelAction->setEnabled(connected && sessionSelected);
+}
+
+void BotsWidget::sessionSelectionChanged()
+{
+  QModelIndexList selection = sessionView->selectionModel()->selectedRows();
+  if(!selection.isEmpty())
+  {
+    QModelIndex modelIndex = sessionProxyModel->mapToSource(selection.front());
+    EBotSession* eSession = (EBotSession*)modelIndex.internalPointer();
+    botService.selectSession(eSession->getId());
+  }
 }
 
 void BotsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)

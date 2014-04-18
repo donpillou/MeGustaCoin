@@ -135,6 +135,8 @@ void BotService::stopSession(quint32 id)
 
 void BotService::selectSession(quint32 id)
 {
+  entityManager.removeAll<EOrder>();
+  entityManager.removeAll<ETransaction>();
   BotProtocol::ControlSessionArgs controlSession;
   controlSession.cmd = BotProtocol::ControlSessionArgs::select;
   controlEntity(BotProtocol::session, id, &controlSession, sizeof(controlSession));
@@ -277,6 +279,14 @@ void BotService::WorkerThread::receivedUpdateEntity(const BotProtocol::Header& h
   case BotProtocol::market:
     if(size >= sizeof(BotProtocol::Market))
       entity = new EBotMarket(header.entityId, *(BotProtocol::Market*)data);
+    break;
+  case BotProtocol::transaction:
+    if(size >= sizeof(BotProtocol::Transaction))
+      entity = new ETransaction(header.entityId, *(BotProtocol::Transaction*)data);
+    break;
+  case BotProtocol::order:
+    if(size >= sizeof(BotProtocol::Order))
+      entity = new EOrder(header.entityId, *(BotProtocol::Order*)data);
     break;
   case BotProtocol::error:
     if(size >= sizeof(BotProtocol::Error))

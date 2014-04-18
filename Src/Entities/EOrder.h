@@ -9,9 +9,8 @@ public:
 public:
   enum class Type
   {
-    unknown,
-    buy,
-    sell,
+    buy = BotProtocol::Order::buy,
+    sell = BotProtocol::Order::sell,
   };
 
   enum class State
@@ -25,7 +24,16 @@ public:
   };
 
 public:
-  EOrder(quint32 id) : Entity(eType, id), type(Type::unknown), amount(0.), price(0.), total(0.), state(State::open) {}
+  //EOrder(quint32 id) : Entity(eType, id), type(Type::unknown), amount(0.), price(0.), total(0.), state(State::open) {}
+  EOrder(quint32 id, BotProtocol::Order& data) : Entity(eType, id)
+  {
+    type = (Type)data.type;
+    date = QDateTime::fromMSecsSinceEpoch(data.date);
+    amount = data.amount;
+    price = data.price;
+    total = data.total;
+    state = State::open;
+  }
 
   Type getType() const {return type;}
   const QDateTime& getDate() const {return date;}

@@ -7,148 +7,19 @@ TransactionModel2::TransactionModel2(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  //entityManager.registerListener<EBotMarket>(*this);
+  entityManager.registerListener<ETransaction>(*this);
 
   eBotMarket = 0;
 }
 
 TransactionModel2::~TransactionModel2()
 {
-  //entityManager.unregisterListener<EBotMarket>(*this);
-  //entityManager.unregisterListener<EMarket>(*this);
-}
-
-//void TransactionModel2::setState(State state)
-//{
-//  this->state = state;
-//  emit changedState();
-//}
-//
-//QString TransactionModel2::getStateName() const
-//{
-//  switch(state)
-//  {
-//  case State::empty:
-//    return QString();
-//  case State::loading:
-//    return tr("loading...");
-//  case State::loaded:
-//    return QString();
-//  case State::error:
-//    return tr("error");
-//  }
-//  Q_ASSERT(false);
-//  return QString();
-//}
-
-void TransactionModel2::reset()
-{
-  emit beginResetModel();
-  qDeleteAll(transactions);
-  transactions.clear();
-  emit endResetModel();
-  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
-}
-
-void TransactionModel2::setData(const QList<Market::Transaction>& updatedTransactions)
-{
-  QHash<QString, const Market::Transaction*> newTransactions;
-  foreach(const Market::Transaction& transaction, updatedTransactions)
-    newTransactions.insert(transaction.id, &transaction);
-
-  for(int i = 0, count = transactions.size(); i < count; ++i)
-  {
-    Transaction* transaction = transactions[i];
-    QHash<QString, const Market::Transaction*>::iterator newIt = newTransactions.find(transaction->id);
-    if(newIt == newTransactions.end())
-    {
-      beginRemoveRows(QModelIndex(), i, i);
-      delete transaction;
-      transactions.removeAt(i);
-      endRemoveRows();
-      --i;
-      count = transactions.size();
-      continue;
-    }
-    else
-    {
-      const Market::Transaction& updatedTransaction = *newIt.value();
-      *transaction = updatedTransaction;
-      emit dataChanged(createIndex(i, (int)Column::first, 0), createIndex(i, (int)Column::last, 0));
-      newTransactions.erase(newIt);
-      continue;
-    }
-  }
-
-  if (newTransactions.size() > 0)
-  {
-    int oldTransactionCount = transactions.size();
-    beginInsertRows(QModelIndex(), oldTransactionCount, oldTransactionCount + newTransactions.size() - 1);
-
-    foreach(const Market::Transaction& newTransaction, updatedTransactions)
-    {
-      if(newTransactions.contains(newTransaction.id))
-      {
-        Transaction* transaction = new Transaction;
-        *transaction = newTransaction;
-        transactions.append(transaction);
-      }
-    }
-
-    endInsertRows();
-  }
-}
-
-void TransactionModel2::addTransaction(const Market::Transaction& newTransaction)
-{
-  int i = 0;
-  foreach(Transaction* transaction, transactions)
-  {
-    if(transaction->id == newTransaction.id)
-    {
-      *transaction = newTransaction;
-      emit dataChanged(createIndex(i, (int)Column::first, 0), createIndex(i, (int)Column::last, 0));
-      return;
-    }
-    ++i;
-  }
-
-  int oldTransactionCount = transactions.size();
-  beginInsertRows(QModelIndex(), oldTransactionCount, oldTransactionCount);
-  Transaction* transaction = new Transaction;
-  *transaction = newTransaction;
-  transactions.append(transaction);
-  endInsertRows();
-}
-
-void TransactionModel2::removeTransaction(const QString& id)
-{
-  int i = 0;
-  foreach(Transaction* transaction, transactions)
-  {
-    if(transaction->id == id)
-    {
-      beginRemoveRows(QModelIndex(), i, i);
-      delete transaction;
-      transactions.removeAt(i);
-      endRemoveRows();
-      return;
-    }
-    ++i;
-  }
-}
-
-const TransactionModel2::Transaction* TransactionModel2::getTransaction(const QModelIndex& index) const
-{
-  int row = index.row();
-  if(row < 0 || row >= transactions.size())
-    return 0;
-  return transactions[row];
+  entityManager.unregisterListener<ETransaction>(*this);
 }
 
 QModelIndex TransactionModel2::index(int row, int column, const QModelIndex& parent) const
 {
-  return createIndex(row, column, 0);
+  return createIndex(row, column, transactions.at(row));
 }
 
 QModelIndex TransactionModel2::parent(const QModelIndex& child) const
@@ -168,7 +39,8 @@ int TransactionModel2::columnCount(const QModelIndex& parent) const
 
 QVariant TransactionModel2::data(const QModelIndex& index, int role) const
 {
-  if(!index.isValid())
+  const ETransaction* eTransaction = (const ETransaction*)index.internalPointer();
+  if(!eTransaction)
     return QVariant();
 
   if(role == Qt::TextAlignmentRole)
@@ -184,20 +56,15 @@ QVariant TransactionModel2::data(const QModelIndex& index, int role) const
       return (int)Qt::AlignLeft | (int)Qt::AlignVCenter;
     }
 
-  int row = index.row();
-  if(row < 0 || row >= transactions.size())
-    return QVariant();
-  const Transaction& transaction = *transactions[row];
-
   switch(role)
   {
   case Qt::DecorationRole:
     if((Column)index.column() == Column::type)
-      switch(transaction.type)
+      switch(eTransaction->getType())
       {
-      case Transaction::Type::sell:
+      case ETransaction::Type::sell:
         return sellIcon;
-      case Transaction::Type::buy:
+      case ETransaction::Type::buy:
         return buyIcon;
       default:
         break;
@@ -207,37 +74,27 @@ QVariant TransactionModel2::data(const QModelIndex& index, int role) const
     switch((Column)index.column())
     {
     case Column::type:
-      switch(transaction.type)
+      switch(eTransaction->getType())
       {
-      case Transaction::Type::buy:
+      case ETransaction::Type::buy:
         return buyStr;
-      case Transaction::Type::sell:
+      case ETransaction::Type::sell:
         return sellStr;
       default:
         break;
       }
     case Column::date:
-      return transaction.date.toString(dateFormat);
+      return eTransaction->getDate().toString(dateFormat);
     case Column::amount:
-      return eBotMarket->formatAmount(transaction.amount);
-      //return QString("%1 %2").arg(QLocale::system().toString(transaction.amount, 'f', 8), market->getCoinCurrency());
-      //return QString().sprintf("%.08f %s", transaction.amount, market->getCoinCurrency());
+      return eBotMarket->formatAmount(eTransaction->getAmount());
     case Column::price:
-      return eBotMarket->formatPrice(transaction.price);
-      //return QString("%1 %2").arg(QLocale::system().toString(transaction.price, 'f', 2), market->getMarketCurrency());
-      //return QString().sprintf("%.02f %s", transaction.price, market->getMarketCurrency());
+      return eBotMarket->formatPrice(eTransaction->getPrice());
     case Column::value:
-      return eBotMarket->formatPrice(transaction.amount * transaction.price);
-      //return QString("%1 %2").arg(QLocale::system().toString(transaction.amount * transaction.price, 'f', 2), market->getMarketCurrency());
-      //return QString().sprintf("%.02f %s", transaction.amount * transaction.price, market->getMarketCurrency());
+      return eBotMarket->formatPrice(eTransaction->getAmount() * eTransaction->getPrice());
     case Column::fee:
-      return eBotMarket->formatPrice(transaction.fee);
-      //return QString("%1 %2").arg(QLocale::system().toString(transaction.fee, 'f', 2), market->getMarketCurrency());
-      //return QString().sprintf("%.02f %s", transaction.fee, market->getMarketCurrency());
+      return eBotMarket->formatPrice(eTransaction->getFee());
     case Column::total:
-      return transaction.total > 0 ? (QString("+") + eBotMarket->formatPrice(transaction.total)) : eBotMarket->formatPrice(transaction.total);
-      //return QString(transaction.balanceChange > 0 ? "+%1 %2" : "%1 %2").arg(QLocale::system().toString(transaction.balanceChange, 'f', 2), market->getMarketCurrency());
-      //return QString().sprintf("%+.02f %s", transaction.balanceChange, market->getMarketCurrency());
+      return eTransaction->getTotal() > 0 ? (QString("+") + eBotMarket->formatPrice(eTransaction->getTotal())) : eBotMarket->formatPrice(eTransaction->getTotal());
     }
   }
   return QVariant();
@@ -283,17 +140,58 @@ QVariant TransactionModel2::headerData(int section, Qt::Orientation orientation,
   return QVariant();
 }
 
+void TransactionModel2::addedEntity(Entity& entity)
+{
+  ETransaction* eTransaction = dynamic_cast<ETransaction*>(&entity);
+  if(eTransaction)
+  {
+    int index = transactions.size();
+    beginInsertRows(QModelIndex(), index, index);
+    transactions.append(eTransaction);
+    endInsertRows();
+    return;
+  }
+  Q_ASSERT(false);
+}
+
 void TransactionModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  //switch((EType)newEntity.getType())
-  //{
-  //case EType::botMarket:
-  //  eBotMarket = dynamic_cast<EBotMarket*>(&newEntity);
-  //  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
-  //  break;
-  //default:
-  //  break;
-  //}
+  ETransaction* oldETransaction = dynamic_cast<ETransaction*>(&oldEntity);
+  if(oldETransaction)
+  {
+    ETransaction* newETransaction = dynamic_cast<ETransaction*>(&newEntity);
+    int index = transactions.indexOf(oldETransaction);
+    transactions[index] = newETransaction; 
+    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newETransaction);
+    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newETransaction);
+    emit dataChanged(leftModelIndex, rightModelIndex);
+    return;
+  }
+  Q_ASSERT(false);
+}
 
+void TransactionModel2::removedEntity(Entity& entity)
+{
+  ETransaction* eTransaction = dynamic_cast<ETransaction*>(&entity);
+  if(eTransaction)
+  {
+    int index = transactions.indexOf(eTransaction);
+    beginRemoveRows(QModelIndex(), index, index);
+    transactions.removeAt(index);
+    endRemoveRows();
+    return;
+  }
+  Q_ASSERT(false);
+}
+
+void TransactionModel2::removedAll(quint32 type)
+{
+  if((EType)type == EType::transaction)
+  {
+    emit beginResetModel();
+    transactions.clear();
+    emit endResetModel();
+    return;
+  }
   Q_ASSERT(false);
 }

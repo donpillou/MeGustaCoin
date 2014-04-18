@@ -18,6 +18,7 @@ private slots:
   void activate();
   void cancelBot();
   void updateToolBarButtons();
+  void sessionSelectionChanged();
 
 private:
   Entity::Manager& entityManager;

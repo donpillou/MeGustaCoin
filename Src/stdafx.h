@@ -14,11 +14,12 @@
 #include "Bots/BotProtocol.h"
 
 #include "Entities/EType.h"
+#include "Entities/EOrder.h"
+#include "Entities/ETransaction.h"
 #include "Entities/EBotEngine.h"
 #include "Entities/EBotSession.h"
 #include "Entities/EBotService.h"
 #include "Entities/EBotMarket.h"
-#include "Entities/EOrder.h"
 
 #include "Markets/DataConnection.h"
 #include "Markets/Market.h"

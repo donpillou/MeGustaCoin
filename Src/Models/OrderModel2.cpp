@@ -7,7 +7,6 @@ OrderModel2::OrderModel2(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  //entityManager.registerListener<EBotMarket>(*this);
   entityManager.registerListener<EOrder>(*this);
 
   eBotMarket = 0;
@@ -15,221 +14,8 @@ OrderModel2::OrderModel2(Entity::Manager& entityManager) :
 
 OrderModel2::~OrderModel2()
 {
-  //entityManager.unregisterListener<EBotMarket>(*this);
   entityManager.unregisterListener<EOrder>(*this);
 }
-
-//void OrderModel2::setState(State state)
-//{
-//  this->state = state;
-//  emit changedState();
-//}
-//
-//QString OrderModel2::getStateName() const
-//{
-//  switch(state)
-//  {
-//  case State::empty:
-//    return QString();
-//  case State::loading:
-//    return tr("loading...");
-//  case State::loaded:
-//    return QString();
-//  case State::error:
-//    return tr("error");
-//  }
-//  Q_ASSERT(false);
-//  return QString();
-//}
-//
-//void OrderModel2::updateHeader()
-//{
-//  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
-//}
-
-//void OrderModel2::setData(const QList<Market::Order>& updatedOrders)
-//{
-//  QHash<QString, const Market::Order*> openOrders;
-//  foreach(const Market::Order& order, updatedOrders)
-//    openOrders.insert(order.id, &order);
-//
-//  for(int i = 0, count = orders.size(); i < count; ++i)
-//  {
-//    Order* order = orders[i];
-//    QHash<QString, const Market::Order*>::iterator openIt = openOrders.find(order->id);
-//    if(order->state == Order::State::open && openIt == openOrders.end())
-//    {
-//      order->state = Order::State::closed;
-//      QModelIndex index = createIndex(i, (int)Column::state, 0);
-//      emit dataChanged(index, index);
-//      openOrders.erase(openIt);
-//      continue;
-//    }
-//    if(openIt != openOrders.end())
-//    {
-//      const Market::Order& updatedOrder = *openIt.value();
-//      *order = updatedOrder;
-//      emit dataChanged(createIndex(i, (int)Column::first, 0), createIndex(i, (int)Column::last, 0));
-//      openOrders.erase(openIt);
-//      continue;
-//    }
-//  }
-//
-//  if (openOrders.size() > 0)
-//  {
-//    int oldOrderCount = orders.size();
-//    beginInsertRows(QModelIndex(), oldOrderCount, oldOrderCount + openOrders.size() - 1);
-//
-//    foreach(const Market::Order& newOrder, updatedOrders)
-//    {
-//      if(openOrders.contains(newOrder.id))
-//      {
-//        Order* order = new Order;
-//        *order = newOrder;
-//        orders.append(order);
-//      }
-//    }
-//
-//    endInsertRows();
-//  }
-//}
-
-//void OrderModel2::addOrder(const Market::Order& order)
-//{
-//  updateOrder(order.id, order);
-//}
-
-//void OrderModel2::removeOrder(const QString& id)
-//{
-//  for(int i = 0, count = orders.size(); i < count; ++i)
-//  {
-//    Order* order = orders[i];
-//    if(order->id == id)
-//    {
-//      beginRemoveRows(QModelIndex(), i, i);
-//      delete order;
-//      orders.removeAt(i);
-//      endRemoveRows();
-//      return;
-//    }
-//  }
-//}
-
-//void OrderModel2::updateOrder(const QString& id, const Market::Order& newOrder)
-//{
-//  for(int i = 0, count = orders.size(); i < count; ++i)
-//  {
-//    Order* order = orders[i];
-//    if(order->id == id)
-//    {
-//      *order = newOrder;
-//      if(newOrder.id.startsWith("draft_"))
-//      {
-//        order->state = Order::State::draft;
-//        order->date = QDateTime();
-//      }
-//      emit dataChanged(createIndex(i, (int)Column::first, 0), createIndex(i, (int)Column::last, 0));
-//      return;
-//    }
-//  }
-//
-//  int oldOrderCount = orders.size();
-//  beginInsertRows(QModelIndex(), oldOrderCount, oldOrderCount);
-//  Order* order = new Order;
-//  *order = newOrder;
-//  if(newOrder.id.startsWith("draft_"))
-//  {
-//    order->state = Order::State::draft;
-//    order->date = QDateTime();
-//  }
-//  orders.append(order);
-//  endInsertRows();
-//}
-
-//void OrderModel2::setOrderState(const QString& id, Order::State state)
-//{
-//  for(int i = 0, count = orders.size(); i < count; ++i)
-//  {
-//    Order* order = orders[i];
-//    if(order->id == id)
-//    {
-//      order->state = state;
-//      QModelIndex index = createIndex(i, (int)Column::state, 0);
-//      emit dataChanged(index, index);
-//      return;
-//    }
-//  }
-//}
-
-//void OrderModel2::setOrderNewAmount(const QString& id, double newAmount)
-//{
-//  for(int i = 0, count = orders.size(); i < count; ++i)
-//  {
-//    Order* order = orders[i];
-//    if(order->id == id)
-//    {
-//      order->newAmount = newAmount;
-//      QModelIndex index = createIndex(i, (int)Column::amount, 0);
-//      emit dataChanged(index, index);
-//      return;
-//    }
-//  }
-//}
-
-//QString OrderModel2::addOrderDraft(Order::Type type, double price)
-//{
-//  int orderCount = orders.size();
-//  beginInsertRows(QModelIndex(), orderCount, orderCount);
-//  Order* newOrder = new Order;
-//  newOrder->id = QString("draft_") + QString::number(nextDraftId++);
-//  newOrder->type = type;
-//  newOrder->state = Order::State::draft;
-//  newOrder->price = price;
-//  orders.append(newOrder);
-//  endInsertRows();
-//  return newOrder->id;
-//}
-
-//QModelIndex OrderModel2::getOrderIndex(const QString& id) const
-//{
-//  for(int i = 0, count = orders.size(); i < count; ++i)
-//  {
-//    Order* order = orders[i];
-//    if(order->id == id)
-//      return createIndex(i, (int)Column::first, 0);
-//  }
-//  return QModelIndex();
-//}
-
-//const OrderModel2::Order* OrderModel2::getOrder(const QString& id) const
-//{
-//  for(int i = 0, count = orders.size(); i < count; ++i)
-//  {
-//    Order* order = orders[i];
-//    if(order->id == id)
-//      return order;
-//  }
-//  return 0;
-//}
-
-//const OrderModel2::Order* OrderModel2::getOrder(const QModelIndex& index) const
-//{
-//  int row = index.row();
-//  if(row < 0 || row >= orders.size())
-//    return 0;
-//  return orders[row];
-//}
-
-//void OrderModel2::removeOrder(const QModelIndex& index)
-//{
-//  int row = index.row();
-//  if(row < 0 || row >= orders.size())
-//    return;
-//  beginRemoveRows(QModelIndex(), row, row);
-//  delete orders[row];
-//  orders.removeAt(row);
-//  endRemoveRows();
-//}
 
 QModelIndex OrderModel2::index(int row, int column, const QModelIndex& parent) const
 {
@@ -250,26 +36,6 @@ int OrderModel2::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
-
-//Qt::ItemFlags OrderModel2::flags(const QModelIndex &index) const
-//{
-//  if (!index.isValid())
-//      return 0;
-//  int row = index.row();
-//  if(row >= 0 && row < orders.size())
-//  {
-//    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-//    const Order& order = *orders[row];
-//    if(order.state == Order::State::open || order.state == Order::State::draft)
-//    {
-//      Column column = (Column)index.column();
-//      if(column == Column::amount || column == Column::price)
-//        flags |= Qt::ItemIsEditable;
-//    }
-//    return flags;
-//  }
-//  return 0;
-//}
 
 QVariant OrderModel2::data(const QModelIndex& index, int role) const
 {
@@ -388,62 +154,6 @@ QVariant OrderModel2::headerData(int section, Qt::Orientation orientation, int r
   return QVariant();
 }
 
-//bool OrderModel2::setData(const QModelIndex & index, const QVariant & value, int role)
-//{
-//  if (role != Qt::EditRole)
-//    return false;
-//
-//  int row = index.row();
-//  if(row < 0 || row >= orders.size())
-//    return false;
-//
-//  Order& order = *orders[row];
-//  if(order.state != OrderModel2::Order::State::draft && order.state != OrderModel2::Order::State::open)
-//    return false;
-//
-//  switch((Column)index.column())
-//  {
-//  case Column::price:
-//    {
-//      double newPrice = value.toDouble();
-//      if(newPrice <= 0.)
-//        return false;
-//      if(order.state == OrderModel2::Order::State::draft)
-//      {
-//        order.price = newPrice;
-//        emit editedDraft(index);
-//      }
-//      else if(newPrice != order.price)
-//      {
-//        order.newPrice = newPrice;
-//        emit editedOrder(index);
-//      }
-//      return true;
-//    }
-//  case Column::amount:
-//    {
-//      double newAmount = value.toDouble();
-//      if(newAmount <= 0.)
-//        return false;
-//      if(order.state == OrderModel2::Order::State::draft)
-//      {
-//        order.amount = newAmount;
-//        emit editedDraft(index);
-//      }
-//      else if(newAmount != order.amount)
-//      {
-//        order.newAmount = value.toDouble();
-//        emit editedOrder(index);
-//      }
-//      return true;
-//    }
-//  default:
-//    break;
-//  }
-//
-//  return false;
-//}
-
 void OrderModel2::addedEntity(Entity& entity)
 {
   EOrder* eOrder = dynamic_cast<EOrder*>(&entity);
@@ -471,16 +181,6 @@ void OrderModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
     emit dataChanged(leftModelIndex, rightModelIndex);
     return;
   }
-
-  //EMarket* oldEMarket = dynamic_cast<EMarket*>(&oldEntity);
-  //if(oldEMarket)
-  //{
-  //  Q_ASSERT(newEntity.getId() == 0);
-  //  EMarket* newEMarket = dynamic_cast<EMarket*>(&newEntity);
-  //  this->eMarket = newEMarket;
-  //  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
-  //  return;
-  //}
   Q_ASSERT(false);
 }
 

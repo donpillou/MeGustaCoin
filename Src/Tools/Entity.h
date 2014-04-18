@@ -61,9 +61,14 @@ public:
       }
     }
 
-    template <typename E> void removeEntity(E type, quint32 id)
+    template <typename E> void removeEntity(E eType, quint32 id)
     {
-      removeEntity((quint32)type, id);
+      removeEntity((quint32)eType, id);
+    }
+
+    template <typename C> void removeEntity(quint32 id)
+    {
+      removeEntity((quint32)C::eType, id);
     }
   
     void removeAll(quint32 type)
@@ -76,6 +81,11 @@ public:
         qDeleteAll(table.entities);
         table.entities.clear();
       }
+    }
+
+    template <typename C> void removeAll()
+    {
+      removeAll((quint32)C::eType);
     }
 
     Entity* getEntity(quint32 type, quint32 id) const

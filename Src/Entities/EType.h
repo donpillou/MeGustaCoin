@@ -4,6 +4,7 @@
 enum class EType
 {
   order,
+  transaction,
   botService,
   botEngine,
   botSession,
