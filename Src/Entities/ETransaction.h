@@ -15,11 +15,12 @@ public:
 public:
   ETransaction(quint32 id, BotProtocol::Transaction& data) : Entity(eType, id)
   {
+    type = (Type)data.type;
     date = QDateTime::fromMSecsSinceEpoch(data.date);
     price = data.price;
     amount = data.amount;
     fee = data.fee;
-    type = (Type)data.type;
+
     switch(type)
     {
     case Type::buy:
@@ -31,18 +32,18 @@ public:
     }
   }
 
+  Type getType() const {return type;}
   const QDateTime& getDate() const {return date;}
   double getPrice() const {return price;}
   double getAmount() const {return amount;}
   double getFee() const {return fee;}
-  Type getType() const {return type;}
   double getTotal() const {return total;}
 
 private:
+  Type type;
   QDateTime date;
   double price; // >= 0
   double amount; // >= 0
   double fee; // >= 0
-  Type type;
   double total;
 };

@@ -93,11 +93,11 @@ public:
       sell
     };
 
+    quint8 type;
     qint64 date;
     double price;
     double amount;
     double fee;
-    quint8 type;
   };
 
   struct Order
@@ -108,11 +108,11 @@ public:
       sell,
     };
 
-    Type type;
+    quint8 type;
     qint64 date;
-    double amount;
     double price;
-    double total;
+    double amount;
+    double fee;
   };
 
   struct RegisterBotRequest

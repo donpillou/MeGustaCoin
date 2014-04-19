@@ -29,24 +29,37 @@ public:
   {
     type = (Type)data.type;
     date = QDateTime::fromMSecsSinceEpoch(data.date);
-    amount = data.amount;
     price = data.price;
-    total = data.total;
+    amount = data.amount;
+    fee = data.fee;
+
+    switch(type)
+    {
+    case Type::buy:
+      total = -(price * amount + fee);
+      break;
+    case Type::sell:
+      total = price * amount - fee;
+      break;
+    }
+
     state = State::open;
   }
 
   Type getType() const {return type;}
   const QDateTime& getDate() const {return date;}
-  const double& getAmount() const {return amount;}
-  const double& getPrice() const {return price;}
-  const double& getTotal() const {return total;}
+  double getPrice() const {return price;}
+  double getAmount() const {return amount;}
+  double getFee() const {return fee;}
+  double getTotal() const {return total;}
   State getState() const {return state;}
 
 private:
   Type type;
   QDateTime date;
-  double amount;
   double price;
+  double amount;
+  double fee;
   double total;
   State state;
 };
