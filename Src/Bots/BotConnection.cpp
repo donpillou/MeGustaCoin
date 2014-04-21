@@ -85,7 +85,7 @@ handle:
   return true;
 }
 
-void BotConnection::handleMessage(const BotProtocol::Header& header, char* data, unsigned int size)
+void BotConnection::handleMessage(const BotProtocol::Header& header, char* data, size_t size)
 {
   switch((BotProtocol::MessageType)header.messageType)
   {

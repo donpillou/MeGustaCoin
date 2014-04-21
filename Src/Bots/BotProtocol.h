@@ -6,6 +6,8 @@ class BotProtocol
 public:
   enum MessageType
   {
+    pingRequest,
+    pingResponse, // a.k.a. pong
     loginRequest,
     loginResponse,
     authRequest,
@@ -16,6 +18,7 @@ public:
     removeEntity,
     controlEntity,
     createEntity,
+    requestEntities,
   };
   
   enum EntityType
