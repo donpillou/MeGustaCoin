@@ -3,6 +3,7 @@
 
 enum class EType
 {
+  none,
   order,
   transaction,
   botService,

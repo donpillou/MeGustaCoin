@@ -321,11 +321,17 @@ void BotService::WorkerThread::receivedUpdateEntity(const BotProtocol::Header& h
 
 void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Header& header)
 {
-  EType eType = (EType)0;
+  EType eType = EType::none;
   switch(header.entityType)
   {
   case BotProtocol::session:
     eType = EType::botSession;
+    break;
+  case BotProtocol::transaction:
+    eType = EType::transaction;
+    break;
+  case BotProtocol::order:
+    eType = EType::order;
     break;
   }
 
