@@ -3,7 +3,7 @@
 
 class MarketsDialog : public QDialog
 {
-  //Q_OBJECT
+  Q_OBJECT
 
 public:
   MarketsDialog(QWidget* parent, QSettings& settings, Entity::Manager& entityManager);
@@ -14,6 +14,10 @@ private:
   QSortFilterProxyModel* proxyModel;
   QPushButton* okButton;
 
+  QAction* addAction;
+  QAction* editAction;
+  QAction* removeAction;
+
   BotMarketModel botMarketModel;
 
   virtual void showEvent(QShowEvent* event);
@@ -21,4 +25,7 @@ private:
 
 private slots:
   //void textChanged();
+  void addMarket();
+  void editMarket();
+  void removeMarket();
 };

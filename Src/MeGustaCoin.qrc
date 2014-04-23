@@ -19,5 +19,7 @@
   <file>Icons/user_gray_go.png</file>
   <file>Icons/user_gray_go_gray.png</file>
   <file>Icons/user_gray_add.png</file>
+  <file>Icons/cart_add.png</file>
+  <file>Icons/cart_edit.png</file>
 </qresource>
 </RCC>

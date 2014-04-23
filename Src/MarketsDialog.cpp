@@ -6,6 +6,19 @@ MarketsDialog::MarketsDialog(QWidget* parent, QSettings& settings, Entity::Manag
 {
   setWindowTitle(tr("Markets"));
 
+  QToolBar* toolBar = new QToolBar(this);
+  toolBar->setStyleSheet("QToolBar { border: 0px }");
+  toolBar->setIconSize(QSize(16, 16));
+  toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+  addAction = toolBar->addAction(QIcon(":/Icons/cart_add.png"), tr("&Add"));
+  connect(addAction, SIGNAL(triggered()), this, SLOT(addMarket()));
+  editAction = toolBar->addAction(QIcon(":/Icons/cart_edit.png"), tr("&Edit"));
+  editAction->setEnabled(false);
+  connect(editAction, SIGNAL(triggered()), this, SLOT(editMarket()));
+  removeAction = toolBar->addAction(QIcon(":/Icons/cancel2.png"), tr("&Remove"));
+  removeAction->setEnabled(false);
+  connect(removeAction, SIGNAL(triggered()), this, SLOT(removeMarket()));
+
   marketView = new QTreeView(this);
   marketView->setUniformRowHeights(true);
   proxyModel = new QSortFilterProxyModel(this);
@@ -22,8 +35,14 @@ MarketsDialog::MarketsDialog(QWidget* parent, QSettings& settings, Entity::Manag
   okButton = buttonBox->button(QDialogButtonBox::Ok);
   okButton->setEnabled(false);
 
+  QVBoxLayout* contentLayout = new QVBoxLayout;
+  contentLayout->setMargin(0);
+  contentLayout->setSpacing(0);
+  contentLayout->addWidget(toolBar);
+  contentLayout->addWidget(marketView);
+
   QVBoxLayout* layout = new QVBoxLayout;
-  layout->addWidget(marketView);
+  layout->addLayout(contentLayout);
   layout->addWidget(buttonBox);
 
   setLayout(layout);
@@ -62,4 +81,16 @@ void MarketsDialog::accept()
   //settings->setValue("Secret", remeber >= 2 ? secretEdit->text() : QString());
   //settings->endGroup();
   //settings->sync();
+}
+
+void MarketsDialog::addMarket()
+{
+}
+
+void MarketsDialog::editMarket()
+{
+}
+
+void MarketsDialog::removeMarket()
+{
 }
