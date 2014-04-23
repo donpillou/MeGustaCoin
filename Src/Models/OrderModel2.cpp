@@ -9,7 +9,7 @@ OrderModel2::OrderModel2(Entity::Manager& entityManager) :
 {
   entityManager.registerListener<EOrder>(*this);
 
-  eBotMarket = 0;
+  eBotMarketAdapter = 0;
 }
 
 OrderModel2::~OrderModel2()
@@ -86,11 +86,11 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
     case Column::date:
       return eOrder->getDate().toString(dateFormat);
     case Column::amount:
-      return eBotMarket->formatAmount(eOrder->getAmount());
+      return eBotMarketAdapter->formatAmount(eOrder->getAmount());
     case Column::price:
-      return eBotMarket->formatPrice(eOrder->getPrice());
+      return eBotMarketAdapter->formatPrice(eOrder->getPrice());
     case Column::value:
-      return eBotMarket->formatPrice(eOrder->getAmount() * eOrder->getPrice());
+      return eBotMarketAdapter->formatPrice(eOrder->getAmount() * eOrder->getPrice());
     case Column::state:
       switch(eOrder->getState())
       {
@@ -109,7 +109,7 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
       }
       break;
     case Column::total:
-        return eOrder->getTotal() > 0 ? (QString("+") + eBotMarket->formatPrice(eOrder->getTotal())) : eBotMarket->formatPrice(eOrder->getTotal());
+        return eOrder->getTotal() > 0 ? (QString("+") + eBotMarketAdapter->formatPrice(eOrder->getTotal())) : eBotMarketAdapter->formatPrice(eOrder->getTotal());
     }
   }
   return QVariant();
@@ -140,15 +140,15 @@ QVariant OrderModel2::headerData(int section, Qt::Orientation orientation, int r
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount %1").arg(eBotMarket ? eBotMarket->getCommCurrency() : QString());
+        return tr("Amount %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString());
       case Column::price:
-        return tr("Price %1").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString());
+        return tr("Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
       case Column::value:
-        return tr("Value %1").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString());
+        return tr("Value %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
       case Column::state:
         return tr("Status");
       case Column::total:
-        return tr("Total %1").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString());
+        return tr("Total %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
     }
   }
   return QVariant();

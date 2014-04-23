@@ -9,5 +9,5 @@ enum class EType
   botService,
   botEngine,
   botSession,
-  botMarket,
+  botMarketAdapter,
 };

@@ -1,13 +1,13 @@
 
 #pragma once
 
-class EBotMarket : public Entity
+class EBotMarketAdapter : public Entity
 {
 public:
-  static const EType eType = EType::botMarket;
+  static const EType eType = EType::botMarketAdapter;
 
 public:
-  EBotMarket(quint32 id, BotProtocol::Market& data) : Entity(eType, id)
+  EBotMarketAdapter(quint32 id, BotProtocol::MarketAdapter& data) : Entity(eType, id)
   {
     data.name[sizeof(data.name) - 1] = '\0';
     data.currencyBase[sizeof(data.currencyBase) - 1] = '\0';

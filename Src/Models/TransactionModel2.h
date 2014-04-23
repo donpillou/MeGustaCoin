@@ -22,7 +22,7 @@ public:
 
 private:
   Entity::Manager& entityManager;
-  EBotMarket* eBotMarket;
+  EBotMarketAdapter* eBotMarketAdapter;
   QList<ETransaction*> transactions;
   QVariant buyStr;
   QVariant sellStr;

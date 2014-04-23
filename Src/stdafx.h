@@ -19,7 +19,7 @@
 #include "Entities/EBotEngine.h"
 #include "Entities/EBotSession.h"
 #include "Entities/EBotService.h"
-#include "Entities/EBotMarket.h"
+#include "Entities/EBotMarketAdapter.h"
 
 #include "Markets/DataConnection.h"
 #include "Markets/Market.h"

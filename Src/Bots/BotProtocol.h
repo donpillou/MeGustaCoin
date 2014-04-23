@@ -26,7 +26,7 @@ public:
     error,
     session,
     engine,
-    market,
+    marketAdapter,
     transaction,
     order,
   };
@@ -81,7 +81,7 @@ public:
     char name[33];
   };
 
-  struct Market
+  struct MarketAdapter
   {
     char name[33];
     char currencyBase[33];

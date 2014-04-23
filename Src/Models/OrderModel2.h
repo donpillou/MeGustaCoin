@@ -22,7 +22,7 @@ public:
 
 private:
   Entity::Manager& entityManager;
-  EBotMarket* eBotMarket;
+  EBotMarketAdapter* eBotMarketAdapter;
   QList<EOrder*> orders;
   QVariant draftStr;
   QVariant submittingStr;
