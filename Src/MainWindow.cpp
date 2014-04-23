@@ -112,23 +112,26 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addDockWidget(Qt::TopDockWidgetArea, logDockWidget, Qt::Vertical);
 
   QMenuBar* menuBar = this->menuBar();
-  QMenu* menu = menuBar->addMenu(tr("&Market"));
-  QAction* action = menu->addAction(tr("&Login..."));
-  action->setShortcut(QKeySequence(QKeySequence::Open));
-  connect(action, SIGNAL(triggered()), this, SLOT(login()));
-  action = menu->addAction(tr("Log&out"));
-  action->setShortcut(QKeySequence(QKeySequence::Close));
-  connect(action, SIGNAL(triggered()), this, SLOT(logout()));
+  QMenu* menu = menuBar->addMenu(tr("&Bots"));
+  connect(menu->addAction(tr("&Markets...")), SIGNAL(triggered()), this, SLOT(showMarkets()));
   menu->addSeparator();
-  action = menu->addAction(tr("&Exit"));
+  connect(menu->addAction(tr("&Options...")), SIGNAL(triggered()), this, SLOT(showOptions()));
+  //QAction* action = menu->addAction(tr("&Login..."));
+  //action->setShortcut(QKeySequence(QKeySequence::Open));
+  //connect(action, SIGNAL(triggered()), this, SLOT(login()));
+  //action = menu->addAction(tr("Log&out"));
+  //action->setShortcut(QKeySequence(QKeySequence::Close));
+  //connect(action, SIGNAL(triggered()), this, SLOT(logout()));
+  menu->addSeparator();
+  QAction* action = menu->addAction(tr("&Exit"));
   action->setShortcut(QKeySequence::Quit);
   connect(action, SIGNAL(triggered()), this, SLOT(close()));
 
   viewMenu = menuBar->addMenu(tr("&View"));
   connect(viewMenu, SIGNAL(aboutToShow()), this, SLOT(updateViewMenu()));
 
-  QMenu* toolsMenu = menuBar->addMenu(tr("&Tools"));
-  connect(toolsMenu->addAction(tr("&Options...")), SIGNAL(triggered()), this, SLOT(showOptions()));
+  //QMenu* toolsMenu = menuBar->addMenu(tr("&Tools"));
+  //connect(toolsMenu->addAction(tr("&Options...")), SIGNAL(triggered()), this, SLOT(showOptions()));
 
   menu = menuBar->addMenu(tr("&Help"));
   connect(menu->addAction(tr("&About...")), SIGNAL(triggered()), this, SLOT(about()));
@@ -409,6 +412,13 @@ void MainWindow::createLiveGraphWidget(const QString& channelName)
   addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
 
   dataService.subscribe(channelName);
+}
+
+void MainWindow::showMarkets()
+{
+  MarketsDialog marketsDialog(this, settings, botEntityManager);
+  if(marketsDialog.exec() != QDialog::Accepted)
+    return;
 }
 
 void MainWindow::showOptions()

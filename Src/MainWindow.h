@@ -46,14 +46,15 @@ private:
   virtual void closeEvent(QCloseEvent* event);
 
 private slots:
-  void login();
-  void logout();
+  void login(); // todo: remove
+  void logout(); // todo: remove
   void refresh();
   void updateWindowTitle();
   void updateWindowTitleTicker();
   void updateFocusPublicDataModel();
   void updateViewMenu();
   void about();
+  void showMarkets();
   void showOptions();
   void enableTradesUpdates(bool enable);
   void enableGraphUpdates(bool enable);

@@ -29,6 +29,7 @@ public:
     marketAdapter,
     transaction,
     order,
+    market,
   };
 
 #pragma pack(push, 1)
@@ -116,6 +117,13 @@ public:
     double price;
     double amount;
     double fee;
+  };
+
+  struct Market
+  {
+    char name[33];
+    char currencyBase[33];
+    char currencyComm[33];
   };
 
   struct RegisterBotRequest

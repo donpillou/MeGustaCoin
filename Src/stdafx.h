@@ -18,6 +18,7 @@
 #include "Entities/ETransaction.h"
 #include "Entities/EBotEngine.h"
 #include "Entities/EBotSession.h"
+#include "Entities/EBotMarket.h"
 #include "Entities/EBotService.h"
 #include "Entities/EBotMarketAdapter.h"
 
@@ -37,6 +38,7 @@
 #include "Models/TransactionModel.h"
 #include "Models/TransactionModel2.h"
 #include "Models/BotSessionModel.h"
+#include "Models/BotMarketModel.h"
 #include "Models/TradeModel.h"
 #include "Models/BookModel.h"
 #include "Models/LogModel.h"
@@ -58,5 +60,6 @@
 #include "Widgets/LogWidget.h"
 
 #include "LoginDialog.h"
+#include "MarketsDialog.h"
 #include "OptionsDialog.h"
 #include "MainWindow.h"

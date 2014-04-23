@@ -10,4 +10,5 @@ enum class EType
   botEngine,
   botSession,
   botMarketAdapter,
+  botMarket,
 };
