@@ -68,6 +68,12 @@ void MarketsWidget::saveState(QSettings& settings)
 
 void MarketsWidget::addMarket()
 {
+  MarketDialog marketDialog(this, entityManager);
+  if(marketDialog.exec() != QDialog::Accepted)
+    return;
+
+  //botService.creat
+
 }
 
 void MarketsWidget::editMarket()
