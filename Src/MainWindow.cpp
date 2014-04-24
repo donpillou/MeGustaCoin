@@ -118,9 +118,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addDockWidget(Qt::TopDockWidgetArea, logDockWidget, Qt::Vertical);
 
   QMenuBar* menuBar = this->menuBar();
-  QMenu* menu = menuBar->addMenu(tr("&Bots"));
-  connect(menu->addAction(tr("&Markets...")), SIGNAL(triggered()), this, SLOT(showMarkets()));
-  menu->addSeparator();
+  QMenu* menu = menuBar->addMenu(tr("&Client"));
   connect(menu->addAction(tr("&Options...")), SIGNAL(triggered()), this, SLOT(showOptions()));
   //QAction* action = menu->addAction(tr("&Login..."));
   //action->setShortcut(QKeySequence(QKeySequence::Open));
@@ -346,6 +344,7 @@ void MainWindow::updateViewMenu()
   action->setShortcut(QKeySequence(QKeySequence::Refresh));
   connect(action, SIGNAL(triggered()), this, SLOT(refresh()));
   viewMenu->addSeparator();
+  viewMenu->addAction(qobject_cast<QDockWidget*>(marketsWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(ordersWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(transactionsWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(graphWidget->parent())->toggleViewAction());
@@ -419,13 +418,6 @@ void MainWindow::createLiveGraphWidget(const QString& channelName)
   addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
 
   dataService.subscribe(channelName);
-}
-
-void MainWindow::showMarkets()
-{
-  MarketsDialog marketsDialog(this, settings, botEntityManager);
-  if(marketsDialog.exec() != QDialog::Accepted)
-    return;
 }
 
 void MainWindow::showOptions()

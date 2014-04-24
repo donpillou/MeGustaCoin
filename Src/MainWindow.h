@@ -55,7 +55,6 @@ private slots:
   void updateFocusPublicDataModel();
   void updateViewMenu();
   void about();
-  void showMarkets();
   void showOptions();
   void enableTradesUpdates(bool enable);
   void enableGraphUpdates(bool enable);
