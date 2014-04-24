@@ -153,7 +153,7 @@ void BotsWidget::updateTitle(EBotService& eBotService)
   if(stateStr.isEmpty())
     title = tr("Bots");
   else
-    title = tr("Bots (%2)").arg(stateStr);
+    title = tr("Bots (%1)").arg(stateStr);
 
   QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
   dockWidget->setWindowTitle(title);

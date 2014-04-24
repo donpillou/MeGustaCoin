@@ -28,6 +28,7 @@ targets = {
     qtRessourceFiles = "Src/Icons/**.png"
     qtRccFiles = "Src/MeGustaCoin.qrc"
     qtMocFiles = {
+      "Src/Widgets/MarketsWidget.h"
       "Src/Widgets/OrdersWidget.h"
       "Src/Widgets/BotsWidget.h"
       "Src/Widgets/TransactionsWidget.h"

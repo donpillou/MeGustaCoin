@@ -32,6 +32,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   }
   */
 
+  marketsWidget = new MarketsWidget(this, settings, botEntityManager, botService);
   ordersWidget = new OrdersWidget(this, settings, dataModel, marketService);
   transactionsWidget = new TransactionsWidget(this, settings, dataModel, marketService);
   graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
@@ -45,8 +46,13 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   //setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::East);
   resize(625, 400);
 
+  QDockWidget* marketsDockWidget = new QDockWidget(tr("Markets"), this);
+  marketsDockWidget->setObjectName("Markets");
+  marketsDockWidget->setWidget(marketsWidget);
+  addDockWidget(Qt::TopDockWidgetArea, marketsDockWidget);
+
   QDockWidget* transactionsDockWidget = new QDockWidget(tr("Transactions"), this);
-  transactionsDockWidget->setObjectName("Orders");
+  transactionsDockWidget->setObjectName("Transactions");
   transactionsDockWidget->setWidget(transactionsWidget);
   addDockWidget(Qt::TopDockWidgetArea, transactionsDockWidget);
 
@@ -195,6 +201,7 @@ MainWindow::~MainWindow()
     delete channelData.tradesWidget;
     delete channelData.graphWidget;
   }
+  delete marketsWidget;
   delete ordersWidget;
   delete transactionsWidget;
   delete graphWidget;

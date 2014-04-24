@@ -12,6 +12,7 @@ public:
 private:
   QSettings settings;
 
+  MarketsWidget* marketsWidget;
   OrdersWidget* ordersWidget;
   BotsWidget* botsWidget;
   TransactionsWidget* transactionsWidget;
