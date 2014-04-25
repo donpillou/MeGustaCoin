@@ -102,6 +102,20 @@ void BotService::controlEntity(BotProtocol::EntityType type, quint32 id, const v
     thread->interrupt();
 }
 
+void BotService::createMarket(quint32 marketAdapterId, const QString& userName, const QString& key, const QString& secret)
+{
+  BotProtocol::CreateMarketArgs createMarket;
+  createMarket.marketAdapterId = marketAdapterId;
+  setString(createMarket.username, userName);
+  setString(createMarket.key, key);
+  setString(createMarket.secret, secret);
+  createEntity(BotProtocol::market, &createMarket, sizeof(createMarket));
+}
+
+void BotService::removeMarket(quint32 id)
+{
+  removeEntity(BotProtocol::market, id);
+}
 
 void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)
 {

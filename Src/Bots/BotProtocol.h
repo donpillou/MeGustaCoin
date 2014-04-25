@@ -66,7 +66,7 @@ public:
   {
     enum State
     {
-      inactive,
+      stopped,
       active,
       simulating,
     };
@@ -121,9 +121,16 @@ public:
 
   struct Market
   {
+    enum State
+    {
+      stopped,
+      running,
+    };
+
     char name[33];
     char currencyBase[33];
     char currencyComm[33];
+    quint8 state;
   };
 
   struct RegisterBotRequest
@@ -157,6 +164,14 @@ public:
     };
 
     quint8 cmd;
+  };
+
+  struct CreateMarketArgs
+  {
+    quint32 marketAdapterId;
+    char username[33];
+    char key[65];
+    char secret[65];
   };
 
 #pragma pack(pop)

@@ -9,7 +9,7 @@ public:
 public:
   enum class State
   {
-    inactive = BotProtocol::Session::inactive,
+    stopped = BotProtocol::Session::stopped,
     active = BotProtocol::Session::active,
     simulating = BotProtocol::Session::simulating,
   };

@@ -22,7 +22,7 @@ private:
   Entity::Manager& entityManager;
   QList<EBotSession*> sessions;
 
-  QVariant inactiveVar;
+  QVariant stoppedVar;
   QVariant activeVar;
   QVariant simulatingVar;
 

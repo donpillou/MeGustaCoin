@@ -12,6 +12,9 @@ public:
   void start(const QString& server, const QString& userName, const QString& password);
   void stop();
 
+  void createMarket(quint32 marketAdapterId, const QString& userName, const QString& key, const QString& secret);
+  void removeMarket(quint32 id);
+
   void createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm);
   void removeSession(quint32 id);
   void startSessionSimulation(quint32 id);

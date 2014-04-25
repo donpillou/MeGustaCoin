@@ -118,7 +118,7 @@ void BotsWidget::cancelBot()
   {
     QModelIndex index = sessionProxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
-    if(eSession->getState() == EBotSession::State::inactive)
+    if(eSession->getState() == EBotSession::State::stopped)
       botService.removeSession(eSession->getId());
     else
       botService.stopSession(eSession->getId());
@@ -167,16 +167,16 @@ void BotsWidget::updateToolBarButtons()
 
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   bool sessionSelected = !selection.isEmpty();
-  bool sessionInactive = false;
+  bool sessionStopped = false;
   if(sessionSelected)
   {
     QModelIndex index = sessionProxyModel->mapToSource(selection.front());
     EBotSession* eSession = (EBotSession*)index.internalPointer();
-    sessionInactive = eSession->getState() == EBotSession::State::inactive;
+    sessionStopped = eSession->getState() == EBotSession::State::stopped;
   }
 
   //optimizeAction->setEnabled(connected && sessionSelected);
-  simulateAction->setEnabled(connected && sessionSelected && sessionInactive);
+  simulateAction->setEnabled(connected && sessionSelected && sessionStopped);
   //activateAction->setEnabled(connected && sessionSelected);
   cancelAction->setEnabled(connected && sessionSelected);
 }
