@@ -14,6 +14,8 @@ public:
     authResponse,
     registerBotRequest,
     registerBotResponse,
+    registerMarketRequest,
+    registerMarketResponse,
     updateEntity,
     removeEntity,
     controlEntity,
