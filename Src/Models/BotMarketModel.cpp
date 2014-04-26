@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
 
-BotMarketModel::BotMarketModel(Entity::Manager& entityManager) : entityManager(entityManager)
+BotMarketModel::BotMarketModel(Entity::Manager& entityManager) : entityManager(entityManager),
+  stoppedVar(tr("stopped")), runningVar(tr("running"))
 {
   entityManager.registerListener<EBotMarket>(*this);
 }
@@ -49,6 +50,15 @@ QVariant BotMarketModel::data(const QModelIndex& index, int role) const
         EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
         return eBotMarketAdapter ? eBotMarketAdapter->getName() : QVariant();
       }
+    case Column::state:
+      switch(eBotMarket->getState())
+      {
+      case EBotMarket::State::stopped:
+        return stoppedVar;
+      case EBotMarket::State::running:
+        return runningVar;
+      }
+      break;
     }
   }
   return QVariant();
@@ -65,6 +75,8 @@ QVariant BotMarketModel::headerData(int section, Qt::Orientation orientation, in
     {
     case Column::name:
       return tr("Name");
+    case Column::state:
+      return tr("State");
     }
   }
   return QVariant();

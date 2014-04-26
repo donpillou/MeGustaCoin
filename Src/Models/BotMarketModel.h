@@ -8,7 +8,8 @@ public:
   {
       first,
       name = first,
-      last = name,
+      state,
+      last = state,
   };
 
 public:
@@ -18,6 +19,9 @@ public:
 private:
   Entity::Manager& entityManager;
   QList<EBotMarket*> markets;
+
+  QVariant stoppedVar;
+  QVariant runningVar;
 
 private: // QAbstractItemModel
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
