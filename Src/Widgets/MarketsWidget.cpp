@@ -36,7 +36,7 @@ MarketsWidget::MarketsWidget(QWidget* parent, QSettings& settings, Entity::Manag
   layout->addWidget(marketView);
   setLayout(layout);
 
-  //connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
+  connect(marketView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
 
   //QHeaderView* headerView = orderView->header();
   //headerView->resizeSection(0, 50);
@@ -72,8 +72,7 @@ void MarketsWidget::addMarket()
   if(marketDialog.exec() != QDialog::Accepted)
     return;
 
-  //botService.creat
-
+  botService.createMarket(marketDialog.getMarketAdapterId(),  marketDialog.getUserName(), marketDialog.getKey(), marketDialog.getSecret());
 }
 
 void MarketsWidget::editMarket()
@@ -82,6 +81,13 @@ void MarketsWidget::editMarket()
 
 void MarketsWidget::removeMarket()
 {
+  QModelIndexList selection = marketView->selectionModel()->selectedRows();
+  foreach(const QModelIndex& proxyIndex, selection)
+  {
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
+    EBotMarket* eBotMarket = (EBotMarket*)index.internalPointer();
+    botService.removeMarket(eBotMarket->getId());
+  }
 }
 
 void MarketsWidget::updateTitle(EBotService& eBotService)
@@ -102,13 +108,11 @@ void MarketsWidget::updateTitle(EBotService& eBotService)
 void MarketsWidget::updateToolBarButtons()
 {
   bool connected = botService.isConnected();
-  addAction->setEnabled(connected);
-
   QModelIndexList selection = marketView->selectionModel()->selectedRows();
   bool marketSelected = !selection.isEmpty();
 
-  editAction->setEnabled(connected);
-  editAction->setEnabled(connected && marketSelected);
+  addAction->setEnabled(connected);
+  //editAction->setEnabled(connected && marketSelected);
   removeAction->setEnabled(connected && marketSelected);
 }
 

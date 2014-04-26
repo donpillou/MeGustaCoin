@@ -302,6 +302,10 @@ void BotService::WorkerThread::receivedUpdateEntity(const BotProtocol::Header& h
     if(size >= sizeof(BotProtocol::Order))
       entity = new EOrder(header.entityId, *(BotProtocol::Order*)data);
     break;
+  case BotProtocol::market:
+    if(size >= sizeof(BotProtocol::Market))
+      entity = new EBotMarket(header.entityId, *(BotProtocol::Market*)data);
+    break;
   case BotProtocol::error:
     if(size >= sizeof(BotProtocol::Error))
     {
@@ -346,6 +350,9 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Header& h
     break;
   case BotProtocol::order:
     eType = EType::order;
+    break;
+  case BotProtocol::market:
+    eType = EType::botMarket;
     break;
   }
 
