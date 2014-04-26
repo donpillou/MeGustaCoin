@@ -127,9 +127,7 @@ public:
       running,
     };
 
-    char name[33];
-    char currencyBase[33];
-    char currencyComm[33];
+    quint32 marketAdapterId;
     quint8 state;
   };
 
