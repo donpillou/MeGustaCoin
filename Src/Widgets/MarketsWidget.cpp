@@ -38,20 +38,15 @@ MarketsWidget::MarketsWidget(QWidget* parent, QSettings& settings, Entity::Manag
 
   connect(marketView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
 
-  //QHeaderView* headerView = orderView->header();
-  //headerView->resizeSection(0, 50);
-  //headerView->resizeSection(1, 60);
-  //headerView->resizeSection(2, 110);
-  //headerView->resizeSection(3, 85);
-  //headerView->resizeSection(4, 100);
-  //headerView->resizeSection(5, 85);
-  //headerView->resizeSection(5, 85);
-  //headerView->setStretchLastSection(false);
-  //headerView->setResizeMode(0, QHeaderView::Stretch);
-  //orderView->sortByColumn(2);
-  //settings.beginGroup("Orders");
-  //headerView->restoreState(settings.value("HeaderState").toByteArray());
-  //settings.endGroup();
+  QHeaderView* headerView = marketView->header();
+  headerView->resizeSection(0, 100);
+  headerView->resizeSection(1, 60);
+  headerView->setStretchLastSection(false);
+  headerView->setResizeMode(0, QHeaderView::Stretch);
+  marketView->sortByColumn(0);
+  settings.beginGroup("Markets");
+  headerView->restoreState(settings.value("HeaderState").toByteArray());
+  settings.endGroup();
 }
 
 MarketsWidget::~MarketsWidget()
@@ -61,9 +56,9 @@ MarketsWidget::~MarketsWidget()
 
 void MarketsWidget::saveState(QSettings& settings)
 {
-  //settings.beginGroup("Orders");
-  //settings.setValue("HeaderState", orderView->header()->saveState());
-  //settings.endGroup();
+  settings.beginGroup("Markets");
+  settings.setValue("HeaderState", marketView->header()->saveState());
+  settings.endGroup();
 }
 
 void MarketsWidget::addMarket()
