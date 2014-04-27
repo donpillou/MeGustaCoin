@@ -10,6 +10,7 @@ public:
   enum class State
   {
     stopped = BotProtocol::Market::stopped,
+    starting = BotProtocol::Market::starting,
     running = BotProtocol::Market::running,
   };
 

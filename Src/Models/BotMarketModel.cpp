@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotMarketModel::BotMarketModel(Entity::Manager& entityManager) : entityManager(entityManager),
-  stoppedVar(tr("stopped")), runningVar(tr("running"))
+  stoppedVar(tr("stopped")), startingVar(tr("starting")),runningVar(tr("running"))
 {
   entityManager.registerListener<EBotMarket>(*this);
 }
@@ -55,6 +55,8 @@ QVariant BotMarketModel::data(const QModelIndex& index, int role) const
       {
       case EBotMarket::State::stopped:
         return stoppedVar;
+      case EBotMarket::State::starting:
+        return startingVar;
       case EBotMarket::State::running:
         return runningVar;
       }

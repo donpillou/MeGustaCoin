@@ -23,7 +23,8 @@ private:
   QList<EBotSession*> sessions;
 
   QVariant stoppedVar;
-  QVariant activeVar;
+  QVariant startingVar;
+  QVariant runningVar;
   QVariant simulatingVar;
 
 private: // QAbstractItemModel

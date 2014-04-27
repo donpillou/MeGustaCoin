@@ -21,6 +21,7 @@ private:
   QList<EBotMarket*> markets;
 
   QVariant stoppedVar;
+  QVariant startingVar;
   QVariant runningVar;
 
 private: // QAbstractItemModel

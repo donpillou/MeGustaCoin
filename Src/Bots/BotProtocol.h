@@ -69,7 +69,8 @@ public:
     enum State
     {
       stopped,
-      active,
+      starting,
+      running,
       simulating,
     };
 
@@ -126,6 +127,7 @@ public:
     enum State
     {
       stopped,
+      starting,
       running,
     };
 
