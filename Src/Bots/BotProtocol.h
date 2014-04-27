@@ -75,7 +75,7 @@ public:
     };
 
     char name[33];
-    quint32 engineId;
+    quint32 botEngineId;
     quint32 marketId;
     quint8 state;
   };

@@ -20,19 +20,19 @@ public:
   {
     data.name[sizeof(data.name) - 1] = '\0';
     name = data.name;
-    engineId = data.engineId;
+    botEngineId = data.botEngineId;
     marketId = data.marketId;
     state = (State)data.state;
   }
 
   const QString& getName() const {return name;}
-  quint32 getEngineId() const {return engineId;}
+  quint32 getEngineId() const {return botEngineId;}
   quint32 getMarketId() const {return marketId;}
   State getState() const {return state;}
 
 private:
   QString name;
-  quint32 engineId;
+  quint32 botEngineId;
   quint32 marketId;
   State state;
 };
