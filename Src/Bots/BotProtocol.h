@@ -29,8 +29,8 @@ public:
     session,
     engine,
     marketAdapter,
-    transaction,
-    order,
+    sessionTransaction,
+    sessionOrder,
     market,
   };
 

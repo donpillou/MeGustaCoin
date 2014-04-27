@@ -23,7 +23,7 @@ public:
 private:
   Entity::Manager& entityManager;
   EBotMarketAdapter* eBotMarketAdapter;
-  QList<ETransaction*> transactions;
+  QList<EBotSessionTransaction*> transactions;
   QVariant buyStr;
   QVariant sellStr;
   QVariant sellIcon;
@@ -53,8 +53,8 @@ public:
 private: // QSortFilterProxyModel
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
-    const ETransaction* leftTransaction = (const ETransaction*)left.internalPointer();
-    const ETransaction* rightTransaction = (const ETransaction*)right.internalPointer();
+    const EBotSessionTransaction* leftTransaction = (const EBotSessionTransaction*)left.internalPointer();
+    const EBotSessionTransaction* rightTransaction = (const EBotSessionTransaction*)right.internalPointer();
     switch((TransactionModel2::Column)left.column())
     {
     case TransactionModel2::Column::date:

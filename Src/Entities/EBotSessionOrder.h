@@ -1,19 +1,31 @@
 
 #pragma once
 
-class ETransaction : public Entity
+class EBotSessionOrder : public Entity
 {
 public:
-  static const EType eType = EType::transaction;
+  static const EType eType = EType::botSessionOrder;
 
+public:
   enum class Type
   {
-    buy = BotProtocol::Transaction::buy,
-    sell = BotProtocol::Transaction::sell,
+    buy = BotProtocol::Order::buy,
+    sell = BotProtocol::Order::sell,
+  };
+
+  enum class State
+  {
+    draft,
+    submitting,
+    open,
+    canceling,
+    canceled,
+    closed,
   };
 
 public:
-  ETransaction(quint32 id, BotProtocol::Transaction& data) : Entity(eType, id)
+  //EBotSessionOrder(quint32 id) : Entity(eType, id), type(Type::unknown), amount(0.), price(0.), total(0.), state(State::open) {}
+  EBotSessionOrder(quint32 id, BotProtocol::Order& data) : Entity(eType, id)
   {
     type = (Type)data.type;
     date = QDateTime::fromMSecsSinceEpoch(data.date);
@@ -30,6 +42,8 @@ public:
       total = price * amount - fee;
       break;
     }
+
+    state = State::open;
   }
 
   Type getType() const {return type;}
@@ -38,12 +52,14 @@ public:
   double getAmount() const {return amount;}
   double getFee() const {return fee;}
   double getTotal() const {return total;}
+  State getState() const {return state;}
 
 private:
   Type type;
   QDateTime date;
-  double price; // >= 0
-  double amount; // >= 0
-  double fee; // >= 0
+  double price;
+  double amount;
+  double fee;
   double total;
+  State state;
 };

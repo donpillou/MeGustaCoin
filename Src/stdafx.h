@@ -14,8 +14,8 @@
 #include "Bots/BotProtocol.h"
 
 #include "Entities/EType.h"
-#include "Entities/EOrder.h"
-#include "Entities/ETransaction.h"
+#include "Entities/EBotSessionOrder.h"
+#include "Entities/EBotSessionTransaction.h"
 #include "Entities/EBotEngine.h"
 #include "Entities/EBotSession.h"
 #include "Entities/EBotMarket.h"

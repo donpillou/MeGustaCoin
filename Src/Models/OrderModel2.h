@@ -23,7 +23,7 @@ public:
 private:
   Entity::Manager& entityManager;
   EBotMarketAdapter* eBotMarketAdapter;
-  QList<EOrder*> orders;
+  QList<EBotSessionOrder*> orders;
   QVariant draftStr;
   QVariant submittingStr;
   QVariant openStr;
@@ -59,8 +59,8 @@ public:
 private:
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
-    const EOrder* leftOrder = (const EOrder*)left.internalPointer();
-    const EOrder* rightOrder = (const EOrder*)right.internalPointer();
+    const EBotSessionOrder* leftOrder = (const EBotSessionOrder*)left.internalPointer();
+    const EBotSessionOrder* rightOrder = (const EBotSessionOrder*)right.internalPointer();
     switch((OrderModel2::Column)left.column())
     {
     case OrderModel2::Column::date:

@@ -7,14 +7,14 @@ OrderModel2::OrderModel2(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<EOrder>(*this);
+  entityManager.registerListener<EBotSessionOrder>(*this);
 
   eBotMarketAdapter = 0;
 }
 
 OrderModel2::~OrderModel2()
 {
-  entityManager.unregisterListener<EOrder>(*this);
+  entityManager.unregisterListener<EBotSessionOrder>(*this);
 }
 
 QModelIndex OrderModel2::index(int row, int column, const QModelIndex& parent) const
@@ -39,7 +39,7 @@ int OrderModel2::columnCount(const QModelIndex& parent) const
 
 QVariant OrderModel2::data(const QModelIndex& index, int role) const
 {
-  const EOrder* eOrder = (const EOrder*)index.internalPointer();
+  const EBotSessionOrder* eOrder = (const EBotSessionOrder*)index.internalPointer();
   if(!eOrder)
     return QVariant();
 
@@ -61,9 +61,9 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
     if((Column)index.column() == Column::type)
       switch(eOrder->getType())
       {
-      case EOrder::Type::sell:
+      case EBotSessionOrder::Type::sell:
         return sellIcon;
-      case EOrder::Type::buy:
+      case EBotSessionOrder::Type::buy:
         return buyIcon;
       default:
         break;
@@ -75,9 +75,9 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
     case Column::type:
       switch(eOrder->getType())
       {
-      case EOrder::Type::buy:
+      case EBotSessionOrder::Type::buy:
         return buyStr;
-      case EOrder::Type::sell:
+      case EBotSessionOrder::Type::sell:
         return sellStr;
       default:
         break;
@@ -94,17 +94,17 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
     case Column::state:
       switch(eOrder->getState())
       {
-      case EOrder::State::draft:
+      case EBotSessionOrder::State::draft:
         return draftStr;
-      case EOrder::State::submitting:
+      case EBotSessionOrder::State::submitting:
         return submittingStr;
-      case EOrder::State::open:
+      case EBotSessionOrder::State::open:
         return openStr;
-      case EOrder::State::canceling:
+      case EBotSessionOrder::State::canceling:
         return cancelingStr;
-      case EOrder::State::canceled:
+      case EBotSessionOrder::State::canceled:
         return canceledStr;
-      case EOrder::State::closed:
+      case EBotSessionOrder::State::closed:
         return closedStr;
       }
       break;
@@ -156,7 +156,7 @@ QVariant OrderModel2::headerData(int section, Qt::Orientation orientation, int r
 
 void OrderModel2::addedEntity(Entity& entity)
 {
-  EOrder* eOrder = dynamic_cast<EOrder*>(&entity);
+  EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
   if(eOrder)
   {
     int index = orders.size();
@@ -170,14 +170,14 @@ void OrderModel2::addedEntity(Entity& entity)
 
 void OrderModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EOrder* oldEOrder = dynamic_cast<EOrder*>(&oldEntity);
-  if(oldEOrder)
+  EBotSessionOrder* oldEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&oldEntity);
+  if(oldEBotSessionOrder)
   {
-    EOrder* newEOrder = dynamic_cast<EOrder*>(&newEntity);
-    int index = orders.indexOf(oldEOrder);
-    orders[index] = newEOrder; 
-    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEOrder);
-    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEOrder);
+    EBotSessionOrder* newEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&newEntity);
+    int index = orders.indexOf(oldEBotSessionOrder);
+    orders[index] = newEBotSessionOrder; 
+    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionOrder);
+    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotSessionOrder);
     emit dataChanged(leftModelIndex, rightModelIndex);
     return;
   }
@@ -186,7 +186,7 @@ void OrderModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 
 void OrderModel2::removedEntity(Entity& entity)
 {
-  EOrder* eOrder = dynamic_cast<EOrder*>(&entity);
+  EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
   if(eOrder)
   {
     int index = orders.indexOf(eOrder);
@@ -200,7 +200,7 @@ void OrderModel2::removedEntity(Entity& entity)
 
 void OrderModel2::removedAll(quint32 type)
 {
-  if((EType)type == EType::order)
+  if((EType)type == EType::botSessionOrder)
   {
     emit beginResetModel();
     orders.clear();

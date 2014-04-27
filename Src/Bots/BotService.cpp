@@ -149,8 +149,8 @@ void BotService::stopSession(quint32 id)
 
 void BotService::selectSession(quint32 id)
 {
-  entityManager.removeAll<EOrder>();
-  entityManager.removeAll<ETransaction>();
+  entityManager.removeAll<EBotSessionOrder>();
+  entityManager.removeAll<EBotSessionTransaction>();
   BotProtocol::ControlSessionArgs controlSession;
   controlSession.cmd = BotProtocol::ControlSessionArgs::select;
   controlEntity(BotProtocol::session, id, &controlSession, sizeof(controlSession));
@@ -294,13 +294,13 @@ void BotService::WorkerThread::receivedUpdateEntity(const BotProtocol::Header& h
     if(size >= sizeof(BotProtocol::MarketAdapter))
       entity = new EBotMarketAdapter(header.entityId, *(BotProtocol::MarketAdapter*)data);
     break;
-  case BotProtocol::transaction:
+  case BotProtocol::sessionTransaction:
     if(size >= sizeof(BotProtocol::Transaction))
-      entity = new ETransaction(header.entityId, *(BotProtocol::Transaction*)data);
+      entity = new EBotSessionTransaction(header.entityId, *(BotProtocol::Transaction*)data);
     break;
-  case BotProtocol::order:
+  case BotProtocol::sessionOrder:
     if(size >= sizeof(BotProtocol::Order))
-      entity = new EOrder(header.entityId, *(BotProtocol::Order*)data);
+      entity = new EBotSessionOrder(header.entityId, *(BotProtocol::Order*)data);
     break;
   case BotProtocol::market:
     if(size >= sizeof(BotProtocol::Market))
@@ -345,11 +345,11 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Header& h
   case BotProtocol::session:
     eType = EType::botSession;
     break;
-  case BotProtocol::transaction:
-    eType = EType::transaction;
+  case BotProtocol::sessionTransaction:
+    eType = EType::botSessionTransaction;
     break;
-  case BotProtocol::order:
-    eType = EType::order;
+  case BotProtocol::sessionOrder:
+    eType = EType::botSessionOrder;
     break;
   case BotProtocol::market:
     eType = EType::botMarket;

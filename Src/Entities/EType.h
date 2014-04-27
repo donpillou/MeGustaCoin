@@ -4,8 +4,8 @@
 enum class EType
 {
   none,
-  order,
-  transaction,
+  botSessionOrder,
+  botSessionTransaction,
   botService,
   botEngine,
   botSession,

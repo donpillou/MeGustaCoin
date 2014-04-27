@@ -7,14 +7,14 @@ TransactionModel2::TransactionModel2(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<ETransaction>(*this);
+  entityManager.registerListener<EBotSessionTransaction>(*this);
 
   eBotMarketAdapter = 0;
 }
 
 TransactionModel2::~TransactionModel2()
 {
-  entityManager.unregisterListener<ETransaction>(*this);
+  entityManager.unregisterListener<EBotSessionTransaction>(*this);
 }
 
 QModelIndex TransactionModel2::index(int row, int column, const QModelIndex& parent) const
@@ -39,7 +39,7 @@ int TransactionModel2::columnCount(const QModelIndex& parent) const
 
 QVariant TransactionModel2::data(const QModelIndex& index, int role) const
 {
-  const ETransaction* eTransaction = (const ETransaction*)index.internalPointer();
+  const EBotSessionTransaction* eTransaction = (const EBotSessionTransaction*)index.internalPointer();
   if(!eTransaction)
     return QVariant();
 
@@ -62,9 +62,9 @@ QVariant TransactionModel2::data(const QModelIndex& index, int role) const
     if((Column)index.column() == Column::type)
       switch(eTransaction->getType())
       {
-      case ETransaction::Type::sell:
+      case EBotSessionTransaction::Type::sell:
         return sellIcon;
-      case ETransaction::Type::buy:
+      case EBotSessionTransaction::Type::buy:
         return buyIcon;
       default:
         break;
@@ -76,9 +76,9 @@ QVariant TransactionModel2::data(const QModelIndex& index, int role) const
     case Column::type:
       switch(eTransaction->getType())
       {
-      case ETransaction::Type::buy:
+      case EBotSessionTransaction::Type::buy:
         return buyStr;
-      case ETransaction::Type::sell:
+      case EBotSessionTransaction::Type::sell:
         return sellStr;
       default:
         break;
@@ -142,7 +142,7 @@ QVariant TransactionModel2::headerData(int section, Qt::Orientation orientation,
 
 void TransactionModel2::addedEntity(Entity& entity)
 {
-  ETransaction* eTransaction = dynamic_cast<ETransaction*>(&entity);
+  EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
   if(eTransaction)
   {
     int index = transactions.size();
@@ -156,14 +156,14 @@ void TransactionModel2::addedEntity(Entity& entity)
 
 void TransactionModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  ETransaction* oldETransaction = dynamic_cast<ETransaction*>(&oldEntity);
-  if(oldETransaction)
+  EBotSessionTransaction* oldEBotSessionTransaction = dynamic_cast<EBotSessionTransaction*>(&oldEntity);
+  if(oldEBotSessionTransaction)
   {
-    ETransaction* newETransaction = dynamic_cast<ETransaction*>(&newEntity);
-    int index = transactions.indexOf(oldETransaction);
-    transactions[index] = newETransaction; 
-    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newETransaction);
-    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newETransaction);
+    EBotSessionTransaction* newEBotSessionTransaction = dynamic_cast<EBotSessionTransaction*>(&newEntity);
+    int index = transactions.indexOf(oldEBotSessionTransaction);
+    transactions[index] = newEBotSessionTransaction; 
+    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionTransaction);
+    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotSessionTransaction);
     emit dataChanged(leftModelIndex, rightModelIndex);
     return;
   }
@@ -172,7 +172,7 @@ void TransactionModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 
 void TransactionModel2::removedEntity(Entity& entity)
 {
-  ETransaction* eTransaction = dynamic_cast<ETransaction*>(&entity);
+  EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
   if(eTransaction)
   {
     int index = transactions.indexOf(eTransaction);
@@ -186,7 +186,7 @@ void TransactionModel2::removedEntity(Entity& entity)
 
 void TransactionModel2::removedAll(quint32 type)
 {
-  if((EType)type == EType::transaction)
+  if((EType)type == EType::botSessionTransaction)
   {
     emit beginResetModel();
     transactions.clear();
