@@ -74,8 +74,8 @@ private:
     virtual void run();
 
   private: // BotConnection::Callback
-    virtual void receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size);
-    virtual void receivedRemoveEntity(const BotProtocol::Header& header);
+    virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size);
+    virtual void receivedRemoveEntity(const BotProtocol::Entity& entity);
   };
 
 private:
@@ -88,9 +88,9 @@ private:
   bool connected;
 
 private:
-  void createEntity(BotProtocol::EntityType type, const void* args, size_t size);
+  void createEntity(const void* args, size_t size);
   void removeEntity(BotProtocol::EntityType type, quint32 id);
-  void controlEntity(BotProtocol::EntityType type, quint32 id, const void* args, size_t size);
+  void controlEntity(const void* args, size_t size);
 
   template<size_t N> void setString(char(&str)[N], const QString& value)
   {

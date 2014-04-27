@@ -9,27 +9,19 @@ public:
   public:
     virtual void receivedLoginResponse(const BotProtocol::LoginResponse& response) {};
     virtual void receivedAuthResponse() {};
-    virtual void receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size) {}
-    virtual void receivedRemoveEntity(const BotProtocol::Header& header) {}
-    //virtual void receivedErrorResponse(const QString& errorMessage) {};
-    //virtual void receivedEngine(const QString& engine) {};
-    //virtual void receivedSession(quint32 id, const QString& name, const QString& engine) {};
+    virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size) {}
+    virtual void receivedRemoveEntity(const BotProtocol::Entity& entity) {}
   };
-
-  BotConnection()/* : cachedHeader(false)*/ {}
 
   bool connect(const QString& server, quint16 port, const QString& userName, const QString& password);
   bool process(Callback& callback);
   void interrupt();
 
-  bool createEntity(BotProtocol::EntityType type, const void* args, size_t size);
-  bool removeEntity(BotProtocol::EntityType type, quint32 id);
-  bool controlEntity(BotProtocol::EntityType type, quint32 id, const void* args, size_t size);
-
-  //bool createSession(const QString& name, const QString& engine);
-  //bool startSession(quint32 id, BotProtocol::StartSessionRequest::Mode mode);
-
   const QString& getLastError() {return error;}
+
+  bool createEntity(const void* args, size_t size);
+  bool removeEntity(BotProtocol::EntityType type, quint32 id);
+  bool controlEntity(const void* args, size_t size);
 
 private:
   SocketConnection connection;
@@ -37,8 +29,6 @@ private:
   QString error;
   Callback* callback;
   qint64 serverTimeToLocalTime;
-  //BotProtocol::Header header;
-  //bool cachedHeader;
 
   void handleMessage(const BotProtocol::Header& header, char* data, size_t dataSize);
 
@@ -46,9 +36,6 @@ private:
   bool sendLoginRequest(const QString& userName);
   bool sendAuthRequest(const QByteArray& signature);
 
-  //bool peekHeader(BotProtocol::MessageType& type);
-  //bool peekHeaderExpect(BotProtocol::MessageType expectedType, size_t minSize);
-  //bool receiveErrorResponse(BotProtocol::ErrorResponse& errorResponse);
   bool receiveLoginResponse(BotProtocol::LoginResponse& loginResponse);
   bool receiveAuthResponse();
 

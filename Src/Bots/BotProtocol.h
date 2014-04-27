@@ -39,13 +39,12 @@ public:
   {
     quint32 size; // including header
     quint16 messageType; // MessageType
-    quint16 entityType; // EntityType
-    quint32 entityId;
   };
 
-  struct Error
+  struct Entity
   {
-    char errorMessage[129];
+    quint16 entityType; // EntityType
+    quint32 entityId;
   };
 
   struct LoginRequest
@@ -64,7 +63,12 @@ public:
     unsigned char signature[32];
   };
 
-  struct Session
+  struct Error : public Entity
+  {
+    char errorMessage[129];
+  };
+
+  struct Session : public Entity
   {
     enum State
     {
@@ -80,19 +84,19 @@ public:
     quint8 state;
   };
 
-  struct Engine
+  struct BotEngine : public Entity
   {
     char name[33];
   };
 
-  struct MarketAdapter
+  struct MarketAdapter : public Entity
   {
     char name[33];
     char currencyBase[33];
     char currencyComm[33];
   };
 
-  struct Transaction
+  struct Transaction : public Entity
   {
     enum Type
     {
@@ -107,7 +111,7 @@ public:
     double fee;
   };
 
-  struct Order
+  struct Order : public Entity
   {
     enum Type
     {
@@ -122,7 +126,7 @@ public:
     double fee;
   };
 
-  struct Market
+  struct Market : public Entity
   {
     enum State
     {
@@ -135,19 +139,7 @@ public:
     quint8 state;
   };
 
-  struct RegisterBotRequest
-  {
-    quint32 pid;
-  };
-  
-  struct RegisterBotResponse
-  {
-    quint8 isSimulation;
-    double balanceBase;
-    double balanceComm;
-  };
-
-  struct CreateSessionArgs
+  struct CreateSessionArgs : public Entity
   {
     char name[33];
     quint32 engineId;
@@ -156,7 +148,7 @@ public:
     double balanceComm;
   };
 
-  struct ControlSessionArgs
+  struct ControlSessionArgs : public Entity
   {
     enum Command
     {
@@ -168,7 +160,7 @@ public:
     quint8 cmd;
   };
 
-  struct CreateMarketArgs
+  struct CreateMarketArgs : public Entity
   {
     quint32 marketAdapterId;
     char username[33];

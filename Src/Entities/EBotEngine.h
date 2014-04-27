@@ -7,7 +7,7 @@ public:
   static const EType eType = EType::botEngine;
 
 public:
-  EBotEngine(quint32 id, BotProtocol::Engine& data) : Entity(eType, id)
+  EBotEngine(BotProtocol::BotEngine& data) : Entity(eType, data.entityId)
   {
     data.name[sizeof(data.name) - 1] = '\0';
     name = data.name;

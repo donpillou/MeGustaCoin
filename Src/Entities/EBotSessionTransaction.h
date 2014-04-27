@@ -13,7 +13,7 @@ public:
   };
 
 public:
-  EBotSessionTransaction(quint32 id, BotProtocol::Transaction& data) : Entity(eType, id)
+  EBotSessionTransaction(BotProtocol::Transaction& data) : Entity(eType, data.entityId)
   {
     type = (Type)data.type;
     date = QDateTime::fromMSecsSinceEpoch(data.date);

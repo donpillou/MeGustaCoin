@@ -7,7 +7,7 @@ public:
   static const EType eType = EType::botMarketAdapter;
 
 public:
-  EBotMarketAdapter(quint32 id, BotProtocol::MarketAdapter& data) : Entity(eType, id)
+  EBotMarketAdapter(BotProtocol::MarketAdapter& data) : Entity(eType, data.entityId)
   {
     data.name[sizeof(data.name) - 1] = '\0';
     data.currencyBase[sizeof(data.currencyBase) - 1] = '\0';

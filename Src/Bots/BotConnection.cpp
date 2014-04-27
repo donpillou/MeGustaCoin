@@ -97,10 +97,12 @@ void BotConnection::handleMessage(const BotProtocol::Header& header, char* data,
     callback->receivedAuthResponse();
     break;
   case BotProtocol::updateEntity:
-    callback->receivedUpdateEntity(header, data, size);
+    if(size >= sizeof(BotProtocol::Entity))
+      callback->receivedUpdateEntity(*(BotProtocol::Entity*)data, size);
     break;
   case BotProtocol::removeEntity:
-    callback->receivedRemoveEntity(header);
+    if(size >= sizeof(BotProtocol::Entity))
+      callback->receivedRemoveEntity(*(const BotProtocol::Entity*)data);
     break;
   default:
     break;
@@ -112,8 +114,6 @@ bool BotConnection::sendMessage(BotProtocol::MessageType type, const void* data,
   BotProtocol::Header header;
   header.size = sizeof(header) + size;
   header.messageType = type;
-  header.entityId = 0;
-  header.entityType = 0;
   if(!connection.send((const char*)&header, sizeof(header)) ||
      !connection.send((const char*)data, size))
   {
@@ -123,13 +123,12 @@ bool BotConnection::sendMessage(BotProtocol::MessageType type, const void* data,
   return true;
 }
 
-bool BotConnection::createEntity(BotProtocol::EntityType type, const void* args, size_t size)
+bool BotConnection::createEntity(const void* args, size_t size)
 {
+  Q_ASSERT(size >= sizeof(BotProtocol::Entity));
   BotProtocol::Header header;
   header.size = sizeof(header) + size;
   header.messageType = BotProtocol::createEntity;
-  header.entityId = 0;
-  header.entityType = type;
   if(!connection.send((const char*)&header, sizeof(header)) ||
      !connection.send((const char*)args, size))
   {
@@ -141,12 +140,14 @@ bool BotConnection::createEntity(BotProtocol::EntityType type, const void* args,
 
 bool BotConnection::removeEntity(BotProtocol::EntityType type, quint32 id)
 {
-  BotProtocol::Header header;
-  header.size = sizeof(header);
-  header.messageType = BotProtocol::removeEntity;
-  header.entityId = id;
-  header.entityType = type;
-  if(!connection.send((const char*)&header, sizeof(header)))
+  char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::Entity)];
+  BotProtocol::Header* header = (BotProtocol::Header*)message;
+  BotProtocol::Entity* entity = (BotProtocol::Entity*)(header + 1);
+  header->size = sizeof(message);
+  header->messageType = BotProtocol::removeEntity;
+  entity->entityId = id;
+  entity->entityType = type;
+  if(!connection.send(message, sizeof(message)))
   {
     error = connection.getLastError();
     return false;
@@ -154,13 +155,12 @@ bool BotConnection::removeEntity(BotProtocol::EntityType type, quint32 id)
   return true;
 }
 
-bool BotConnection::controlEntity(BotProtocol::EntityType type, quint32 id, const void* args, size_t size)
+bool BotConnection::controlEntity(const void* args, size_t size)
 {
+  Q_ASSERT(size >= sizeof(BotProtocol::Entity));
   BotProtocol::Header header;
   header.size = sizeof(header) + size;
   header.messageType = BotProtocol::controlEntity;
-  header.entityId = id;
-  header.entityType = type;
   if(!connection.send((const char*)&header, sizeof(header)) ||
      !connection.send((const char*)args, size))
   {
@@ -201,11 +201,11 @@ bool BotConnection::receiveLoginResponse(BotProtocol::LoginResponse& loginRespon
       loginResponse = response;
       finished = true;
     };
-    virtual void receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size)
+    virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size)
     {
-      if((BotProtocol::EntityType)header.entityType == BotProtocol::error && size >= sizeof(BotProtocol::Error))
+      if((BotProtocol::EntityType)entity.entityType == BotProtocol::error && size >= sizeof(BotProtocol::Error))
       {
-        error = ((BotProtocol::Error*)data)->errorMessage;
+        error = ((BotProtocol::Error*)&entity)->errorMessage;
         finished = true;
       }
     };
@@ -238,11 +238,11 @@ bool BotConnection::receiveAuthResponse()
     {
       finished = true;
     };
-    virtual void receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size)
+    virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size)
     {
-      if((BotProtocol::EntityType)header.entityType == BotProtocol::error && size >= sizeof(BotProtocol::Error))
+      if((BotProtocol::EntityType)entity.entityType == BotProtocol::error && size >= sizeof(BotProtocol::Error))
       {
-        error = ((BotProtocol::Error*)data)->errorMessage;
+        error = ((BotProtocol::Error*)&entity)->errorMessage;
         finished = true;
       }
     };

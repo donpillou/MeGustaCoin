@@ -16,7 +16,7 @@ public:
   };
 
 public:
-  EBotSession(quint32 id, BotProtocol::Session& data) : Entity(eType, id)
+  EBotSession(BotProtocol::Session& data) : Entity(eType, data.entityId)
   {
     data.name[sizeof(data.name) - 1] = '\0';
     name = data.name;

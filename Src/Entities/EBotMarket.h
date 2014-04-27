@@ -15,7 +15,7 @@ public:
   };
 
 public:
-  EBotMarket(quint32 id, BotProtocol::Market& data) : Entity(eType, id)
+  EBotMarket(BotProtocol::Market& data) : Entity(eType, data.entityId)
   {
     marketAdapterId = data.marketAdapterId;
     state = (State)data.state;

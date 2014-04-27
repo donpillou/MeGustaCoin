@@ -24,8 +24,7 @@ public:
   };
 
 public:
-  //EBotSessionOrder(quint32 id) : Entity(eType, id), type(Type::unknown), amount(0.), price(0.), total(0.), state(State::open) {}
-  EBotSessionOrder(quint32 id, BotProtocol::Order& data) : Entity(eType, id)
+  EBotSessionOrder(BotProtocol::Order& data) : Entity(eType, data.entityId)
   {
     type = (Type)data.type;
     date = QDateTime::fromMSecsSinceEpoch(data.date);

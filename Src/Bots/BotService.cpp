@@ -38,23 +38,22 @@ void BotService::stop()
   qDeleteAll(jobQueue.getAll());
 }
 
-void BotService::createEntity(BotProtocol::EntityType type, const void* args, size_t size)
+void BotService::createEntity(const void* args, size_t size)
 {
   class CreateEntityJob : public Job
   {
   public:
-    CreateEntityJob(BotProtocol::EntityType type, const QByteArray& args) : type(type), args(args) {}
+    CreateEntityJob(const QByteArray& args) : args(args) {}
   private:
-    BotProtocol::EntityType type;
     QByteArray args;
   public: // Event
     virtual bool execute(WorkerThread& workerThread)
     {
-      return workerThread.connection.createEntity(type, args.constData(), args.size());
+      return workerThread.connection.createEntity(args.constData(), args.size());
     }
   };
 
-  jobQueue.append(new CreateEntityJob(type, QByteArray((const char*)args, (int)size)));
+  jobQueue.append(new CreateEntityJob(QByteArray((const char*)args, (int)size)));
   if(thread)
     thread->interrupt();
 }
@@ -80,24 +79,22 @@ void BotService::removeEntity(BotProtocol::EntityType type, quint32 id)
     thread->interrupt();
 }
 
-void BotService::controlEntity(BotProtocol::EntityType type, quint32 id, const void* args, size_t size)
+void BotService::controlEntity(const void* args, size_t size)
 {
   class ControlEntityJob : public Job
   {
   public:
-    ControlEntityJob(BotProtocol::EntityType type, quint32 id, const QByteArray& args) : type(type), id(id), args(args) {}
+    ControlEntityJob(const QByteArray& args) : args(args) {}
   private:
-    BotProtocol::EntityType type;
-    quint32 id;
     QByteArray args;
   public: // Event
     virtual bool execute(WorkerThread& workerThread)
     {
-      return workerThread.connection.controlEntity(type, id, args.constData(), args.size());
+      return workerThread.connection.controlEntity(args.constData(), args.size());
     }
   };
 
-  jobQueue.append(new ControlEntityJob(type, id, QByteArray((const char*)args, (int)size)));
+  jobQueue.append(new ControlEntityJob(QByteArray((const char*)args, (int)size)));
   if(thread)
     thread->interrupt();
 }
@@ -105,11 +102,12 @@ void BotService::controlEntity(BotProtocol::EntityType type, quint32 id, const v
 void BotService::createMarket(quint32 marketAdapterId, const QString& userName, const QString& key, const QString& secret)
 {
   BotProtocol::CreateMarketArgs createMarket;
+  createMarket.entityType = BotProtocol::market;
   createMarket.marketAdapterId = marketAdapterId;
   setString(createMarket.username, userName);
   setString(createMarket.key, key);
   setString(createMarket.secret, secret);
-  createEntity(BotProtocol::market, &createMarket, sizeof(createMarket));
+  createEntity(&createMarket, sizeof(createMarket));
 }
 
 void BotService::removeMarket(quint32 id)
@@ -120,12 +118,13 @@ void BotService::removeMarket(quint32 id)
 void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)
 {
   BotProtocol::CreateSessionArgs createSession;
+  createSession.entityType = BotProtocol::session;
   setString(createSession.name, name);
   createSession.engineId = engineId;
   createSession.marketId = marketId;
   createSession.balanceBase = balanceBase;
   createSession.balanceComm = balanceComm;
-  createEntity(BotProtocol::session, &createSession, sizeof(createSession));
+  createEntity(&createSession, sizeof(createSession));
 }
 
 void BotService::removeSession(quint32 id)
@@ -136,24 +135,31 @@ void BotService::removeSession(quint32 id)
 void BotService::startSessionSimulation(quint32 id)
 {
   BotProtocol::ControlSessionArgs controlSession;
+  controlSession.entityType = BotProtocol::session;
+  controlSession.entityId = id;
   controlSession.cmd = BotProtocol::ControlSessionArgs::startSimulation;
-  controlEntity(BotProtocol::session, id, &controlSession, sizeof(controlSession));
+  controlEntity(&controlSession, sizeof(controlSession));
 }
 
 void BotService::stopSession(quint32 id)
 {
   BotProtocol::ControlSessionArgs controlSession;
+  controlSession.entityType = BotProtocol::session;
+  controlSession.entityId = id;
   controlSession.cmd = BotProtocol::ControlSessionArgs::stop;
-  controlEntity(BotProtocol::session, id, &controlSession, sizeof(controlSession));
+  controlEntity(&controlSession, sizeof(controlSession));
 }
 
 void BotService::selectSession(quint32 id)
 {
   entityManager.removeAll<EBotSessionOrder>();
   entityManager.removeAll<EBotSessionTransaction>();
+
   BotProtocol::ControlSessionArgs controlSession;
+  controlSession.entityType = BotProtocol::session;
+  controlSession.entityId = id;
   controlSession.cmd = BotProtocol::ControlSessionArgs::select;
-  controlEntity(BotProtocol::session, id, &controlSession, sizeof(controlSession));
+  controlEntity(&controlSession, sizeof(controlSession));
 }
 
 void BotService::handleEvents()
@@ -277,39 +283,39 @@ void BotService::WorkerThread::run()
   }
 }
 
-void BotService::WorkerThread::receivedUpdateEntity(const BotProtocol::Header& header, char* data, size_t size)
+void BotService::WorkerThread::receivedUpdateEntity(BotProtocol::Entity& data, size_t size)
 {
   Entity* entity = 0;
-  switch((BotProtocol::EntityType)header.entityType)
+  switch((BotProtocol::EntityType)data.entityType)
   {
   case BotProtocol::engine:
-    if(size >= sizeof(BotProtocol::Engine))
-      entity = new EBotEngine(header.entityId, *(BotProtocol::Engine*)data);
+    if(size >= sizeof(BotProtocol::BotEngine))
+      entity = new EBotEngine(*(BotProtocol::BotEngine*)&data);
     break;
   case BotProtocol::session:
     if(size >= sizeof(BotProtocol::Session))
-      entity = new EBotSession(header.entityId, *(BotProtocol::Session*)data);
+      entity = new EBotSession(*(BotProtocol::Session*)&data);
     break;
   case BotProtocol::marketAdapter:
     if(size >= sizeof(BotProtocol::MarketAdapter))
-      entity = new EBotMarketAdapter(header.entityId, *(BotProtocol::MarketAdapter*)data);
+      entity = new EBotMarketAdapter(*(BotProtocol::MarketAdapter*)&data);
     break;
   case BotProtocol::sessionTransaction:
     if(size >= sizeof(BotProtocol::Transaction))
-      entity = new EBotSessionTransaction(header.entityId, *(BotProtocol::Transaction*)data);
+      entity = new EBotSessionTransaction(*(BotProtocol::Transaction*)&data);
     break;
   case BotProtocol::sessionOrder:
     if(size >= sizeof(BotProtocol::Order))
-      entity = new EBotSessionOrder(header.entityId, *(BotProtocol::Order*)data);
+      entity = new EBotSessionOrder(*(BotProtocol::Order*)&data);
     break;
   case BotProtocol::market:
     if(size >= sizeof(BotProtocol::Market))
-      entity = new EBotMarket(header.entityId, *(BotProtocol::Market*)data);
+      entity = new EBotMarket(*(BotProtocol::Market*)&data);
     break;
   case BotProtocol::error:
     if(size >= sizeof(BotProtocol::Error))
     {
-      BotProtocol::Error* error = (BotProtocol::Error*)data;
+      BotProtocol::Error* error = (BotProtocol::Error*)&data;
       error->errorMessage[sizeof(error->errorMessage) - 1] = '\0';
       addMessage(LogModel::Type::error, error->errorMessage);
       return;
@@ -337,10 +343,10 @@ void BotService::WorkerThread::receivedUpdateEntity(const BotProtocol::Header& h
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
-void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Header& header)
+void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& entity)
 {
   EType eType = EType::none;
-  switch(header.entityType)
+  switch((BotProtocol::EntityType)entity.entityType)
   {
   case BotProtocol::session:
     eType = EType::botSession;
@@ -369,6 +375,6 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Header& h
         botService.entityManager.removeEntity(eType, id);
     }
   };
-  eventQueue.append(new RemoveEntityEvent(eType, header.entityId));
+  eventQueue.append(new RemoveEntityEvent(eType, entity.entityId));
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
