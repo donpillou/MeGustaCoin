@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-OrderModel2::OrderModel2(Entity::Manager& entityManager) :
+SessionOrderModel::SessionOrderModel(Entity::Manager& entityManager) :
   entityManager(entityManager),
   draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), 
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
@@ -12,32 +12,32 @@ OrderModel2::OrderModel2(Entity::Manager& entityManager) :
   eBotMarketAdapter = 0;
 }
 
-OrderModel2::~OrderModel2()
+SessionOrderModel::~SessionOrderModel()
 {
   entityManager.unregisterListener<EBotSessionOrder>(*this);
 }
 
-QModelIndex OrderModel2::index(int row, int column, const QModelIndex& parent) const
+QModelIndex SessionOrderModel::index(int row, int column, const QModelIndex& parent) const
 {
   return createIndex(row, column, orders.at(row));
 }
 
-QModelIndex OrderModel2::parent(const QModelIndex& child) const
+QModelIndex SessionOrderModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int OrderModel2::rowCount(const QModelIndex& parent) const
+int SessionOrderModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : orders.size();
 }
 
-int OrderModel2::columnCount(const QModelIndex& parent) const
+int SessionOrderModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant OrderModel2::data(const QModelIndex& index, int role) const
+QVariant SessionOrderModel::data(const QModelIndex& index, int role) const
 {
   const EBotSessionOrder* eOrder = (const EBotSessionOrder*)index.internalPointer();
   if(!eOrder)
@@ -115,7 +115,7 @@ QVariant OrderModel2::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-QVariant OrderModel2::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant SessionOrderModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -154,7 +154,7 @@ QVariant OrderModel2::headerData(int section, Qt::Orientation orientation, int r
   return QVariant();
 }
 
-void OrderModel2::addedEntity(Entity& entity)
+void SessionOrderModel::addedEntity(Entity& entity)
 {
   EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
   if(eOrder)
@@ -168,7 +168,7 @@ void OrderModel2::addedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void OrderModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void SessionOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   EBotSessionOrder* oldEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&oldEntity);
   if(oldEBotSessionOrder)
@@ -184,7 +184,7 @@ void OrderModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   Q_ASSERT(false);
 }
 
-void OrderModel2::removedEntity(Entity& entity)
+void SessionOrderModel::removedEntity(Entity& entity)
 {
   EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
   if(eOrder)
@@ -198,7 +198,7 @@ void OrderModel2::removedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void OrderModel2::removedAll(quint32 type)
+void SessionOrderModel::removedAll(quint32 type)
 {
   if((EType)type == EType::botSessionOrder)
   {

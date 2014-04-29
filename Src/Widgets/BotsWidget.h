@@ -25,8 +25,8 @@ private:
   BotService& botService;
 
   BotSessionModel botSessionModel;
-  OrderModel2 orderModel;
-  TransactionModel2 transactionModel;
+  SessionOrderModel orderModel;
+  SessionTransactionModel transactionModel;
 
   QSplitter* splitter;
   QTreeView* sessionView;

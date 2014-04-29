@@ -1,11 +1,11 @@
 
 #pragma once
 
-class OrderModel2 : public QAbstractItemModel, public Entity::Listener
+class SessionOrderModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
-  OrderModel2(Entity::Manager& entityManager);
-  ~OrderModel2();
+  SessionOrderModel(Entity::Manager& entityManager);
+  ~SessionOrderModel();
 
   enum class Column
   {
@@ -61,17 +61,17 @@ private:
   {
     const EBotSessionOrder* leftOrder = (const EBotSessionOrder*)left.internalPointer();
     const EBotSessionOrder* rightOrder = (const EBotSessionOrder*)right.internalPointer();
-    switch((OrderModel2::Column)left.column())
+    switch((SessionOrderModel::Column)left.column())
     {
-    case OrderModel2::Column::date:
+    case SessionOrderModel::Column::date:
       return leftOrder->getDate().msecsTo(rightOrder->getDate()) > 0;
-    case OrderModel2::Column::value:
+    case SessionOrderModel::Column::value:
       return leftOrder->getAmount() * leftOrder->getPrice() < rightOrder->getAmount() * rightOrder->getPrice();
-    case OrderModel2::Column::amount:
+    case SessionOrderModel::Column::amount:
       return leftOrder->getAmount() < rightOrder->getAmount();
-    case OrderModel2::Column::price:
+    case SessionOrderModel::Column::price:
       return leftOrder->getPrice() < rightOrder->getPrice();
-    case OrderModel2::Column::total:
+    case SessionOrderModel::Column::total:
       return leftOrder->getTotal() < rightOrder->getTotal();
     default:
       break;

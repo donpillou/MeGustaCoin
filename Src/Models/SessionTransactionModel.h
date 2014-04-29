@@ -1,11 +1,11 @@
 
 #pragma once
 
-class TransactionModel2 : public QAbstractItemModel, public Entity::Listener
+class SessionTransactionModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
-  TransactionModel2(Entity::Manager& entityManager);
-  ~TransactionModel2();
+  SessionTransactionModel(Entity::Manager& entityManager);
+  ~SessionTransactionModel();
 
   enum class Column
   {
@@ -55,19 +55,19 @@ private: // QSortFilterProxyModel
   {
     const EBotSessionTransaction* leftTransaction = (const EBotSessionTransaction*)left.internalPointer();
     const EBotSessionTransaction* rightTransaction = (const EBotSessionTransaction*)right.internalPointer();
-    switch((TransactionModel2::Column)left.column())
+    switch((SessionTransactionModel::Column)left.column())
     {
-    case TransactionModel2::Column::date:
+    case SessionTransactionModel::Column::date:
       return leftTransaction->getDate().msecsTo(rightTransaction->getDate()) > 0;
-    case TransactionModel2::Column::value:
+    case SessionTransactionModel::Column::value:
       return leftTransaction->getAmount() * leftTransaction->getPrice() < rightTransaction->getAmount() * rightTransaction->getPrice();
-    case TransactionModel2::Column::amount:
+    case SessionTransactionModel::Column::amount:
       return leftTransaction->getAmount() < rightTransaction->getAmount();
-    case TransactionModel2::Column::price:
+    case SessionTransactionModel::Column::price:
       return leftTransaction->getPrice() < rightTransaction->getPrice();
-    case TransactionModel2::Column::fee:
+    case SessionTransactionModel::Column::fee:
       return leftTransaction->getFee() < rightTransaction->getFee();
-    case TransactionModel2::Column::total:
+    case SessionTransactionModel::Column::total:
       return leftTransaction->getTotal() < rightTransaction->getTotal();
     default:
       break;

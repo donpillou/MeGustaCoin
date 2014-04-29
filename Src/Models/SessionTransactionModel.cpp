@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-TransactionModel2::TransactionModel2(Entity::Manager& entityManager) :
+SessionTransactionModel::SessionTransactionModel(Entity::Manager& entityManager) :
   entityManager(entityManager),
   buyStr(tr("buy")), sellStr(tr("sell")),
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
@@ -12,32 +12,32 @@ TransactionModel2::TransactionModel2(Entity::Manager& entityManager) :
   eBotMarketAdapter = 0;
 }
 
-TransactionModel2::~TransactionModel2()
+SessionTransactionModel::~SessionTransactionModel()
 {
   entityManager.unregisterListener<EBotSessionTransaction>(*this);
 }
 
-QModelIndex TransactionModel2::index(int row, int column, const QModelIndex& parent) const
+QModelIndex SessionTransactionModel::index(int row, int column, const QModelIndex& parent) const
 {
   return createIndex(row, column, transactions.at(row));
 }
 
-QModelIndex TransactionModel2::parent(const QModelIndex& child) const
+QModelIndex SessionTransactionModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int TransactionModel2::rowCount(const QModelIndex& parent) const
+int SessionTransactionModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : transactions.size();
 }
 
-int TransactionModel2::columnCount(const QModelIndex& parent) const
+int SessionTransactionModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant TransactionModel2::data(const QModelIndex& index, int role) const
+QVariant SessionTransactionModel::data(const QModelIndex& index, int role) const
 {
   const EBotSessionTransaction* eTransaction = (const EBotSessionTransaction*)index.internalPointer();
   if(!eTransaction)
@@ -100,7 +100,7 @@ QVariant TransactionModel2::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-QVariant TransactionModel2::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant SessionTransactionModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -140,7 +140,7 @@ QVariant TransactionModel2::headerData(int section, Qt::Orientation orientation,
   return QVariant();
 }
 
-void TransactionModel2::addedEntity(Entity& entity)
+void SessionTransactionModel::addedEntity(Entity& entity)
 {
   EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
   if(eTransaction)
@@ -154,7 +154,7 @@ void TransactionModel2::addedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void TransactionModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void SessionTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   EBotSessionTransaction* oldEBotSessionTransaction = dynamic_cast<EBotSessionTransaction*>(&oldEntity);
   if(oldEBotSessionTransaction)
@@ -170,7 +170,7 @@ void TransactionModel2::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   Q_ASSERT(false);
 }
 
-void TransactionModel2::removedEntity(Entity& entity)
+void SessionTransactionModel::removedEntity(Entity& entity)
 {
   EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
   if(eTransaction)
@@ -184,7 +184,7 @@ void TransactionModel2::removedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void TransactionModel2::removedAll(quint32 type)
+void SessionTransactionModel::removedAll(quint32 type)
 {
   if((EType)type == EType::botSessionTransaction)
   {
