@@ -19,8 +19,8 @@ bool BotConnection::connect(const QString& server, quint16 port, const QString& 
     return false;
 
   QByteArray passwordData = password.toUtf8();
-  QByteArray pwhmac = Sha256::hmac(QByteArray((char*)loginResponse.userkey, 32), passwordData);
-  QByteArray signature = Sha256::hmac(QByteArray((char*)loginResponse.loginkey, 32), pwhmac);
+  QByteArray pwhmac = Sha256::hmac(QByteArray((char*)loginResponse.userKey, 32), passwordData);
+  QByteArray signature = Sha256::hmac(QByteArray((char*)loginResponse.loginKey, 32), pwhmac);
   if(!sendAuthRequest(signature))
     return false;
   if(!receiveAuthResponse())
@@ -173,7 +173,7 @@ bool BotConnection::controlEntity(const void* args, size_t size)
 bool BotConnection::sendLoginRequest(const QString& userName)
 {
   BotProtocol::LoginRequest loginRequest;
-  setString(loginRequest.username, userName);
+  setString(loginRequest.userName, userName);
   return sendMessage(BotProtocol::loginRequest, &loginRequest, sizeof(loginRequest));
 }
 

@@ -104,7 +104,7 @@ void BotService::createMarket(quint32 marketAdapterId, const QString& userName, 
   BotProtocol::CreateMarketArgs createMarket;
   createMarket.entityType = BotProtocol::market;
   createMarket.marketAdapterId = marketAdapterId;
-  setString(createMarket.username, userName);
+  setString(createMarket.userName, userName);
   setString(createMarket.key, key);
   setString(createMarket.secret, secret);
   createEntity(&createMarket, sizeof(createMarket));

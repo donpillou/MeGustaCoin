@@ -32,6 +32,9 @@ public:
     sessionTransaction,
     sessionOrder,
     market,
+    marketTransaction,
+    marketOrder,
+    marketBalance,
   };
 
 #pragma pack(push, 1)
@@ -49,13 +52,13 @@ public:
 
   struct LoginRequest
   {
-    char username[33];
+    char userName[33];
   };
 
   struct LoginResponse
   {
-    unsigned char userkey[32];
-    unsigned char loginkey[32];
+    unsigned char userKey[32];
+    unsigned char loginKey[32];
   };
 
   struct AuthRequest
@@ -163,9 +166,21 @@ public:
   struct CreateMarketArgs : public Entity
   {
     quint32 marketAdapterId;
-    char username[33];
+    char userName[33];
     char key[65];
     char secret[65];
+  };
+
+  struct ControlMarketArgs : public Entity
+  {
+    enum Command
+    {
+      select,
+      refreshTransactions,
+      refreshOrders,
+    };
+
+    quint8 cmd;
   };
 
 #pragma pack(pop)
