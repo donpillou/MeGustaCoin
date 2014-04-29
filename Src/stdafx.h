@@ -35,10 +35,12 @@
 #include "Bots/BotDialog.h"
 
 #include "Models/GraphModel.h"
-#include "Models/OrderModel.h"
+#include "Models/OrderModel.h" // todo: remove
 #include "Models/SessionOrderModel.h"
-#include "Models/TransactionModel.h"
+#include "Models/TransactionModel.h" // todo: remove
 #include "Models/SessionTransactionModel.h"
+#include "Models/MarketOrderModel.h"
+#include "Models/MarketTransactionModel.h"
 #include "Models/BotSessionModel.h"
 #include "Models/BotMarketModel.h"
 #include "Models/TradeModel.h"

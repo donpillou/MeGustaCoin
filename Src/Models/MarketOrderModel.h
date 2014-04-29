@@ -1,11 +1,11 @@
 
 #pragma once
 
-class SessionOrderModel : public QAbstractItemModel, public Entity::Listener
+class MarketOrderModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
-  SessionOrderModel(Entity::Manager& entityManager);
-  ~SessionOrderModel();
+  MarketOrderModel(Entity::Manager& entityManager);
+  ~MarketOrderModel();
 
   enum class Column
   {
@@ -51,10 +51,10 @@ private: // Entity::Listener
   virtual void removedAll(quint32 type);
 };
 
-class SessionOrderSortProxyModel : public QSortFilterProxyModel
+class MarketOrderSortProxyModel : public QSortFilterProxyModel
 {
 public:
-  SessionOrderSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
+  MarketOrderSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
 
 private:
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const

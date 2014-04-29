@@ -1,0 +1,197 @@
+
+#include "stdafx.h"
+
+MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
+  entityManager(entityManager),
+  buyStr(tr("buy")), sellStr(tr("sell")),
+  sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
+  dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
+{
+  entityManager.registerListener<EBotSessionTransaction>(*this);
+
+  eBotMarketAdapter = 0;
+}
+
+MarketTransactionModel::~MarketTransactionModel()
+{
+  entityManager.unregisterListener<EBotSessionTransaction>(*this);
+}
+
+QModelIndex MarketTransactionModel::index(int row, int column, const QModelIndex& parent) const
+{
+  return createIndex(row, column, transactions.at(row));
+}
+
+QModelIndex MarketTransactionModel::parent(const QModelIndex& child) const
+{
+  return QModelIndex();
+}
+
+int MarketTransactionModel::rowCount(const QModelIndex& parent) const
+{
+  return parent.isValid() ? 0 : transactions.size();
+}
+
+int MarketTransactionModel::columnCount(const QModelIndex& parent) const
+{
+  return (int)Column::last + 1;
+}
+
+QVariant MarketTransactionModel::data(const QModelIndex& index, int role) const
+{
+  const EBotSessionTransaction* eTransaction = (const EBotSessionTransaction*)index.internalPointer();
+  if(!eTransaction)
+    return QVariant();
+
+  if(role == Qt::TextAlignmentRole)
+    switch((Column)index.column())
+    {
+    case Column::price:
+    case Column::value:
+    case Column::amount:
+    case Column::fee:
+    case Column::total:
+      return (int)Qt::AlignRight | (int)Qt::AlignVCenter;
+    default:
+      return (int)Qt::AlignLeft | (int)Qt::AlignVCenter;
+    }
+
+  switch(role)
+  {
+  case Qt::DecorationRole:
+    if((Column)index.column() == Column::type)
+      switch(eTransaction->getType())
+      {
+      case EBotSessionTransaction::Type::sell:
+        return sellIcon;
+      case EBotSessionTransaction::Type::buy:
+        return buyIcon;
+      default:
+        break;
+      }
+    break;
+  case Qt::DisplayRole:
+    switch((Column)index.column())
+    {
+    case Column::type:
+      switch(eTransaction->getType())
+      {
+      case EBotSessionTransaction::Type::buy:
+        return buyStr;
+      case EBotSessionTransaction::Type::sell:
+        return sellStr;
+      default:
+        break;
+      }
+    case Column::date:
+      return eTransaction->getDate().toString(dateFormat);
+    case Column::amount:
+      return eBotMarketAdapter->formatAmount(eTransaction->getAmount());
+    case Column::price:
+      return eBotMarketAdapter->formatPrice(eTransaction->getPrice());
+    case Column::value:
+      return eBotMarketAdapter->formatPrice(eTransaction->getAmount() * eTransaction->getPrice());
+    case Column::fee:
+      return eBotMarketAdapter->formatPrice(eTransaction->getFee());
+    case Column::total:
+      return eTransaction->getTotal() > 0 ? (QString("+") + eBotMarketAdapter->formatPrice(eTransaction->getTotal())) : eBotMarketAdapter->formatPrice(eTransaction->getTotal());
+    }
+  }
+  return QVariant();
+}
+
+QVariant MarketTransactionModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+  if(orientation != Qt::Horizontal)
+    return QVariant();
+  switch(role)
+  {
+  case Qt::TextAlignmentRole:
+    switch((Column)section)
+    {
+    case Column::price:
+    case Column::value:
+    case Column::amount:
+    case Column::fee:
+    case Column::total:
+      return Qt::AlignRight;
+    default:
+      return Qt::AlignLeft;
+    }
+  case Qt::DisplayRole:
+    switch((Column)section)
+    {
+      case Column::type:
+        return tr("Type");
+      case Column::date:
+        return tr("Date");
+      case Column::amount:
+        return tr("Amount %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString());
+      case Column::price:
+        return tr("Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+      case Column::value:
+        return tr("Value %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+      case Column::fee:
+        return tr("Fee %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+      case Column::total:
+        return tr("Total %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+    }
+  }
+  return QVariant();
+}
+
+void MarketTransactionModel::addedEntity(Entity& entity)
+{
+  EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
+  if(eTransaction)
+  {
+    int index = transactions.size();
+    beginInsertRows(QModelIndex(), index, index);
+    transactions.append(eTransaction);
+    endInsertRows();
+    return;
+  }
+  Q_ASSERT(false);
+}
+
+void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+{
+  EBotSessionTransaction* oldEBotSessionTransaction = dynamic_cast<EBotSessionTransaction*>(&oldEntity);
+  if(oldEBotSessionTransaction)
+  {
+    EBotSessionTransaction* newEBotSessionTransaction = dynamic_cast<EBotSessionTransaction*>(&newEntity);
+    int index = transactions.indexOf(oldEBotSessionTransaction);
+    transactions[index] = newEBotSessionTransaction; 
+    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionTransaction);
+    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotSessionTransaction);
+    emit dataChanged(leftModelIndex, rightModelIndex);
+    return;
+  }
+  Q_ASSERT(false);
+}
+
+void MarketTransactionModel::removedEntity(Entity& entity)
+{
+  EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
+  if(eTransaction)
+  {
+    int index = transactions.indexOf(eTransaction);
+    beginRemoveRows(QModelIndex(), index, index);
+    transactions.removeAt(index);
+    endRemoveRows();
+    return;
+  }
+  Q_ASSERT(false);
+}
+
+void MarketTransactionModel::removedAll(quint32 type)
+{
+  if((EType)type == EType::botSessionTransaction)
+  {
+    emit beginResetModel();
+    transactions.clear();
+    emit endResetModel();
+    return;
+  }
+  Q_ASSERT(false);
+}

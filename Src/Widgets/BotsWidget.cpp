@@ -45,7 +45,7 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, Entity::Manager& en
 
   orderView = new QTreeView(this);
   orderView->setUniformRowHeights(true);
-  OrderSortProxyModel2* orderProxyModel = new OrderSortProxyModel2(this);
+  SessionOrderSortProxyModel* orderProxyModel = new SessionOrderSortProxyModel(this);
   orderProxyModel->setDynamicSortFilter(true);
   orderProxyModel->setSourceModel(&orderModel);
   orderView->setModel(orderProxyModel);
@@ -57,7 +57,7 @@ BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, Entity::Manager& en
 
   transactionView = new QTreeView(this);
   transactionView->setUniformRowHeights(true);
-  TransactionSortProxyModel2* transactionProxyModel = new TransactionSortProxyModel2(this);
+  SessionTransactionSortProxyModel* transactionProxyModel = new SessionTransactionSortProxyModel(this);
   transactionProxyModel->setDynamicSortFilter(true);
   transactionProxyModel->setSourceModel(&transactionModel);
   transactionView->setModel(transactionProxyModel);
