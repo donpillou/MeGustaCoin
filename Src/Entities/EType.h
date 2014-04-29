@@ -11,4 +11,6 @@ enum class EType
   botSession,
   botMarketAdapter,
   botMarket,
+  botMarketOrder,
+  botMarketTransaction,
 };

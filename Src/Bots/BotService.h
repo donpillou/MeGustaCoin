@@ -14,6 +14,7 @@ public:
 
   void createMarket(quint32 marketAdapterId, const QString& userName, const QString& key, const QString& secret);
   void removeMarket(quint32 id);
+  void selectMarket(quint32 id);
 
   void createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm);
   void removeSession(quint32 id);

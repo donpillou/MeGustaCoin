@@ -115,6 +115,19 @@ void BotService::removeMarket(quint32 id)
   removeEntity(BotProtocol::market, id);
 }
 
+void BotService::selectMarket(quint32 id)
+{
+  entityManager.removeAll<EBotMarketOrder>();
+  entityManager.removeAll<EBotMarketTransaction>();
+
+  BotProtocol::ControlMarketArgs controlMarket;
+  controlMarket.entityType = BotProtocol::market;
+  controlMarket.entityId = id;
+  controlMarket.cmd = BotProtocol::ControlMarketArgs::select;
+  controlEntity(&controlMarket, sizeof(controlMarket));
+
+}
+
 void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)
 {
   BotProtocol::CreateSessionArgs createSession;

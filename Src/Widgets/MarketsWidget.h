@@ -29,6 +29,7 @@ private slots:
   void editMarket();
   void removeMarket();
   void updateToolBarButtons();
+  void marketSelectionChanged();
 
 private:
   void updateTitle(EBotService& eBotService);

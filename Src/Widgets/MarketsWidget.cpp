@@ -37,6 +37,7 @@ MarketsWidget::MarketsWidget(QWidget* parent, QSettings& settings, Entity::Manag
   setLayout(layout);
 
   connect(marketView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
+  connect(marketView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(marketSelectionChanged()));
 
   QHeaderView* headerView = marketView->header();
   headerView->resizeSection(0, 100);
@@ -111,6 +112,16 @@ void MarketsWidget::updateToolBarButtons()
   removeAction->setEnabled(connected && marketSelected);
 }
 
+void MarketsWidget::marketSelectionChanged()
+{
+  QModelIndexList selection = marketView->selectionModel()->selectedRows();
+  if(!selection.isEmpty())
+  {
+    QModelIndex modelIndex = proxyModel->mapToSource(selection.front());
+    EBotMarket* eBotMarket = (EBotMarket*)modelIndex.internalPointer();
+    botService.selectMarket(eBotMarket->getId());
+  }
+}
 
 void MarketsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
