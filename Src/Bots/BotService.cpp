@@ -125,7 +125,6 @@ void BotService::selectMarket(quint32 id)
   controlMarket.entityId = id;
   controlMarket.cmd = BotProtocol::ControlMarketArgs::select;
   controlEntity(&controlMarket, sizeof(controlMarket));
-
 }
 
 void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)

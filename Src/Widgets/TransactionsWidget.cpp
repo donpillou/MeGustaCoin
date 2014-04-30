@@ -1,13 +1,12 @@
 
 #include "stdafx.h"
 
-TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService) :
-  QWidget(parent),
-  dataModel(dataModel), transactionModel(dataModel.transactionModel),
-  marketService(marketService)
+TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
+  QWidget(parent), entityManager(entityManager), botService(botService), transactionModel(entityManager)
 {
-  connect(&dataModel.transactionModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
+  entityManager.registerListener<EBotService>(*this);
+  //connect(&dataModel.transactionModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
+  //connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
 
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -20,7 +19,7 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Dat
 
   transactionView = new QTreeView(this);
   transactionView->setUniformRowHeights(true);
-  proxyModel = new TransactionSortProxyModel(this, transactionModel);
+  proxyModel = new MarketTransactionSortProxyModel(this);
   proxyModel->setSourceModel(&transactionModel);
   proxyModel->setDynamicSortFilter(true);
   transactionView->setModel(proxyModel);
@@ -52,6 +51,11 @@ TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Dat
   settings.endGroup();
 }
 
+TransactionsWidget::~TransactionsWidget()
+{
+  entityManager.unregisterListener<EBotService>(*this);
+}
+
 void TransactionsWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("Transactions");
@@ -61,20 +65,21 @@ void TransactionsWidget::saveState(QSettings& settings)
 
 void TransactionsWidget::updateToolBarButtons()
 {
-  bool hasMarket = marketService.isReady();
+  bool connected = botService.isConnected();
+  bool marketSelected = false;
 
-  refreshAction->setEnabled(hasMarket);
+  refreshAction->setEnabled(connected && marketSelected);
 }
 
 void TransactionsWidget::refresh()
 {
-  marketService.loadTransactions();
-  marketService.loadBalance();
+  //marketService.loadTransactions();
+  //marketService.loadBalance();
 }
 
-void TransactionsWidget::updateTitle()
+void TransactionsWidget::updateTitle(EBotService& eBotService)
 {
-  QString stateStr = dataModel.transactionModel.getStateName();
+  QString stateStr = eBotService.getStateName();
   QString title;
   if(stateStr.isEmpty())
     title = tr("Transactions");
@@ -83,4 +88,17 @@ void TransactionsWidget::updateTitle()
   QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
   dockWidget->setWindowTitle(title);
   dockWidget->toggleViewAction()->setText(tr("Transactions"));
+}
+
+void TransactionsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+{
+  switch ((EType)newEntity.getType())
+  {
+  case EType::botService:
+    updateTitle(*dynamic_cast<EBotService*>(&newEntity));
+    updateToolBarButtons();
+    break;
+  default:
+    break;
+  }
 }

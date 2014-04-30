@@ -1,12 +1,13 @@
 
 #pragma once
 
-class OrdersWidget : public QWidget
+class OrdersWidget : public QWidget, public Entity::Listener
 {
   Q_OBJECT
 
 public:
-  OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService);
+  OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
+  ~OrdersWidget();
 
   void saveState(QSettings& settings);
 
@@ -21,12 +22,12 @@ private slots:
   void updateOrder(const QModelIndex& index);
   void updateDraft(const QModelIndex& index);
   void updateToolBarButtons();
-  void updateTitle();
 
 private:
-  DataModel& dataModel;
-  OrderModel& orderModel;
-  MarketService& marketService;
+  Entity::Manager& entityManager;
+  BotService& botService;
+
+  MarketOrderModel orderModel;
 
   QTreeView* orderView;
   QSortFilterProxyModel* proxyModel;
@@ -39,4 +40,11 @@ private:
 
   void addOrder(OrderModel::Order::Type type);
   QList<QModelIndex> getSelectedRows();
+
+private:
+    void updateTitle(EBotService& eBotService);
+
+private: // Entity::Listener
+  virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
+
 };

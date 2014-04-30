@@ -33,8 +33,8 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   */
 
   marketsWidget = new MarketsWidget(this, settings, botEntityManager, botService);
-  ordersWidget = new OrdersWidget(this, settings, dataModel, marketService);
-  transactionsWidget = new TransactionsWidget(this, settings, dataModel, marketService);
+  ordersWidget = new OrdersWidget(this, settings, botEntityManager, botService);
+  transactionsWidget = new TransactionsWidget(this, settings, botEntityManager, botService);
   graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
   botsWidget = new BotsWidget(this, settings, botEntityManager, botService);
   logWidget = new LogWidget(this, settings, dataModel.logModel);

@@ -1,11 +1,12 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& dataModel, MarketService& marketService) :
-  QWidget(parent), dataModel(dataModel), orderModel(dataModel.orderModel), marketService(marketService)
+OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
+  QWidget(parent), entityManager(entityManager), botService(botService), orderModel(entityManager)
 {
-  connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
+  entityManager.registerListener<EBotService>(*this);
+  //connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
+  //connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
 
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -37,7 +38,7 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& data
 
   orderView = new QTreeView(this);
   orderView->setUniformRowHeights(true);
-  proxyModel = new OrderSortProxyModel(this, orderModel);
+  proxyModel = new MarketOrderSortProxyModel(this);
   proxyModel->setDynamicSortFilter(true);
   proxyModel->setSourceModel(&orderModel);
   orderView->setModel(proxyModel);
@@ -74,13 +75,17 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, DataModel& data
   settings.endGroup();
 }
 
+OrdersWidget::~OrdersWidget()
+{
+  entityManager.unregisterListener<EBotService>(*this);
+}
+
 void OrdersWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("Orders");
   settings.setValue("HeaderState", orderView->header()->saveState());
   settings.endGroup();
 }
-
 
 void OrdersWidget::newBuyOrder()
 {
@@ -94,21 +99,21 @@ void OrdersWidget::newSellOrder()
 
 void OrdersWidget::addOrder(OrderModel::Order::Type type)
 {
-  const QString& marketName = dataModel.getMarketName();
-  if(marketName.isEmpty())
-    return;
-  const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
-  double price = 0;
-  double bid, ask;
-  if(publicDataModel.getTicker(bid, ask))
-    price = type == OrderModel::Order::Type::buy ? (bid + 0.01) : (ask - 0.01);
-
-  QString id = marketService.createOrderDraft(type == OrderModel::Order::Type::sell, price);
-  QModelIndex index = orderModel.getOrderIndex(id);
-
-  QModelIndex amountIndex = proxyModel->mapFromSource(orderModel.index(index.row(), (int)OrderModel::Column::amount));
-  orderView->setCurrentIndex(amountIndex);
-  orderView->edit(amountIndex);
+  //const QString& marketName = dataModel.getMarketName();
+  //if(marketName.isEmpty())
+  //  return;
+  //const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
+  //double price = 0;
+  //double bid, ask;
+  //if(publicDataModel.getTicker(bid, ask))
+  //  price = type == OrderModel::Order::Type::buy ? (bid + 0.01) : (ask - 0.01);
+  //
+  //QString id = marketService.createOrderDraft(type == OrderModel::Order::Type::sell, price);
+  //QModelIndex index = orderModel.getOrderIndex(id);
+  //
+  //QModelIndex amountIndex = proxyModel->mapFromSource(orderModel.index(index.row(), (int)OrderModel::Column::amount));
+  //orderView->setCurrentIndex(amountIndex);
+  //orderView->edit(amountIndex);
 }
 
 QList<QModelIndex> OrdersWidget::getSelectedRows()
@@ -126,124 +131,127 @@ QList<QModelIndex> OrdersWidget::getSelectedRows()
 
 void OrdersWidget::submitOrder()
 {
-  QList<QModelIndex> seletedIndices = getSelectedRows();
-
-  foreach(const QModelIndex& proxyIndex, seletedIndices)
-  {
-    QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    const OrderModel::Order* order = orderModel.getOrder(index);
-    if(order->state == OrderModel::Order::State::draft)
-    {
-      double amount = order->newAmount != 0. ? order->newAmount : order->amount;
-      double price = order->newPrice != 0. ? order->newPrice : order->price;
-      /*
-      double maxAmount = order->type == OrderModel::Order::Type::buy ? marketService.getMaxBuyAmout(price) : marketService.getMaxSellAmout();
-      if(amount > maxAmount)
-      {
-        orderModel.setOrderNewAmount(order->id, maxAmount);
-        amount = maxAmount;
-      }
-      */
-
-      marketService.createOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
-    }
-  }
-  updateToolBarButtons();
+  //QList<QModelIndex> seletedIndices = getSelectedRows();
+  //
+  //foreach(const QModelIndex& proxyIndex, seletedIndices)
+  //{
+  //  QModelIndex index = proxyModel->mapToSource(proxyIndex);
+  //  const OrderModel::Order* order = orderModel.getOrder(index);
+  //  if(order->state == OrderModel::Order::State::draft)
+  //  {
+  //    double amount = order->newAmount != 0. ? order->newAmount : order->amount;
+  //    double price = order->newPrice != 0. ? order->newPrice : order->price;
+  //    /*
+  //    double maxAmount = order->type == OrderModel::Order::Type::buy ? marketService.getMaxBuyAmout(price) : marketService.getMaxSellAmout();
+  //    if(amount > maxAmount)
+  //    {
+  //      orderModel.setOrderNewAmount(order->id, maxAmount);
+  //      amount = maxAmount;
+  //    }
+  //    */
+  //
+  //    marketService.createOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
+  //  }
+  //}
+  //updateToolBarButtons();
 }
 
 void OrdersWidget::cancelOrder()
 {
-  QList<QModelIndex> seletedIndices = getSelectedRows();
-
-  QMap<int, QModelIndex> rowsToRemove;
-  foreach(const QModelIndex& proxyIndex, seletedIndices)
-  {
-    QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    const OrderModel::Order* order = orderModel.getOrder(index);
-    switch(order->state)
-    {
-    case OrderModel::Order::State::draft:
-    case OrderModel::Order::State::canceled:
-    case OrderModel::Order::State::closed:
-      rowsToRemove.insert(index.row(), index);
-      break;
-    case OrderModel::Order::State::open:
-      {
-        marketService.cancelOrder(order->id);
-        break;
-      }
-    default:
-      break;
-    }
-  }
-  while(!rowsToRemove.isEmpty())
-  {
-    QMap<int, QModelIndex>::iterator last = --rowsToRemove.end();
-    orderModel.removeOrder(last.value());
-    rowsToRemove.erase(last);
-  }
-  updateToolBarButtons();
+  //QList<QModelIndex> seletedIndices = getSelectedRows();
+  //
+  //QMap<int, QModelIndex> rowsToRemove;
+  //foreach(const QModelIndex& proxyIndex, seletedIndices)
+  //{
+  //  QModelIndex index = proxyModel->mapToSource(proxyIndex);
+  //  const OrderModel::Order* order = orderModel.getOrder(index);
+  //  switch(order->state)
+  //  {
+  //  case OrderModel::Order::State::draft:
+  //  case OrderModel::Order::State::canceled:
+  //  case OrderModel::Order::State::closed:
+  //    rowsToRemove.insert(index.row(), index);
+  //    break;
+  //  case OrderModel::Order::State::open:
+  //    {
+  //      marketService.cancelOrder(order->id);
+  //      break;
+  //    }
+  //  default:
+  //    break;
+  //  }
+  //}
+  //while(!rowsToRemove.isEmpty())
+  //{
+  //  QMap<int, QModelIndex>::iterator last = --rowsToRemove.end();
+  //  orderModel.removeOrder(last.value());
+  //  rowsToRemove.erase(last);
+  //}
+  //updateToolBarButtons();
 }
 
 void OrdersWidget::updateOrder(const QModelIndex& index)
 {
-  const OrderModel::Order* order = orderModel.getOrder(index);
-  if(order->state != OrderModel::Order::State::open || (order->newAmount == 0. && order->newPrice == 0.))
-    return;
-  double amount = order->newAmount != 0. ? order->newAmount : order->amount;
-  double price = order->newPrice != 0. ? order->newPrice : order->price;
-
-  marketService.updateOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
-  updateToolBarButtons();
+  //const OrderModel::Order* order = orderModel.getOrder(index);
+  //if(order->state != OrderModel::Order::State::open || (order->newAmount == 0. && order->newPrice == 0.))
+  //  return;
+  //double amount = order->newAmount != 0. ? order->newAmount : order->amount;
+  //double price = order->newPrice != 0. ? order->newPrice : order->price;
+  //
+  //marketService.updateOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
+  //updateToolBarButtons();
 }
 
 void OrdersWidget::updateDraft(const QModelIndex& index)
 {
-  const OrderModel::Order* order = orderModel.getOrder(index);
-  if(order->state != OrderModel::Order::State::draft)
-    return;
-  double amount = order->newAmount != 0. ? order->newAmount : order->amount;
-  double price = order->newPrice != 0. ? order->newPrice : order->price;
-
-  marketService.updateOrderDraft(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
+  //const OrderModel::Order* order = orderModel.getOrder(index);
+  //if(order->state != OrderModel::Order::State::draft)
+  //  return;
+  //double amount = order->newAmount != 0. ? order->newAmount : order->amount;
+  //double price = order->newPrice != 0. ? order->newPrice : order->price;
+  //
+  //marketService.updateOrderDraft(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
 }
 
 void OrdersWidget::updateToolBarButtons()
 {
-  QList<QModelIndex> selectedRows = getSelectedRows();
+  bool connected = botService.isConnected();
+  bool marketSelected = false;
 
-  bool hasMarket = marketService.isReady();
-  bool canCancel = getSelectedRows().size() > 0;
-  bool canSubmit = false;
-
-  if(hasMarket)
-    foreach(const QModelIndex& proxyIndex, selectedRows)
-    {
-      QModelIndex index = proxyModel->mapToSource(proxyIndex);
-      const OrderModel::Order* order = orderModel.getOrder(index);
-      if(order->state == OrderModel::Order::State::draft)
-      {
-        canSubmit = true;
-        break;
-      }
-    }
-
-  refreshAction->setEnabled(hasMarket);
-  buyAction->setEnabled(hasMarket);
-  sellAction->setEnabled(hasMarket);
-  submitAction->setEnabled(hasMarket && canSubmit);
-  cancelAction->setEnabled(canCancel);
+  //QList<QModelIndex> selectedRows = getSelectedRows();
+  //
+  //bool hasMarket = marketService.isReady();
+  //bool canCancel = getSelectedRows().size() > 0;
+  //bool canSubmit = false;
+  //
+  //if(hasMarket)
+  //  foreach(const QModelIndex& proxyIndex, selectedRows)
+  //  {
+  //    QModelIndex index = proxyModel->mapToSource(proxyIndex);
+  //    const OrderModel::Order* order = orderModel.getOrder(index);
+  //    if(order->state == OrderModel::Order::State::draft)
+  //    {
+  //      canSubmit = true;
+  //      break;
+  //    }
+  //  }
+  //
+  refreshAction->setEnabled(connected && marketSelected);
+  //buyAction->setEnabled(hasMarket);
+  //sellAction->setEnabled(hasMarket);
+  //submitAction->setEnabled(hasMarket && canSubmit);
+  //cancelAction->setEnabled(canCancel);
 }
 
 void OrdersWidget::refresh()
 {
-  marketService.loadOrders();
-  marketService.loadBalance();
+  //marketService.loadOrders();
+  //marketService.loadBalance();
 }
 
-void OrdersWidget::updateTitle()
+void OrdersWidget::updateTitle(EBotService& eBotService)
 {
-  QString stateStr = dataModel.orderModel.getStateName();
+  QString stateStr = eBotService.getStateName();
   QString title;
   if(stateStr.isEmpty())
     title = tr("Orders");
@@ -252,4 +260,17 @@ void OrdersWidget::updateTitle()
   QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
   dockWidget->setWindowTitle(title);
   dockWidget->toggleViewAction()->setText(tr("Orders"));
+}
+
+void OrdersWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+{
+  switch ((EType)newEntity.getType())
+  {
+  case EType::botService:
+    updateTitle(*dynamic_cast<EBotService*>(&newEntity));
+    updateToolBarButtons();
+    break;
+  default:
+    break;
+  }
 }

@@ -7,14 +7,14 @@ MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<EBotSessionOrder>(*this);
+  entityManager.registerListener<EBotMarketOrder>(*this);
 
   eBotMarketAdapter = 0;
 }
 
 MarketOrderModel::~MarketOrderModel()
 {
-  entityManager.unregisterListener<EBotSessionOrder>(*this);
+  entityManager.unregisterListener<EBotMarketOrder>(*this);
 }
 
 QModelIndex MarketOrderModel::index(int row, int column, const QModelIndex& parent) const
@@ -39,7 +39,7 @@ int MarketOrderModel::columnCount(const QModelIndex& parent) const
 
 QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
 {
-  const EBotSessionOrder* eOrder = (const EBotSessionOrder*)index.internalPointer();
+  const EBotMarketOrder* eOrder = (const EBotMarketOrder*)index.internalPointer();
   if(!eOrder)
     return QVariant();
 
@@ -61,9 +61,9 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
     if((Column)index.column() == Column::type)
       switch(eOrder->getType())
       {
-      case EBotSessionOrder::Type::sell:
+      case EBotMarketOrder::Type::sell:
         return sellIcon;
-      case EBotSessionOrder::Type::buy:
+      case EBotMarketOrder::Type::buy:
         return buyIcon;
       default:
         break;
@@ -75,9 +75,9 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
     case Column::type:
       switch(eOrder->getType())
       {
-      case EBotSessionOrder::Type::buy:
+      case EBotMarketOrder::Type::buy:
         return buyStr;
-      case EBotSessionOrder::Type::sell:
+      case EBotMarketOrder::Type::sell:
         return sellStr;
       default:
         break;
@@ -94,17 +94,17 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
     case Column::state:
       switch(eOrder->getState())
       {
-      case EBotSessionOrder::State::draft:
+      case EBotMarketOrder::State::draft:
         return draftStr;
-      case EBotSessionOrder::State::submitting:
+      case EBotMarketOrder::State::submitting:
         return submittingStr;
-      case EBotSessionOrder::State::open:
+      case EBotMarketOrder::State::open:
         return openStr;
-      case EBotSessionOrder::State::canceling:
+      case EBotMarketOrder::State::canceling:
         return cancelingStr;
-      case EBotSessionOrder::State::canceled:
+      case EBotMarketOrder::State::canceled:
         return canceledStr;
-      case EBotSessionOrder::State::closed:
+      case EBotMarketOrder::State::closed:
         return closedStr;
       }
       break;
@@ -156,7 +156,7 @@ QVariant MarketOrderModel::headerData(int section, Qt::Orientation orientation, 
 
 void MarketOrderModel::addedEntity(Entity& entity)
 {
-  EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
+  EBotMarketOrder* eOrder = dynamic_cast<EBotMarketOrder*>(&entity);
   if(eOrder)
   {
     int index = orders.size();
@@ -170,14 +170,14 @@ void MarketOrderModel::addedEntity(Entity& entity)
 
 void MarketOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EBotSessionOrder* oldEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&oldEntity);
-  if(oldEBotSessionOrder)
+  EBotMarketOrder* oldEBotMarketOrder = dynamic_cast<EBotMarketOrder*>(&oldEntity);
+  if(oldEBotMarketOrder)
   {
-    EBotSessionOrder* newEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&newEntity);
-    int index = orders.indexOf(oldEBotSessionOrder);
-    orders[index] = newEBotSessionOrder; 
-    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionOrder);
-    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotSessionOrder);
+    EBotMarketOrder* newEBotMarketOrder = dynamic_cast<EBotMarketOrder*>(&newEntity);
+    int index = orders.indexOf(oldEBotMarketOrder);
+    orders[index] = newEBotMarketOrder; 
+    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotMarketOrder);
+    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotMarketOrder);
     emit dataChanged(leftModelIndex, rightModelIndex);
     return;
   }
@@ -186,7 +186,7 @@ void MarketOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 
 void MarketOrderModel::removedEntity(Entity& entity)
 {
-  EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
+  EBotMarketOrder* eOrder = dynamic_cast<EBotMarketOrder*>(&entity);
   if(eOrder)
   {
     int index = orders.indexOf(eOrder);

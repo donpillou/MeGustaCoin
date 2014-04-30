@@ -7,14 +7,14 @@ MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<EBotSessionTransaction>(*this);
+  entityManager.registerListener<EBotMarketTransaction>(*this);
 
   eBotMarketAdapter = 0;
 }
 
 MarketTransactionModel::~MarketTransactionModel()
 {
-  entityManager.unregisterListener<EBotSessionTransaction>(*this);
+  entityManager.unregisterListener<EBotMarketTransaction>(*this);
 }
 
 QModelIndex MarketTransactionModel::index(int row, int column, const QModelIndex& parent) const
@@ -39,7 +39,7 @@ int MarketTransactionModel::columnCount(const QModelIndex& parent) const
 
 QVariant MarketTransactionModel::data(const QModelIndex& index, int role) const
 {
-  const EBotSessionTransaction* eTransaction = (const EBotSessionTransaction*)index.internalPointer();
+  const EBotMarketTransaction* eTransaction = (const EBotMarketTransaction*)index.internalPointer();
   if(!eTransaction)
     return QVariant();
 
@@ -62,9 +62,9 @@ QVariant MarketTransactionModel::data(const QModelIndex& index, int role) const
     if((Column)index.column() == Column::type)
       switch(eTransaction->getType())
       {
-      case EBotSessionTransaction::Type::sell:
+      case EBotMarketTransaction::Type::sell:
         return sellIcon;
-      case EBotSessionTransaction::Type::buy:
+      case EBotMarketTransaction::Type::buy:
         return buyIcon;
       default:
         break;
@@ -76,9 +76,9 @@ QVariant MarketTransactionModel::data(const QModelIndex& index, int role) const
     case Column::type:
       switch(eTransaction->getType())
       {
-      case EBotSessionTransaction::Type::buy:
+      case EBotMarketTransaction::Type::buy:
         return buyStr;
-      case EBotSessionTransaction::Type::sell:
+      case EBotMarketTransaction::Type::sell:
         return sellStr;
       default:
         break;
@@ -142,7 +142,7 @@ QVariant MarketTransactionModel::headerData(int section, Qt::Orientation orienta
 
 void MarketTransactionModel::addedEntity(Entity& entity)
 {
-  EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
+  EBotMarketTransaction* eTransaction = dynamic_cast<EBotMarketTransaction*>(&entity);
   if(eTransaction)
   {
     int index = transactions.size();
@@ -156,14 +156,14 @@ void MarketTransactionModel::addedEntity(Entity& entity)
 
 void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EBotSessionTransaction* oldEBotSessionTransaction = dynamic_cast<EBotSessionTransaction*>(&oldEntity);
-  if(oldEBotSessionTransaction)
+  EBotMarketTransaction* oldEBotMarketTransaction = dynamic_cast<EBotMarketTransaction*>(&oldEntity);
+  if(oldEBotMarketTransaction)
   {
-    EBotSessionTransaction* newEBotSessionTransaction = dynamic_cast<EBotSessionTransaction*>(&newEntity);
-    int index = transactions.indexOf(oldEBotSessionTransaction);
-    transactions[index] = newEBotSessionTransaction; 
-    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionTransaction);
-    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotSessionTransaction);
+    EBotMarketTransaction* newEBotMarketTransaction = dynamic_cast<EBotMarketTransaction*>(&newEntity);
+    int index = transactions.indexOf(oldEBotMarketTransaction);
+    transactions[index] = newEBotMarketTransaction; 
+    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotMarketTransaction);
+    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotMarketTransaction);
     emit dataChanged(leftModelIndex, rightModelIndex);
     return;
   }
@@ -172,7 +172,7 @@ void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity
 
 void MarketTransactionModel::removedEntity(Entity& entity)
 {
-  EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
+  EBotMarketTransaction* eTransaction = dynamic_cast<EBotMarketTransaction*>(&entity);
   if(eTransaction)
   {
     int index = transactions.indexOf(eTransaction);
