@@ -415,6 +415,8 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& e
   case BotProtocol::marketOrder:
     eType = EType::botMarketOrder;
     break;
+  default:
+    break;
   }
 
   class RemoveEntityEvent : public Event

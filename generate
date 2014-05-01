@@ -2,4 +2,4 @@
 
 [ ! -f "Build/mare/mare" ] && Ext/mare/build --buildDir=Build/mare --outputDir=Build/mare --sourceDir=Ext/mare/src
 Build/mare/mare $@
-
+mkdir -p  Build/Debug Build/Release
