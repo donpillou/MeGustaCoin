@@ -69,6 +69,7 @@ public:
   }
   double getTotal() const {return total;}
   State getState() const {return state;}
+  void setState(State state) {this->state = state;}
 
 private:
   Type type;

@@ -179,6 +179,22 @@ public:
     quint8 success;
   };
 
+  struct CreateTransactionArgs : public Entity
+  {
+    quint8 type; // see Transaction::Type
+    double price;
+    double amount;
+    double fee;
+  };
+
+  struct CreateOrderArgs : public Entity
+  {
+    quint8 type; // see Order::Type
+    double price;
+    double amount;
+    double fee;
+  };
+
   struct CreateMarketArgs : public Entity
   {
     quint32 marketAdapterId;

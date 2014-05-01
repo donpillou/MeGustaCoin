@@ -144,6 +144,16 @@ void BotService::refreshMarketTransactions()
   controlEntity(&controlMarket, sizeof(controlMarket));
 }
 
+void BotService::createMarketOrder(EBotMarketOrder::Type type, double price, double amount)
+{
+  BotProtocol::CreateOrderArgs order;
+  order.entityType = BotProtocol::marketOrder;
+  order.entityId  = 0;
+  order.price = price;
+  order.amount = amount;
+  createEntity(&order, sizeof(order));
+}
+
 void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)
 {
   BotProtocol::CreateSessionArgs createSession;

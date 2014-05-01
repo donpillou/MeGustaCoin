@@ -140,6 +140,19 @@ void OrdersWidget::addOrderDraft(EBotMarketOrder::Type type)
 
 void OrdersWidget::submitOrder()
 {
+  QModelIndexList selection = orderView->selectionModel()->selectedRows();
+  foreach(const QModelIndex& proxyIndex, selection)
+  {
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
+    EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
+    if(eBotMarketOrder->getState() == EBotMarketOrder::State::draft)
+    {
+      botService.createMarketOrder(eBotMarketOrder->getType(), eBotMarketOrder->getPrice(), eBotMarketOrder->getAmount());
+      eBotMarketOrder->setState(EBotMarketOrder::State::submitting);
+      entityManager.updatedEntity(*eBotMarketOrder);
+    }
+  }
+
   //QList<QModelIndex> seletedIndices = getSelectedRows();
   //
   //foreach(const QModelIndex& proxyIndex, seletedIndices)
