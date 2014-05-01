@@ -20,7 +20,6 @@ private slots:
   void submitOrder();
   void cancelOrder();
   void updateOrder(const QModelIndex& index);
-  void updateDraft(const QModelIndex& index);
   void updateToolBarButtons();
 
 private:

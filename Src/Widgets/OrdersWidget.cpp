@@ -55,8 +55,7 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager
   layout->addWidget(orderView);
   setLayout(layout);
 
-  connect(&orderModel, SIGNAL(editedOrder(const QModelIndex&)), this, SLOT(updateOrder(const QModelIndex&)));
-  connect(&orderModel, SIGNAL(editedDraft(const QModelIndex&)), this, SLOT(updateDraft(const QModelIndex&)));
+  //connect(&orderModel, SIGNAL(editedOrder(const QModelIndex&)), this, SLOT(updateOrder(const QModelIndex&)));
   connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
 
   QHeaderView* headerView = orderView->header();
@@ -212,22 +211,24 @@ void OrdersWidget::updateOrder(const QModelIndex& index)
   //updateToolBarButtons();
 }
 
-void OrdersWidget::updateDraft(const QModelIndex& index)
-{
-  //const OrderModel::Order* order = orderModel.getOrder(index);
-  //if(order->state != OrderModel::Order::State::draft)
-  //  return;
-  //double amount = order->newAmount != 0. ? order->newAmount : order->amount;
-  //double price = order->newPrice != 0. ? order->newPrice : order->price;
-  //
-  //marketService.updateOrderDraft(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
-}
-
 void OrdersWidget::updateToolBarButtons()
 {
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
   bool connected = botService.isConnected();
-  bool marketSelected = eBotService->getSelectedMarketId() != 0;
+  bool marketSelected = connected && eBotService->getSelectedMarketId() != 0;
+
+  QModelIndexList selection = orderView->selectionModel()->selectedRows();
+  bool draftSelected = false;
+  foreach(const QModelIndex& proxyIndex, selection)
+  {
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
+    EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
+    if(eBotMarketOrder->getState() == EBotMarketOrder::State::draft)
+    {
+      draftSelected = true;
+      break;
+    }
+  }
 
   //QList<QModelIndex> selectedRows = getSelectedRows();
   //
@@ -247,10 +248,10 @@ void OrdersWidget::updateToolBarButtons()
   //    }
   //  }
   //
-  refreshAction->setEnabled(connected && marketSelected);
-  buyAction->setEnabled(connected && marketSelected);
-  sellAction->setEnabled(connected && marketSelected);
-  //submitAction->setEnabled(hasMarket && canSubmit);
+  refreshAction->setEnabled(marketSelected);
+  buyAction->setEnabled(marketSelected);
+  sellAction->setEnabled(marketSelected);
+  submitAction->setEnabled(marketSelected && draftSelected);
   //cancelAction->setEnabled(canCancel);
 }
 
