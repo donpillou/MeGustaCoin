@@ -25,13 +25,11 @@ public:
       if(it == table.entities.end())
       {
         table.entities.insert(id, &entity);
-        entity.entityManager = this;
         for(QSet<Listener*>::iterator i = table.listeners.begin(), end = table.listeners.end(); i != end; ++i)
           (*i)->addedEntity(entity);
       }
       else
       {
-        entity.entityManager = this;
         Entity* oldEntity = *it;
         *it = &entity;
         for(QSet<Listener*>::iterator i = table.listeners.begin(), end = table.listeners.end(); i != end; ++i)
@@ -154,20 +152,13 @@ public:
 
 
 public:
-  //Entity(quint32 type, quint32 id) : entityManager(0), type(type), id(id) {}
-  template <typename E> Entity(E type, quint32 id) : entityManager(0), type((quint32)type), id(id) {}
+  template <typename E> Entity(E type, quint32 id) : type((quint32)type), id(id) {}
   virtual ~Entity() {}
 
   quint32 getType() const {return type;}
   quint32 getId() const {return id;}
 
-protected:
-  void updated() {entityManager->updatedEntity(*this);};
-
 private:
-  Manager* entityManager;
   quint32 type;
   quint32 id;
-
-  //friend class EntityManager;
 };

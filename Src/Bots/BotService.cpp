@@ -117,17 +117,11 @@ void BotService::removeMarket(quint32 id)
 
 void BotService::selectMarket(quint32 id)
 {
-  entityManager.removeAll<EBotMarketOrder>();
-  entityManager.removeAll<EBotMarketTransaction>();
-
   BotProtocol::ControlMarketArgs controlMarket;
   controlMarket.entityType = BotProtocol::market;
   controlMarket.entityId = id;
   controlMarket.cmd = BotProtocol::ControlMarketArgs::select;
   controlEntity(&controlMarket, sizeof(controlMarket));
-
-  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  eBotService->setSelectedMarketId(id);
 }
 
 void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)
@@ -167,8 +161,8 @@ void BotService::stopSession(quint32 id)
 
 void BotService::selectSession(quint32 id)
 {
-  entityManager.removeAll<EBotSessionOrder>();
-  entityManager.removeAll<EBotSessionTransaction>();
+  //entityManager.removeAll<EBotSessionOrder>();
+  //entityManager.removeAll<EBotSessionTransaction>();
 
   BotProtocol::ControlSessionArgs controlSession;
   controlSession.entityType = BotProtocol::session;
@@ -239,7 +233,10 @@ void BotService::WorkerThread::setState(EBotService::State state)
         entityManager.removeAll<EBotSessionTransaction>();
         entityManager.removeAll<EBotSessionOrder>();
         entityManager.removeAll<EBotMarket>();
+        eBotService->setSelectedMarketId(0);
+        eBotService->setSelectedSessionId(0);
       }
+      entityManager.updatedEntity(*eBotService);
     }
   };
   eventQueue.append(new SetStateEvent(state));
@@ -400,5 +397,71 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& e
     }
   };
   eventQueue.append(new RemoveEntityEvent(eType, entity.entityId));
+  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+}
+
+void BotService::WorkerThread::receivedControlEntityResponse(BotProtocol::Entity& entity, size_t size)
+{
+  class ControlEntityResponseEvent : public Event
+  {
+  public:
+    ControlEntityResponseEvent(const QByteArray& response) : response(response) {}
+  private:
+    QByteArray response;
+  public: // Event
+    virtual void handle(BotService& botService)
+    {
+      BotProtocol::Entity* entity = (BotProtocol::Entity*)response.data();
+      size_t size = response.size();
+      switch((BotProtocol::EntityType)entity->entityType)
+      {
+      case BotProtocol::market:
+        if(size >= sizeof(BotProtocol::ControlMarketResponse))
+        {
+          BotProtocol::ControlMarketResponse* response = (BotProtocol::ControlMarketResponse*)entity;
+          switch((BotProtocol::ControlMarketArgs::Command)response->cmd)
+          {
+          case BotProtocol::ControlMarketArgs::select:
+            {
+              Entity::Manager& entityManager = botService.entityManager;
+              entityManager.removeAll<EBotMarketOrder>();
+              entityManager.removeAll<EBotMarketTransaction>();
+              EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+              eBotService->setSelectedMarketId(entity->entityId);
+              entityManager.updatedEntity(*eBotService);
+            }
+            break;
+          default:
+            break;
+          }
+          break;
+        }
+      case BotProtocol::session:
+        if(size >= sizeof(BotProtocol::ControlSessionResponse))
+        {
+          BotProtocol::ControlSessionResponse* response = (BotProtocol::ControlSessionResponse*)entity;
+          switch((BotProtocol::ControlSessionArgs::Command)response->cmd)
+          {
+          case BotProtocol::ControlSessionArgs::select:
+            {
+              Entity::Manager& entityManager = botService.entityManager;
+              entityManager.removeAll<EBotSessionOrder>();
+              entityManager.removeAll<EBotSessionTransaction>();
+              EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+              eBotService->setSelectedSessionId(entity->entityId);
+              entityManager.updatedEntity(*eBotService);
+            }
+            break;
+          default:
+            break;
+          }
+          break;
+        }
+      default:
+        break;
+      }
+    }
+  };
+  eventQueue.append(new ControlEntityResponseEvent(QByteArray((const char*)&entity, (int)size)));
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }

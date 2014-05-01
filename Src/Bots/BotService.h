@@ -77,6 +77,7 @@ private:
   private: // BotConnection::Callback
     virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size);
     virtual void receivedRemoveEntity(const BotProtocol::Entity& entity);
+    virtual void receivedControlEntityResponse(BotProtocol::Entity& entity, size_t size);
   };
 
 private:

@@ -15,21 +15,16 @@ public:
   };
 
 public:
-  EBotService() : Entity(eType, 0), state(State::offline), selectedMarketId(0) {}
+  EBotService() : Entity(eType, 0), state(State::offline), selectedSessionId(0), selectedMarketId(0) {}
 
   State getState() const {return state;}
-  void setState(State state)
-  {
-    this->state = state;
-    updated();
-  }
+  void setState(State state) {this->state = state;}
+
+  quint32 getSelectedSessionId() const {return selectedSessionId;}
+  void setSelectedSessionId(quint32 id) {selectedSessionId = id;}
 
   quint32 getSelectedMarketId() const {return selectedMarketId;}
-  void setSelectedMarketId(quint32 id)
-  {
-    selectedMarketId = id;
-    updated();
-  }
+  void setSelectedMarketId(quint32 id) {selectedMarketId = id;}
 
   QString getStateName() const
   {
@@ -50,5 +45,6 @@ public:
 
 private:
   State state;
+  quint32 selectedSessionId;
   quint32 selectedMarketId;
 };

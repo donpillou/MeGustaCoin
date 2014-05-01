@@ -19,6 +19,7 @@ public:
     updateEntity,
     removeEntity,
     controlEntity,
+    controlEntityResponse,
     createEntity,
     requestEntities,
   };
@@ -163,6 +164,12 @@ public:
     quint8 cmd;
   };
 
+  struct ControlSessionResponse : public Entity
+  {
+    quint8 cmd;
+    quint8 success;
+  };
+
   struct CreateMarketArgs : public Entity
   {
     quint32 marketAdapterId;
@@ -181,6 +188,12 @@ public:
     };
 
     quint8 cmd;
+  };
+
+  struct ControlMarketResponse : public Entity
+  {
+    quint8 cmd;
+    quint8 success;
   };
 
 #pragma pack(pop)

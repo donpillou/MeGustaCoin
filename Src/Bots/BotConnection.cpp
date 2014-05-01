@@ -104,6 +104,10 @@ void BotConnection::handleMessage(const BotProtocol::Header& header, char* data,
     if(size >= sizeof(BotProtocol::Entity))
       callback->receivedRemoveEntity(*(const BotProtocol::Entity*)data);
     break;
+  case BotProtocol::controlEntityResponse:
+    if(size >= sizeof(BotProtocol::Entity))
+      callback->receivedControlEntityResponse(*(BotProtocol::Entity*)data, size);
+    break;
   default:
     break;
   }
@@ -260,20 +264,3 @@ bool BotConnection::receiveAuthResponse()
   }
   return true;
 }
-
-//bool BotConnection::createSession(const QString& name, const QString& engine)
-//{
-//  BotProtocol::CreateSessionRequest createSession;
-//  setString(createSession.engine, engine);
-//  setString(createSession.name, name);
-//  return sendMessage(BotProtocol::createSessionRequest, &createSession, sizeof(createSession));
-//}
-//
-//bool BotConnection::startSession(quint32 id, BotProtocol::StartSessionRequest::Mode mode)
-//{
-//  BotProtocol::StartSessionRequest startSession;
-//  startSession.id = id;
-//  startSession.mode = mode;
-//  return sendMessage(BotProtocol::startSessionRequest, &startSession, sizeof(startSession));
-//}
-

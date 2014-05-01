@@ -11,6 +11,7 @@ public:
     virtual void receivedAuthResponse() {};
     virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size) {}
     virtual void receivedRemoveEntity(const BotProtocol::Entity& entity) {}
+    virtual void receivedControlEntityResponse(BotProtocol::Entity& entity, size_t size) {}
   };
 
   bool connect(const QString& server, quint16 port, const QString& userName, const QString& password);
