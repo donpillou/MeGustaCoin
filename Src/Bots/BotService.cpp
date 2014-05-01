@@ -125,6 +125,9 @@ void BotService::selectMarket(quint32 id)
   controlMarket.entityId = id;
   controlMarket.cmd = BotProtocol::ControlMarketArgs::select;
   controlEntity(&controlMarket, sizeof(controlMarket));
+
+  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+  eBotService->setSelectedMarketId(id);
 }
 
 void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)
@@ -221,11 +224,14 @@ void BotService::WorkerThread::setState(EBotService::State state)
   private: // Event
     virtual void handle(BotService& botService)
     {
+      EBotService* eBotService = botService.entityManager.getEntity<EBotService>(0);
       if(state == EBotService::State::connected)
         botService.connected = true;
       else if(state == EBotService::State::offline)
+      {
         botService.connected = false;
-      EBotService* eBotService = botService.entityManager.getEntity<EBotService>(0);
+        eBotService->setSelectedMarketId(0);
+      }
       eBotService->setState(state);
       //botService.dataModel.botsModel.setState(state);
     }
@@ -385,6 +391,12 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& e
     virtual void handle(BotService& botService)
     {
         botService.entityManager.removeEntity(eType, id);
+        if(eType == EType::botMarket)
+        {
+          EBotService* eBotService = botService.entityManager.getEntity<EBotService>(0);
+          if(eBotService->getSelectedMarketId() == id)
+            eBotService->setSelectedMarketId(0);
+        }
     }
   };
   eventQueue.append(new RemoveEntityEvent(eType, entity.entityId));

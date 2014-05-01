@@ -15,12 +15,19 @@ public:
   };
 
 public:
-  EBotService() : Entity(eType, 0), state(State::offline) {}
+  EBotService() : Entity(eType, 0), state(State::offline), selectedMarketId(0) {}
 
   State getState() const {return state;}
   void setState(State state)
   {
     this->state = state;
+    updated();
+  }
+
+  quint32 getSelectedMarketId() const {return selectedMarketId;}
+  void setSelectedMarketId(quint32 id)
+  {
+    selectedMarketId = id;
     updated();
   }
 
@@ -43,4 +50,5 @@ public:
 
 private:
   State state;
+  quint32 selectedMarketId;
 };

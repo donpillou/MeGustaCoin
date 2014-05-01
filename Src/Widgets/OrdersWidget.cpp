@@ -215,8 +215,9 @@ void OrdersWidget::updateDraft(const QModelIndex& index)
 
 void OrdersWidget::updateToolBarButtons()
 {
+  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
   bool connected = botService.isConnected();
-  bool marketSelected = false;
+  bool marketSelected = eBotService->getSelectedMarketId() != 0;
 
   //QList<QModelIndex> selectedRows = getSelectedRows();
   //

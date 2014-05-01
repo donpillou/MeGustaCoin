@@ -151,20 +151,20 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   restoreGeometry(settings.value("Geometry").toByteArray());
   restoreState(settings.value("WindowState").toByteArray());
 
-  settings.beginGroup("Login");
-  if(settings.value("Remember", 0).toUInt() >= 2)
-  {
-    QString market = settings.value("Market").toString();
-    QString user = settings.value("User").toString();
-    QString key = settings.value("Key").toString();
-    QString secret = settings.value("Secret").toString();
-    settings.endGroup();
-    open(market, user, key, secret);
-  }
-  else
-    settings.endGroup();
-  if(!marketService.isReady())
-    QTimer::singleShot(0, this, SLOT(login()));
+  //settings.beginGroup("Login");
+  //if(settings.value("Remember", 0).toUInt() >= 2)
+  //{
+  //  QString market = settings.value("Market").toString();
+  //  QString user = settings.value("User").toString();
+  //  QString key = settings.value("Key").toString();
+  //  QString secret = settings.value("Secret").toString();
+  //  settings.endGroup();
+  //  open(market, user, key, secret);
+  //}
+  //else
+  //  settings.endGroup();
+  //if(!marketService.isReady())
+  //  QTimer::singleShot(0, this, SLOT(login()));
 
   startDataService();
   startBotService();
@@ -190,7 +190,7 @@ void MainWindow::startBotService()
 
 MainWindow::~MainWindow()
 {
-  logout();
+  //logout();
 
   // manually delete widgets since they hold a reference to the data model
   for(QHash<QString, ChannelData>::Iterator i = channelDataMap.begin(), end = channelDataMap.end(); i != end; ++i)
@@ -209,7 +209,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-  logout();
+  //logout();
 
   settings.setValue("Geometry", saveGeometry());
   settings.setValue("WindowState", saveState());
@@ -243,22 +243,22 @@ void MainWindow::closeEvent(QCloseEvent* event)
   QMainWindow::closeEvent(event);
 }
 
-void MainWindow::login()
-{
-  LoginDialog loginDialog(this, &settings);
-  if(loginDialog.exec() != QDialog::Accepted)
-    return;
-
-  open(loginDialog.market(), loginDialog.userName(), loginDialog.key(), loginDialog.secret());
-}
-
-void MainWindow::logout()
-{
-  const QString& marketName = dataModel.getMarketName();
-  if(!marketName.isEmpty())
-    dataService.unsubscribe(marketName);
-  marketService.logout();
-}
+//void MainWindow::login()
+//{
+//  LoginDialog loginDialog(this, &settings);
+//  if(loginDialog.exec() != QDialog::Accepted)
+//    return;
+//
+//  open(loginDialog.market(), loginDialog.userName(), loginDialog.key(), loginDialog.secret());
+//}
+//
+//void MainWindow::logout()
+//{
+//  const QString& marketName = dataModel.getMarketName();
+//  if(!marketName.isEmpty())
+//    dataService.unsubscribe(marketName);
+//  marketService.logout();
+//}
 
 void MainWindow::refresh()
 {
@@ -267,21 +267,21 @@ void MainWindow::refresh()
   marketService.loadBalance();
 }
 
-void MainWindow::open(const QString& marketName, const QString& userName, const QString& key, const QString& secret)
-{
-  logout();
-
-  marketService.login(marketName, userName, key, secret);
-
-  // update gui
-  updateWindowTitle();
-
-  // request data
-  marketService.loadBalance();
-  marketService.loadOrders();
-  marketService.loadTransactions();
-  dataService.subscribe(marketName);
-}
+//void MainWindow::open(const QString& marketName, const QString& userName, const QString& key, const QString& secret)
+//{
+//  logout();
+//
+//  marketService.login(marketName, userName, key, secret);
+//
+//  // update gui
+//  updateWindowTitle();
+//
+//  // request data
+//  marketService.loadBalance();
+//  marketService.loadOrders();
+//  marketService.loadTransactions();
+//  dataService.subscribe(marketName);
+//}
 
 void MainWindow::updateWindowTitle()
 {

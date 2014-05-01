@@ -39,16 +39,17 @@ private:
   QSignalMapper liveTradesSignalMapper;
   QSignalMapper liveGraphSignalMapper;
 
-  void open(const QString& market, const QString& userName, const QString& key, const QString& secret);
+private:
+  //void open(const QString& market, const QString& userName, const QString& key, const QString& secret);
   void startDataService();
   void startBotService();
 
-
+private: // QMainWindow
   virtual void closeEvent(QCloseEvent* event);
 
 private slots:
-  void login(); // todo: remove
-  void logout(); // todo: remove
+  //void login(); // todo: remove
+  //void logout(); // todo: remove
   void refresh();
   void updateWindowTitle();
   void updateWindowTitleTicker();

@@ -65,8 +65,9 @@ void TransactionsWidget::saveState(QSettings& settings)
 
 void TransactionsWidget::updateToolBarButtons()
 {
+  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
   bool connected = botService.isConnected();
-  bool marketSelected = false;
+  bool marketSelected = eBotService->getSelectedMarketId() != 0;
 
   refreshAction->setEnabled(connected && marketSelected);
 }

@@ -50,7 +50,6 @@ targets = {
       "Src/Markets/DataService.h"
       "Src/Bots/BotService.h"
       "Src/MainWindow.h"
-      "Src/LoginDialog.h"
       "Src/MarketDialog.h"
       "Src/Bots/BotDialog.h"
     }

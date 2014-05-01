@@ -64,7 +64,6 @@
 #include "Widgets/GraphWidget.h"
 #include "Widgets/LogWidget.h"
 
-#include "LoginDialog.h"
 #include "MarketDialog.h"
 #include "OptionsDialog.h"
 #include "MainWindow.h"
