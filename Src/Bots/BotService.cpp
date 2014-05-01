@@ -224,16 +224,22 @@ void BotService::WorkerThread::setState(EBotService::State state)
   private: // Event
     virtual void handle(BotService& botService)
     {
-      EBotService* eBotService = botService.entityManager.getEntity<EBotService>(0);
+      Entity::Manager& entityManager = botService.entityManager;
+      EBotService* eBotService = entityManager.getEntity<EBotService>(0);
       if(state == EBotService::State::connected)
         botService.connected = true;
       else if(state == EBotService::State::offline)
-      {
         botService.connected = false;
-        eBotService->setSelectedMarketId(0);
-      }
       eBotService->setState(state);
-      //botService.dataModel.botsModel.setState(state);
+      if(state == EBotService::State::offline)
+      {
+        entityManager.removeAll<EBotEngine>();
+        entityManager.removeAll<EBotSession>();
+        entityManager.removeAll<EBotMarketAdapter>();
+        entityManager.removeAll<EBotSessionTransaction>();
+        entityManager.removeAll<EBotSessionOrder>();
+        entityManager.removeAll<EBotMarket>();
+      }
     }
   };
   eventQueue.append(new SetStateEvent(state));
@@ -354,7 +360,7 @@ void BotService::WorkerThread::receivedUpdateEntity(BotProtocol::Entity& data, s
   public: // Event
     virtual void handle(BotService& botService)
     {
-        botService.entityManager.delegateEntity(entity);
+      botService.entityManager.delegateEntity(entity);
     }
   };
   eventQueue.append(new UpdateEntityEvent(*entity));
@@ -390,13 +396,7 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& e
   public: // Event
     virtual void handle(BotService& botService)
     {
-        botService.entityManager.removeEntity(eType, id);
-        if(eType == EType::botMarket)
-        {
-          EBotService* eBotService = botService.entityManager.getEntity<EBotService>(0);
-          if(eBotService->getSelectedMarketId() == id)
-            eBotService->setSelectedMarketId(0);
-        }
+      botService.entityManager.removeEntity(eType, id);
     }
   };
   eventQueue.append(new RemoveEntityEvent(eType, entity.entityId));
