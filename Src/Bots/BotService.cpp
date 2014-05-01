@@ -124,6 +124,26 @@ void BotService::selectMarket(quint32 id)
   controlEntity(&controlMarket, sizeof(controlMarket));
 }
 
+void BotService::refreshMarketOrders()
+{
+  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+  BotProtocol::ControlMarketArgs controlMarket;
+  controlMarket.entityType = BotProtocol::market;
+  controlMarket.entityId = eBotService->getSelectedMarketId();
+  controlMarket.cmd = BotProtocol::ControlMarketArgs::refreshOrders;
+  controlEntity(&controlMarket, sizeof(controlMarket));
+}
+
+void BotService::refreshMarketTransactions()
+{
+  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+  BotProtocol::ControlMarketArgs controlMarket;
+  controlMarket.entityType = BotProtocol::market;
+  controlMarket.entityId = eBotService->getSelectedMarketId();
+  controlMarket.cmd = BotProtocol::ControlMarketArgs::refreshTransactions;
+  controlEntity(&controlMarket, sizeof(controlMarket));
+}
+
 void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)
 {
   BotProtocol::CreateSessionArgs createSession;
@@ -333,6 +353,14 @@ void BotService::WorkerThread::receivedUpdateEntity(BotProtocol::Entity& data, s
     if(size >= sizeof(BotProtocol::Market))
       entity = new EBotMarket(*(BotProtocol::Market*)&data);
     break;
+  case BotProtocol::marketTransaction:
+    if(size >= sizeof(BotProtocol::Transaction))
+      entity = new EBotMarketTransaction(*(BotProtocol::Transaction*)&data);
+    break;
+  case BotProtocol::marketOrder:
+    if(size >= sizeof(BotProtocol::Order))
+      entity = new EBotMarketOrder(*(BotProtocol::Order*)&data);
+    break;
   case BotProtocol::error:
     if(size >= sizeof(BotProtocol::Error))
     {
@@ -380,6 +408,12 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& e
     break;
   case BotProtocol::market:
     eType = EType::botMarket;
+    break;
+  case BotProtocol::marketTransaction:
+    eType = EType::botMarketTransaction;
+    break;
+  case BotProtocol::marketOrder:
+    eType = EType::botMarketOrder;
     break;
   }
 

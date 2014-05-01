@@ -74,6 +74,7 @@ void TransactionsWidget::updateToolBarButtons()
 
 void TransactionsWidget::refresh()
 {
+  botService.refreshMarketTransactions();
   //marketService.loadTransactions();
   //marketService.loadBalance();
 }

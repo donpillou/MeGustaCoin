@@ -200,7 +200,7 @@ void MarketOrderModel::removedEntity(Entity& entity)
 
 void MarketOrderModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::botSessionOrder)
+  if((EType)type == EType::botMarketOrder)
   {
     emit beginResetModel();
     orders.clear();

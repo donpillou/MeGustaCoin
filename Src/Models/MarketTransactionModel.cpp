@@ -186,7 +186,7 @@ void MarketTransactionModel::removedEntity(Entity& entity)
 
 void MarketTransactionModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::botSessionTransaction)
+  if((EType)type == EType::botMarketTransaction)
   {
     emit beginResetModel();
     transactions.clear();
