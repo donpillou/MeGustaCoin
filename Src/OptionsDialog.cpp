@@ -25,10 +25,10 @@ OptionsDialog::OptionsDialog(QWidget* parent, QSettings* settings) : QDialog(par
   botLayout->addWidget(new QLabel(tr("Password:")), 2, 0);
   botLayout->addWidget(botPasswordEdit, 2, 1);
 
-  QGroupBox* dataGroupBox = new QGroupBox(tr("Data Server (traded)"));
+  QGroupBox* dataGroupBox = new QGroupBox(tr("MegucoData Server"));
   dataGroupBox->setLayout(dataLayout);
 
-  QGroupBox* botGroupBox = new QGroupBox(tr("Bot Server (tradedbot)"));
+  QGroupBox* botGroupBox = new QGroupBox(tr("MegucoBot Server"));
   botGroupBox->setLayout(botLayout);
 
   QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
