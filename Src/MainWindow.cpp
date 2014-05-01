@@ -260,12 +260,12 @@ void MainWindow::closeEvent(QCloseEvent* event)
 //  marketService.logout();
 //}
 
-void MainWindow::refresh()
-{
-  marketService.loadOrders();
-  marketService.loadTransactions();
-  marketService.loadBalance();
-}
+//void MainWindow::refresh()
+//{
+//  marketService.loadOrders();
+//  marketService.loadTransactions();
+//  marketService.loadBalance();
+//}
 
 //void MainWindow::open(const QString& marketName, const QString& userName, const QString& key, const QString& secret)
 //{
@@ -340,10 +340,10 @@ void MainWindow::updateViewMenu()
 {
   viewMenu->clear();
 
-  QAction* action = viewMenu->addAction(tr("&Refresh"));
-  action->setShortcut(QKeySequence(QKeySequence::Refresh));
-  connect(action, SIGNAL(triggered()), this, SLOT(refresh()));
-  viewMenu->addSeparator();
+  //QAction* action = viewMenu->addAction(tr("&Refresh"));
+  //action->setShortcut(QKeySequence(QKeySequence::Refresh));
+  //connect(action, SIGNAL(triggered()), this, SLOT(refresh()));
+  //viewMenu->addSeparator();
   viewMenu->addAction(qobject_cast<QDockWidget*>(marketsWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(ordersWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(transactionsWidget->parent())->toggleViewAction());
@@ -365,7 +365,7 @@ void MainWindow::updateViewMenu()
       subMenu->addAction(qobject_cast<QDockWidget*>(channelData->tradesWidget->parent())->toggleViewAction());
     else
     {
-      action = subMenu->addAction(tr("Live Trades"));
+      QAction* action = subMenu->addAction(tr("Live Trades"));
       liveTradesSignalMapper.setMapping(action, channelName);
       connect(action, SIGNAL(triggered()), &liveTradesSignalMapper, SLOT(map()));
     }
@@ -373,7 +373,7 @@ void MainWindow::updateViewMenu()
       subMenu->addAction(qobject_cast<QDockWidget*>(channelData->graphWidget->parent())->toggleViewAction());
     else
     {
-      action = subMenu->addAction(tr("Live Graph"));
+      QAction* action = subMenu->addAction(tr("Live Graph"));
       liveGraphSignalMapper.setMapping(action, channelName);
       connect(action, SIGNAL(triggered()), &liveGraphSignalMapper, SLOT(map()));
     }

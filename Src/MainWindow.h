@@ -50,7 +50,7 @@ private: // QMainWindow
 private slots:
   //void login(); // todo: remove
   //void logout(); // todo: remove
-  void refresh();
+  //void refresh();
   void updateWindowTitle();
   void updateWindowTitleTicker();
   void updateFocusPublicDataModel();
