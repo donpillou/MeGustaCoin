@@ -8,7 +8,6 @@ public:
   {
       first,
       type = first,
-      state,
       date,
       value,
       amount,

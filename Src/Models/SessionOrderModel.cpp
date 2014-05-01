@@ -91,23 +91,6 @@ QVariant SessionOrderModel::data(const QModelIndex& index, int role) const
       return eBotMarketAdapter->formatPrice(eOrder->getPrice());
     case Column::value:
       return eBotMarketAdapter->formatPrice(eOrder->getAmount() * eOrder->getPrice());
-    case Column::state:
-      switch(eOrder->getState())
-      {
-      case EBotSessionOrder::State::draft:
-        return draftStr;
-      case EBotSessionOrder::State::submitting:
-        return submittingStr;
-      case EBotSessionOrder::State::open:
-        return openStr;
-      case EBotSessionOrder::State::canceling:
-        return cancelingStr;
-      case EBotSessionOrder::State::canceled:
-        return canceledStr;
-      case EBotSessionOrder::State::closed:
-        return closedStr;
-      }
-      break;
     case Column::total:
         return eOrder->getTotal() > 0 ? (QString("+") + eBotMarketAdapter->formatPrice(eOrder->getTotal())) : eBotMarketAdapter->formatPrice(eOrder->getTotal());
     }
@@ -145,8 +128,6 @@ QVariant SessionOrderModel::headerData(int section, Qt::Orientation orientation,
         return tr("Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
       case Column::value:
         return tr("Value %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
-      case Column::state:
-        return tr("Status");
       case Column::total:
         return tr("Total %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
     }

@@ -13,16 +13,6 @@ public:
     sell = BotProtocol::Order::sell,
   };
 
-  enum class State
-  {
-    draft,
-    submitting,
-    open,
-    canceling,
-    canceled,
-    closed,
-  };
-
 public:
   EBotSessionOrder(BotProtocol::Order& data) : Entity(eType, data.entityId)
   {
@@ -41,8 +31,6 @@ public:
       total = price * amount - fee;
       break;
     }
-
-    state = State::open;
   }
 
   Type getType() const {return type;}
@@ -51,7 +39,6 @@ public:
   double getAmount() const {return amount;}
   double getFee() const {return fee;}
   double getTotal() const {return total;}
-  State getState() const {return state;}
 
 private:
   Type type;
@@ -60,5 +47,4 @@ private:
   double amount;
   double fee;
   double total;
-  State state;
 };
