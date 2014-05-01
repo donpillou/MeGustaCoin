@@ -16,7 +16,7 @@ private:
   OrdersWidget* ordersWidget;
   BotsWidget* botsWidget;
   TransactionsWidget* transactionsWidget;
-  GraphWidget* graphWidget;
+  //GraphWidget* graphWidget;
   LogWidget* logWidget;
 
   QMenu* viewMenu;
@@ -53,7 +53,7 @@ private slots:
   //void refresh();
   void updateWindowTitle();
   void updateWindowTitleTicker();
-  void updateFocusPublicDataModel();
+  //void updateFocusPublicDataModel();
   void updateViewMenu();
   void about();
   void showOptions();

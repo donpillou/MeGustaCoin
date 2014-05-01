@@ -6,7 +6,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 {
   botEntityManager.delegateEntity(*new EBotService);
 
-  connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
+  //connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
   connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
   connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
@@ -35,7 +35,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   marketsWidget = new MarketsWidget(this, settings, botEntityManager, botService);
   ordersWidget = new OrdersWidget(this, settings, botEntityManager, botService);
   transactionsWidget = new TransactionsWidget(this, settings, botEntityManager, botService);
-  graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
+  //graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
   botsWidget = new BotsWidget(this, settings, botEntityManager, botService);
   logWidget = new LogWidget(this, settings, dataModel.logModel);
 
@@ -62,12 +62,12 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addDockWidget(Qt::TopDockWidgetArea, ordersDockWidget);
   tabifyDockWidget(transactionsDockWidget, ordersDockWidget);
 
-  QDockWidget* graphDockWidget = new QDockWidget(this);
-  graphDockWidget->setObjectName("LiveGraph");
-  graphDockWidget->setWidget(graphWidget);
-  graphWidget->updateTitle();
-  addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
-  tabifyDockWidget(transactionsDockWidget, graphDockWidget);
+  //QDockWidget* graphDockWidget = new QDockWidget(this);
+  //graphDockWidget->setObjectName("LiveGraph");
+  //graphDockWidget->setWidget(graphWidget);
+  //graphWidget->updateTitle();
+  //addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
+  //tabifyDockWidget(transactionsDockWidget, graphDockWidget);
 
   /*
   for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
@@ -202,7 +202,7 @@ MainWindow::~MainWindow()
   delete marketsWidget;
   delete ordersWidget;
   delete transactionsWidget;
-  delete graphWidget;
+  //delete graphWidget;
   delete botsWidget;
   delete logWidget;
 }
@@ -215,7 +215,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   settings.setValue("WindowState", saveState());
   ordersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
-  graphWidget->saveState(settings);
+  //graphWidget->saveState(settings);
   botsWidget->saveState(settings);
 
   QStringList openedLiveTradesWidgets;
@@ -316,25 +316,25 @@ void MainWindow::updateWindowTitleTicker()
     updateWindowTitle();
 }
 
-void MainWindow::updateFocusPublicDataModel()
-{
-  const PublicDataModel* oldFocusPublicDataModel = graphWidget->getFocusPublicDataModel();
-  if(oldFocusPublicDataModel)
-    disconnect(oldFocusPublicDataModel, SIGNAL(updatedTicker()), this, SLOT(updateWindowTitle()));
-  const QString& marketName = dataModel.getMarketName();
-  if(marketName.isEmpty())
-  {
-    graphWidget->setFocusPublicDataModel(0);
-    updateWindowTitle();
-  }
-  else
-  {
-    PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
-    graphWidget->setFocusPublicDataModel(&publicDataModel);
-    connect(&publicDataModel, SIGNAL(updatedTicker()), this, SLOT(updateWindowTitle()));
-    updateWindowTitle();
-  }
-}
+//void MainWindow::updateFocusPublicDataModel()
+//{
+//  const PublicDataModel* oldFocusPublicDataModel = graphWidget->getFocusPublicDataModel();
+//  if(oldFocusPublicDataModel)
+//    disconnect(oldFocusPublicDataModel, SIGNAL(updatedTicker()), this, SLOT(updateWindowTitle()));
+//  const QString& marketName = dataModel.getMarketName();
+//  if(marketName.isEmpty())
+//  {
+//    graphWidget->setFocusPublicDataModel(0);
+//    updateWindowTitle();
+//  }
+//  else
+//  {
+//    PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
+//    graphWidget->setFocusPublicDataModel(&publicDataModel);
+//    connect(&publicDataModel, SIGNAL(updatedTicker()), this, SLOT(updateWindowTitle()));
+//    updateWindowTitle();
+//  }
+//}
 
 void MainWindow::updateViewMenu()
 {
@@ -347,7 +347,7 @@ void MainWindow::updateViewMenu()
   viewMenu->addAction(qobject_cast<QDockWidget*>(marketsWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(ordersWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(transactionsWidget->parent())->toggleViewAction());
-  viewMenu->addAction(qobject_cast<QDockWidget*>(graphWidget->parent())->toggleViewAction());
+  //viewMenu->addAction(qobject_cast<QDockWidget*>(graphWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(logWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(botsWidget->parent())->toggleViewAction());
   viewMenu->addSeparator();
