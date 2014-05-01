@@ -15,6 +15,19 @@ MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
 MarketOrderModel::~MarketOrderModel()
 {
   entityManager.unregisterListener<EBotMarketOrder>(*this);
+  qDeleteAll(draftOrders);
+}
+
+QModelIndex MarketOrderModel::createDraft(EBotMarketOrder::Type type, double price)
+{
+  EBotMarketOrder* eBotMarketOrder = new EBotMarketOrder(type, QDateTime::currentDateTime(), price);
+  draftOrders.insert(eBotMarketOrder);
+
+  int index = orders.size();
+  beginInsertRows(QModelIndex(), index, index);
+  orders.append(eBotMarketOrder);
+  endInsertRows();
+  return createIndex(index, (int)Column::amount, eBotMarketOrder);
 }
 
 QModelIndex MarketOrderModel::index(int row, int column, const QModelIndex& parent) const
@@ -69,6 +82,17 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
         break;
       }
     break;
+  case Qt::EditRole:
+    switch((Column)index.column())
+    {
+    case Column::amount:
+      return eOrder->getAmount();
+    case Column::price:
+      return eOrder->getPrice();
+    default:
+      break;
+    }
+    break;
   case Qt::DisplayRole:
     switch((Column)index.column())
     {
@@ -113,6 +137,83 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
     }
   }
   return QVariant();
+}
+
+Qt::ItemFlags MarketOrderModel::flags(const QModelIndex &index) const
+{
+  const EBotMarketOrder* eOrder = (const EBotMarketOrder*)index.internalPointer();
+  if(!eOrder)
+    return 0;
+
+  Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+  if(/*eOrder->getState() == EMarketOrder::State::open || */eOrder->getState() == EBotMarketOrder::State::draft)
+  {
+    Column column = (Column)index.column();
+    if(column == Column::amount || column == Column::price)
+      flags |= Qt::ItemIsEditable;
+  }
+  return flags;
+}
+
+bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value, int role)
+{
+  if (role != Qt::EditRole)
+    return false;
+
+  EBotMarketOrder* eOrder = (EBotMarketOrder*)index.internalPointer();
+  if(!eOrder)
+    return false;
+
+  if(eOrder->getState() != EBotMarketOrder::State::draft /* && eOrder->getState() != EBotMarketOrder::State::open */)
+    return false;
+
+  switch((Column)index.column())
+  {
+  case Column::price:
+    {
+      double newPrice = value.toDouble();
+      if(newPrice <= 0. || newPrice == eOrder->getPrice())
+        return false;
+      if(eOrder->getState() == EBotMarketOrder::State::draft)
+      {
+        eOrder->setPrice(newPrice);
+        EBotMarketBalance* eBotMarketBalance = entityManager.getEntity<EBotMarketBalance>(0);
+        if(eBotMarketBalance)
+          eOrder->setFee(qCeil(eOrder->getAmount() * eOrder->getPrice() * eBotMarketBalance->getFee()));
+      }
+      else // if(eOrder->getState() == EBotMarketOrder::State::open)
+      {
+        // todo: ??
+        //order.newPrice = newPrice;
+        //emit editedOrder(index);
+      }
+      return true;
+    }
+  case Column::amount:
+    {
+      double newAmount = value.toDouble();
+      if(newAmount <= 0. || newAmount == eOrder->getAmount())
+        return false;
+      if(eOrder->getState() == EBotMarketOrder::State::draft)
+      {
+        eOrder->setAmount(newAmount);
+        EBotMarketBalance* eBotMarketBalance = entityManager.getEntity<EBotMarketBalance>(0);
+        if(eBotMarketBalance)
+          eOrder->setFee(qCeil(eOrder->getAmount() * eOrder->getPrice() * eBotMarketBalance->getFee()));
+      }
+      else // if(eOrder->getState() == EBotMarketOrder::State::open)
+      {
+        // todo: ???
+        //order.newAmount = value.toDouble();
+        //emit editedOrder(index);
+      }
+      return true;
+    }
+  default:
+    break;
+  }
+
+  return false;
 }
 
 QVariant MarketOrderModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -205,6 +306,8 @@ void MarketOrderModel::removedAll(quint32 type)
     emit beginResetModel();
     orders.clear();
     emit endResetModel();
+    qDeleteAll(draftOrders);
+    draftOrders.clear();
     return;
   }
   Q_ASSERT(false);

@@ -4,9 +4,6 @@
 class SessionOrderModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
-  SessionOrderModel(Entity::Manager& entityManager);
-  ~SessionOrderModel();
-
   enum class Column
   {
       first,
@@ -19,6 +16,10 @@ public:
       total,
       last = total,
   };
+
+public:
+  SessionOrderModel(Entity::Manager& entityManager);
+  ~SessionOrderModel();
 
 private:
   Entity::Manager& entityManager;

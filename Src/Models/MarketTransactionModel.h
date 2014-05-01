@@ -4,9 +4,6 @@
 class MarketTransactionModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
-  MarketTransactionModel(Entity::Manager& entityManager);
-  ~MarketTransactionModel();
-
   enum class Column
   {
       first,
@@ -19,6 +16,10 @@ public:
       total,
       last = total,
   };
+
+public:
+  MarketTransactionModel(Entity::Manager& entityManager);
+  ~MarketTransactionModel();
 
 private:
   Entity::Manager& entityManager;

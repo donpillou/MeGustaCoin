@@ -52,9 +52,9 @@ public:
       if(it != table.entities.end())
       {
         Entity* entity = *it;
+        table.entities.erase(it);
         for(QSet<Listener*>::iterator i = table.listeners.begin(), end = table.listeners.end(); i != end; ++i)
           (*i)->removedEntity(*entity);
-        table.entities.erase(it);
         delete entity;
       }
     }
@@ -74,10 +74,11 @@ public:
       EntityTable& table = tables[type];
       if(!table.entities.isEmpty())
       {
+        QHash<quint32, Entity*> entities;
+        entities.swap(table.entities);
         for(QSet<Listener*>::iterator i = table.listeners.begin(), end = table.listeners.end(); i != end; ++i)
           (*i)->removedAll(type);
-        qDeleteAll(table.entities);
-        table.entities.clear();
+        qDeleteAll(entities);
       }
     }
 

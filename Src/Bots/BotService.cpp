@@ -254,6 +254,7 @@ void BotService::WorkerThread::setState(EBotService::State state)
         entityManager.removeAll<EBotSessionOrder>();
         entityManager.removeAll<EBotMarketTransaction>();
         entityManager.removeAll<EBotMarketOrder>();
+        entityManager.removeAll<EBotMarketBalance>();
         entityManager.removeAll<EBotMarket>();
         eBotService->setSelectedMarketId(0);
         eBotService->setSelectedSessionId(0);
@@ -363,6 +364,10 @@ void BotService::WorkerThread::receivedUpdateEntity(BotProtocol::Entity& data, s
     if(size >= sizeof(BotProtocol::Order))
       entity = new EBotMarketOrder(*(BotProtocol::Order*)&data);
     break;
+  case BotProtocol::marketBalance:
+    if(size >= sizeof(BotProtocol::MarketBalance))
+      entity = new EBotMarketBalance(*(BotProtocol::MarketBalance*)&data);
+    break;
   case BotProtocol::error:
     if(size >= sizeof(BotProtocol::Error))
     {
@@ -417,6 +422,9 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& e
   case BotProtocol::marketOrder:
     eType = EType::botMarketOrder;
     break;
+  case BotProtocol::marketBalance:
+    eType = EType::botMarketBalance;
+    break;
   default:
     break;
   }
@@ -464,6 +472,7 @@ void BotService::WorkerThread::receivedControlEntityResponse(BotProtocol::Entity
               Entity::Manager& entityManager = botService.entityManager;
               entityManager.removeAll<EBotMarketOrder>();
               entityManager.removeAll<EBotMarketTransaction>();
+              entityManager.removeAll<EBotMarketBalance>();
               EBotService* eBotService = entityManager.getEntity<EBotService>(0);
               eBotService->setSelectedMarketId(entity->entityId);
               entityManager.updatedEntity(*eBotService);

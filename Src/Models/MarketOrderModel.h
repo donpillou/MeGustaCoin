@@ -4,9 +4,6 @@
 class MarketOrderModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
-  MarketOrderModel(Entity::Manager& entityManager);
-  ~MarketOrderModel();
-
   enum class Column
   {
       first,
@@ -20,10 +17,17 @@ public:
       last = total,
   };
 
+public:
+  MarketOrderModel(Entity::Manager& entityManager);
+  ~MarketOrderModel();
+
+  QModelIndex createDraft(EBotMarketOrder::Type type, double price);
+
 private:
   Entity::Manager& entityManager;
   EBotMarketAdapter* eBotMarketAdapter;
   QList<EBotMarketOrder*> orders;
+  QSet<EBotMarketOrder*> draftOrders;
   QVariant draftStr;
   QVariant submittingStr;
   QVariant openStr;
@@ -42,6 +46,8 @@ private: // QAbstractItemModel
   virtual int rowCount(const QModelIndex& parent) const;
   virtual int columnCount(const QModelIndex& parent) const;
   virtual QVariant data(const QModelIndex& index, int role) const;
+  virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+  virtual bool setData(const QModelIndex & index, const QVariant & value, int role);
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 private: // Entity::Listener

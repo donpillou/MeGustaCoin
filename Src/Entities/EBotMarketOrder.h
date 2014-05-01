@@ -32,24 +32,41 @@ public:
     amount = data.amount;
     fee = data.fee;
 
-    switch(type)
-    {
-    case Type::buy:
-      total = -(price * amount + fee);
-      break;
-    case Type::sell:
-      total = price * amount - fee;
-      break;
-    }
-
+    updateTotal();
     state = State::open;
+  }
+
+  EBotMarketOrder(Type type, const QDateTime& date, double price) : Entity(eType, 0)
+  {
+    this->type = type;
+    this->date = date;
+    this->price = price;
+    this->amount = 0.;
+    this->fee = 0.;
+    this->total = 0.;
+    state = State::draft;
   }
 
   Type getType() const {return type;}
   const QDateTime& getDate() const {return date;}
   double getPrice() const {return price;}
+  void setPrice(double price)
+  {
+    this->price = price;
+    updateTotal();
+  }
   double getAmount() const {return amount;}
+  void setAmount(double amount)
+  {
+    this->amount = amount;
+    updateTotal();
+  }
   double getFee() const {return fee;}
+  void setFee(double fee)
+  {
+    this->fee = fee;
+    updateTotal();
+  }
   double getTotal() const {return total;}
   State getState() const {return state;}
 
@@ -61,4 +78,17 @@ private:
   double fee;
   double total;
   State state;
+
+  void updateTotal()
+  {
+    switch(type)
+    {
+    case Type::buy:
+      total = -(price * amount + fee);
+      break;
+    case Type::sell:
+      total = price * amount - fee;
+      break;
+    }
+  }
 };

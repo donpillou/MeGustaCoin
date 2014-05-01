@@ -5,9 +5,10 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   marketService(dataModel), dataService(dataModel), botService(dataModel, botEntityManager)
 {
   botEntityManager.delegateEntity(*new EBotService);
+  botEntityManager.registerListener<EBotMarketBalance>(*this);
 
   //connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
-  connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
+  //connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
   connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
 
@@ -33,7 +34,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   */
 
   marketsWidget = new MarketsWidget(this, settings, botEntityManager, botService);
-  ordersWidget = new OrdersWidget(this, settings, botEntityManager, botService);
+  ordersWidget = new OrdersWidget(this, settings, botEntityManager, botService, dataModel);
   transactionsWidget = new TransactionsWidget(this, settings, botEntityManager, botService);
   //graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
   botsWidget = new BotsWidget(this, settings, botEntityManager, botService);
@@ -170,6 +171,26 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   startBotService();
 }
 
+MainWindow::~MainWindow()
+{
+  botEntityManager.unregisterListener<EBotMarketBalance>(*this);
+  //logout();
+
+  // manually delete widgets since they hold a reference to the data model
+  for(QHash<QString, ChannelData>::Iterator i = channelDataMap.begin(), end = channelDataMap.end(); i != end; ++i)
+  {
+    ChannelData& channelData = i.value();
+    delete channelData.tradesWidget;
+    delete channelData.graphWidget;
+  }
+  delete marketsWidget;
+  delete ordersWidget;
+  delete transactionsWidget;
+  //delete graphWidget;
+  delete botsWidget;
+  delete logWidget;
+}
+
 void MainWindow::startDataService()
 {
   settings.beginGroup("DataServer");
@@ -186,25 +207,6 @@ void MainWindow::startBotService()
   QString botPassword = settings.value("Password").toString();
   botService.start(botServer, botUser, botPassword);
   settings.endGroup();
-}
-
-MainWindow::~MainWindow()
-{
-  //logout();
-
-  // manually delete widgets since they hold a reference to the data model
-  for(QHash<QString, ChannelData>::Iterator i = channelDataMap.begin(), end = channelDataMap.end(); i != end; ++i)
-  {
-    ChannelData& channelData = i.value();
-    delete channelData.tradesWidget;
-    delete channelData.graphWidget;
-  }
-  delete marketsWidget;
-  delete ordersWidget;
-  delete transactionsWidget;
-  //delete graphWidget;
-  delete botsWidget;
-  delete logWidget;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -285,20 +287,39 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::updateWindowTitle()
 {
-  if(!marketService.isReady())
+  
+  EBotMarketBalance* eBotMarketBalance = botEntityManager.getEntity<EBotMarketBalance>(0);
+  EBotMarketAdapter* eBotMarketAdapater = 0;
+  if(eBotMarketBalance)
+  {
+    EBotService* eBotService = botEntityManager.getEntity<EBotService>(0);
+    EBotMarket* eBotMarket = botEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
+    if(eBotMarket)
+      eBotMarketAdapater = botEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+  }
+  if(!eBotMarketBalance || !eBotMarketAdapater)
     setWindowTitle(tr("Meguco Client"));
   else
   {
-    QString title;
-    const Market::Balance& balance = dataModel.getBalance();
-    double usd = balance.availableUsd + balance.reservedUsd;
-    double btc = balance.availableBtc + balance.reservedBtc;
-    if(usd != 0. || btc != 0. || balance.fee != 0.)
-      title = QString("%1(%2) %3 / %4(%5) %6 - ").arg(dataModel.formatPrice(balance.availableUsd), dataModel.formatPrice(usd), dataModel.getMarketCurrency(), dataModel.formatAmount(balance.availableBtc), dataModel.formatAmount(btc), dataModel.getCoinCurrency());
-    const QString& marketName = dataModel.getMarketName();
-    title += marketName;
-    if(!marketName.isEmpty())
+    EBotService* eBotService = botEntityManager.getEntity<EBotService>(0);
+    EBotMarket* eBotMarket = botEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
+    EBotMarketAdapter* eBotMarketAdapater = 0;
+    if(eBotMarket)
+      eBotMarketAdapater = botEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+
+    double usd = eBotMarketBalance->getAvailableUsd() + eBotMarketBalance->getReservedUsd();
+    double btc = eBotMarketBalance->getAvailableBtc() + eBotMarketBalance->getReservedBtc();
+    QString title = QString("%1(%2) %3 / %4(%5) %6 - ").arg(
+      eBotMarketAdapater->formatPrice(eBotMarketBalance->getAvailableUsd()), 
+      eBotMarketAdapater->formatPrice(usd), 
+      eBotMarketAdapater->getBaseCurrency(),
+      eBotMarketAdapater->formatAmount(eBotMarketBalance->getAvailableBtc()), 
+      eBotMarketAdapater->formatAmount(btc), 
+      eBotMarketAdapater->getCommCurrency());
+    if(eBotMarketAdapater)
     {
+      const QString& marketName = eBotMarketAdapater->getName();
+      title += eBotMarketAdapater->getName();
       const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
       double bid, ask;
       if(publicDataModel.getTicker(bid, ask))
@@ -481,4 +502,19 @@ found:
     dataService.subscribe(channelName);
   else
     dataService.unsubscribe(channelName);
+}
+
+void MainWindow::addedEntity(Entity& entity)
+{
+  updateWindowTitle();
+}
+
+void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+{
+  updateWindowTitle();
+}
+
+void MainWindow::removedAll(quint32 type)
+{
+  updateWindowTitle();
 }

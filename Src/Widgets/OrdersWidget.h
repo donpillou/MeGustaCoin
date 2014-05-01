@@ -6,7 +6,7 @@ class OrdersWidget : public QWidget, public Entity::Listener
   Q_OBJECT
 
 public:
-  OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
+  OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botServic, DataModel& dataModele);
   ~OrdersWidget();
 
   void saveState(QSettings& settings);
@@ -26,6 +26,7 @@ private slots:
 private:
   Entity::Manager& entityManager;
   BotService& botService;
+  DataModel& dataModel; // todo: get rid of this
 
   MarketOrderModel orderModel;
 
@@ -38,8 +39,7 @@ private:
   QAction* submitAction;
   QAction* cancelAction;
 
-  void addOrder(OrderModel::Order::Type type);
-  QList<QModelIndex> getSelectedRows();
+  void addOrderDraft(EBotMarketOrder::Type type);
 
 private:
     void updateTitle(EBotService& eBotService);

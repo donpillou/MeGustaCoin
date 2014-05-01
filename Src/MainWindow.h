@@ -1,7 +1,7 @@
 
 #pragma once
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, public Entity::Listener
 {
   Q_OBJECT
 
@@ -61,4 +61,9 @@ private slots:
   void enableGraphUpdates(bool enable);
   void createLiveTradeWidget(const QString& channel);
   void createLiveGraphWidget(const QString& channel);
+
+private: // Entity::Listener
+  virtual void addedEntity(Entity& entity);
+  virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
+  virtual void removedAll(quint32 type);
 };

@@ -23,6 +23,7 @@
 #include "Entities/EBotMarketTransaction.h"
 #include "Entities/EBotService.h"
 #include "Entities/EBotMarketAdapter.h"
+#include "Entities/EBotMarketBalance.h"
 
 #include "Markets/DataConnection.h"
 #include "Markets/Market.h"

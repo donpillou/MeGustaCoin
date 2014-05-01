@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(parent), entityManager(entityManager), botService(botService), orderModel(entityManager)
+OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataModel& dataModel) :
+  QWidget(parent), entityManager(entityManager), botService(botService), dataModel(dataModel), orderModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
   //connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
@@ -89,25 +89,35 @@ void OrdersWidget::saveState(QSettings& settings)
 
 void OrdersWidget::newBuyOrder()
 {
-  addOrder(OrderModel::Order::Type::buy);
+  addOrderDraft(EBotMarketOrder::Type::buy);
 }
 
 void OrdersWidget::newSellOrder()
 {
-  addOrder(OrderModel::Order::Type::sell);
+  addOrderDraft(EBotMarketOrder::Type::sell);
 }
 
-void OrdersWidget::addOrder(OrderModel::Order::Type type)
+void OrdersWidget::addOrderDraft(EBotMarketOrder::Type type)
 {
-  //const QString& marketName = dataModel.getMarketName();
-  //if(marketName.isEmpty())
-  //  return;
-  //const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
-  //double price = 0;
-  //double bid, ask;
-  //if(publicDataModel.getTicker(bid, ask))
-  //  price = type == OrderModel::Order::Type::buy ? (bid + 0.01) : (ask - 0.01);
-  //
+  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+  EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
+  if(!eBotMarket)
+    return;
+  EBotMarketAdapter* eBotMarketAdapater = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+  if(!eBotMarketAdapater)
+    return;
+  const QString& marketName = eBotMarketAdapater->getName();
+  const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
+  double price = 0;
+  double bid, ask;
+  if(publicDataModel.getTicker(bid, ask))
+    price = type == EBotMarketOrder::Type::buy ? (bid + 0.01) : (ask - 0.01);
+
+  QModelIndex amountProxyIndex = orderModel.createDraft(type, price);
+  QModelIndex amountIndex = proxyModel->mapFromSource(amountProxyIndex);
+  orderView->setCurrentIndex(amountIndex);
+  orderView->edit(amountIndex);
+
   //QString id = marketService.createOrderDraft(type == OrderModel::Order::Type::sell, price);
   //QModelIndex index = orderModel.getOrderIndex(id);
   //
@@ -116,18 +126,18 @@ void OrdersWidget::addOrder(OrderModel::Order::Type type)
   //orderView->edit(amountIndex);
 }
 
-QList<QModelIndex> OrdersWidget::getSelectedRows()
-{ // since orderView->selectionModel()->selectedRows(); does not work
-  QList<QModelIndex> result;
-  QItemSelection selection = orderView->selectionModel()->selection();
-  foreach(const QItemSelectionRange& range, selection)
-  {
-    QModelIndex parent = range.parent();
-    for(int i = range.top(), end = range.bottom() + 1; i < end; ++i)
-      result.append(range.model()->index(i, 0, parent));
-  }
-  return result;
-}
+//QList<QModelIndex> OrdersWidget::getSelectedRows()
+//{ // since orderView->selectionModel()->selectedRows(); does not work
+//  QList<QModelIndex> result;
+//  QItemSelection selection = orderView->selectionModel()->selection();
+//  foreach(const QItemSelectionRange& range, selection)
+//  {
+//    QModelIndex parent = range.parent();
+//    for(int i = range.top(), end = range.bottom() + 1; i < end; ++i)
+//      result.append(range.model()->index(i, 0, parent));
+//  }
+//  return result;
+//}
 
 void OrdersWidget::submitOrder()
 {
@@ -238,8 +248,8 @@ void OrdersWidget::updateToolBarButtons()
   //  }
   //
   refreshAction->setEnabled(connected && marketSelected);
-  //buyAction->setEnabled(hasMarket);
-  //sellAction->setEnabled(hasMarket);
+  buyAction->setEnabled(connected && marketSelected);
+  sellAction->setEnabled(connected && marketSelected);
   //submitAction->setEnabled(hasMarket && canSubmit);
   //cancelAction->setEnabled(canCancel);
 }

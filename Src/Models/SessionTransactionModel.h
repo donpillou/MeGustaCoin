@@ -4,9 +4,6 @@
 class SessionTransactionModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
-  SessionTransactionModel(Entity::Manager& entityManager);
-  ~SessionTransactionModel();
-
   enum class Column
   {
       first,
@@ -19,6 +16,10 @@ public:
       total,
       last = total,
   };
+
+public:
+  SessionTransactionModel(Entity::Manager& entityManager);
+  ~SessionTransactionModel();
 
 private:
   Entity::Manager& entityManager;

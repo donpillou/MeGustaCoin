@@ -143,6 +143,15 @@ public:
     quint8 state;
   };
 
+  struct MarketBalance : public Entity
+  {
+    double reservedUsd;
+    double reservedBtc;
+    double availableUsd;
+    double availableBtc;
+    double fee;
+  };
+
   struct CreateSessionArgs : public Entity
   {
     char name[33];
