@@ -20,6 +20,7 @@
 #include "Entities/EBotSession.h"
 #include "Entities/EBotMarket.h"
 #include "Entities/EBotMarketOrder.h"
+#include "Entities/EBotMarketOrderDraft.h"
 #include "Entities/EBotMarketTransaction.h"
 #include "Entities/EBotService.h"
 #include "Entities/EBotMarketAdapter.h"

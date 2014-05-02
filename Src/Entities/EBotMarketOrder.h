@@ -24,6 +24,7 @@ public:
   };
 
 public:
+  EBotMarketOrder(EType type, quint32 id) : Entity(eType, id) {}
   EBotMarketOrder(BotProtocol::Order& data) : Entity(eType, data.entityId)
   {
     type = (Type)data.type;
@@ -34,17 +35,6 @@ public:
 
     updateTotal();
     state = State::open;
-  }
-
-  EBotMarketOrder(Type type, const QDateTime& date, double price) : Entity(eType, 0)
-  {
-    this->type = type;
-    this->date = date;
-    this->price = price;
-    this->amount = 0.;
-    this->fee = 0.;
-    this->total = 0.;
-    state = State::draft;
   }
 
   Type getType() const {return type;}
@@ -71,7 +61,7 @@ public:
   State getState() const {return state;}
   void setState(State state) {this->state = state;}
 
-private:
+protected:
   Type type;
   QDateTime date;
   double price;

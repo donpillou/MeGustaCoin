@@ -264,6 +264,7 @@ void BotService::WorkerThread::setState(EBotService::State state)
         entityManager.removeAll<EBotSessionOrder>();
         entityManager.removeAll<EBotMarketTransaction>();
         entityManager.removeAll<EBotMarketOrder>();
+        entityManager.removeAll<EBotMarketOrderDraft>();
         entityManager.removeAll<EBotMarketBalance>();
         entityManager.removeAll<EBotMarket>();
         eBotService->setSelectedMarketId(0);

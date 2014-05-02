@@ -15,19 +15,16 @@ MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
 MarketOrderModel::~MarketOrderModel()
 {
   entityManager.unregisterListener<EBotMarketOrder>(*this);
-  qDeleteAll(draftOrders);
 }
 
 QModelIndex MarketOrderModel::createDraft(EBotMarketOrder::Type type, double price)
 {
-  EBotMarketOrder* eBotMarketOrder = new EBotMarketOrder(type, QDateTime::currentDateTime(), price);
-  draftOrders.insert(eBotMarketOrder);
-
+  quint32 id = entityManager.getNewEntityId<EBotMarketOrderDraft>();
+  EBotMarketOrderDraft* eBotMarketOrderDraft = new EBotMarketOrderDraft(id, type, QDateTime::currentDateTime(), price);
   int index = orders.size();
-  beginInsertRows(QModelIndex(), index, index);
-  orders.append(eBotMarketOrder);
-  endInsertRows();
-  return createIndex(index, (int)Column::amount, eBotMarketOrder);
+  entityManager.delegateEntity(*eBotMarketOrderDraft);
+  Q_ASSERT(orders[index] == eBotMarketOrderDraft);
+  return createIndex(index, (int)Column::amount, eBotMarketOrderDraft);
 }
 
 QModelIndex MarketOrderModel::index(int row, int column, const QModelIndex& parent) const
@@ -301,13 +298,15 @@ void MarketOrderModel::removedEntity(Entity& entity)
 
 void MarketOrderModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::botMarketOrder)
+  if((EType)type == EType::botMarketOrder || 
+     (EType)type == EType::botMarketOrderDraft)
   {
-    emit beginResetModel();
-    orders.clear();
-    emit endResetModel();
-    qDeleteAll(draftOrders);
-    draftOrders.clear();
+    if(!orders.isEmpty())
+    {
+      emit beginResetModel();
+      orders.clear();
+      emit endResetModel();
+    }
     return;
   }
   Q_ASSERT(false);

@@ -27,7 +27,6 @@ private:
   Entity::Manager& entityManager;
   EBotMarketAdapter* eBotMarketAdapter;
   QList<EBotMarketOrder*> orders;
-  QSet<EBotMarketOrder*> draftOrders;
   QVariant draftStr;
   QVariant submittingStr;
   QVariant openStr;

@@ -12,6 +12,7 @@ enum class EType
   botMarketAdapter,
   botMarket,
   botMarketOrder,
+  botMarketOrderDraft,
   botMarketTransaction,
   botMarketBalance,
 };

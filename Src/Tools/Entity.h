@@ -153,6 +153,17 @@ public:
       }
     }
 
+    template<class C> quint32 getNewEntityId()
+    {
+      EntityTable& table = tables[(quint32)C::eType];
+      if(table.entities.isEmpty())
+        return 1;
+      quint32 id = (--table.entities.end()).value()->getId();
+      while(table.entities.contains(id))
+        id += qrand() % 10;
+      return id;
+    }
+
     void registerListener(quint32 type, Listener& listener)
     {
       EntityTable& table = tables[type];
