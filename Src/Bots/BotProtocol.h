@@ -21,6 +21,7 @@ public:
     controlEntity,
     controlEntityResponse,
     createEntity,
+    createEntityResponse,
     requestEntities,
   };
   
@@ -49,6 +50,12 @@ public:
   {
     quint16 entityType; // EntityType
     quint32 entityId;
+  };
+
+  struct CreateResponse : public Entity
+  {
+    quint32 id; // id of the created entity
+    quint8 success;
   };
 
   struct LoginRequest

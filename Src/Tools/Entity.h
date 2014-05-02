@@ -8,9 +8,10 @@ public:
   {
   public:
     virtual void addedEntity(Entity& entity) {};
+    virtual void addedEntity(Entity& entity, Entity& replacedEntity) {};
     virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity) {};
     virtual void removedEntity(Entity& entity) {};
-    //virtual void addedAll(const QHash<quint32, Entity*>& entities) = 0;
+    virtual void removedEntity(Entity& entity, Entity& newEntity) {};
     virtual void removedAll(quint32 type) {};
   };
 
@@ -35,6 +36,43 @@ public:
         for(QSet<Listener*>::iterator i = table.listeners.begin(), end = table.listeners.end(); i != end; ++i)
           (*i)->updatedEntitiy(*oldEntity, entity);
         delete oldEntity;
+      }
+    }
+
+    void delegateEntity(Entity& entity, Entity& replacedEntity)
+    {
+      quint32 replacedId = replacedEntity.getId();
+      EntityTable& replacedTable = tables[replacedEntity.getType()];
+      QHash<quint32, Entity*>::iterator itReplaced = replacedTable.entities.find(replacedId);
+      if(itReplaced != replacedTable.entities.end())
+      {
+        replacedTable.entities.erase(itReplaced);
+        for(QSet<Listener*>::iterator i = replacedTable.listeners.begin(), end = replacedTable.listeners.end(); i != end; ++i)
+          (*i)->removedEntity(replacedEntity, entity);
+      }
+
+      quint32 newId = entity.getId();
+      EntityTable& newTable = tables[entity.getType()];
+      QHash<quint32, Entity*>::iterator it = newTable.entities.find(newId);
+      if(it == newTable.entities.end())
+      { // move replacing entity to new entity
+        newTable.entities.insert(newId, &entity);
+        for(QSet<Listener*>::iterator i = newTable.listeners.begin(), end = newTable.listeners.end(); i != end; ++i)
+          (*i)->addedEntity(entity, replacedEntity);
+        delete &replacedEntity;
+      }
+      else
+      {
+        // remove existing new entity, move old entity to new entity
+        Entity* oldEntity = *it;
+        newTable.entities.erase(it);
+        for(QSet<Listener*>::iterator i = newTable.listeners.begin(), end = newTable.listeners.end(); i != end; ++i)
+          (*i)->removedEntity(*oldEntity);
+        newTable.entities.insert(newId, &entity);
+        for(QSet<Listener*>::iterator i = newTable.listeners.begin(), end = newTable.listeners.end(); i != end; ++i)
+          (*i)->addedEntity(entity, replacedEntity);
+        delete oldEntity;
+        delete &replacedEntity;
       }
     }
 

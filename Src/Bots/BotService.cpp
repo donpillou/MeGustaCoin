@@ -194,9 +194,6 @@ void BotService::stopSession(quint32 id)
 
 void BotService::selectSession(quint32 id)
 {
-  //entityManager.removeAll<EBotSessionOrder>();
-  //entityManager.removeAll<EBotSessionTransaction>();
-
   BotProtocol::ControlSession controlSession;
   controlSession.entityType = BotProtocol::session;
   controlSession.entityId = id;
@@ -441,6 +438,8 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& e
   default:
     break;
   }
+  if(eType == EType::none)
+    return;
 
   class RemoveEntityEvent : public Event
   {
@@ -523,5 +522,55 @@ void BotService::WorkerThread::receivedControlEntityResponse(BotProtocol::Entity
     }
   };
   eventQueue.append(new ControlEntityResponseEvent(QByteArray((const char*)&entity, (int)size)));
+  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+}
+
+void BotService::WorkerThread::receivedCreateEntityResponse(const BotProtocol::CreateResponse& entity)
+{
+  EType eType = EType::none;
+  switch((BotProtocol::EntityType)entity.entityType)
+  {
+  case BotProtocol::marketOrder:
+    eType = EType::botMarketOrder;
+    break;
+  default:
+    return;
+  }
+  if(eType == EType::none)
+    return;
+
+  class CreateEntityResponseEvent : public Event
+  {
+  public:
+    CreateEntityResponseEvent(EType eType, quint32 oldId, quint32 newId, bool success) : eType(eType), oldId(oldId), newId(newId), success(success) {}
+  private:
+    EType eType;
+    quint32 oldId;
+    quint32 newId;
+    bool success;
+  public: // Event
+    virtual void handle(BotService& botService)
+    {
+      Entity::Manager& entityManager = botService.entityManager;
+      if(!success)
+      {
+        // todo: do something
+        return;
+      }
+      switch(eType)
+      {
+      case EType::botMarketOrder:
+        {
+          // todo: find draft
+          // create entity from draft
+          // delegate
+        }
+        break;
+      default:
+        break;
+      }
+    }
+  };
+  eventQueue.append(new CreateEntityResponseEvent(eType, entity.entityId, entity.id, entity.success != 0));
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }

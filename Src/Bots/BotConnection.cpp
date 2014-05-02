@@ -108,6 +108,9 @@ void BotConnection::handleMessage(const BotProtocol::Header& header, char* data,
     if(size >= sizeof(BotProtocol::Entity))
       callback->receivedControlEntityResponse(*(BotProtocol::Entity*)data, size);
     break;
+  case BotProtocol::createEntityResponse:
+    if(size >= sizeof(BotProtocol::CreateResponse))
+      callback->receivedCreateEntityResponse(*(const BotProtocol::CreateResponse*)data);
   default:
     break;
   }
