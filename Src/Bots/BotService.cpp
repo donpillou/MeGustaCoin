@@ -148,7 +148,8 @@ void BotService::createMarketOrder(EBotMarketOrder::Type type, double price, dou
 {
   BotProtocol::CreateOrderArgs order;
   order.entityType = BotProtocol::marketOrder;
-  order.entityId  = 0;
+  order.entityId = 0;
+  order.type = (quint8)type;
   order.price = price;
   order.amount = amount;
   createEntity(&order, sizeof(order));
