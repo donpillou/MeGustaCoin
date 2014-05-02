@@ -118,30 +118,30 @@ void BotService::removeMarket(quint32 id)
 
 void BotService::selectMarket(quint32 id)
 {
-  BotProtocol::ControlMarketArgs controlMarket;
+  BotProtocol::ControlMarket controlMarket;
   controlMarket.entityType = BotProtocol::market;
   controlMarket.entityId = id;
-  controlMarket.cmd = BotProtocol::ControlMarketArgs::select;
+  controlMarket.cmd = BotProtocol::ControlMarket::select;
   controlEntity(&controlMarket, sizeof(controlMarket));
 }
 
 void BotService::refreshMarketOrders()
 {
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  BotProtocol::ControlMarketArgs controlMarket;
+  BotProtocol::ControlMarket controlMarket;
   controlMarket.entityType = BotProtocol::market;
   controlMarket.entityId = eBotService->getSelectedMarketId();
-  controlMarket.cmd = BotProtocol::ControlMarketArgs::refreshOrders;
+  controlMarket.cmd = BotProtocol::ControlMarket::refreshOrders;
   controlEntity(&controlMarket, sizeof(controlMarket));
 }
 
 void BotService::refreshMarketTransactions()
 {
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  BotProtocol::ControlMarketArgs controlMarket;
+  BotProtocol::ControlMarket controlMarket;
   controlMarket.entityType = BotProtocol::market;
   controlMarket.entityId = eBotService->getSelectedMarketId();
-  controlMarket.cmd = BotProtocol::ControlMarketArgs::refreshTransactions;
+  controlMarket.cmd = BotProtocol::ControlMarket::refreshTransactions;
   controlEntity(&controlMarket, sizeof(controlMarket));
 }
 
@@ -176,19 +176,19 @@ void BotService::removeSession(quint32 id)
 
 void BotService::startSessionSimulation(quint32 id)
 {
-  BotProtocol::ControlSessionArgs controlSession;
+  BotProtocol::ControlSession controlSession;
   controlSession.entityType = BotProtocol::session;
   controlSession.entityId = id;
-  controlSession.cmd = BotProtocol::ControlSessionArgs::startSimulation;
+  controlSession.cmd = BotProtocol::ControlSession::startSimulation;
   controlEntity(&controlSession, sizeof(controlSession));
 }
 
 void BotService::stopSession(quint32 id)
 {
-  BotProtocol::ControlSessionArgs controlSession;
+  BotProtocol::ControlSession controlSession;
   controlSession.entityType = BotProtocol::session;
   controlSession.entityId = id;
-  controlSession.cmd = BotProtocol::ControlSessionArgs::stop;
+  controlSession.cmd = BotProtocol::ControlSession::stop;
   controlEntity(&controlSession, sizeof(controlSession));
 }
 
@@ -197,10 +197,10 @@ void BotService::selectSession(quint32 id)
   //entityManager.removeAll<EBotSessionOrder>();
   //entityManager.removeAll<EBotSessionTransaction>();
 
-  BotProtocol::ControlSessionArgs controlSession;
+  BotProtocol::ControlSession controlSession;
   controlSession.entityType = BotProtocol::session;
   controlSession.entityId = id;
-  controlSession.cmd = BotProtocol::ControlSessionArgs::select;
+  controlSession.cmd = BotProtocol::ControlSession::select;
   controlEntity(&controlSession, sizeof(controlSession));
 }
 
@@ -478,9 +478,9 @@ void BotService::WorkerThread::receivedControlEntityResponse(BotProtocol::Entity
         if(size >= sizeof(BotProtocol::ControlMarketResponse))
         {
           BotProtocol::ControlMarketResponse* response = (BotProtocol::ControlMarketResponse*)entity;
-          switch((BotProtocol::ControlMarketArgs::Command)response->cmd)
+          switch((BotProtocol::ControlMarket::Command)response->cmd)
           {
-          case BotProtocol::ControlMarketArgs::select:
+          case BotProtocol::ControlMarket::select:
             {
               Entity::Manager& entityManager = botService.entityManager;
               entityManager.removeAll<EBotMarketOrder>();
@@ -500,9 +500,9 @@ void BotService::WorkerThread::receivedControlEntityResponse(BotProtocol::Entity
         if(size >= sizeof(BotProtocol::ControlSessionResponse))
         {
           BotProtocol::ControlSessionResponse* response = (BotProtocol::ControlSessionResponse*)entity;
-          switch((BotProtocol::ControlSessionArgs::Command)response->cmd)
+          switch((BotProtocol::ControlSession::Command)response->cmd)
           {
-          case BotProtocol::ControlSessionArgs::select:
+          case BotProtocol::ControlSession::select:
             {
               Entity::Manager& entityManager = botService.entityManager;
               entityManager.removeAll<EBotSessionOrder>();
