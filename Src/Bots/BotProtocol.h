@@ -86,6 +86,8 @@ public:
     quint32 botEngineId;
     quint32 marketId;
     quint8 state;
+    double balanceBase;
+    double balanceComm;
   };
 
   struct BotEngine : public Entity
@@ -141,6 +143,9 @@ public:
 
     quint32 marketAdapterId;
     quint8 state;
+    char userName[33];
+    char key[65];
+    char secret[65];
   };
 
   struct MarketBalance : public Entity
@@ -150,15 +155,6 @@ public:
     double availableUsd;
     double availableBtc;
     double fee;
-  };
-
-  struct CreateSessionArgs : public Entity
-  {
-    char name[33];
-    quint32 engineId;
-    quint32 marketId;
-    double balanceBase;
-    double balanceComm;
   };
 
   struct ControlSessionArgs : public Entity
@@ -177,30 +173,6 @@ public:
   {
     quint8 cmd;
     quint8 success;
-  };
-
-  struct CreateTransactionArgs : public Entity
-  {
-    quint8 type; // see Transaction::Type
-    double price;
-    double amount;
-    double fee;
-  };
-
-  struct CreateOrderArgs : public Entity
-  {
-    quint8 type; // see Order::Type
-    double price;
-    double amount;
-    double fee;
-  };
-
-  struct CreateMarketArgs : public Entity
-  {
-    quint32 marketAdapterId;
-    char userName[33];
-    char key[65];
-    char secret[65];
   };
 
   struct ControlMarketArgs : public Entity

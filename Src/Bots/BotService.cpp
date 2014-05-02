@@ -101,13 +101,14 @@ void BotService::controlEntity(const void* args, size_t size)
 
 void BotService::createMarket(quint32 marketAdapterId, const QString& userName, const QString& key, const QString& secret)
 {
-  BotProtocol::CreateMarketArgs createMarket;
-  createMarket.entityType = BotProtocol::market;
-  createMarket.marketAdapterId = marketAdapterId;
-  setString(createMarket.userName, userName);
-  setString(createMarket.key, key);
-  setString(createMarket.secret, secret);
-  createEntity(&createMarket, sizeof(createMarket));
+  BotProtocol::Market market;
+  market.entityType = BotProtocol::market;
+  market.entityId = 0;
+  market.marketAdapterId = marketAdapterId;
+  setString(market.userName, userName);
+  setString(market.key, key);
+  setString(market.secret, secret);
+  createEntity(&market, sizeof(market));
 }
 
 void BotService::removeMarket(quint32 id)
@@ -146,7 +147,7 @@ void BotService::refreshMarketTransactions()
 
 void BotService::createMarketOrder(EBotMarketOrder::Type type, double price, double amount)
 {
-  BotProtocol::CreateOrderArgs order;
+  BotProtocol::Order order;
   order.entityType = BotProtocol::marketOrder;
   order.entityId = 0;
   order.type = (quint8)type;
@@ -157,14 +158,15 @@ void BotService::createMarketOrder(EBotMarketOrder::Type type, double price, dou
 
 void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)
 {
-  BotProtocol::CreateSessionArgs createSession;
-  createSession.entityType = BotProtocol::session;
-  setString(createSession.name, name);
-  createSession.engineId = engineId;
-  createSession.marketId = marketId;
-  createSession.balanceBase = balanceBase;
-  createSession.balanceComm = balanceComm;
-  createEntity(&createSession, sizeof(createSession));
+  BotProtocol::Session session;
+  session.entityType = BotProtocol::session;
+  session.entityId = 0;
+  setString(session.name, name);
+  session.botEngineId = engineId;
+  session.marketId = marketId;
+  session.balanceBase = balanceBase;
+  session.balanceComm = balanceComm;
+  createEntity(&session, sizeof(session));
 }
 
 void BotService::removeSession(quint32 id)
