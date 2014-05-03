@@ -19,7 +19,9 @@ public:
   void refreshMarketTransactions();
 
   EBotMarketOrderDraft& createMarketOrderDraft(EBotMarketOrder::Type type, double price);
-  void createMarketOrder(EBotMarketOrder::Type type, double price, double amount);
+  void submitMarketOrderDraft(EBotMarketOrderDraft& draft);
+  void cancelMarketOrder(EBotMarketOrder& order);
+  void removeMarketOrderDraft(EBotMarketOrderDraft& draft);
 
   void createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm);
   void removeSession(quint32 id);

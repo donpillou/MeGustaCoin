@@ -140,11 +140,7 @@ void OrdersWidget::submitOrder()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
     if(eBotMarketOrder->getState() == EBotMarketOrder::State::draft)
-    {
-      botService.createMarketOrder(eBotMarketOrder->getType(), eBotMarketOrder->getPrice(), eBotMarketOrder->getAmount());
-      eBotMarketOrder->setState(EBotMarketOrder::State::submitting);
-      entityManager.updatedEntity(*eBotMarketOrder);
-    }
+      botService.submitMarketOrderDraft(*(EBotMarketOrderDraft*)eBotMarketOrder);
   }
 
   //QList<QModelIndex> seletedIndices = getSelectedRows();
@@ -174,6 +170,33 @@ void OrdersWidget::submitOrder()
 
 void OrdersWidget::cancelOrder()
 {
+  QModelIndexList selection = orderView->selectionModel()->selectedRows();
+  QList<EBotMarketOrder*> ordersToRemove;
+  foreach(const QModelIndex& proxyIndex, selection)
+  {
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
+    EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
+    switch(eBotMarketOrder->getState())
+    {
+    case EBotMarketOrder::State::draft:
+    case EBotMarketOrder::State::canceled:
+    case EBotMarketOrder::State::closed:
+      ordersToRemove.append(eBotMarketOrder);
+      break;
+    case EBotMarketOrder::State::open:
+      botService.cancelMarketOrder(*eBotMarketOrder);
+      break;
+    default:
+      break;
+    }
+  }
+  while(!ordersToRemove.isEmpty())
+  {
+    QList<EBotMarketOrder*>::Iterator last = --ordersToRemove.end();
+    botService.removeMarketOrderDraft(*(EBotMarketOrderDraft*)*last);
+    ordersToRemove.erase(last);
+  }
+
   //QList<QModelIndex> seletedIndices = getSelectedRows();
   //
   //QMap<int, QModelIndex> rowsToRemove;

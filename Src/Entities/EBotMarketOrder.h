@@ -1,6 +1,8 @@
 
 #pragma once
 
+class EBotMarketOrderDraft;
+
 class EBotMarketOrder : public Entity
 {
 public:
@@ -24,7 +26,6 @@ public:
   };
 
 public:
-  EBotMarketOrder(EType type, quint32 id) : Entity(type, id) {}
   EBotMarketOrder(BotProtocol::Order& data) : Entity(eType, data.entityId)
   {
     type = (Type)data.type;
@@ -36,6 +37,7 @@ public:
     updateTotal();
     state = State::open;
   }
+  EBotMarketOrder(quint32 id, const EBotMarketOrderDraft& order);
 
   Type getType() const {return type;}
   const QDateTime& getDate() const {return date;}
@@ -60,6 +62,9 @@ public:
   double getTotal() const {return total;}
   State getState() const {return state;}
   void setState(State state) {this->state = state;}
+
+protected:
+  EBotMarketOrder(EType type, quint32 id) : Entity(type, id) {}
 
 protected:
   Type type;

@@ -153,15 +153,43 @@ EBotMarketOrderDraft& BotService::createMarketOrderDraft(EBotMarketOrder::Type t
   return *eBotMarketOrderDraft;
 }
 
-void BotService::createMarketOrder(EBotMarketOrder::Type type, double price, double amount)
+void BotService::submitMarketOrderDraft(EBotMarketOrderDraft& draft)
 {
+  if(draft.getState() != EBotMarketOrder::State::draft)
+    return;
+  draft.setState(EBotMarketOrder::State::submitting);
+  entityManager.updatedEntity(draft);
+
   BotProtocol::Order order;
   order.entityType = BotProtocol::marketOrder;
   order.entityId = 0;
-  order.type = (quint8)type;
-  order.price = price;
-  order.amount = amount;
+  order.type = (quint8)draft.getType();
+  order.price = draft.getPrice();
+  order.amount = draft.getAmount();
   createEntity(&order, sizeof(order));
+}
+
+void BotService::cancelMarketOrder(EBotMarketOrder& order)
+{
+  if(order.getState() != EBotMarketOrder::State::open)
+    return;
+  order.setState(EBotMarketOrder::State::canceling);
+  entityManager.updatedEntity(order);
+  removeEntity(BotProtocol::marketOrder, order.getId());
+}
+
+void BotService::removeMarketOrderDraft(EBotMarketOrderDraft& draft)
+{
+  switch(draft.getState())
+  {
+  case EBotMarketOrder::State::draft:
+  case EBotMarketOrder::State::canceled:
+  case EBotMarketOrder::State::closed:
+    break;
+  default:
+    return;
+  }
+  entityManager.removeEntity<EBotMarketOrderDraft>(draft.getId());
 }
 
 void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)
@@ -460,7 +488,23 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& e
   public: // Event
     virtual void handle(BotService& botService)
     {
-      botService.entityManager.removeEntity(eType, id);
+      Entity::Manager& entityManager = botService.entityManager;
+      switch(eType)
+      {
+      case EType::botMarketOrder:
+        {
+          EBotMarketOrder* eBotMarketOrder = entityManager.getEntity<EBotMarketOrder>(id);
+          if(!eBotMarketOrder)
+            return;
+          quint32 draftId = entityManager.getNewEntityId<EBotMarketOrderDraft>();
+          EBotMarketOrderDraft* eBotMarketOrderDraft = new EBotMarketOrderDraft(draftId, *eBotMarketOrder);
+          entityManager.delegateEntity(*eBotMarketOrderDraft, *eBotMarketOrder);
+        }
+        break;
+      default:
+        entityManager.removeEntity(eType, id);
+        break;
+      }
     }
   };
   eventQueue.append(new RemoveEntityEvent(eType, entity.entityId));
@@ -561,18 +605,24 @@ void BotService::WorkerThread::receivedCreateEntityResponse(const BotProtocol::C
     virtual void handle(BotService& botService)
     {
       Entity::Manager& entityManager = botService.entityManager;
-      if(!success)
-      {
-        // todo: do something
-        return;
-      }
       switch(eType)
       {
       case EType::botMarketOrder:
+        if(success)
         {
-          // todo: find draft
-          // create entity from draft
-          // delegate
+          EBotMarketOrderDraft* eBotMarketOrderDraft = entityManager.getEntity<EBotMarketOrderDraft>(oldId);
+          if(!eBotMarketOrderDraft)
+            return;
+          EBotMarketOrder* eBotMarketOrder = new EBotMarketOrder(newId, *eBotMarketOrderDraft);
+          entityManager.delegateEntity(*eBotMarketOrder, *eBotMarketOrderDraft);
+        }
+        else
+        {
+          EBotMarketOrderDraft* eBotMarketOrderDraft = entityManager.getEntity<EBotMarketOrderDraft>(oldId);
+          if(!eBotMarketOrderDraft)
+            return;
+          eBotMarketOrderDraft->setState(EBotMarketOrder::State::draft);
+          entityManager.updatedEntity(*eBotMarketOrderDraft);
         }
         break;
       default:

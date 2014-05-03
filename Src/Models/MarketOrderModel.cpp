@@ -280,6 +280,11 @@ void MarketOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   Q_ASSERT(false);
 }
 
+void MarketOrderModel::addedEntity(Entity& entity, Entity& replacedEntity)
+{
+  updatedEntitiy(replacedEntity, entity);
+}
+
 void MarketOrderModel::removedEntity(Entity& entity)
 {
   EBotMarketOrder* eOrder = dynamic_cast<EBotMarketOrder*>(&entity);
