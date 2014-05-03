@@ -22,6 +22,7 @@ public:
   const QString& getLastError() {return error;}
 
   bool createEntity(const void* args, size_t size);
+  bool updateEntity(const void* args, size_t size);
   bool removeEntity(BotProtocol::EntityType type, quint32 id);
   bool controlEntity(const void* args, size_t size);
 

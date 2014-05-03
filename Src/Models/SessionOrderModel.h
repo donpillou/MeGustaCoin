@@ -26,6 +26,7 @@ private:
   QList<EBotSessionOrder*> orders;
   QVariant draftStr;
   QVariant submittingStr;
+  QVariant updatingStr;
   QVariant openStr;
   QVariant cancelingStr;
   QVariant canceledStr;

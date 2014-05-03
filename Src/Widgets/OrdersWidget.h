@@ -19,7 +19,8 @@ private slots:
   void newSellOrder();
   void submitOrder();
   void cancelOrder();
-  void updateOrder(const QModelIndex& index);
+  void editedOrderPrice(const QModelIndex& index, double price);
+  void editedOrderAmount(const QModelIndex& index, double amount);
   void updateToolBarButtons();
 
 private:

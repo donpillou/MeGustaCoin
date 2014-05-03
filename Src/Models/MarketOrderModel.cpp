@@ -3,7 +3,7 @@
 
 MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
   entityManager(entityManager),
-  draftStr(tr("draft")), submittingStr(tr("submitting...")), openStr(tr("open")), cancelingStr(tr("canceling...")), canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), 
+  draftStr(tr("draft")), submittingStr(tr("submitting...")), updatingStr(tr("updating...")), openStr(tr("open")), cancelingStr(tr("canceling...")), canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), 
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
@@ -117,6 +117,8 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
         return draftStr;
       case EBotMarketOrder::State::submitting:
         return submittingStr;
+      case EBotMarketOrder::State::updating:
+        return updatingStr;
       case EBotMarketOrder::State::open:
         return openStr;
       case EBotMarketOrder::State::canceling:
@@ -141,7 +143,7 @@ Qt::ItemFlags MarketOrderModel::flags(const QModelIndex &index) const
     return 0;
 
   Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-  if(/*eOrder->getState() == EMarketOrder::State::open || */eOrder->getState() == EBotMarketOrder::State::draft)
+  if(eOrder->getState() == EBotMarketOrder::State::open || eOrder->getState() == EBotMarketOrder::State::draft)
   {
     Column column = (Column)index.column();
     if(column == Column::amount || column == Column::price)
@@ -159,7 +161,7 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
   if(!eOrder)
     return false;
 
-  if(eOrder->getState() != EBotMarketOrder::State::draft /* && eOrder->getState() != EBotMarketOrder::State::open */)
+  if(eOrder->getState() != EBotMarketOrder::State::draft && eOrder->getState() != EBotMarketOrder::State::open)
     return false;
 
   switch((Column)index.column())
@@ -176,11 +178,10 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
         if(eBotMarketBalance)
           eOrder->setFee(qCeil(eOrder->getAmount() * eOrder->getPrice() * eBotMarketBalance->getFee() * 100.) / 100.);
       }
-      else // if(eOrder->getState() == EBotMarketOrder::State::open)
+      else if(eOrder->getState() == EBotMarketOrder::State::open)
       {
-        // todo: ??
-        //order.newPrice = newPrice;
-        //emit editedOrder(index);
+        if(eOrder->getPrice() != newPrice)
+          emit editedOrderPrice(index, newPrice);
       }
       return true;
     }
@@ -196,11 +197,10 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
         if(eBotMarketBalance)
           eOrder->setFee(qCeil(eOrder->getAmount() * eOrder->getPrice() * eBotMarketBalance->getFee() * 100.) / 100.);
       }
-      else // if(eOrder->getState() == EBotMarketOrder::State::open)
+      else if(eOrder->getState() == EBotMarketOrder::State::open)
       {
-        // todo: ???
-        //order.newAmount = value.toDouble();
-        //emit editedOrder(index);
+        if(eOrder->getAmount() != newAmount)
+          emit editedOrderAmount(index, newAmount);
       }
       return true;
     }

@@ -58,6 +58,26 @@ void BotService::createEntity(const void* args, size_t size)
     thread->interrupt();
 }
 
+void BotService::updateEntity(const void* args, size_t size)
+{
+  class UpdateEntityJob : public Job
+  {
+  public:
+    UpdateEntityJob(const QByteArray& args) : args(args) {}
+  private:
+    QByteArray args;
+  public: // Event
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      return workerThread.connection.updateEntity(args.constData(), args.size());
+    }
+  };
+
+  jobQueue.append(new UpdateEntityJob(QByteArray((const char*)args, (int)size)));
+  if(thread)
+    thread->interrupt();
+}
+
 void BotService::removeEntity(BotProtocol::EntityType type, quint32 id)
 {
   class RemoveEntityJob : public Job
@@ -167,6 +187,22 @@ void BotService::submitMarketOrderDraft(EBotMarketOrderDraft& draft)
   order.price = draft.getPrice();
   order.amount = draft.getAmount();
   createEntity(&order, sizeof(order));
+}
+
+void BotService::updateMarketOrder(EBotMarketOrder& order, double price, double amount)
+{
+  if(order.getState() != EBotMarketOrder::State::open)
+    return;
+  order.setState(EBotMarketOrder::State::updating);
+  entityManager.updatedEntity(order);
+
+  BotProtocol::Order updatedOrder;
+  updatedOrder.entityType = BotProtocol::marketOrder;
+  updatedOrder.entityId = order.getId();
+  updatedOrder.type = (quint8)order.getType();
+  updatedOrder.price = price;
+  updatedOrder.amount = amount;
+  updateEntity(&updatedOrder, sizeof(updatedOrder));
 }
 
 void BotService::cancelMarketOrder(EBotMarketOrder& order)

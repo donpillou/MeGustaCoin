@@ -20,6 +20,7 @@ public:
 
   EBotMarketOrderDraft& createMarketOrderDraft(EBotMarketOrder::Type type, double price);
   void submitMarketOrderDraft(EBotMarketOrderDraft& draft);
+  void updateMarketOrder(EBotMarketOrder& order, double price, double amount);
   void cancelMarketOrder(EBotMarketOrder& order);
   void removeMarketOrderDraft(EBotMarketOrderDraft& draft);
 
@@ -99,6 +100,7 @@ private:
 
 private:
   void createEntity(const void* args, size_t size);
+  void updateEntity(const void* args, size_t size);
   void removeEntity(BotProtocol::EntityType type, quint32 id);
   void controlEntity(const void* args, size_t size);
 

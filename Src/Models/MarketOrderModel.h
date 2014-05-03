@@ -3,6 +3,8 @@
 
 class MarketOrderModel : public QAbstractItemModel, public Entity::Listener
 {
+  Q_OBJECT
+
 public:
   enum class Column
   {
@@ -23,12 +25,17 @@ public:
 
   QModelIndex getDraftAmountIndex(EBotMarketOrderDraft& draft);
 
+signals:
+  void editedOrderPrice(const QModelIndex& index, double price);
+  void editedOrderAmount(const QModelIndex& index, double price);
+
 private:
   Entity::Manager& entityManager;
   EBotMarketAdapter* eBotMarketAdapter;
   QList<EBotMarketOrder*> orders;
   QVariant draftStr;
   QVariant submittingStr;
+  QVariant updatingStr;
   QVariant openStr;
   QVariant cancelingStr;
   QVariant canceledStr;

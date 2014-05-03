@@ -19,6 +19,7 @@ public:
   {
     draft,
     submitting,
+    updating,
     open,
     canceling,
     canceled,

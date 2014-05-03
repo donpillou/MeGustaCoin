@@ -146,6 +146,21 @@ bool BotConnection::createEntity(const void* args, size_t size)
   return true;
 }
 
+bool BotConnection::updateEntity(const void* args, size_t size)
+{
+  Q_ASSERT(size >= sizeof(BotProtocol::Entity));
+  BotProtocol::Header header;
+  header.size = sizeof(header) + size;
+  header.messageType = BotProtocol::updateEntity;
+  if(!connection.send((const char*)&header, sizeof(header)) ||
+     !connection.send((const char*)args, size))
+  {
+    error = connection.getLastError();
+    return false;
+  }
+  return true;
+}
+
 bool BotConnection::removeEntity(BotProtocol::EntityType type, quint32 id)
 {
   char message[sizeof(BotProtocol::Header) + sizeof(BotProtocol::Entity)];

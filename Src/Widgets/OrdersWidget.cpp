@@ -55,7 +55,8 @@ OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager
   layout->addWidget(orderView);
   setLayout(layout);
 
-  //connect(&orderModel, SIGNAL(editedOrder(const QModelIndex&)), this, SLOT(updateOrder(const QModelIndex&)));
+  connect(&orderModel, SIGNAL(editedOrderPrice(const QModelIndex&, double)), this, SLOT(editedOrderPrice(const QModelIndex&, double)));
+  connect(&orderModel, SIGNAL(editedOrderAmount(const QModelIndex&, double)), this, SLOT(editedOrderAmount(const QModelIndex&, double)));
   connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
 
   QHeaderView* headerView = orderView->header();
@@ -229,17 +230,29 @@ void OrdersWidget::cancelOrder()
   //updateToolBarButtons();
 }
 
-void OrdersWidget::updateOrder(const QModelIndex& index)
+void OrdersWidget::editedOrderPrice(const QModelIndex& index, double price)
 {
-  //const OrderModel::Order* order = orderModel.getOrder(index);
-  //if(order->state != OrderModel::Order::State::open || (order->newAmount == 0. && order->newPrice == 0.))
-  //  return;
-  //double amount = order->newAmount != 0. ? order->newAmount : order->amount;
-  //double price = order->newPrice != 0. ? order->newPrice : order->price;
-  //
-  //marketService.updateOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
-  //updateToolBarButtons();
+  EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
+  botService.updateMarketOrder(*eBotMarketOrder, price, eBotMarketOrder->getAmount());
 }
+
+void OrdersWidget::editedOrderAmount(const QModelIndex& index, double amount)
+{
+  EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
+  botService.updateMarketOrder(*eBotMarketOrder, eBotMarketOrder->getPrice(), amount);
+}
+
+//void OrdersWidget::updateOrder(const QModelIndex& index)
+//{
+//  const OrderModel::Order* order = orderModel.getOrder(index);
+//  if(order->state != OrderModel::Order::State::open || (order->newAmount == 0. && order->newPrice == 0.))
+//    return;
+//  double amount = order->newAmount != 0. ? order->newAmount : order->amount;
+//  double price = order->newPrice != 0. ? order->newPrice : order->price;
+//  
+//  marketService.updateOrder(order->id, order->type == OrderModel::Order::Type::buy ? amount : -amount, price);
+//  updateToolBarButtons();
+//}
 
 void OrdersWidget::updateToolBarButtons()
 {
