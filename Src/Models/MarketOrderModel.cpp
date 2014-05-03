@@ -174,7 +174,7 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
         eOrder->setPrice(newPrice);
         EBotMarketBalance* eBotMarketBalance = entityManager.getEntity<EBotMarketBalance>(0);
         if(eBotMarketBalance)
-          eOrder->setFee(qCeil(eOrder->getAmount() * eOrder->getPrice() * eBotMarketBalance->getFee()));
+          eOrder->setFee(qCeil(eOrder->getAmount() * eOrder->getPrice() * eBotMarketBalance->getFee() * 100.) / 100.);
       }
       else // if(eOrder->getState() == EBotMarketOrder::State::open)
       {
@@ -194,7 +194,7 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
         eOrder->setAmount(newAmount);
         EBotMarketBalance* eBotMarketBalance = entityManager.getEntity<EBotMarketBalance>(0);
         if(eBotMarketBalance)
-          eOrder->setFee(qCeil(eOrder->getAmount() * eOrder->getPrice() * eBotMarketBalance->getFee()));
+          eOrder->setFee(qCeil(eOrder->getAmount() * eOrder->getPrice() * eBotMarketBalance->getFee() * 100.) / 100.);
       }
       else // if(eOrder->getState() == EBotMarketOrder::State::open)
       {
