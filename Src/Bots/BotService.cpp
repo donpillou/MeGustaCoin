@@ -162,7 +162,7 @@ void BotService::submitMarketOrderDraft(EBotMarketOrderDraft& draft)
 
   BotProtocol::Order order;
   order.entityType = BotProtocol::marketOrder;
-  order.entityId = 0;
+  order.entityId = draft.getId();
   order.type = (quint8)draft.getType();
   order.price = draft.getPrice();
   order.amount = draft.getAmount();
@@ -578,7 +578,7 @@ void BotService::WorkerThread::receivedControlEntityResponse(BotProtocol::Entity
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
-void BotService::WorkerThread::receivedCreateEntityResponse(const BotProtocol::CreateResponse& entity)
+void BotService::WorkerThread::receivedCreateEntityResponse(const BotProtocol::CreateEntityResponse& entity)
 {
   EType eType = EType::none;
   switch((BotProtocol::EntityType)entity.entityType)

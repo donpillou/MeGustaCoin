@@ -12,7 +12,7 @@ public:
     virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size) {}
     virtual void receivedRemoveEntity(const BotProtocol::Entity& entity) {}
     virtual void receivedControlEntityResponse(BotProtocol::Entity& entity, size_t size) {}
-    virtual void receivedCreateEntityResponse(const BotProtocol::CreateResponse& entity) {}
+    virtual void receivedCreateEntityResponse(const BotProtocol::CreateEntityResponse& entity) {}
   };
 
   bool connect(const QString& server, quint16 port, const QString& userName, const QString& password);

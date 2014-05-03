@@ -243,11 +243,12 @@ void OrdersWidget::updateOrder(const QModelIndex& index)
 
 void OrdersWidget::updateToolBarButtons()
 {
+  QModelIndexList selection = orderView->selectionModel()->selectedRows();
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
   bool connected = botService.isConnected();
   bool marketSelected = connected && eBotService->getSelectedMarketId() != 0;
+  bool canCancel = selection.size() > 0;
 
-  QModelIndexList selection = orderView->selectionModel()->selectedRows();
   bool draftSelected = false;
   foreach(const QModelIndex& proxyIndex, selection)
   {
@@ -282,7 +283,7 @@ void OrdersWidget::updateToolBarButtons()
   buyAction->setEnabled(marketSelected);
   sellAction->setEnabled(marketSelected);
   submitAction->setEnabled(marketSelected && draftSelected);
-  //cancelAction->setEnabled(canCancel);
+  cancelAction->setEnabled(canCancel);
 }
 
 void OrdersWidget::refresh()

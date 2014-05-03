@@ -52,7 +52,7 @@ public:
     quint32 entityId;
   };
 
-  struct CreateResponse : public Entity
+  struct CreateEntityResponse : public Entity
   {
     quint32 id; // id of the created entity
     quint8 success;
