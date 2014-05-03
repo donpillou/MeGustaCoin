@@ -24,7 +24,7 @@ public:
   };
 
 public:
-  EBotMarketOrder(EType type, quint32 id) : Entity(eType, id) {}
+  EBotMarketOrder(EType type, quint32 id) : Entity(type, id) {}
   EBotMarketOrder(BotProtocol::Order& data) : Entity(eType, data.entityId)
   {
     type = (Type)data.type;

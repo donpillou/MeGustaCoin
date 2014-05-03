@@ -8,6 +8,7 @@ MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
   entityManager.registerListener<EBotMarketOrder>(*this);
+  entityManager.registerListener<EBotMarketOrderDraft>(*this);
 
   eBotMarketAdapter = 0;
 }
@@ -15,16 +16,13 @@ MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
 MarketOrderModel::~MarketOrderModel()
 {
   entityManager.unregisterListener<EBotMarketOrder>(*this);
+  entityManager.unregisterListener<EBotMarketOrderDraft>(*this);
 }
 
-QModelIndex MarketOrderModel::createDraft(EBotMarketOrder::Type type, double price)
+QModelIndex MarketOrderModel::getDraftAmountIndex(EBotMarketOrderDraft& draft)
 {
-  quint32 id = entityManager.getNewEntityId<EBotMarketOrderDraft>();
-  EBotMarketOrderDraft* eBotMarketOrderDraft = new EBotMarketOrderDraft(id, type, QDateTime::currentDateTime(), price);
-  int index = orders.size();
-  entityManager.delegateEntity(*eBotMarketOrderDraft);
-  Q_ASSERT(orders[index] == eBotMarketOrderDraft);
-  return createIndex(index, (int)Column::amount, eBotMarketOrderDraft);
+  int index = orders.indexOf(&draft);
+  return createIndex(index, (int)Column::amount, &draft);
 }
 
 QModelIndex MarketOrderModel::index(int row, int column, const QModelIndex& parent) const

@@ -112,17 +112,11 @@ void OrdersWidget::addOrderDraft(EBotMarketOrder::Type type)
   if(publicDataModel.getTicker(bid, ask))
     price = type == EBotMarketOrder::Type::buy ? (bid + 0.01) : (ask - 0.01);
 
-  QModelIndex amountProxyIndex = orderModel.createDraft(type, price);
+  EBotMarketOrderDraft& eBotMarketOrderDraft = botService.createMarketOrderDraft(type, price);
+  QModelIndex amountProxyIndex = orderModel.getDraftAmountIndex(eBotMarketOrderDraft);
   QModelIndex amountIndex = proxyModel->mapFromSource(amountProxyIndex);
   orderView->setCurrentIndex(amountIndex);
   orderView->edit(amountIndex);
-
-  //QString id = marketService.createOrderDraft(type == OrderModel::Order::Type::sell, price);
-  //QModelIndex index = orderModel.getOrderIndex(id);
-  //
-  //QModelIndex amountIndex = proxyModel->mapFromSource(orderModel.index(index.row(), (int)OrderModel::Column::amount));
-  //orderView->setCurrentIndex(amountIndex);
-  //orderView->edit(amountIndex);
 }
 
 //QList<QModelIndex> OrdersWidget::getSelectedRows()

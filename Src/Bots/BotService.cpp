@@ -145,6 +145,14 @@ void BotService::refreshMarketTransactions()
   controlEntity(&controlMarket, sizeof(controlMarket));
 }
 
+EBotMarketOrderDraft& BotService::createMarketOrderDraft(EBotMarketOrder::Type type, double price)
+{
+  quint32 id = entityManager.getNewEntityId<EBotMarketOrderDraft>();
+  EBotMarketOrderDraft* eBotMarketOrderDraft = new EBotMarketOrderDraft(id, type, QDateTime::currentDateTime(), price);
+  entityManager.delegateEntity(*eBotMarketOrderDraft);
+  return *eBotMarketOrderDraft;
+}
+
 void BotService::createMarketOrder(EBotMarketOrder::Type type, double price, double amount)
 {
   BotProtocol::Order order;

@@ -21,7 +21,7 @@ public:
   MarketOrderModel(Entity::Manager& entityManager);
   ~MarketOrderModel();
 
-  QModelIndex createDraft(EBotMarketOrder::Type type, double price);
+  QModelIndex getDraftAmountIndex(EBotMarketOrderDraft& draft);
 
 private:
   Entity::Manager& entityManager;
