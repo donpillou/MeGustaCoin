@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-DataModel::DataModel() : orderModel(*this), transactionModel(*this), botOrderModel(*this), botTransactionModel(*this), publicDataModel(0) {}
+DataModel::DataModel() : publicDataModel(0) {}
 
 DataModel::~DataModel()
 {
@@ -35,18 +35,6 @@ void DataModel::setMarket(const QString& marketName, const QString& coinCurrency
   this->publicDataModel = marketName.isEmpty() ? 0 : &getDataChannel(marketName);
   emit changedMarket();
 }
-
-void DataModel::setBalance(const Market::Balance& balance)
-{
-  this->balance = balance;
-  emit changedBalance();
-}
-
-//void DataModel::setTickerData(const Market::TickerData& tickerData)
-//{
-//  this->tickerData = tickerData;
-//  emit changedTickerData();
-//}
 
 QString DataModel::formatAmount(double amount)
 {
