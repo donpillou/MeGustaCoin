@@ -9,16 +9,21 @@ BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(
   connect(nameEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged()));
 
   QList<EBotEngine*> engines;
-  QList<EBotMarketAdapter*> marketAdapters;
+  QList<EBotMarket*> markets;
   entityManager.getAllEntities<EBotEngine>(engines);
-  entityManager.getAllEntities<EBotMarketAdapter>(marketAdapters);
+  entityManager.getAllEntities<EBotMarket>(markets);
 
   engineComboBox = new QComboBox(this);
   foreach(const EBotEngine* engine, engines)
     engineComboBox->addItem(engine->getName(), engine->getId());
   marketComboBox = new QComboBox(this);
-  foreach(const EBotMarketAdapter* marketAdapter, marketAdapters)
-    marketComboBox->addItem(marketAdapter->getName(), marketAdapter->getId());
+  foreach(const EBotMarket* market, markets)
+  {
+    EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(market->getMarketAdapterId());
+    if(!eBotMarketAdapter)
+      continue;
+    marketComboBox->addItem(eBotMarketAdapter->getName(), market->getId());
+  }
 
   balanceBaseSpinBox = new QDoubleSpinBox(this);
   balanceBaseSpinBox->setValue(100.);
