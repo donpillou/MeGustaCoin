@@ -22,7 +22,6 @@ public:
     controlEntityResponse,
     createEntity,
     createEntityResponse,
-    requestEntities,
   };
   
   enum EntityType
