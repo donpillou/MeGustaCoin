@@ -104,16 +104,6 @@ private:
   void removeEntity(BotProtocol::EntityType type, quint32 id);
   void controlEntity(const void* args, size_t size);
 
-  template<size_t N> void setString(char(&str)[N], const QString& value)
-  {
-    QByteArray buf = value.toUtf8();
-    size_t size = buf.length() + 1;
-    if(size > N - 1)
-      size = N - 1;
-    memcpy(str, buf.constData(), size);
-    str[N - 1] = '\0';
-  }
-
 private slots:
   void handleEvents();
 };

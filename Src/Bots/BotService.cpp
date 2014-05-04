@@ -125,9 +125,9 @@ void BotService::createMarket(quint32 marketAdapterId, const QString& userName, 
   market.entityType = BotProtocol::market;
   market.entityId = 0;
   market.marketAdapterId = marketAdapterId;
-  setString(market.userName, userName);
-  setString(market.key, key);
-  setString(market.secret, secret);
+  BotProtocol::setString(market.userName, userName);
+  BotProtocol::setString(market.key, key);
+  BotProtocol::setString(market.secret, secret);
   createEntity(&market, sizeof(market));
 }
 
@@ -233,7 +233,7 @@ void BotService::createSession(const QString& name, quint32 engineId, quint32 ma
   BotProtocol::Session session;
   session.entityType = BotProtocol::session;
   session.entityId = 0;
-  setString(session.name, name);
+  BotProtocol::setString(session.name, name);
   session.botEngineId = engineId;
   session.marketId = marketId;
   session.balanceBase = balanceBase;
@@ -334,6 +334,7 @@ void BotService::WorkerThread::setState(EBotService::State state)
         entityManager.removeAll<EBotMarketAdapter>();
         entityManager.removeAll<EBotSessionTransaction>();
         entityManager.removeAll<EBotSessionOrder>();
+        entityManager.removeAll<EBotSessionLogMessage>();
         entityManager.removeAll<EBotMarketTransaction>();
         entityManager.removeAll<EBotMarketOrder>();
         entityManager.removeAll<EBotMarketOrderDraft>();
@@ -435,6 +436,10 @@ void BotService::WorkerThread::receivedUpdateEntity(BotProtocol::Entity& data, s
     if(size >= sizeof(BotProtocol::Order))
       entity = new EBotSessionOrder(*(BotProtocol::Order*)&data);
     break;
+  case BotProtocol::sessionLogMessage:
+    if(size >= sizeof(BotProtocol::SessionLogMessage))
+      entity = new EBotSessionLogMessage(*(BotProtocol::SessionLogMessage*)&data);
+    break;
   case BotProtocol::market:
     if(size >= sizeof(BotProtocol::Market))
       entity = new EBotMarket(*(BotProtocol::Market*)&data);
@@ -495,6 +500,9 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& e
     break;
   case BotProtocol::sessionOrder:
     eType = EType::botSessionOrder;
+    break;
+  case BotProtocol::sessionLogMessage:
+    eType = EType::botSessionLogMessage;
     break;
   case BotProtocol::market:
     eType = EType::botMarket;
@@ -595,6 +603,7 @@ void BotService::WorkerThread::receivedControlEntityResponse(BotProtocol::Entity
               Entity::Manager& entityManager = botService.entityManager;
               entityManager.removeAll<EBotSessionOrder>();
               entityManager.removeAll<EBotSessionTransaction>();
+              entityManager.removeAll<EBotSessionLogMessage>();
               EBotService* eBotService = entityManager.getEntity<EBotService>(0);
               eBotService->setSelectedSessionId(entity->entityId);
               entityManager.updatedEntity(*eBotService);

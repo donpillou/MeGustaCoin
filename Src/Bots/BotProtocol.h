@@ -32,6 +32,7 @@ public:
     marketAdapter,
     sessionTransaction,
     sessionOrder,
+    sessionLogMessage,
     market,
     marketTransaction,
     marketOrder,
@@ -163,6 +164,12 @@ public:
     double fee;
   };
 
+  struct SessionLogMessage : public Entity
+  {
+    qint64 date;
+    char message[129];
+  };
+
   struct ControlSession : public Entity
   {
     enum Command
@@ -201,4 +208,19 @@ public:
 
 #pragma pack(pop)
 
+  template<size_t N> static void setString(char(&str)[N], const QString& value)
+  {
+    QByteArray buf = value.toUtf8();
+    size_t size = buf.length() + 1;
+    if(size > N - 1)
+      size = N - 1;
+    qMemCopy(str, buf.constData(), size);
+    str[N - 1] = '\0';
+  }
+  
+  template<size_t N> static QString getString(char(&str)[N])
+  {
+    str[N - 1] = '\0';
+    return str;
+  }
 };

@@ -9,8 +9,7 @@ public:
 public:
   EBotEngine(BotProtocol::BotEngine& data) : Entity(eType, data.entityId)
   {
-    data.name[sizeof(data.name) - 1] = '\0';
-    name = data.name;
+    name = BotProtocol::getString(data.name);
   }
 
   const QString& getName() const {return name;}

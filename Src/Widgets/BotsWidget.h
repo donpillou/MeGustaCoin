@@ -19,6 +19,8 @@ private slots:
   void cancelBot();
   void updateToolBarButtons();
   void sessionSelectionChanged();
+  void checkAutoScroll(const QModelIndex&, int, int);
+  void autoScroll(int, int);
 
 private:
   Entity::Manager& entityManager;
@@ -27,12 +29,15 @@ private:
   BotSessionModel botSessionModel;
   SessionOrderModel orderModel;
   SessionTransactionModel transactionModel;
+  SessionLogModel logModel;
 
   QSplitter* splitter;
   QTreeView* sessionView;
   QTreeView* orderView;
   QTreeView* transactionView;
+  QTreeView* logView;
   QSortFilterProxyModel* sessionProxyModel;
+  bool autoScrollEnabled;
 
   QAction* addAction;
   QAction* optimizeAction;

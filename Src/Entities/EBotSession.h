@@ -18,8 +18,7 @@ public:
 public:
   EBotSession(BotProtocol::Session& data) : Entity(eType, data.entityId)
   {
-    data.name[sizeof(data.name) - 1] = '\0';
-    name = data.name;
+    name = BotProtocol::getString(data.name);
     botEngineId = data.botEngineId;
     marketId = data.marketId;
     state = (State)data.state;

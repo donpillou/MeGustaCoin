@@ -9,12 +9,9 @@ public:
 public:
   EBotMarketAdapter(BotProtocol::MarketAdapter& data) : Entity(eType, data.entityId)
   {
-    data.name[sizeof(data.name) - 1] = '\0';
-    data.currencyBase[sizeof(data.currencyBase) - 1] = '\0';
-    data.currencyComm[sizeof(data.currencyComm) - 1] = '\0';
-    name = data.name;
-    baseCurrency = data.currencyBase;
-    commCurrency = data.currencyComm;
+    name = BotProtocol::getString(data.name);
+    baseCurrency = BotProtocol::getString(data.currencyBase);
+    commCurrency = BotProtocol::getString(data.currencyComm);
   }
 
   const QString& getName() const {return name;}
