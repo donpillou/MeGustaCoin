@@ -87,6 +87,7 @@ private:
     virtual void receivedRemoveEntity(const BotProtocol::Entity& entity);
     virtual void receivedControlEntityResponse(BotProtocol::Entity& entity, size_t size);
     virtual void receivedCreateEntityResponse(const BotProtocol::CreateEntityResponse& entity);
+    virtual void receivedErrorResponse(BotProtocol::ErrorResponse& response);
   };
 
 private:

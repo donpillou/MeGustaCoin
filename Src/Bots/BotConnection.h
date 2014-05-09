@@ -7,12 +7,13 @@ public:
   class Callback
   {
   public:
-    virtual void receivedLoginResponse(const BotProtocol::LoginResponse& response) {};
-    virtual void receivedAuthResponse() {};
+    virtual void receivedLoginResponse(const BotProtocol::LoginResponse& response) {}
+    virtual void receivedAuthResponse() {}
     virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size) {}
     virtual void receivedRemoveEntity(const BotProtocol::Entity& entity) {}
     virtual void receivedControlEntityResponse(BotProtocol::Entity& entity, size_t size) {}
     virtual void receivedCreateEntityResponse(const BotProtocol::CreateEntityResponse& entity) {}
+    virtual void receivedErrorResponse(BotProtocol::ErrorResponse& response) {}
   };
 
   bool connect(const QString& server, quint16 port, const QString& userName, const QString& password);

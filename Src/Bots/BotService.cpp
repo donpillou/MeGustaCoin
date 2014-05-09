@@ -456,15 +456,6 @@ void BotService::WorkerThread::receivedUpdateEntity(BotProtocol::Entity& data, s
     if(size >= sizeof(BotProtocol::MarketBalance))
       entity = new EBotMarketBalance(*(BotProtocol::MarketBalance*)&data);
     break;
-  case BotProtocol::error:
-    if(size >= sizeof(BotProtocol::Error))
-    {
-      BotProtocol::Error* error = (BotProtocol::Error*)&data;
-      error->errorMessage[sizeof(error->errorMessage) - 1] = '\0';
-      addMessage(LogModel::Type::error, error->errorMessage);
-      return;
-    }
-    break;
   default:
     return;
   }
@@ -640,12 +631,11 @@ void BotService::WorkerThread::receivedCreateEntityResponse(const BotProtocol::C
   class CreateEntityResponseEvent : public Event
   {
   public:
-    CreateEntityResponseEvent(EType eType, quint32 oldId, quint32 newId, bool success) : eType(eType), oldId(oldId), newId(newId), success(success) {}
+    CreateEntityResponseEvent(EType eType, quint32 oldId, quint32 newId) : eType(eType), oldId(oldId), newId(newId) {}
   private:
     EType eType;
     quint32 oldId;
     quint32 newId;
-    bool success;
   public: // Event
     virtual void handle(BotService& botService)
     {
@@ -653,7 +643,6 @@ void BotService::WorkerThread::receivedCreateEntityResponse(const BotProtocol::C
       switch(eType)
       {
       case EType::botMarketOrder:
-        if(success)
         {
           EBotMarketOrderDraft* eBotMarketOrderDraft = entityManager.getEntity<EBotMarketOrderDraft>(oldId);
           if(!eBotMarketOrderDraft)
@@ -661,20 +650,43 @@ void BotService::WorkerThread::receivedCreateEntityResponse(const BotProtocol::C
           EBotMarketOrder* eBotMarketOrder = new EBotMarketOrder(newId, *eBotMarketOrderDraft);
           entityManager.delegateEntity(*eBotMarketOrder, *eBotMarketOrderDraft);
         }
-        else
-        {
-          EBotMarketOrderDraft* eBotMarketOrderDraft = entityManager.getEntity<EBotMarketOrderDraft>(oldId);
-          if(!eBotMarketOrderDraft)
-            return;
-          eBotMarketOrderDraft->setState(EBotMarketOrder::State::draft);
-          entityManager.updatedEntity(*eBotMarketOrderDraft);
-        }
         break;
       default:
         break;
       }
     }
   };
-  eventQueue.append(new CreateEntityResponseEvent(eType, entity.entityId, entity.id, entity.success != 0));
+  eventQueue.append(new CreateEntityResponseEvent(eType, entity.entityId, entity.id));
+  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+}
+
+void BotService::WorkerThread::receivedErrorResponse(BotProtocol::ErrorResponse& response)
+{
+  class ErrorResponseEvent : public Event
+  {
+  public:
+    ErrorResponseEvent(BotProtocol::EntityType entityType, quint32 entityId, BotProtocol::MessageType messageType, const QString& errorMessage) : entityType(entityType), entityId(entityId), messageType(messageType), errorMessage(errorMessage) {}
+  private:
+    BotProtocol::EntityType entityType;
+    quint32 entityId;
+    BotProtocol::MessageType messageType;
+    QString errorMessage;
+  public: // Event
+    virtual void handle(BotService& botService)
+    {
+      if(messageType == BotProtocol::createEntity && entityType == BotProtocol::marketOrder)
+      {
+        Entity::Manager& entityManager = botService.entityManager;
+        EBotMarketOrderDraft* eBotMarketOrderDraft = entityManager.getEntity<EBotMarketOrderDraft>(entityId);
+        if(eBotMarketOrderDraft)
+        {
+          eBotMarketOrderDraft->setState(EBotMarketOrder::State::draft);
+          entityManager.updatedEntity(*eBotMarketOrderDraft);
+        }
+      }
+    }
+  };
+  QString errorMessage = BotProtocol::getString(response.errorMessage);
+  eventQueue.append(new ErrorResponseEvent((BotProtocol::EntityType)response.entityType, response.entityId, (BotProtocol::MessageType)response.messageType, errorMessage));
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }

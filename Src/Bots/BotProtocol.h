@@ -22,11 +22,11 @@ public:
     controlEntityResponse,
     createEntity,
     createEntityResponse,
+    errorResponse
   };
   
   enum EntityType
   {
-    error,
     session,
     engine,
     marketAdapter,
@@ -55,7 +55,6 @@ public:
   struct CreateEntityResponse : public Entity
   {
     quint32 id; // id of the created entity
-    quint8 success;
   };
 
   struct LoginRequest
@@ -74,8 +73,9 @@ public:
     unsigned char signature[32];
   };
 
-  struct Error : public Entity
+  struct ErrorResponse : public Entity
   {
+    quint16 messageType;
     char errorMessage[129];
   };
 
@@ -185,7 +185,6 @@ public:
   struct ControlSessionResponse : public Entity
   {
     quint8 cmd;
-    quint8 success;
   };
 
   struct ControlMarket : public Entity
@@ -203,7 +202,6 @@ public:
   struct ControlMarketResponse : public Entity
   {
     quint8 cmd;
-    quint8 success;
   };
 
 #pragma pack(pop)

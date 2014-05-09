@@ -112,6 +112,10 @@ void BotConnection::handleMessage(const BotProtocol::Header& header, char* data,
     if(size >= sizeof(BotProtocol::CreateEntityResponse))
       callback->receivedCreateEntityResponse(*(const BotProtocol::CreateEntityResponse*)data);
     break;
+  case BotProtocol::errorResponse:
+    if(size >= sizeof(BotProtocol::ErrorResponse))
+      callback->receivedErrorResponse(*(BotProtocol::ErrorResponse*)data);
+    break;
   default:
     break;
   }
@@ -223,15 +227,12 @@ bool BotConnection::receiveLoginResponse(BotProtocol::LoginResponse& loginRespon
     {
       loginResponse = response;
       finished = true;
-    };
-    virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size)
+    }
+    virtual void receivedErrorResponse(BotProtocol::ErrorResponse& response)
     {
-      if((BotProtocol::EntityType)entity.entityType == BotProtocol::error && size >= sizeof(BotProtocol::Error))
-      {
-        error = ((BotProtocol::Error*)&entity)->errorMessage;
-        finished = true;
-      }
-    };
+      error = BotProtocol::getString(response.errorMessage);
+      finished = true;
+    }
   } callback(loginResponse);
 
   do
@@ -260,15 +261,12 @@ bool BotConnection::receiveAuthResponse()
     virtual void receivedAuthResponse()
     {
       finished = true;
-    };
-    virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size)
+    }
+    virtual void receivedErrorResponse(BotProtocol::ErrorResponse& response)
     {
-      if((BotProtocol::EntityType)entity.entityType == BotProtocol::error && size >= sizeof(BotProtocol::Error))
-      {
-        error = ((BotProtocol::Error*)&entity)->errorMessage;
-        finished = true;
-      }
-    };
+      error = BotProtocol::getString(response.errorMessage);
+      finished = true;
+    }
   } callback;
 
   do
