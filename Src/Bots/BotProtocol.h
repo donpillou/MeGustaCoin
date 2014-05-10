@@ -6,6 +6,7 @@ class BotProtocol
 public:
   enum MessageType
   {
+    errorResponse,
     pingRequest,
     pingResponse, // a.k.a. pong
     loginRequest,
@@ -17,18 +18,20 @@ public:
     registerMarketRequest,
     registerMarketResponse,
     updateEntity,
+    updateEntityResponse,
     removeEntity,
+    removeEntityResponse,
     controlEntity,
     controlEntityResponse,
     createEntity,
     createEntityResponse,
-    errorResponse
   };
   
   enum EntityType
   {
+    none,
     session,
-    engine,
+    botEngine,
     marketAdapter,
     sessionTransaction,
     sessionOrder,
@@ -44,17 +47,13 @@ public:
   {
     quint32 size; // including header
     quint16 messageType; // MessageType
+    quint32 requestId;
   };
 
   struct Entity
   {
     quint16 entityType; // EntityType
     quint32 entityId;
-  };
-
-  struct CreateEntityResponse : public Entity
-  {
-    quint32 id; // id of the created entity
   };
 
   struct LoginRequest
@@ -177,6 +176,8 @@ public:
       startSimulation,
       stop,
       select,
+      requestTransactions,
+      requestOrders,
     };
 
     quint8 cmd;
@@ -194,6 +195,7 @@ public:
       select,
       refreshTransactions,
       refreshOrders,
+      refreshBalance,
     };
 
     quint8 cmd;

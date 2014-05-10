@@ -85,9 +85,9 @@ private:
   private: // BotConnection::Callback
     virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size);
     virtual void receivedRemoveEntity(const BotProtocol::Entity& entity);
-    virtual void receivedControlEntityResponse(BotProtocol::Entity& entity, size_t size);
-    virtual void receivedCreateEntityResponse(const BotProtocol::CreateEntityResponse& entity);
-    virtual void receivedErrorResponse(BotProtocol::ErrorResponse& response);
+    virtual void receivedControlEntityResponse(quint32 requestId, BotProtocol::Entity& entity, size_t size);
+    virtual void receivedCreateEntityResponse(quint32 requestId, const BotProtocol::Entity& entity);
+    virtual void receivedErrorResponse(quint32 requestId, BotProtocol::ErrorResponse& response);
   };
 
 private:
@@ -100,10 +100,10 @@ private:
   bool connected;
 
 private:
-  void createEntity(const void* args, size_t size);
-  void updateEntity(const void* args, size_t size);
-  void removeEntity(BotProtocol::EntityType type, quint32 id);
-  void controlEntity(const void* args, size_t size);
+  void createEntity(quint32 requestId, const void* args, size_t size);
+  void updateEntity(quint32 requestId, const void* args, size_t size);
+  void removeEntity(quint32 requestId, BotProtocol::EntityType type, quint32 id);
+  void controlEntity(quint32 requestId, const void* args, size_t size);
 
 private slots:
   void handleEvents();

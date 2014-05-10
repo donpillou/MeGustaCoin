@@ -11,9 +11,9 @@ public:
     virtual void receivedAuthResponse() {}
     virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size) {}
     virtual void receivedRemoveEntity(const BotProtocol::Entity& entity) {}
-    virtual void receivedControlEntityResponse(BotProtocol::Entity& entity, size_t size) {}
-    virtual void receivedCreateEntityResponse(const BotProtocol::CreateEntityResponse& entity) {}
-    virtual void receivedErrorResponse(BotProtocol::ErrorResponse& response) {}
+    virtual void receivedControlEntityResponse(quint32 requestId, BotProtocol::Entity& entity, size_t size) {}
+    virtual void receivedCreateEntityResponse(quint32 requestId, const BotProtocol::Entity& entity) {}
+    virtual void receivedErrorResponse(quint32 requestId, BotProtocol::ErrorResponse& response) {}
   };
 
   bool connect(const QString& server, quint16 port, const QString& userName, const QString& password);
@@ -22,10 +22,10 @@ public:
 
   const QString& getLastError() {return error;}
 
-  bool createEntity(const void* args, size_t size);
-  bool updateEntity(const void* args, size_t size);
-  bool removeEntity(BotProtocol::EntityType type, quint32 id);
-  bool controlEntity(const void* args, size_t size);
+  bool createEntity(quint32 requestId, const void* args, size_t size);
+  bool updateEntity(quint32 requestId, const void* args, size_t size);
+  bool removeEntity(quint32 requestId, BotProtocol::EntityType type, quint32 id);
+  bool controlEntity(quint32 requestId, const void* args, size_t size);
 
 private:
   SocketConnection connection;
@@ -36,7 +36,7 @@ private:
 
   void handleMessage(const BotProtocol::Header& header, char* data, size_t dataSize);
 
-  bool sendMessage(BotProtocol::MessageType type, const void* data, size_t dataSize);
+  bool sendMessage(BotProtocol::MessageType type, quint32 requestId, const void* data, size_t dataSize);
   bool sendLoginRequest(const QString& userName);
   bool sendAuthRequest(const QByteArray& signature);
 
