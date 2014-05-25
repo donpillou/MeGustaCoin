@@ -79,6 +79,7 @@ private:
     void setState(EBotService::State state);
     void process();
     static EType getEType(BotProtocol::EntityType entityType);
+    static Entity* createEntity(BotProtocol::Entity& data, size_t size);
 
   private: // QThread
     virtual void run();

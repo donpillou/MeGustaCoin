@@ -5,6 +5,7 @@ enum class EType
 {
   none,
   botSessionOrder,
+  botSessionMarker,
   botSessionTransaction,
   botSessionLogMessage,
   botService,

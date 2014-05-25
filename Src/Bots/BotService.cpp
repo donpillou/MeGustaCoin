@@ -417,52 +417,7 @@ void BotService::WorkerThread::run()
 
 void BotService::WorkerThread::receivedUpdateEntity(BotProtocol::Entity& data, size_t size)
 {
-  Entity* entity = 0;
-  switch((BotProtocol::EntityType)data.entityType)
-  {
-  case BotProtocol::botEngine:
-    if(size >= sizeof(BotProtocol::BotEngine))
-      entity = new EBotEngine(*(BotProtocol::BotEngine*)&data);
-    break;
-  case BotProtocol::session:
-    if(size >= sizeof(BotProtocol::Session))
-      entity = new EBotSession(*(BotProtocol::Session*)&data);
-    break;
-  case BotProtocol::marketAdapter:
-    if(size >= sizeof(BotProtocol::MarketAdapter))
-      entity = new EBotMarketAdapter(*(BotProtocol::MarketAdapter*)&data);
-    break;
-  case BotProtocol::sessionTransaction:
-    if(size >= sizeof(BotProtocol::Transaction))
-      entity = new EBotSessionTransaction(*(BotProtocol::Transaction*)&data);
-    break;
-  case BotProtocol::sessionOrder:
-    if(size >= sizeof(BotProtocol::Order))
-      entity = new EBotSessionOrder(*(BotProtocol::Order*)&data);
-    break;
-  case BotProtocol::sessionLogMessage:
-    if(size >= sizeof(BotProtocol::SessionLogMessage))
-      entity = new EBotSessionLogMessage(*(BotProtocol::SessionLogMessage*)&data);
-    break;
-  case BotProtocol::market:
-    if(size >= sizeof(BotProtocol::Market))
-      entity = new EBotMarket(*(BotProtocol::Market*)&data);
-    break;
-  case BotProtocol::marketTransaction:
-    if(size >= sizeof(BotProtocol::Transaction))
-      entity = new EBotMarketTransaction(*(BotProtocol::Transaction*)&data);
-    break;
-  case BotProtocol::marketOrder:
-    if(size >= sizeof(BotProtocol::Order))
-      entity = new EBotMarketOrder(*(BotProtocol::Order*)&data);
-    break;
-  case BotProtocol::marketBalance:
-    if(size >= sizeof(BotProtocol::MarketBalance))
-      entity = new EBotMarketBalance(*(BotProtocol::MarketBalance*)&data);
-    break;
-  default:
-    return;
-  }
+  Entity* entity = createEntity(data, size);
   if(!entity)
     return;
 
@@ -707,4 +662,58 @@ EType BotService::WorkerThread::getEType(BotProtocol::EntityType entityType)
   default:
     return EType::none;
   }
+}
+
+Entity* BotService::WorkerThread::createEntity(BotProtocol::Entity& data, size_t size)
+{
+  switch((BotProtocol::EntityType)data.entityType)
+  {
+  case BotProtocol::botEngine:
+    if(size >= sizeof(BotProtocol::BotEngine))
+      return new EBotEngine(*(BotProtocol::BotEngine*)&data);
+    break;
+  case BotProtocol::session:
+    if(size >= sizeof(BotProtocol::Session))
+      return new EBotSession(*(BotProtocol::Session*)&data);
+    break;
+  case BotProtocol::marketAdapter:
+    if(size >= sizeof(BotProtocol::MarketAdapter))
+      return new EBotMarketAdapter(*(BotProtocol::MarketAdapter*)&data);
+    break;
+  case BotProtocol::sessionTransaction:
+    if(size >= sizeof(BotProtocol::Transaction))
+      return new EBotSessionTransaction(*(BotProtocol::Transaction*)&data);
+    break;
+  case BotProtocol::sessionOrder:
+    if(size >= sizeof(BotProtocol::Order))
+      return new EBotSessionOrder(*(BotProtocol::Order*)&data);
+    break;
+  case BotProtocol::sessionMarker:
+    if(size >= sizeof(BotProtocol::Marker))
+      return new EBotSessionMarker(*(BotProtocol::Marker*)&data);
+    break;
+  case BotProtocol::sessionLogMessage:
+    if(size >= sizeof(BotProtocol::SessionLogMessage))
+      return new EBotSessionLogMessage(*(BotProtocol::SessionLogMessage*)&data);
+    break;
+  case BotProtocol::market:
+    if(size >= sizeof(BotProtocol::Market))
+      return new EBotMarket(*(BotProtocol::Market*)&data);
+    break;
+  case BotProtocol::marketTransaction:
+    if(size >= sizeof(BotProtocol::Transaction))
+      return new EBotMarketTransaction(*(BotProtocol::Transaction*)&data);
+    break;
+  case BotProtocol::marketOrder:
+    if(size >= sizeof(BotProtocol::Order))
+      return new EBotMarketOrder(*(BotProtocol::Order*)&data);
+    break;
+  case BotProtocol::marketBalance:
+    if(size >= sizeof(BotProtocol::MarketBalance))
+      return new EBotMarketBalance(*(BotProtocol::MarketBalance*)&data);
+    break;
+  default:
+    break;
+  }
+  return 0;
 }
