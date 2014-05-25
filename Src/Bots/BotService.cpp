@@ -484,36 +484,7 @@ void BotService::WorkerThread::receivedUpdateEntity(BotProtocol::Entity& data, s
 
 void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& entity)
 {
-  EType eType = EType::none;
-  switch((BotProtocol::EntityType)entity.entityType)
-  {
-  case BotProtocol::session:
-    eType = EType::botSession;
-    break;
-  case BotProtocol::sessionTransaction:
-    eType = EType::botSessionTransaction;
-    break;
-  case BotProtocol::sessionOrder:
-    eType = EType::botSessionOrder;
-    break;
-  case BotProtocol::sessionLogMessage:
-    eType = EType::botSessionLogMessage;
-    break;
-  case BotProtocol::market:
-    eType = EType::botMarket;
-    break;
-  case BotProtocol::marketTransaction:
-    eType = EType::botMarketTransaction;
-    break;
-  case BotProtocol::marketOrder:
-    eType = EType::botMarketOrder;
-    break;
-  case BotProtocol::marketBalance:
-    eType = EType::botMarketBalance;
-    break;
-  default:
-    break;
-  }
+  EType eType = getEType((BotProtocol::EntityType)entity.entityType);
   if(eType == EType::none)
     return;
 
@@ -550,6 +521,29 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& e
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
+void BotService::WorkerThread::receivedRemoveAllEntities(const BotProtocol::Entity& entity)
+{
+  EType eType = getEType((BotProtocol::EntityType)entity.entityType);
+  if(eType == EType::none)
+    return;
+
+  class RemoveAllEntitiesEvent : public Event
+  {
+  public:
+    RemoveAllEntitiesEvent(EType eType) : eType(eType) {}
+  private:
+    EType eType;
+  public: // Event
+    virtual void handle(BotService& botService)
+    {
+      Entity::Manager& entityManager = botService.entityManager;
+      entityManager.removeAll((quint32)eType);
+    }
+  };
+  eventQueue.append(new RemoveAllEntitiesEvent(eType));
+  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+}
+
 void BotService::WorkerThread::receivedControlEntityResponse(quint32 requestId, BotProtocol::Entity& entity, size_t size)
 {
   class ControlEntityResponseEvent : public Event
@@ -574,9 +568,6 @@ void BotService::WorkerThread::receivedControlEntityResponse(quint32 requestId, 
           case BotProtocol::ControlMarket::select:
             {
               Entity::Manager& entityManager = botService.entityManager;
-              entityManager.removeAll<EBotMarketOrder>();
-              entityManager.removeAll<EBotMarketTransaction>();
-              entityManager.removeAll<EBotMarketBalance>();
               EBotService* eBotService = entityManager.getEntity<EBotService>(0);
               eBotService->setSelectedMarketId(entity->entityId);
               entityManager.updatedEntity(*eBotService);
@@ -596,9 +587,6 @@ void BotService::WorkerThread::receivedControlEntityResponse(quint32 requestId, 
           case BotProtocol::ControlSession::select:
             {
               Entity::Manager& entityManager = botService.entityManager;
-              entityManager.removeAll<EBotSessionOrder>();
-              entityManager.removeAll<EBotSessionTransaction>();
-              entityManager.removeAll<EBotSessionLogMessage>();
               EBotService* eBotService = entityManager.getEntity<EBotService>(0);
               eBotService->setSelectedSessionId(entity->entityId);
               entityManager.updatedEntity(*eBotService);
@@ -694,4 +682,29 @@ void BotService::WorkerThread::receivedErrorResponse(quint32 requestId, BotProto
   QString errorMessage = BotProtocol::getString(response.errorMessage);
   eventQueue.append(new ErrorResponseEvent(requestId, (BotProtocol::EntityType)response.entityType, (BotProtocol::MessageType)response.messageType, errorMessage));
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+}
+
+EType BotService::WorkerThread::getEType(BotProtocol::EntityType entityType)
+{
+  switch(entityType)
+  {
+  case BotProtocol::session:
+    return EType::botSession;
+  case BotProtocol::sessionTransaction:
+    return EType::botSessionTransaction;
+  case BotProtocol::sessionOrder:
+    return EType::botSessionOrder;
+  case BotProtocol::sessionLogMessage:
+    return EType::botSessionLogMessage;
+  case BotProtocol::market:
+    return EType::botMarket;
+  case BotProtocol::marketTransaction:
+    return EType::botMarketTransaction;
+  case BotProtocol::marketOrder:
+    return EType::botMarketOrder;
+  case BotProtocol::marketBalance:
+    return EType::botMarketBalance;
+  default:
+    return EType::none;
+  }
 }

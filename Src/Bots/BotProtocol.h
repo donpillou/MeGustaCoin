@@ -25,6 +25,7 @@ public:
     controlEntityResponse,
     createEntity,
     createEntityResponse,
+    removeAllEntities,
   };
   
   enum EntityType
@@ -35,6 +36,7 @@ public:
     marketAdapter,
     sessionTransaction,
     sessionOrder,
+    sessionMarker,
     sessionLogMessage,
     market,
     marketTransaction,
@@ -136,6 +138,20 @@ public:
     double price;
     double amount;
     double fee;
+  };
+
+  struct Marker : public Entity
+  {
+    enum Type
+    {
+      buy,
+      sell,
+      buyAttempt,
+      sellAttempt,
+    };
+
+    quint8 type;
+    qint64 date;
   };
 
   struct Market : public Entity

@@ -104,6 +104,10 @@ void BotConnection::handleMessage(const BotProtocol::Header& header, char* data,
     if(size >= sizeof(BotProtocol::Entity))
       callback->receivedRemoveEntity(*(const BotProtocol::Entity*)data);
     break;
+  case BotProtocol::removeAllEntities:
+    if(size >= sizeof(BotProtocol::Entity))
+      callback->receivedRemoveAllEntities(*(const BotProtocol::Entity*)data);
+    break;
   case BotProtocol::controlEntityResponse:
     if(size >= sizeof(BotProtocol::Entity))
       callback->receivedControlEntityResponse(header.requestId, *(BotProtocol::Entity*)data, size);
