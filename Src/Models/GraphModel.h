@@ -21,21 +21,21 @@ public:
     TradeSample() : amount(0) {}
   };
 
-  enum class Marker
-  {
-    buyMarker,
-    sellMarker,
-    buyAttemptMarker,
-    sellAttemptMarker,
-  };
+  //enum class Marker
+  //{
+  //  buyMarker,
+  //  sellMarker,
+  //  buyAttemptMarker,
+  //  sellAttemptMarker,
+  //};
 
   QList<TradeSample> tradeSamples;
   Bot::Values* values;
-  QMap<quint64, Marker> markers;
+  //QMap<quint64, Marker> markers;
 
   void addTrade(const DataProtocol::Trade& trade, quint64 tradeAge);
-  void addMarker(quint64 time, Marker marker);
-  void clearMarkers();
+  //void addMarker(quint64 time, Marker marker);
+  //void clearMarkers();
 
 signals:
   void dataAdded();

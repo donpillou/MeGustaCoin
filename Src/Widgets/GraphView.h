@@ -1,10 +1,11 @@
 
 #pragma once
 
-class GraphView : public QWidget
+class GraphView : public QWidget, public Entity::Listener
 {
 public:
-  GraphView(QWidget* parent, const PublicDataModel* publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels);
+  GraphView(QWidget* parent, const PublicDataModel* publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels, Entity::Manager& entityManager);
+  ~GraphView();
 
   void setFocusPublicDataModel(const PublicDataModel* publicDataModel);
 
@@ -32,8 +33,10 @@ private:
   const PublicDataModel* publicDataModel;
   const QMap<QString, PublicDataModel*>& publicDataModels;
   const GraphModel* graphModel;
+  Entity::Manager& entityManager;
 
   unsigned int enabledData;
+  bool drawSessionMarkers;
 
   quint64 time;
   int maxAge;
@@ -81,4 +84,7 @@ private:
     if(price < totalMin)
       totalMin = price;
   }
+
+private: // Entity::Listener
+  virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
 };

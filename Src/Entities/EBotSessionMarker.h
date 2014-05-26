@@ -19,13 +19,13 @@ public:
   EBotSessionMarker(BotProtocol::Marker& data) : Entity(eType, data.entityId)
   {
     type = (Type)data.type;
-    date = QDateTime::fromMSecsSinceEpoch(data.date);
+    date = data.date;
   }
 
   Type getType() const {return type;}
-  const QDateTime& getDate() const {return date;}
+  const qint64& getDate() const {return date;}
 
 private:
   Type type;
-  QDateTime date;
+  qint64 date;
 };

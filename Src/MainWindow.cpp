@@ -428,7 +428,7 @@ void MainWindow::createLiveGraphWidget(const QString& channelName)
     return;
 
   PublicDataModel& publicDataModel = dataModel.getDataChannel(channelName);
-  channelData.graphWidget = new GraphWidget(this, settings, &publicDataModel, channelName + "_0",dataModel.getDataChannels());
+  channelData.graphWidget = new GraphWidget(this, settings, &publicDataModel, channelName + "_0", dataModel.getDataChannels(), botEntityManager);
 
   QDockWidget* graphDockWidget = new QDockWidget(this);
   //connect(graphDockWidget->toggleViewAction(), SIGNAL(toggled(bool)), this, SLOT(enableGraphUpdates(bool)));

@@ -2,17 +2,24 @@
 #include "stdafx.h"
 #include <cfloat>
 
-GraphView::GraphView(QWidget* parent, const PublicDataModel* publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels) :
+GraphView::GraphView(QWidget* parent, const PublicDataModel* publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels, Entity::Manager& entityManager) :
   QWidget(parent), publicDataModel(publicDataModel), 
-  publicDataModels(publicDataModels), graphModel(0),
-  enabledData((unsigned int)Data::all), time(0), maxAge(60 * 60),
+  publicDataModels(publicDataModels), graphModel(0), entityManager(entityManager),
+  enabledData((unsigned int)Data::all), drawSessionMarkers(false), time(0), maxAge(60 * 60),
   totalMin(DBL_MAX), totalMax(0.), volumeMax(0.)
 {
+  entityManager.registerListener<EBotService>(*this);
+
   if(publicDataModel)
   {
     graphModel = &publicDataModel->graphModel;
     connect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
   }
+}
+
+GraphView::~GraphView()
+{
+  entityManager.unregisterListener<EBotService>(*this);
 }
 
 QSize GraphView::sizeHint() const
@@ -142,7 +149,8 @@ void GraphView::paintEvent(QPaintEvent* event)
     //if(enabledData  & (int)Data::estimates && !graphModel->tradeSamples.isEmpty())
     //  drawEstimates(painter, plotRect, vmin, vmax);
 
-    drawMarkers(painter, plotRect, vmin, vmax);
+    if(drawSessionMarkers)
+      drawMarkers(painter, plotRect, vmin, vmax);
     break;
   }
 }
@@ -616,8 +624,15 @@ void GraphView::drawExpRegressionLines(QPainter& painter, const QRect& rect, dou
 
 void GraphView::drawMarkers(QPainter& painter, const QRect& rect, double vmin, double vmax)
 {
-  if(graphModel->markers.isEmpty())
+  //if(graphModel->markers.isEmpty())
+  //  return;
+  QList<EBotSessionMarker*> markersUnsorted;
+  entityManager.getAllEntities<EBotSessionMarker>(markersUnsorted);
+  if(markersUnsorted.isEmpty())
     return;
+  QMap<quint64, EBotSessionMarker::Type> markers;
+  foreach(EBotSessionMarker* marker, markersUnsorted)
+    markers.insert(marker->getDate() / 1000, marker->getType());
 
   int leftInt = rect.left();
   int widthInt = rect.width();
@@ -629,9 +644,9 @@ void GraphView::drawMarkers(QPainter& painter, const QRect& rect, double vmin, d
   quint64 hmax = time;
   quint64 hmin = hmax - maxAge;
 
-  QPoint* lineData = (QPoint*)alloca(graphModel->markers.size() * 2 * sizeof(QPoint));
+  QPoint* lineData = (QPoint*)alloca(markers.size() * 2 * sizeof(QPoint));
   QPoint* currentLinePoint = lineData;
-  for(QMap<quint64, GraphModel::Marker>::ConstIterator i = graphModel->markers.begin(), end = graphModel->markers.end(); i != end; ++i)
+  for(QMap<quint64, EBotSessionMarker::Type>::ConstIterator i = markers.begin(), end = markers.end(); i != end; ++i)
   {
     const quint64& time = i.key();
     if(time < hmin)
@@ -641,19 +656,19 @@ void GraphView::drawMarkers(QPainter& painter, const QRect& rect, double vmin, d
     currentLinePoint[1].setX(x);
     switch(i.value())
     {
-    case GraphModel::Marker::buyMarker:
+    case EBotSessionMarker::Type::buy:
       currentLinePoint[0].setY(bottomInt);
       currentLinePoint[1].setY(midInt);
       break;
-    case GraphModel::Marker::buyAttemptMarker:
+    case EBotSessionMarker::Type::buyAttempt:
       currentLinePoint[0].setY(bottomInt);
       currentLinePoint[1].setY(bottomMidInt);
       break;
-    case GraphModel::Marker::sellMarker:
+    case EBotSessionMarker::Type::sell:
       currentLinePoint[0].setY(midInt);
       currentLinePoint[1].setY(topInt);
       break;
-    case GraphModel::Marker::sellAttemptMarker:
+    case EBotSessionMarker::Type::sellAttempt:
       currentLinePoint[0].setY(topMidInt);
       currentLinePoint[1].setY(topInt);
       break;
@@ -710,4 +725,34 @@ void GraphView::setFocusPublicDataModel(const PublicDataModel* publicDataModel)
     connect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
   }
   update();
+}
+
+void GraphView::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+{
+  switch ((EType)newEntity.getType())
+  {
+  case EType::botService:
+    drawSessionMarkers = false;
+    if(publicDataModel)
+    {
+      EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
+      EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
+      if(eBotSession)
+      {
+        EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotSession->getMarketId());
+        if(eBotMarket)
+        {
+          EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+          if(eBotMarketAdapter->getName() == publicDataModel->getMarketName())
+          {
+            drawSessionMarkers = true;
+          }
+        }
+      }
+
+    }
+    break;
+  default:
+    break;
+  }
 }

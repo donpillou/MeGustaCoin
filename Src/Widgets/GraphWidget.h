@@ -6,7 +6,7 @@ class GraphWidget : public QWidget
   Q_OBJECT
 
 public:
-  GraphWidget(QWidget* parent, QSettings& settings, const PublicDataModel* publicDataModel, const QString& graphNum, const QMap<QString, PublicDataModel*>& publicDataModels);
+  GraphWidget(QWidget* parent, QSettings& settings, const PublicDataModel* publicDataModel, const QString& graphNum, const QMap<QString, PublicDataModel*>& publicDataModels, Entity::Manager& entityManager);
 
   void saveState(QSettings& settings);
 

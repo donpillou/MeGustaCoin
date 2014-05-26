@@ -40,16 +40,16 @@ void GraphModel::addTrade(const DataProtocol::Trade& trade, quint64 tradeAge)
   }
 }
 
-void GraphModel::addMarker(quint64 time, Marker marker)
-{
-  markers.insert(time, marker);
-  emit dataAdded();
-}
-
-void GraphModel::clearMarkers()
-{
-  if(markers.isEmpty())
-    return;
-  markers.clear();
-  emit dataAdded();
-}
+//void GraphModel::addMarker(quint64 time, Marker marker)
+//{
+//  markers.insert(time, marker);
+//  emit dataAdded();
+//}
+//
+//void GraphModel::clearMarkers()
+//{
+//  if(markers.isEmpty())
+//    return;
+//  markers.clear();
+//  emit dataAdded();
+//}

@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const PublicDataModel* publicDataModel, const QString& settingsSection, const QMap<QString, PublicDataModel*>& publicDataModels) :
+GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const PublicDataModel* publicDataModel, const QString& settingsSection, const QMap<QString, PublicDataModel*>& publicDataModels, Entity::Manager& entityManager) :
   QWidget(parent), publicDataModel(publicDataModel), settingsSection(settingsSection),
   publicDataModels(publicDataModels)
 {
@@ -96,7 +96,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const PublicDataM
   frame->setBackgroundRole(QPalette::Base);
   frame->setAutoFillBackground(true);
 
-  graphView = new GraphView(this, publicDataModel, publicDataModels);
+  graphView = new GraphView(this, publicDataModel, publicDataModels, entityManager);
   QVBoxLayout* graphLayout = new QVBoxLayout;
   graphLayout->setMargin(0);
   graphLayout->setSpacing(0);
