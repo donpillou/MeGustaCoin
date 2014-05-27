@@ -138,6 +138,7 @@ public:
     double price;
     double amount;
     double fee;
+    qint64 timeout;
   };
 
   struct Marker : public Entity
