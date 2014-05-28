@@ -191,6 +191,7 @@ public:
     enum Command
     {
       startSimulation,
+      startLive,
       stop,
       select,
       requestTransactions,

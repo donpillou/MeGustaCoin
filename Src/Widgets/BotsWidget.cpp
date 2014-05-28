@@ -147,12 +147,21 @@ void BotsWidget::simulate()
   {
     QModelIndex index = sessionProxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
-    botService.startSessionSimulation(eSession->getId());
+    if(eSession->getState() == EBotSession::State::stopped)
+      botService.startSessionSimulation(eSession->getId());
   }
 }
 
 void BotsWidget::optimize()
 {
+  QModelIndexList selection = sessionView->selectionModel()->selectedRows();
+  foreach(const QModelIndex& proxyIndex, selection)
+  {
+    QModelIndex index = sessionProxyModel->mapToSource(proxyIndex);
+    EBotSession* eSession = (EBotSession*)index.internalPointer();
+    if(eSession->getState() == EBotSession::State::stopped)
+      botService.startSession(eSession->getId());
+  }
 }
 
 void BotsWidget::updateTitle(EBotService& eBotService)
@@ -185,9 +194,9 @@ void BotsWidget::updateToolBarButtons()
     sessionStopped = eSession->getState() == EBotSession::State::stopped;
   }
 
-  //optimizeAction->setEnabled(connected && sessionSelected);
+  //optimizeAction->setEnabled(connected && sessionSelected && sessionStopped));
   simulateAction->setEnabled(connected && sessionSelected && sessionStopped);
-  //activateAction->setEnabled(connected && sessionSelected);
+  activateAction->setEnabled(connected && sessionSelected && sessionStopped);
   cancelAction->setEnabled(connected && sessionSelected);
 }
 
@@ -217,7 +226,6 @@ void BotsWidget::autoScroll(int, int)
   scrollBar->setValue(scrollBar->maximum());
   autoScrollEnabled = false;
 }
-
 
 void BotsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {

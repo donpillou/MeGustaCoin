@@ -259,6 +259,14 @@ void BotService::startSessionSimulation(quint32 id)
   controlEntity(0, &controlSession, sizeof(controlSession));
 }
 
+void BotService::startSession(quint32 id)
+{
+  BotProtocol::ControlSession controlSession;
+  controlSession.entityType = BotProtocol::session;
+  controlSession.entityId = id;
+  controlSession.cmd = BotProtocol::ControlSession::startLive;
+  controlEntity(0, &controlSession, sizeof(controlSession));
+}
 void BotService::stopSession(quint32 id)
 {
   BotProtocol::ControlSession controlSession;
