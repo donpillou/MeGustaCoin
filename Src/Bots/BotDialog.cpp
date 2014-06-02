@@ -8,14 +8,7 @@ BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(
   nameEdit = new QLineEdit(this);
   connect(nameEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged()));
 
-  QList<EBotEngine*> engines;
-  QList<EBotMarket*> markets;
-  entityManager.getAllEntities<EBotEngine>(engines);
-  entityManager.getAllEntities<EBotMarket>(markets);
-
   engineComboBox = new QComboBox(this);
-  foreach(const EBotEngine* engine, engines)
-    engineComboBox->addItem(engine->getName(), engine->getId());
   marketComboBox = new QComboBox(this);
   connect(marketComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(marketSelectionChanged(int)));
 
@@ -35,10 +28,10 @@ BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(
   contentLayout->addWidget(engineComboBox, 1, 1);
   contentLayout->addWidget(new QLabel(tr("Market:")), 2, 0);
   contentLayout->addWidget(marketComboBox, 2, 1);
-  balanceBaseLabel = new QLabel();
+  balanceBaseLabel = new QLabel(tr("Balance:"));
   contentLayout->addWidget(balanceBaseLabel, 3, 0);
   contentLayout->addWidget(balanceBaseSpinBox, 3, 1);
-  balanceCommLabel = new QLabel();
+  balanceCommLabel = new QLabel(tr("Balance:"));
   contentLayout->addWidget(balanceCommLabel, 4, 0);
   contentLayout->addWidget(balanceCommSpinBox, 4, 1);
 
@@ -52,6 +45,12 @@ BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(
   layout->addLayout(contentLayout);
   layout->addWidget(buttonBox);
 
+  QList<EBotEngine*> engines;
+  QList<EBotMarket*> markets;
+  entityManager.getAllEntities<EBotEngine>(engines);
+  entityManager.getAllEntities<EBotMarket>(markets);
+  foreach(const EBotEngine* engine, engines)
+    engineComboBox->addItem(engine->getName(), engine->getId());
   foreach(const EBotMarket* market, markets)
   {
     EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(market->getMarketAdapterId());
@@ -88,7 +87,7 @@ void BotDialog::showEvent(QShowEvent* event)
 
 void BotDialog::textChanged()
 {
-  okButton->setEnabled(!nameEdit->text().isEmpty());
+  okButton->setEnabled(!nameEdit->text().isEmpty() && engineComboBox->currentIndex() >= 0 && marketComboBox->currentIndex() >= 0);
 }
 
 void BotDialog::marketSelectionChanged(int index)
