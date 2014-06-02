@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(parent)
+BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(parent), entityManager(entityManager)
 {
   setWindowTitle(tr("Add Bot"));
 
@@ -17,13 +17,7 @@ BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(
   foreach(const EBotEngine* engine, engines)
     engineComboBox->addItem(engine->getName(), engine->getId());
   marketComboBox = new QComboBox(this);
-  foreach(const EBotMarket* market, markets)
-  {
-    EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(market->getMarketAdapterId());
-    if(!eBotMarketAdapter)
-      continue;
-    marketComboBox->addItem(eBotMarketAdapter->getName(), market->getId());
-  }
+  connect(marketComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(marketSelectionChanged(int)));
 
   balanceBaseSpinBox = new QDoubleSpinBox(this);
   balanceBaseSpinBox->setValue(100.);
@@ -41,11 +35,11 @@ BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(
   contentLayout->addWidget(engineComboBox, 1, 1);
   contentLayout->addWidget(new QLabel(tr("Market:")), 2, 0);
   contentLayout->addWidget(marketComboBox, 2, 1);
-  int botMarketIndex = marketComboBox->currentIndex();
-  const EBotMarketAdapter* eBotMarket = botMarketIndex >= 0 ? entityManager.getEntity<EBotMarketAdapter>(marketComboBox->itemData(botMarketIndex).toUInt()) : 0;
-  contentLayout->addWidget(new QLabel(tr("Balance %1:").arg(eBotMarket ? eBotMarket->getBaseCurrency() : QString())), 3, 0);
+  balanceBaseLabel = new QLabel();
+  contentLayout->addWidget(balanceBaseLabel, 3, 0);
   contentLayout->addWidget(balanceBaseSpinBox, 3, 1);
-  contentLayout->addWidget(new QLabel(tr("Balance %1:").arg(eBotMarket ? eBotMarket->getCommCurrency() : QString())), 4, 0);
+  balanceCommLabel = new QLabel();
+  contentLayout->addWidget(balanceCommLabel, 4, 0);
   contentLayout->addWidget(balanceCommSpinBox, 4, 1);
 
   QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -57,6 +51,14 @@ BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(
   QVBoxLayout* layout = new QVBoxLayout;
   layout->addLayout(contentLayout);
   layout->addWidget(buttonBox);
+
+  foreach(const EBotMarket* market, markets)
+  {
+    EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(market->getMarketAdapterId());
+    if(!eBotMarketAdapter)
+      continue;
+    marketComboBox->addItem(eBotMarketAdapter->getName(), market->getId());
+  }
 
   setLayout(layout);
 }
@@ -87,4 +89,12 @@ void BotDialog::showEvent(QShowEvent* event)
 void BotDialog::textChanged()
 {
   okButton->setEnabled(!nameEdit->text().isEmpty());
+}
+
+void BotDialog::marketSelectionChanged(int index)
+{
+  const EBotMarket* eBotMarket = index >= 0 ? entityManager.getEntity<EBotMarket>(marketComboBox->itemData(index).toUInt()) : 0;
+  EBotMarketAdapter* eBotMarketAdapter = eBotMarket ? entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId()) : 0;
+  balanceBaseLabel->setText(tr("Balance %1:").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString()));
+  balanceCommLabel->setText(tr("Balance %1:").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString()));
 }

@@ -15,15 +15,20 @@ public:
   double getBalanceComm() const {return balanceCommSpinBox->value();}
 
 private:
+  Entity::Manager& entityManager;
   QLineEdit* nameEdit;
   QComboBox* engineComboBox;
   QComboBox* marketComboBox;
   QDoubleSpinBox * balanceBaseSpinBox;
   QDoubleSpinBox * balanceCommSpinBox;
   QPushButton* okButton;
+  QLabel* balanceBaseLabel;
+  QLabel* balanceCommLabel;
 
+private:
   virtual void showEvent(QShowEvent* event);
 
 private slots:
   void textChanged();
+  void marketSelectionChanged(int index);
 };
