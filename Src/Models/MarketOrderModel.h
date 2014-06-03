@@ -74,17 +74,17 @@ private:
   {
     const EBotSessionOrder* leftOrder = (const EBotSessionOrder*)left.internalPointer();
     const EBotSessionOrder* rightOrder = (const EBotSessionOrder*)right.internalPointer();
-    switch((SessionOrderModel::Column)left.column())
+    switch((MarketOrderModel::Column)left.column())
     {
-    case SessionOrderModel::Column::date:
+    case MarketOrderModel::Column::date:
       return leftOrder->getDate().msecsTo(rightOrder->getDate()) > 0;
-    case SessionOrderModel::Column::value:
+    case MarketOrderModel::Column::value:
       return leftOrder->getAmount() * leftOrder->getPrice() < rightOrder->getAmount() * rightOrder->getPrice();
-    case SessionOrderModel::Column::amount:
+    case MarketOrderModel::Column::amount:
       return leftOrder->getAmount() < rightOrder->getAmount();
-    case SessionOrderModel::Column::price:
+    case MarketOrderModel::Column::price:
       return leftOrder->getPrice() < rightOrder->getPrice();
-    case SessionOrderModel::Column::total:
+    case MarketOrderModel::Column::total:
       return leftOrder->getTotal() < rightOrder->getTotal();
     default:
       break;

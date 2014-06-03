@@ -56,19 +56,19 @@ private: // QSortFilterProxyModel
   {
     const EBotSessionTransaction* leftTransaction = (const EBotSessionTransaction*)left.internalPointer();
     const EBotSessionTransaction* rightTransaction = (const EBotSessionTransaction*)right.internalPointer();
-    switch((SessionTransactionModel::Column)left.column())
+    switch((MarketTransactionModel::Column)left.column())
     {
-    case SessionTransactionModel::Column::date:
+    case MarketTransactionModel::Column::date:
       return leftTransaction->getDate().msecsTo(rightTransaction->getDate()) > 0;
-    case SessionTransactionModel::Column::value:
+    case MarketTransactionModel::Column::value:
       return leftTransaction->getAmount() * leftTransaction->getPrice() < rightTransaction->getAmount() * rightTransaction->getPrice();
-    case SessionTransactionModel::Column::amount:
+    case MarketTransactionModel::Column::amount:
       return leftTransaction->getAmount() < rightTransaction->getAmount();
-    case SessionTransactionModel::Column::price:
+    case MarketTransactionModel::Column::price:
       return leftTransaction->getPrice() < rightTransaction->getPrice();
-    case SessionTransactionModel::Column::fee:
+    case MarketTransactionModel::Column::fee:
       return leftTransaction->getFee() < rightTransaction->getFee();
-    case SessionTransactionModel::Column::total:
+    case MarketTransactionModel::Column::total:
       return leftTransaction->getTotal() < rightTransaction->getTotal();
     default:
       break;
