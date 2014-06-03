@@ -137,7 +137,14 @@ void BotsWidget::cancelBot()
 
 void BotsWidget::activate()
 {
-
+  QModelIndexList selection = sessionView->selectionModel()->selectedRows();
+  foreach(const QModelIndex& proxyIndex, selection)
+  {
+    QModelIndex index = sessionProxyModel->mapToSource(proxyIndex);
+    EBotSession* eSession = (EBotSession*)index.internalPointer();
+    if(eSession->getState() == EBotSession::State::stopped)
+      botService.startSession(eSession->getId());
+  }
 }
 
 void BotsWidget::simulate()
