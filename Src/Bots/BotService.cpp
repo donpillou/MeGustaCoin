@@ -347,6 +347,7 @@ void BotService::WorkerThread::setState(EBotService::State state)
         entityManager.removeAll<EBotSessionTransaction>();
         entityManager.removeAll<EBotSessionOrder>();
         entityManager.removeAll<EBotSessionLogMessage>();
+        entityManager.removeAll<EBotSessionMarker>();
         entityManager.removeAll<EBotMarketTransaction>();
         entityManager.removeAll<EBotMarketOrder>();
         entityManager.removeAll<EBotMarketOrderDraft>();
@@ -659,6 +660,8 @@ EType BotService::WorkerThread::getEType(BotProtocol::EntityType entityType)
     return EType::botSessionOrder;
   case BotProtocol::sessionLogMessage:
     return EType::botSessionLogMessage;
+  case BotProtocol::sessionMarker:
+    return EType::botSessionMarker;
   case BotProtocol::market:
     return EType::botMarket;
   case BotProtocol::marketTransaction:
