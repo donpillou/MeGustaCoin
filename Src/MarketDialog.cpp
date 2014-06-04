@@ -28,7 +28,7 @@ MarketDialog::MarketDialog(QWidget* parent, Entity::Manager& entityManager) : QD
   QGridLayout *contentLayout = new QGridLayout;
   contentLayout->addWidget(new QLabel(tr("Market:")), 0, 0);
   contentLayout->addWidget(marketComboBox, 0, 1);
-  int botMarketIndex = marketComboBox->currentIndex();
+  //int botMarketIndex = marketComboBox->currentIndex();
   //const EBotMarketAdapter* eBotMarket = botMarketIndex >= 0 ? entityManager.getEntity<EBotMarketAdapter>(marketComboBox->itemData(botMarketIndex).toUInt()) : 0;
   contentLayout->addWidget(new QLabel(tr("User:")), 1, 0);
   contentLayout->addWidget(userEdit, 1, 1);
