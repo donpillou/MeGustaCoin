@@ -46,7 +46,7 @@ public:
     marketBalance,
   };
 
-#pragma pack(push, 1)
+#pragma pack(push, 4)
   struct Header
   {
     quint32 size; // including header

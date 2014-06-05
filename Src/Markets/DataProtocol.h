@@ -33,7 +33,7 @@ public:
     syncFlag = 0x02,
   };
 
-#pragma pack(push, 1)
+#pragma pack(push, 4)
   struct Header
   {
     quint32 size; // including header
