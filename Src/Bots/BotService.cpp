@@ -348,6 +348,7 @@ void BotService::WorkerThread::setState(EBotService::State state)
         entityManager.removeAll<EBotSessionOrder>();
         entityManager.removeAll<EBotSessionLogMessage>();
         entityManager.removeAll<EBotSessionMarker>();
+        entityManager.removeAll<EBotSessionBalance>();
         entityManager.removeAll<EBotMarketTransaction>();
         entityManager.removeAll<EBotMarketOrder>();
         entityManager.removeAll<EBotMarketOrderDraft>();
@@ -662,6 +663,8 @@ EType BotService::WorkerThread::getEType(BotProtocol::EntityType entityType)
     return EType::botSessionLogMessage;
   case BotProtocol::sessionMarker:
     return EType::botSessionMarker;
+  case BotProtocol::sessionBalance:
+    return EType::botSessionBalance;
   case BotProtocol::market:
     return EType::botMarket;
   case BotProtocol::marketTransaction:
@@ -707,6 +710,10 @@ Entity* BotService::WorkerThread::createEntity(BotProtocol::Entity& data, size_t
     if(size >= sizeof(BotProtocol::SessionLogMessage))
       return new EBotSessionLogMessage(*(BotProtocol::SessionLogMessage*)&data);
     break;
+  case BotProtocol::sessionBalance:
+    if(size >= sizeof(BotProtocol::Balance))
+      return new EBotSessionBalance(*(BotProtocol::Balance*)&data);
+    break;
   case BotProtocol::market:
     if(size >= sizeof(BotProtocol::Market))
       return new EBotMarket(*(BotProtocol::Market*)&data);
@@ -720,8 +727,8 @@ Entity* BotService::WorkerThread::createEntity(BotProtocol::Entity& data, size_t
       return new EBotMarketOrder(*(BotProtocol::Order*)&data);
     break;
   case BotProtocol::marketBalance:
-    if(size >= sizeof(BotProtocol::MarketBalance))
-      return new EBotMarketBalance(*(BotProtocol::MarketBalance*)&data);
+    if(size >= sizeof(BotProtocol::Balance))
+      return new EBotMarketBalance(*(BotProtocol::Balance*)&data);
     break;
   default:
     break;

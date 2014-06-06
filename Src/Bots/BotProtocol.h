@@ -40,6 +40,7 @@ public:
     sessionOrder,
     sessionMarker,
     sessionLogMessage,
+    sessionBalance,
     market,
     marketTransaction,
     marketOrder,
@@ -173,12 +174,12 @@ public:
     char secret[65];
   };
 
-  struct MarketBalance : public Entity
+  struct Balance : public Entity
   {
     double reservedUsd;
     double reservedBtc;
-    double availableUsd;
-    double availableBtc;
+    double availableUsd; // usd in open orders
+    double availableBtc; // btc in open orders
     double fee;
   };
 
@@ -198,6 +199,7 @@ public:
       select,
       requestTransactions,
       requestOrders,
+      requestBalance,
     };
 
     quint8 cmd;

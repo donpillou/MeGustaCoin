@@ -1,13 +1,13 @@
 
 #pragma once
 
-class EBotMarketBalance : public Entity
+class EBotSessionBalance : public Entity
 {
 public:
-  static const EType eType = EType::botMarketBalance;
+  static const EType eType = EType::botSessionBalance;
 
 public:
-  EBotMarketBalance(BotProtocol::Balance& data) : Entity(eType, data.entityId)
+  EBotSessionBalance(BotProtocol::Balance& data) : Entity(eType, data.entityId)
   {
     reservedUsd = data.reservedUsd;
     reservedBtc = data.reservedBtc;
