@@ -18,4 +18,6 @@ enum class EType
   botMarketOrderDraft,
   botMarketTransaction,
   botMarketBalance,
+  dataMarket,
+  logMessage,
 };

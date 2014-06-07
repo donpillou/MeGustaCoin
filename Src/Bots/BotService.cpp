@@ -285,6 +285,12 @@ void BotService::selectSession(quint32 id)
   controlEntity(0, &controlSession, sizeof(controlSession));
 }
 
+void BotService::addLogMessage(ELogMessage::Type type, const QString& message)
+{
+  ELogMessage* logMessage = new ELogMessage(type, message);
+  entityManager.delegateEntity(*logMessage);
+}
+
 void BotService::handleEvents()
 {
   for(;;)
@@ -302,19 +308,19 @@ void BotService::WorkerThread::interrupt()
   connection.interrupt();
 }
 
-void BotService::WorkerThread::addMessage(LogModel::Type type, const QString& message)
+void BotService::WorkerThread::addMessage(ELogMessage::Type type, const QString& message)
 {
   class LogMessageEvent : public Event
   {
   public:
-    LogMessageEvent(LogModel::Type type, const QString& message) : type(type), message(message) {}
+    LogMessageEvent(ELogMessage::Type type, const QString& message) : type(type), message(message) {}
   private:
-    LogModel::Type type;
+    ELogMessage::Type type;
     QString message;
   public: // Event
     virtual void handle(BotService& botService)
     {
-      botService.dataModel.logModel.addMessage(type, message);
+      botService.addLogMessage(type, message);
     }
   };
   eventQueue.append(new LogMessageEvent(type, message));
@@ -377,16 +383,16 @@ void BotService::WorkerThread::process()
     delete job;
   }
 
-  addMessage(LogModel::Type::information, "Connecting to bot service...");
+  addMessage(ELogMessage::Type::information, "Connecting to bot service...");
 
   // create connection
   QStringList addr = server.split(':');
   if(!connection.connect(addr.size() > 0 ? addr[0] : QString(), addr.size() > 1 ? addr[1].toULong() : 0, userName, password))
   {
-    addMessage(LogModel::Type::error, QString("Could not connect to bot service: %1").arg(connection.getLastError()));
+    addMessage(ELogMessage::Type::error, QString("Could not connect to bot service: %1").arg(connection.getLastError()));
     return;
   }
-  addMessage(LogModel::Type::information, "Connected to bot service.");
+  addMessage(ELogMessage::Type::information, "Connected to bot service.");
   setState(EBotService::State::connected);
 
   // loop
@@ -409,7 +415,7 @@ void BotService::WorkerThread::process()
   }
 
 error:
-  addMessage(LogModel::Type::error, QString("Lost connection to bot service: %1").arg(connection.getLastError()));
+  addMessage(ELogMessage::Type::error, QString("Lost connection to bot service: %1").arg(connection.getLastError()));
 }
 
 void BotService::WorkerThread::run()
@@ -641,7 +647,7 @@ void BotService::WorkerThread::receivedErrorResponse(quint32 requestId, BotProto
           entityManager.updatedEntity(*eBotMarketOrderDraft);
         }
       }
-      botService.dataModel.logModel.addMessage(LogModel::Type::error, errorMessage);
+      botService.addLogMessage(ELogMessage::Type::error, errorMessage);
     }
   };
   QString errorMessage = BotProtocol::getString(response.errorMessage);

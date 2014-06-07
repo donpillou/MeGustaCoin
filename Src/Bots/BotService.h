@@ -76,7 +76,7 @@ private:
     QString password;
 
   private:
-    void addMessage(LogModel::Type type, const QString& message);
+    void addMessage(ELogMessage::Type type, const QString& message);
     void setState(EBotService::State state);
     void process();
     static EType getEType(BotProtocol::EntityType entityType);
@@ -108,6 +108,8 @@ private:
   void updateEntity(quint32 requestId, const void* args, size_t size);
   void removeEntity(quint32 requestId, BotProtocol::EntityType type, quint32 id);
   void controlEntity(quint32 requestId, const void* args, size_t size);
+
+  void addLogMessage(ELogMessage::Type type, const QString& message);
 
 private slots:
   void handleEvents();

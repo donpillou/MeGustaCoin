@@ -6,9 +6,9 @@ class DataModel : public QObject
   Q_OBJECT
 
 public:
-  LogModel logModel;
+  //LogModel logModel;
 
-  BotsModel botsModel;
+  //BotsModel botsModel;
 
   DataModel();
   ~DataModel();

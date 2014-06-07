@@ -6,7 +6,7 @@ class LogWidget : public QWidget
   Q_OBJECT
 
 public:
-  LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel);
+  LogWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager);
 
   void saveState(QSettings& settings);
 
@@ -15,7 +15,7 @@ private slots:
   void autoScroll(int, int);
 
 private:
-  LogModel& logModel;
+  LogModel logModel;
   QTreeView* logView;
   bool autoScrollEnabled;
 };

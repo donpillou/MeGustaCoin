@@ -6,7 +6,7 @@ class DataService : public QObject
   Q_OBJECT
 
 public:
-  DataService(DataModel& dataModel);
+  DataService(DataModel& dataModel, Entity::Manager& entityManager);
   ~DataService();
 
   void start(const QString& server);
@@ -52,7 +52,7 @@ private:
     QHash<quint64, QList<DataProtocol::Trade> > replayedTrades;
 
   private:
-    void addMessage(LogModel::Type type, const QString& message);
+    void addMessage(ELogMessage::Type type, const QString& message);
     void setState(PublicDataModel::State state);
     void process();
 
@@ -68,7 +68,9 @@ private:
     virtual void receivedErrorResponse(const QString& message);
   };
 
+private:
   DataModel& dataModel;
+  Entity::Manager& entityManager;
   WorkerThread* thread;
 
   JobQueue<Event*> eventQueue;
@@ -76,6 +78,9 @@ private:
   QHash<quint64, PublicDataModel*> activeSubscriptions;
   bool isConnected;
   QSet<QString> subscriptions;
+
+private:
+  void addLogMessage(ELogMessage::Type type, const QString& message);
 
 private slots:
   void handleEvents();

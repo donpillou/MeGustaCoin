@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-LogWidget::LogWidget(QWidget* parent, QSettings& settings, LogModel& logModel) : QWidget(parent),
-  logModel(logModel), autoScrollEnabled(true)
+LogWidget::LogWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager) : QWidget(parent),
+  logModel(entityManager), autoScrollEnabled(true)
 {
   connect(&logModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
 

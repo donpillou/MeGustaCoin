@@ -28,6 +28,8 @@
 #include "Entities/EBotService.h"
 #include "Entities/EBotMarketAdapter.h"
 #include "Entities/EBotMarketBalance.h"
+#include "Entities/ELogMessage.h"
+#include "Entities/EDataMarket.h"
 
 #include "Markets/DataConnection.h"
 

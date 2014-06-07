@@ -1,27 +1,24 @@
 
 #include "stdafx.h"
 
-LogModel::LogModel() : errorIcon(QIcon(":/Icons/cancel.png")),
-warningIcon(QIcon(":/Icons/error.png")), informationIcon(QIcon(":/Icons/information.png")) {}
-
-void LogModel::addMessage(Type type, const QString& message)
+LogModel::LogModel(Entity::Manager& entityManager) :
+  entityManager(entityManager),
+  errorIcon(QIcon(":/Icons/cancel.png")), warningIcon(QIcon(":/Icons/error.png")), informationIcon(QIcon(":/Icons/information.png")),
+  dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  int oldMessageCount = messages.size();
-  beginInsertRows(QModelIndex(), oldMessageCount, oldMessageCount);
+  entityManager.registerListener<ELogMessage>(*this);
+}
 
-  LogModel::Item item;
-  item.type = type;
-  item.message = message;
-  QString dateFormat = QLocale::system().dateTimeFormat(QLocale::ShortFormat);
-  item.date = QDateTime::currentDateTime().toString(dateFormat);
-  messages.append(item);
+LogModel::~LogModel()
+{
+  entityManager.unregisterListener<ELogMessage>(*this);
 
-  endInsertRows();
+  qDeleteAll(messages);
 }
 
 QModelIndex LogModel::index(int row, int column, const QModelIndex& parent) const
 {
-  return createIndex(row, column, 0);
+  return createIndex(row, column, messages.at(row));
 }
 
 QModelIndex LogModel::parent(const QModelIndex& child) const
@@ -41,25 +38,21 @@ int LogModel::columnCount(const QModelIndex& parent) const
 
 QVariant LogModel::data(const QModelIndex& index, int role) const
 {
-  if(!index.isValid())
+  const Item* item = (const Item*)index.internalPointer();
+  if(!item)
     return QVariant();
-
-  int row = index.row();
-  if(row < 0 || row >= messages.size())
-    return QVariant();
-  const Item& item = messages[row];
 
   switch(role)
   {
   case Qt::DecorationRole:
     if ((Column)index.column() == Column::message)
-      switch(item.type)
+      switch(item->type)
       {
-      case Type::error:
+      case ELogMessage::Type::error:
         return errorIcon;
-      case Type::warning:
+      case ELogMessage::Type::warning:
         return warningIcon;
-      case Type::information:
+      case ELogMessage::Type::information:
         return informationIcon;
       }
     break;
@@ -67,9 +60,9 @@ QVariant LogModel::data(const QModelIndex& index, int role) const
     switch((Column)index.column())
     {
     case Column::date:
-      return item.date;
+      return item->date.toString(dateFormat);
     case Column::message:
-      return item.message;
+      return item->message;
     }
     break;
   }
@@ -93,4 +86,40 @@ QVariant LogModel::headerData(int section, Qt::Orientation orientation, int role
     break;
   }
   return QVariant();
+}
+
+void LogModel::addedEntity(Entity& entity)
+{
+  ELogMessage* eLogMessage = dynamic_cast<ELogMessage*>(&entity);
+  if(eLogMessage)
+  {
+    int index = messages.size();
+    Item* item = new Item;
+    item->type = eLogMessage->getType();
+    item->date = eLogMessage->getDate();
+    item->message = eLogMessage->getMessage();
+    beginInsertRows(QModelIndex(), index, index);
+    messages.append(item);
+    endInsertRows();
+    return;
+  }
+  Q_ASSERT(false);
+}
+
+void LogModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+{
+  addedEntity(newEntity);
+}
+
+void LogModel::removedAll(quint32 type)
+{
+  if((EType)type == EType::logMessage)
+  {
+    emit beginResetModel();
+    qDeleteAll(messages);
+    messages.clear();
+    emit endResetModel();
+    return;
+  }
+  Q_ASSERT(false);
 }

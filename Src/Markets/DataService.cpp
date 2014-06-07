@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-DataService::DataService(DataModel& dataModel) :
-  dataModel(dataModel), thread(0), isConnected(false) {}
+DataService::DataService(DataModel& dataModel, Entity::Manager& entityManager) :
+  dataModel(dataModel), entityManager(entityManager), thread(0), isConnected(false) {}
 
 DataService::~DataService()
 {
@@ -62,7 +62,7 @@ void DataService::subscribe(const QString& channel)
     }
   };
 
-  dataModel.logModel.addMessage(LogModel::Type::information, QString("Subscribing to channel %1...").arg(channel));
+  addLogMessage(ELogMessage::Type::information, QString("Subscribing to channel %1...").arg(channel));
   PublicDataModel& publicDataModel = dataModel.getDataChannel(channel);
   jobQueue.append(new SubscriptionJob(channel, publicDataModel.getLastReceivedTradeId()));
   if(thread)
@@ -94,7 +94,7 @@ void DataService::unsubscribe(const QString& channel)
     }
   };
 
-  dataModel.logModel.addMessage(LogModel::Type::information, QString("Unsubscribing from channel %1...").arg(channel));
+  addLogMessage(ELogMessage::Type::information, QString("Unsubscribing from channel %1...").arg(channel));
   jobQueue.append(new UnsubscriptionJob(channel));
   if(thread)
     thread->interrupt();
@@ -112,24 +112,30 @@ void DataService::handleEvents()
   }
 }
 
+void DataService::addLogMessage(ELogMessage::Type type, const QString& message)
+{
+  ELogMessage* logMessage = new ELogMessage(type, message);
+  entityManager.delegateEntity(*logMessage);
+}
+
 void DataService::WorkerThread::interrupt()
 {
   connection.interrupt();
 }
 
-void DataService::WorkerThread::addMessage(LogModel::Type type, const QString& message)
+void DataService::WorkerThread::addMessage(ELogMessage::Type type, const QString& message)
 {
   class LogMessageEvent : public Event
   {
   public:
-    LogMessageEvent(LogModel::Type type, const QString& message) : type(type), message(message) {}
+    LogMessageEvent(ELogMessage::Type type, const QString& message) : type(type), message(message) {}
   private:
-    LogModel::Type type;
+    ELogMessage::Type type;
     QString message;
   public: // Event
     virtual void handle(DataService& dataService)
     {
-        dataService.dataModel.logModel.addMessage(type, message);
+        dataService.addLogMessage(type, message);
     }
   };
   eventQueue.append(new LogMessageEvent(type, message));
@@ -186,16 +192,16 @@ void DataService::WorkerThread::process()
     delete job;
   }
 
-  addMessage(LogModel::Type::information, "Connecting to data service...");
+  addMessage(ELogMessage::Type::information, "Connecting to data service...");
 
   // create connection
   QStringList addr = server.split(':');
   if(!connection.connect(addr.size() > 0 ? addr[0] : QString(), addr.size() > 1 ? addr[1].toULong() : 0))
   {
-    addMessage(LogModel::Type::error, QString("Could not connect to data service: %1").arg(connection.getLastError()));
+    addMessage(ELogMessage::Type::error, QString("Could not connect to data service: %1").arg(connection.getLastError()));
     return;
   }
-  addMessage(LogModel::Type::information, "Connected to data service.");
+  addMessage(ELogMessage::Type::information, "Connected to data service.");
   setState(PublicDataModel::State::connected);
 
   // load channel list
@@ -222,7 +228,7 @@ void DataService::WorkerThread::process()
   }
 
 error:
-  addMessage(LogModel::Type::error, QString("Lost connection to data service: %1").arg(connection.getLastError()));
+  addMessage(ELogMessage::Type::error, QString("Lost connection to data service: %1").arg(connection.getLastError()));
 }
 
 void DataService::WorkerThread::run()
@@ -274,7 +280,7 @@ void DataService::WorkerThread::receivedSubscribeResponse(const QString& channel
       PublicDataModel& publicDataModel = dataModel.getDataChannel(channelName);
       dataService.activeSubscriptions[channelId] = &publicDataModel;
       publicDataModel.setState(PublicDataModel::State::loading);
-      dataModel.logModel.addMessage(LogModel::Type::information, QString("Subscribed to channel %1.").arg(channelName));
+      dataService.addLogMessage(ELogMessage::Type::information, QString("Subscribed to channel %1.").arg(channelName));
     }
   };
 
@@ -299,7 +305,7 @@ void DataService::WorkerThread::receivedUnsubscribeResponse(const QString& chann
       dataService.activeSubscriptions.remove(channelId);
       if(publicDataModel.getState() == PublicDataModel::State::connected)
         publicDataModel.setState(PublicDataModel::State::offline);
-      dataModel.logModel.addMessage(LogModel::Type::information, QString("Unsubscribed from channel %1.").arg(channelName));
+      dataService.addLogMessage(ELogMessage::Type::information, QString("Unsubscribed from channel %1.").arg(channelName));
     }
   };
 
@@ -389,5 +395,5 @@ void DataService::WorkerThread::receivedTicker(quint64 channelId, const DataProt
 
 void DataService::WorkerThread::receivedErrorResponse(const QString& message)
 {
-  addMessage(LogModel::Type::error, message);
+  addMessage(ELogMessage::Type::error, message);
 }
