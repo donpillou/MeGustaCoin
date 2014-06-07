@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-BotService::BotService(DataModel& dataModel, Entity::Manager& entityManager) :
-  dataModel(dataModel), entityManager(entityManager), thread(0), connected(false) {}
+BotService::BotService(Entity::Manager& entityManager) :
+  entityManager(entityManager), thread(0), connected(false) {}
 
 BotService::~BotService()
 {

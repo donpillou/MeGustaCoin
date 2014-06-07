@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "Meguco", "MegucoClient"),
-  dataService(dataModel, botEntityManager), botService(dataModel, botEntityManager)
+  dataService(dataModel, botEntityManager), botService(botEntityManager)
 {
   botEntityManager.delegateEntity(*new EBotService);
   botEntityManager.registerListener<EBotMarketBalance>(*this);

@@ -6,7 +6,7 @@ class BotService : public QObject
   Q_OBJECT
 
 public:
-  BotService(DataModel& dataModel, Entity::Manager& entityManager);
+  BotService(Entity::Manager& entityManager);
   ~BotService();
 
   void start(const QString& server, const QString& userName, const QString& password);
@@ -95,7 +95,6 @@ private:
   };
 
 private:
-  DataModel& dataModel;
   Entity::Manager& entityManager;
   WorkerThread* thread;
 
