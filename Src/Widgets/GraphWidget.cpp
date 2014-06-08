@@ -1,12 +1,10 @@
 
 #include "stdafx.h"
 
-GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const PublicDataModel* publicDataModel, const QString& settingsSection, const QMap<QString, PublicDataModel*>& publicDataModels, Entity::Manager& entityManager) :
-  QWidget(parent), publicDataModel(publicDataModel), settingsSection(settingsSection),
-  publicDataModels(publicDataModels)
+GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const QString& channelName, const QString& settingsSection, Entity::Manager& globalEntityManager, Entity::Manager& channelEntityManager, const GraphModel& graphModel, const QMap<QString, GraphModel*>& graphModels) :
+  QWidget(parent), channelName(channelName), settingsSection(settingsSection), channelEntityManager(channelEntityManager)
 {
-  if(publicDataModel)
-    connect(publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
+  // todo: update title
 
   /*
   setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
@@ -96,7 +94,7 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const PublicDataM
   frame->setBackgroundRole(QPalette::Base);
   frame->setAutoFillBackground(true);
 
-  graphView = new GraphView(this, publicDataModel, publicDataModels, entityManager);
+  graphView = new GraphView(this, globalEntityManager, channelEntityManager, graphModel, graphModels);
   QVBoxLayout* graphLayout = new QVBoxLayout;
   graphLayout->setMargin(0);
   graphLayout->setSpacing(0);
@@ -131,17 +129,17 @@ void GraphWidget::saveState(QSettings& settings)
   settings.endGroup();
 }
 
-void GraphWidget::setFocusPublicDataModel(const PublicDataModel* publicDataModel)
-{
-  if(this->publicDataModel)
-    disconnect(this->publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-  this->publicDataModel = publicDataModel;
-  if(publicDataModel)
-    connect(publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-
-  graphView->setFocusPublicDataModel(publicDataModel);
-  updateTitle();
-}
+//void GraphWidget::setFocusPublicDataModel(const PublicDataModel* publicDataModel)
+//{
+//  if(this->publicDataModel)
+//    disconnect(this->publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
+//  this->publicDataModel = publicDataModel;
+//  if(publicDataModel)
+//    connect(publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
+//
+//  graphView->setFocusPublicDataModel(publicDataModel);
+//  updateTitle();
+//}
 
 void GraphWidget::setZoom(int maxTime)
 {
@@ -168,8 +166,8 @@ void GraphWidget::updateDataMenu()
     dataSignalMapper->removeMappings(action);
   dataMenu->clear();
 
-  if(!publicDataModel)
-    return;
+  //if(!entityManager)
+  //  return;
 
   QAction* action = dataMenu->addAction(tr("Trades"));
   action->setCheckable(true);
@@ -214,20 +212,19 @@ void GraphWidget::updateDataMenu()
 
 void GraphWidget::updateTitle()
 {
-  QString stateStr;
-  if(publicDataModel)
-    stateStr = publicDataModel->getStateName();
+  EDataSubscription* eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
+  QString stateStr = eDataSubscription->getStateName();
 
   QString title;
-  if(publicDataModel)
+  //if(entityManager)
   {
     if(stateStr.isEmpty())
-      title = tr("%1 Live Graph").arg(publicDataModel->getMarketName());
+      title = tr("%1 Live Graph").arg(channelName);
     else
-      title = tr("%1 Live Graph (%2)").arg(publicDataModel->getMarketName(), stateStr);
+      title = tr("%1 Live Graph (%2)").arg(channelName, stateStr);
   }
-  else
-    title = tr("Live Graph (%1)").arg(tr("offline"));
+  //else
+  //  title = tr("Live Graph (%1)").arg(tr("offline"));
 
   QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
   dockWidget->setWindowTitle(title);

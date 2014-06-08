@@ -6,14 +6,15 @@ class DataService : public QObject
   Q_OBJECT
 
 public:
-  DataService(DataModel& dataModel, Entity::Manager& entityManager);
+  DataService(Entity::Manager& globalEntityManager);
   ~DataService();
 
   void start(const QString& server);
   void stop();
 
-  void subscribe(const QString& channel);
+  void subscribe(const QString& channel, Entity::Manager& entityManager);
   void unsubscribe(const QString& channel);
+  Entity::Manager* getSubscription(const QString& channel);
 
 private:
   class WorkerThread;
@@ -38,6 +39,7 @@ private:
     WorkerThread(DataService& dataService, JobQueue<Event*>& eventQueue, JobQueue<Job*>& jobQueue, const QString& server) :
       dataService(dataService), eventQueue(eventQueue), jobQueue(jobQueue), canceled(false), 
       server(server) {}
+    ~WorkerThread() {qDeleteAll(replayedTrades);}
 
     const QString& getServer() const {return server;}
     void interrupt();
@@ -49,11 +51,11 @@ private:
     DataConnection connection;
     bool canceled;
     QString server;
-    QHash<quint64, QList<DataProtocol::Trade> > replayedTrades;
+    QHash<quint64, EDataTradeData*> replayedTrades;
 
   private:
     void addMessage(ELogMessage::Type type, const QString& message);
-    void setState(PublicDataModel::State state);
+    void setState(EDataService::State state);
     void process();
 
   private: // QThread
@@ -69,15 +71,14 @@ private:
   };
 
 private:
-  DataModel& dataModel;
-  Entity::Manager& entityManager;
+  Entity::Manager& globalEntityManager;
   WorkerThread* thread;
 
   JobQueue<Event*> eventQueue;
   JobQueue<Job*> jobQueue;
-  QHash<quint64, PublicDataModel*> activeSubscriptions;
+  QHash<quint64, Entity::Manager*> activeSubscriptions;
   bool isConnected;
-  QSet<QString> subscriptions;
+  QHash<QString, Entity::Manager*> subscriptions;
 
 private:
   void addLogMessage(ELogMessage::Type type, const QString& message);

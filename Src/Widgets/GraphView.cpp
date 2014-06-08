@@ -2,24 +2,18 @@
 #include "stdafx.h"
 #include <cfloat>
 
-GraphView::GraphView(QWidget* parent, const PublicDataModel* publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels, Entity::Manager& entityManager) :
-  QWidget(parent), publicDataModel(publicDataModel), 
-  publicDataModels(publicDataModels), graphModel(0), entityManager(entityManager),
+GraphView::GraphView(QWidget* parent, Entity::Manager& globalEntityManager, Entity::Manager& channelEntityManager, const GraphModel& graphModel, const QMap<QString, GraphModel*>& graphModels) :
+  QWidget(parent), globalEntityManager(globalEntityManager), channelEntityManager(channelEntityManager), graphModel(graphModel), graphModels(graphModels),
   enabledData((unsigned int)Data::all), drawSessionMarkers(false), time(0), maxAge(60 * 60),
   totalMin(DBL_MAX), totalMax(0.), volumeMax(0.)
 {
-  entityManager.registerListener<EBotService>(*this);
-
-  if(publicDataModel)
-  {
-    graphModel = &publicDataModel->graphModel;
-    connect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
-  }
+  globalEntityManager.registerListener<EBotService>(*this);
+  EDataSubscription* eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
 }
 
 GraphView::~GraphView()
 {
-  entityManager.unregisterListener<EBotService>(*this);
+  globalEntityManager.unregisterListener<EBotService>(*this);
 }
 
 QSize GraphView::sizeHint() const
@@ -39,12 +33,13 @@ void GraphView::setEnabledData(unsigned int data)
 
 void GraphView::paintEvent(QPaintEvent* event)
 {
-  if(!graphModel)
-    return;
+  //if(!graphModel)
+  //  return;
 
-  if(!graphModel->tradeSamples.isEmpty())
+  const QList<GraphModel::TradeSample>& tradeSamples = graphModel.getTradeSamples();
+  if(!tradeSamples.isEmpty())
   {
-    const GraphModel::TradeSample& tradeSample = graphModel->tradeSamples.back();
+    const GraphModel::TradeSample& tradeSample = tradeSamples.back();
     addToMinMax(tradeSample.max);
     addToMinMax(tradeSample.min);
     if(tradeSample.time > time)
@@ -64,11 +59,12 @@ void GraphView::paintEvent(QPaintEvent* event)
 
   if(enabledData & (int)Data::otherMarkets)
   {
-    foreach(const PublicDataModel* publicDataModel, publicDataModels)
+    for(QMap<QString, GraphModel*>::ConstIterator i = graphModels.begin(), end = graphModels.end(); i != end; ++i)
     {
-      if(!publicDataModel || publicDataModel->graphModel.tradeSamples.isEmpty())
+      const QList<GraphModel::TradeSample>& tradeSamples = i.value()->getTradeSamples();
+      if(tradeSamples.isEmpty())
         continue;
-      const GraphModel::TradeSample& tradeSample = publicDataModel->graphModel.tradeSamples.back();
+      const GraphModel::TradeSample& tradeSample = tradeSamples.back();
       if(tradeSample.time > time)
         time = tradeSample.time;
     }
@@ -83,7 +79,7 @@ void GraphView::paintEvent(QPaintEvent* event)
 
     double vmin = totalMin;
     double vmax = qMax(totalMax, vmin + 1.);
-    const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, publicDataModel->formatPrice(totalMax == 0. ? 0. : vmax));
+    const QSize priceSize = painter.fontMetrics().size(Qt::TextSingleLine, eDataSubscription->formatPrice(totalMax == 0. ? 0. : vmax));
 
     QRect plotRect(10, 10, rect.width() - (10 + priceSize.width() + 8), rect.height() - 20 - priceSize.height() + 5);
     if(plotRect.width() <= 0 || plotRect.height() <= 0)
@@ -97,37 +93,43 @@ void GraphView::paintEvent(QPaintEvent* event)
     totalMax = 0.;
     volumeMax = 0.;
 
-    if(enabledData & (int)Data::otherMarkets && graphModel->values)
+    if(enabledData & (int)Data::otherMarkets)
     {
-      static unsigned int colors[] = { 0x0000FF, 0x8A2BE2, 0xA52A2A, 0x5F9EA0, 0x7FFF00, 0xD2691E, 0xFF7F50, 0x6495ED, 0xDC143C, 0x00FFFF, 0x00008B, 0x008B8B, 0xB8860B, 0xA9A9A9, 0x006400, 0xBDB76B, 0x8B008B, 0x556B2F, 0xFF8C00, 0x9932CC, 0x8B0000, 0xE9967A, 0x8FBC8F, 0x483D8B, 0x2F4F4F, 0x00CED1, 0x9400D3, 0xFF1493, 0x00BFFF, 0x696969, 0x1E90FF, 0xB22222, 0x228B22, 0xFF00FF, 0xFFD700, 0xDAA520, 0x808080, 0x008000, 0xADFF2F, 0xFF69B4, 0xCD5C5C, 0x4B0082 };
-      int nextColorIndex = 0;
-      //double averagePrice = graphModel->values->regressions[(int)Bot::Regressions::regression24h].average;
-      double averagePrice = graphModel->values->regressions[(int)Bot::Regressions::regression6h].average;
-      //double averagePrice = graphModel->values->bellRegressions[(int)Bot::BellRegressions::bellRegression15m].average;
-      if(averagePrice > 0.)
-        foreach(const PublicDataModel* publicDataModel, publicDataModels)
-        {
-          if(publicDataModel && publicDataModel->graphModel.values)
+      const Bot::Values* values = graphModel.getValues();
+      if(values)
+      {
+        static unsigned int colors[] = { 0x0000FF, 0x8A2BE2, 0xA52A2A, 0x5F9EA0, 0x7FFF00, 0xD2691E, 0xFF7F50, 0x6495ED, 0xDC143C, 0x00FFFF, 0x00008B, 0x008B8B, 0xB8860B, 0xA9A9A9, 0x006400, 0xBDB76B, 0x8B008B, 0x556B2F, 0xFF8C00, 0x9932CC, 0x8B0000, 0xE9967A, 0x8FBC8F, 0x483D8B, 0x2F4F4F, 0x00CED1, 0x9400D3, 0xFF1493, 0x00BFFF, 0x696969, 0x1E90FF, 0xB22222, 0x228B22, 0xFF00FF, 0xFFD700, 0xDAA520, 0x808080, 0x008000, 0xADFF2F, 0xFF69B4, 0xCD5C5C, 0x4B0082 };
+        int nextColorIndex = 0;
+        //double averagePrice = graphModel->values->regressions[(int)Bot::Regressions::regression24h].average;
+        double averagePrice = values->regressions[(int)Bot::Regressions::regression6h].average;
+        //double averagePrice = graphModel->values->bellRegressions[(int)Bot::BellRegressions::bellRegression15m].average;
+        if(averagePrice > 0.)
+          for(QMap<QString, GraphModel*>::ConstIterator i = graphModels.begin(), end = graphModels.end(); i != end; ++i)
           {
-            if(publicDataModel != this->publicDataModel || !(enabledData & ((int)Data::trades)))
+            const GraphModel* channelGraphModel = i.value();
+            if(channelGraphModel != &graphModel || !(enabledData & ((int)Data::trades)))
             {
-              int colorIndex = nextColorIndex % (sizeof(colors) / sizeof(*colors));
-              //double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::Regressions::regression24h].average;
-              double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::Regressions::regression6h].average;
-              //double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::BellRegressions::bellRegression15m].average;
-              if(otherAveragePrice > 0.)
+              const Bot::Values* values = channelGraphModel->getValues();
+              if(values)
               {
-                QColor color(colors[colorIndex]);
-                color.setAlpha(0x70);
-                prepareTradePolyline(plotRect, vmin, vmax, lastVolumeMax, publicDataModel->graphModel, (int)Data::trades, averagePrice / otherAveragePrice, color);
+                int colorIndex = nextColorIndex % (sizeof(colors) / sizeof(*colors));
+                //double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::Regressions::regression24h].average;
+                double otherAveragePrice = values->regressions[(int)Bot::Regressions::regression6h].average;
+                //double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::BellRegressions::bellRegression15m].average;
+                if(otherAveragePrice > 0.)
+                {
+                  QColor color(colors[colorIndex]);
+                  color.setAlpha(0x70);
+                  prepareTradePolyline(plotRect, vmin, vmax, lastVolumeMax, *channelGraphModel, (int)Data::trades, averagePrice / otherAveragePrice, color);
+                }
               }
+              nextColorIndex++;
             }
-            nextColorIndex++;
           }
-        }
+      }
     }
-    if(enabledData & ((int)Data::trades | (int)Data::tradeVolume) && !graphModel->tradeSamples.isEmpty())
-      prepareTradePolyline(plotRect, vmin, vmax, lastVolumeMax, *graphModel, enabledData, 1., QColor(0, 0, 0));
+    if(enabledData & ((int)Data::trades | (int)Data::tradeVolume) && !tradeSamples.isEmpty())
+      prepareTradePolyline(plotRect, vmin, vmax, lastVolumeMax, graphModel, enabledData, 1., QColor(0, 0, 0));
 
     if(totalMax == 0.)
       return; // no data to draw
@@ -184,7 +186,7 @@ void GraphView::drawAxesLables(QPainter& painter, const QRect& rect, double vmin
       painter.setPen(textPen);
       QPoint textPos(right.x() + 2, right.y() + priceSize.height() * 0.5 - 3);
       if(textPos.y() > 2)
-        painter.drawText(textPos, publicDataModel->formatPrice(vmin + vstart + i * vstep));
+        painter.drawText(textPos, eDataSubscription->formatPrice(vmin + vstart + i * vstep));
     }
   }
 
@@ -276,14 +278,11 @@ void GraphView::prepareTradePolyline(const QRect& rect, double ymin, double ymax
   QPointF* polyData = graphModelData.polyData;
   QPoint* volumeData = graphModelData.volumeData;
 
-  if(&graphModel != this->graphModel)
-    enabledData &= ~(int)Data::tradeVolume;
-
   {
     QPointF* currentPoint = polyData;
     QPoint* currentVolumePoint = volumeData;
 
-    const QList<GraphModel::TradeSample>& tradeSamples = graphModel.tradeSamples;
+    const QList<GraphModel::TradeSample>& tradeSamples = graphModel.getTradeSamples();
     int i = 0, count = tradeSamples.size();
     for(int step = qMax(tradeSamples.size() / 2, 1);;)
     {
@@ -438,7 +437,7 @@ void GraphView::drawTradePolylines(QPainter& painter)
       continue;
     }
     const GraphModel* graphMode = i.key();
-    if(graphMode == this->graphModel)
+    if(graphMode == &this->graphModel)
       focusGraphModelData = &graphModelData;
     else
     {
@@ -554,7 +553,8 @@ void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double ym
 
 void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax)
 {
-  if(!graphModel->values)
+  const Bot::Values* values = graphModel.getValues();
+  if(!values)
     return;
 
   double vrange = vmax - vmin;
@@ -567,7 +567,7 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
   static quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
   for(int i = 0; i < (int)Bot::Regressions::numOfRegressions; ++i)
   {
-    const Bot::Values::RegressionLine& rl = graphModel->values->regressions[i];
+    const Bot::Values::RegressionLine& rl = values->regressions[i];
 
     const quint64& endTime = time;
     quint64 startTime = qMax(time - depths[i], hmin);
@@ -589,7 +589,8 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
 
 void GraphView::drawExpRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax)
 {
-  if(!graphModel->values)
+  const Bot::Values* values = graphModel.getValues();
+  if(!values)
     return;
 
   double vrange = vmax - vmin;
@@ -602,7 +603,7 @@ void GraphView::drawExpRegressionLines(QPainter& painter, const QRect& rect, dou
   static quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
   for(int i = 0; i < (int)Bot::BellRegressions::numOfBellRegressions; ++i)
   {
-    const Bot::Values::RegressionLine& rl = graphModel->values->bellRegressions[i];
+    const Bot::Values::RegressionLine& rl = values->bellRegressions[i];
 
     const quint64& endTime = time;
     quint64 startTime = qMax(time - depths[i] * 3, hmin);
@@ -624,10 +625,8 @@ void GraphView::drawExpRegressionLines(QPainter& painter, const QRect& rect, dou
 
 void GraphView::drawMarkers(QPainter& painter, const QRect& rect, double vmin, double vmax)
 {
-  //if(graphModel->markers.isEmpty())
-  //  return;
   QList<EBotSessionMarker*> markersUnsorted;
-  entityManager.getAllEntities<EBotSessionMarker>(markersUnsorted);
+  globalEntityManager.getAllEntities<EBotSessionMarker>(markersUnsorted); // todo: optimize this by keeping markersUnsorted as member variable
   if(markersUnsorted.isEmpty())
     return;
   QMap<quint64, EBotSessionMarker::Type> markers;
@@ -710,22 +709,22 @@ void GraphView::drawEstimates(QPainter& painter, const QRect& rect, double vmin,
 }
 */
 
-void GraphView::setFocusPublicDataModel(const PublicDataModel* publicDataModel)
-{
-  if(graphModel)
-  {
-    disconnect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
-    graphModel = 0;
-    this->publicDataModel = 0;
-  }
-  if(publicDataModel)
-  {
-    this->publicDataModel = publicDataModel;
-    graphModel = &publicDataModel->graphModel;
-    connect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
-  }
-  update();
-}
+//void GraphView::setFocusPublicDataModel(const PublicDataModel* publicDataModel)
+//{
+//  if(graphModel)
+//  {
+//    disconnect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
+//    graphModel = 0;
+//    this->publicDataModel = 0;
+//  }
+//  if(publicDataModel)
+//  {
+//    this->publicDataModel = publicDataModel;
+//    graphModel = &publicDataModel->graphModel;
+//    connect(graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
+//  }
+//  update();
+//}
 
 void GraphView::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
@@ -733,17 +732,17 @@ void GraphView::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   {
   case EType::botService:
     drawSessionMarkers = false;
-    if(publicDataModel)
     {
       EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
-      EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
+      EBotSession* eBotSession = globalEntityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
       if(eBotSession)
       {
-        EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotSession->getMarketId());
+        EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotSession->getMarketId());
         if(eBotMarket)
         {
-          EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
-          if(eBotMarketAdapter->getName() == publicDataModel->getMarketName())
+          EBotMarketAdapter* eBotMarketAdapter = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+          QMap<QString, GraphModel*>::ConstIterator it = graphModels.find(eBotMarketAdapter->getName());
+          if(it != graphModels.end() && it.value() == &graphModel)
           {
             drawSessionMarkers = true;
           }

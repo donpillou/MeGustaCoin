@@ -4,7 +4,7 @@
 class GraphView : public QWidget, public Entity::Listener
 {
 public:
-  GraphView(QWidget* parent, const PublicDataModel* publicDataModel, const QMap<QString, PublicDataModel*>& publicDataModels, Entity::Manager& entityManager);
+  GraphView(QWidget* parent, Entity::Manager& globalEntityManager, Entity::Manager& channelEntityManager, const GraphModel& graphModel, const QMap<QString, GraphModel*>& graphModels);
   ~GraphView();
 
   void setFocusPublicDataModel(const PublicDataModel* publicDataModel);
@@ -30,10 +30,11 @@ public:
   virtual QSize sizeHint() const;
 
 private:
-  const PublicDataModel* publicDataModel;
-  const QMap<QString, PublicDataModel*>& publicDataModels;
-  const GraphModel* graphModel;
-  Entity::Manager& entityManager;
+  Entity::Manager& globalEntityManager;
+  Entity::Manager& channelEntityManager;
+  const GraphModel& graphModel;
+  const QMap<QString, GraphModel*>& graphModels;
+  EDataSubscription* eDataSubscription;
 
   unsigned int enabledData;
   bool drawSessionMarkers;

@@ -2,10 +2,11 @@
 #include "stdafx.h"
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "Meguco", "MegucoClient"),
-  dataService(dataModel, botEntityManager), botService(botEntityManager)
+  dataService(globalEntityManager), botService(globalEntityManager)
 {
-  botEntityManager.delegateEntity(*new EBotService);
-  botEntityManager.registerListener<EBotMarketBalance>(*this);
+  globalEntityManager.delegateEntity(*new EBotService);
+  globalEntityManager.delegateEntity(*new EDataService);
+  globalEntityManager.registerListener<EBotMarketBalance>(*this);
 
   //connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
   //connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
@@ -33,12 +34,12 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   }
   */
 
-  marketsWidget = new MarketsWidget(this, settings, botEntityManager, botService);
-  ordersWidget = new OrdersWidget(this, settings, botEntityManager, botService, dataModel);
-  transactionsWidget = new TransactionsWidget(this, settings, botEntityManager, botService);
+  marketsWidget = new MarketsWidget(this, settings, globalEntityManager, botService);
+  ordersWidget = new OrdersWidget(this, settings, globalEntityManager, botService, dataService);
+  transactionsWidget = new TransactionsWidget(this, settings, globalEntityManager, botService);
   //graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
-  botsWidget = new BotsWidget(this, settings, botEntityManager, botService);
-  logWidget = new LogWidget(this, settings, botEntityManager);
+  botsWidget = new BotsWidget(this, settings, globalEntityManager, botService);
+  logWidget = new LogWidget(this, settings, globalEntityManager);
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
   updateWindowTitle();
@@ -144,28 +145,25 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 
   QStringList liveTradesWidgets = settings.value("LiveTradesWidgets").toStringList();
   QStringList liveGraphWidgets = settings.value("LiveGraphWidgets").toStringList();
-  foreach(const QString& channelName, liveTradesWidgets)
-    createLiveTradeWidget(channelName);
-  foreach(const QString& channelName, liveGraphWidgets)
-    createLiveGraphWidget(channelName);
+  foreach(const QString& channel, liveTradesWidgets)
+  {
+    QStringList channelData = channel.split('\n');
+    if(channelData.size() < 3)
+      continue;
+    createChannelData(channelData[0], channelData[1], channelData[2]);
+    createLiveTradeWidget(channelData[0]);
+  }
+  foreach(const QString& channel, liveGraphWidgets)
+  {
+    QStringList channelData = channel.split('\n');
+    if(channelData.size() < 3)
+      continue;
+    createChannelData(channelData[0], channelData[1], channelData[2]);
+    createLiveGraphWidget(channelData[0]);
+  }
 
   restoreGeometry(settings.value("Geometry").toByteArray());
   restoreState(settings.value("WindowState").toByteArray());
-
-  //settings.beginGroup("Login");
-  //if(settings.value("Remember", 0).toUInt() >= 2)
-  //{
-  //  QString market = settings.value("Market").toString();
-  //  QString user = settings.value("User").toString();
-  //  QString key = settings.value("Key").toString();
-  //  QString secret = settings.value("Secret").toString();
-  //  settings.endGroup();
-  //  open(market, user, key, secret);
-  //}
-  //else
-  //  settings.endGroup();
-  //if(!marketService.isReady())
-  //  QTimer::singleShot(0, this, SLOT(login()));
 
   startDataService();
   startBotService();
@@ -173,8 +171,10 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 
 MainWindow::~MainWindow()
 {
-  botEntityManager.unregisterListener<EBotMarketBalance>(*this);
-  //logout();
+  globalEntityManager.unregisterListener<EBotMarketBalance>(*this);
+
+  dataService.stop();
+  botService.stop();
 
   // manually delete widgets since they hold a reference to the data model
   for(QHash<QString, ChannelData>::Iterator i = channelDataMap.begin(), end = channelDataMap.end(); i != end; ++i)
@@ -189,6 +189,8 @@ MainWindow::~MainWindow()
   //delete graphWidget;
   delete botsWidget;
   delete logWidget;
+
+  qDeleteAll(channelGraphModels);
 }
 
 void MainWindow::startDataService()
@@ -211,8 +213,6 @@ void MainWindow::startBotService()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-  //logout();
-
   settings.setValue("Geometry", saveGeometry());
   settings.setValue("WindowState", saveState());
   ordersWidget->saveState(settings);
@@ -226,15 +226,18 @@ void MainWindow::closeEvent(QCloseEvent* event)
   {
     const QString& channelName = i.key();
     ChannelData& channelData = i.value();
+    EDataSubscription* eDataSubscription = channelData.channelEntityManager.getEntity<EDataSubscription>(0);
+    if(!eDataSubscription)
+      continue;
     if(channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible())
     {
       channelData.tradesWidget->saveState(settings);
-      openedLiveTradesWidgets.append(channelName);
+      openedLiveTradesWidgets.append(channelName + "\n" + eDataSubscription->getBaseCurrency() + "\n" + eDataSubscription->getCommCurrency());
     }
     if(channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible())
     {
       channelData.graphWidget->saveState(settings);
-      openedLiveGraphWidgets.append(channelName);
+      openedLiveGraphWidgets.append(channelName + "\n" + eDataSubscription->getBaseCurrency() + "\n" + eDataSubscription->getCommCurrency());
     }
   }
 
@@ -245,67 +248,26 @@ void MainWindow::closeEvent(QCloseEvent* event)
   QMainWindow::closeEvent(event);
 }
 
-//void MainWindow::login()
-//{
-//  LoginDialog loginDialog(this, &settings);
-//  if(loginDialog.exec() != QDialog::Accepted)
-//    return;
-//
-//  open(loginDialog.market(), loginDialog.userName(), loginDialog.key(), loginDialog.secret());
-//}
-//
-//void MainWindow::logout()
-//{
-//  const QString& marketName = dataModel.getMarketName();
-//  if(!marketName.isEmpty())
-//    dataService.unsubscribe(marketName);
-//  marketService.logout();
-//}
-
-//void MainWindow::refresh()
-//{
-//  marketService.loadOrders();
-//  marketService.loadTransactions();
-//  marketService.loadBalance();
-//}
-
-//void MainWindow::open(const QString& marketName, const QString& userName, const QString& key, const QString& secret)
-//{
-//  logout();
-//
-//  marketService.login(marketName, userName, key, secret);
-//
-//  // update gui
-//  updateWindowTitle();
-//
-//  // request data
-//  marketService.loadBalance();
-//  marketService.loadOrders();
-//  marketService.loadTransactions();
-//  dataService.subscribe(marketName);
-//}
-
 void MainWindow::updateWindowTitle()
 {
-  
-  EBotMarketBalance* eBotMarketBalance = botEntityManager.getEntity<EBotMarketBalance>(0);
+  EBotMarketBalance* eBotMarketBalance = globalEntityManager.getEntity<EBotMarketBalance>(0);
   EBotMarketAdapter* eBotMarketAdapater = 0;
   if(eBotMarketBalance)
   {
-    EBotService* eBotService = botEntityManager.getEntity<EBotService>(0);
-    EBotMarket* eBotMarket = botEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
+    EBotService* eBotService = globalEntityManager.getEntity<EBotService>(0);
+    EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
     if(eBotMarket)
-      eBotMarketAdapater = botEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+      eBotMarketAdapater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
   }
   if(!eBotMarketBalance || !eBotMarketAdapater)
     setWindowTitle(tr("Meguco Client"));
   else
   {
-    EBotService* eBotService = botEntityManager.getEntity<EBotService>(0);
-    EBotMarket* eBotMarket = botEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
+    EBotService* eBotService = globalEntityManager.getEntity<EBotService>(0);
+    EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
     EBotMarketAdapter* eBotMarketAdapater = 0;
     if(eBotMarket)
-      eBotMarketAdapater = botEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+      eBotMarketAdapater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
 
     double usd = eBotMarketBalance->getAvailableUsd() + eBotMarketBalance->getReservedUsd();
     double btc = eBotMarketBalance->getAvailableBtc() + eBotMarketBalance->getReservedBtc();
@@ -319,23 +281,26 @@ void MainWindow::updateWindowTitle()
     if(eBotMarketAdapater)
     {
       const QString& marketName = eBotMarketAdapater->getName();
-      title += eBotMarketAdapater->getName();
-      const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
-      double bid, ask;
-      if(publicDataModel.getTicker(bid, ask))
-        //title += QString(" - %1 / %2 bid / %3 ask").arg(dataModel.formatPrice(tickerSample.last), dataModel.formatPrice(bid), dataModel.formatPrice(ask));
-        title += QString(" - %1 bid / %2 ask").arg(dataModel.formatPrice(bid), dataModel.formatPrice(ask));
+      title += marketName;
+      Entity::Manager* channelEntityManager = dataService.getSubscription(marketName);
+      if(channelEntityManager)
+      {
+        EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
+        EDataTickerData* eDataTickerData = channelEntityManager->getEntity<EDataTickerData>(0);
+        if(eDataSubscription && eDataTickerData)
+          title += QString(" - %1 bid / %2 ask").arg(eDataSubscription->formatPrice(eDataTickerData->getBid()), eDataSubscription->formatPrice(eDataTickerData->getAsk()));
+      }
     }
     setWindowTitle(title);
   }
 }
 
-void MainWindow::updateWindowTitleTicker()
-{
-  PublicDataModel* sourceModel = qobject_cast<PublicDataModel*>(sender());
-  if(sourceModel->getMarketName() == dataModel.getMarketName())
-    updateWindowTitle();
-}
+//void MainWindow::updateWindowTitleTicker()
+//{
+//  PublicDataModel* sourceModel = qobject_cast<PublicDataModel*>(sender());
+//  if(sourceModel->getMarketName() == dataModel.getMarketName())
+//    updateWindowTitle();
+//}
 
 //void MainWindow::updateFocusPublicDataModel()
 //{
@@ -372,15 +337,15 @@ void MainWindow::updateViewMenu()
   viewMenu->addAction(qobject_cast<QDockWidget*>(logWidget->parent())->toggleViewAction());
   viewMenu->addAction(qobject_cast<QDockWidget*>(botsWidget->parent())->toggleViewAction());
   viewMenu->addSeparator();
-  QMap<QString, PublicDataModel*> publicDataModels = dataModel.getDataChannels();
-  for(QMap<QString, PublicDataModel*>::Iterator i = publicDataModels.begin(), end = publicDataModels.end(); i != end; ++i)
+  QList<EDataMarket*> channels;
+  globalEntityManager.getAllEntities<EDataMarket>(channels);
+  for(QList<EDataMarket*>::Iterator i = channels.begin(), end = channels.end(); i != end; ++i)
   {
-    const QString& channelName = i.key();
+    const QString& channelName = (*i)->getName();
     QMenu* subMenu = viewMenu->addMenu(channelName);
 
-    ChannelData* channelData = 0;
-    if(channelDataMap.contains(i.key()))
-      channelData = &channelDataMap[channelName];
+    QHash<QString, ChannelData>::Iterator it = channelDataMap.find(channelName);
+    ChannelData* channelData = it == channelDataMap.end() ? 0 : &it.value();
 
     if(channelData && channelData->tradesWidget)
       subMenu->addAction(qobject_cast<QDockWidget*>(channelData->tradesWidget->parent())->toggleViewAction());
@@ -401,44 +366,86 @@ void MainWindow::updateViewMenu()
   }
 }
 
-void MainWindow::createLiveTradeWidget(const QString& channelName)
+void MainWindow::createChannelData(const QString& channelName, const QString& currencyBase, const QString currencyComm)
 {
-  ChannelData& channelData = channelDataMap[channelName];
-  if(channelData.tradesWidget)
+  QHash<QString, ChannelData>::Iterator it = channelDataMap.find(channelName);
+  if(it != channelDataMap.end())
     return;
 
-  PublicDataModel& publicDataModel = dataModel.getDataChannel(channelName);
-  channelData.tradesWidget = new TradesWidget(this, settings, publicDataModel);
+  ChannelData* channelData = &*channelDataMap.insert(channelName, ChannelData());
+  channelData->channelEntityManager.delegateEntity(*new EDataSubscription(currencyBase, currencyComm));
+
+  if(!channelGraphModels.contains(channelName))
+    channelGraphModels.insert(channelName, new GraphModel(channelData->channelEntityManager));
+}
+
+MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
+{
+  QHash<QString, ChannelData>::Iterator it = channelDataMap.find(channelName);
+  if(it == channelDataMap.end())
+  {
+    QList<EDataMarket*> channels;
+    EDataMarket* eDataMarket = 0;
+    globalEntityManager.getAllEntities<EDataMarket>(channels);
+    for(QList<EDataMarket*>::Iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+      if((*i)->getName() == channelName)
+        eDataMarket = *i;
+    if(!eDataMarket)
+      return 0;
+
+    ChannelData* channelData = &*channelDataMap.insert(channelName, ChannelData());
+    channelData->channelEntityManager.delegateEntity(*new EDataSubscription(eDataMarket->getBaseCurrency(), eDataMarket->getCommCurrency()));
+
+    if(!channelGraphModels.contains(channelName))
+      channelGraphModels.insert(channelName, new GraphModel(channelData->channelEntityManager));
+
+    return channelData;
+  }
+  else
+    return &*it;
+}
+
+void MainWindow::createLiveTradeWidget(const QString& channelName)
+{
+  ChannelData* channelData = getChannelData(channelName);
+  if(!channelData)
+    return;
+  if(channelData->tradesWidget)
+    return;
+  channelData->tradesWidget = new TradesWidget(this, settings, channelName, channelData->channelEntityManager);
 
   QDockWidget* tradesDockWidget = new QDockWidget(this);
   //connect(tradesDockWidget->toggleViewAction(), SIGNAL(toggled(bool)), this, SLOT(enableTradesUpdates(bool)));
   connect(tradesDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableTradesUpdates(bool)));
   tradesDockWidget->setObjectName(channelName + "LiveTrades");
-  tradesDockWidget->setWidget(channelData.tradesWidget);
-  channelData.tradesWidget->updateTitle();
+  tradesDockWidget->setWidget(channelData->tradesWidget);
+  channelData->tradesWidget->updateTitle();
   addDockWidget(Qt::TopDockWidgetArea, tradesDockWidget);
   
-  dataService.subscribe(channelName);
+  dataService.subscribe(channelName, channelData->channelEntityManager);
 }
 
 void MainWindow::createLiveGraphWidget(const QString& channelName)
 {
-  ChannelData& channelData = channelDataMap[channelName];
-  if(channelData.graphWidget)
+  ChannelData* channelData = getChannelData(channelName);
+  if(!channelData)
     return;
+  if(channelData->graphWidget)
+    return;
+  GraphModel* channelGraphModel = channelGraphModels[channelName];
+  Q_ASSERT(channelGraphModel);
 
-  PublicDataModel& publicDataModel = dataModel.getDataChannel(channelName);
-  channelData.graphWidget = new GraphWidget(this, settings, &publicDataModel, channelName + "_0", dataModel.getDataChannels(), botEntityManager);
+  channelData->graphWidget = new GraphWidget(this, settings, channelName, channelName + "_0", globalEntityManager, channelData->channelEntityManager, *channelGraphModel, channelGraphModels);
 
   QDockWidget* graphDockWidget = new QDockWidget(this);
   //connect(graphDockWidget->toggleViewAction(), SIGNAL(toggled(bool)), this, SLOT(enableGraphUpdates(bool)));
   connect(graphDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableGraphUpdates(bool)));
   graphDockWidget->setObjectName(channelName + "LiveGraph");
-  graphDockWidget->setWidget(channelData.graphWidget);
-  channelData.graphWidget->updateTitle();
+  graphDockWidget->setWidget(channelData->graphWidget);
+  channelData->graphWidget->updateTitle();
   addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
 
-  dataService.subscribe(channelName);
+  dataService.subscribe(channelName, channelData->channelEntityManager);
 }
 
 void MainWindow::showOptions()
@@ -469,13 +476,13 @@ void MainWindow::enableTradesUpdates(bool enable)
   return;
 found:
   const QString& channelName = it.key();
-  if(channelName == dataModel.getMarketName())
+  if(channelName == selectedChannelName)
     return;
   ChannelData& channelData = it.value();
   bool active = (channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) ||
                 (channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible());
   if(active)
-    dataService.subscribe(channelName);
+    dataService.subscribe(channelName, channelData.channelEntityManager);
   else
     dataService.unsubscribe(channelName);
 }
@@ -493,13 +500,13 @@ void MainWindow::enableGraphUpdates(bool enable)
   return;
 found:
   const QString& channelName = it.key();
-  if(channelName == dataModel.getMarketName())
+  if(channelName == selectedChannelName)
     return;
   ChannelData& channelData = it.value();
   bool active = (channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) ||
                 (channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible());
   if(active)
-    dataService.subscribe(channelName);
+    dataService.subscribe(channelName, channelData.channelEntityManager);
   else
     dataService.unsubscribe(channelName);
 }

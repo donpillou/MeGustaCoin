@@ -21,27 +21,30 @@ private:
 
   QMenu* viewMenu;
 
-  DataModel dataModel;
-  Entity::Manager botEntityManager;
+  Entity::Manager globalEntityManager;
   DataService dataService;
   BotService botService;
+  QString selectedChannelName;
 
   struct ChannelData
   {
     TradesWidget* tradesWidget;
     GraphWidget* graphWidget;
+    Entity::Manager channelEntityManager;
 
     ChannelData() : tradesWidget(0), graphWidget(0) {}
   };
 
   QHash<QString, ChannelData> channelDataMap;
+  QMap<QString, GraphModel*> channelGraphModels;
   QSignalMapper liveTradesSignalMapper;
   QSignalMapper liveGraphSignalMapper;
 
 private:
-  //void open(const QString& market, const QString& userName, const QString& key, const QString& secret);
   void startDataService();
   void startBotService();
+  void createChannelData(const QString& channelName, const QString& currencyBase, const QString currencyComm);
+  ChannelData* getChannelData(const QString& channelName);
 
 private: // QMainWindow
   virtual void closeEvent(QCloseEvent* event);
@@ -51,7 +54,7 @@ private slots:
   //void logout(); // todo: remove
   //void refresh();
   void updateWindowTitle();
-  void updateWindowTitleTicker();
+  //void updateWindowTitleTicker();
   //void updateFocusPublicDataModel();
   void updateViewMenu();
   void about();

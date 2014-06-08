@@ -6,7 +6,7 @@ class OrdersWidget : public QWidget, public Entity::Listener
   Q_OBJECT
 
 public:
-  OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botServic, DataModel& dataModele);
+  OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataService& dataService);
   ~OrdersWidget();
 
   void saveState(QSettings& settings);
@@ -26,7 +26,7 @@ private slots:
 private:
   Entity::Manager& entityManager;
   BotService& botService;
-  DataModel& dataModel; // todo: get rid of this
+  DataService& dataService;
 
   MarketOrderModel orderModel;
 

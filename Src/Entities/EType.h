@@ -4,6 +4,7 @@
 enum class EType
 {
   none,
+  logMessage,
   botSessionOrder,
   botSessionMarker,
   botSessionTransaction,
@@ -18,6 +19,9 @@ enum class EType
   botMarketOrderDraft,
   botMarketTransaction,
   botMarketBalance,
+  dataService,
   dataMarket,
-  logMessage,
+  dataTradeData,
+  dataTickerData,
+  dataSubscription,
 };

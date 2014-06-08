@@ -6,12 +6,12 @@ class GraphWidget : public QWidget
   Q_OBJECT
 
 public:
-  GraphWidget(QWidget* parent, QSettings& settings, const PublicDataModel* publicDataModel, const QString& graphNum, const QMap<QString, PublicDataModel*>& publicDataModels, Entity::Manager& entityManager);
+  GraphWidget(QWidget* parent, QSettings& settings, const QString& channelName, const QString& settingsSection, Entity::Manager& globalEntityManager, Entity::Manager& channelEntityManager, const GraphModel& graphModel, const QMap<QString, GraphModel*>& graphModels);
 
   void saveState(QSettings& settings);
 
-  void setFocusPublicDataModel(const PublicDataModel* publicDataModel);
-  const PublicDataModel* getFocusPublicDataModel() const {return publicDataModel;}
+  //void setFocusPublicDataModel(const PublicDataModel* publicDataModel);
+  //const PublicDataModel* getFocusPublicDataModel() const {return publicDataModel;}
 
 public slots:
   void updateTitle();
@@ -22,9 +22,9 @@ private slots:
   void updateDataMenu();
 
 private:
-  const PublicDataModel* publicDataModel;
+  QString channelName;
   QString settingsSection;
-  const QMap<QString, PublicDataModel*>& publicDataModels;
+  Entity::Manager& channelEntityManager;
   GraphView* graphView;
 
   QAction* zoomAction;

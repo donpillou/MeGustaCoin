@@ -1,12 +1,11 @@
 
 #include "stdafx.h"
 
-TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel) :
+TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, const QString& channelName, Entity::Manager& entityManager) :
   QWidget(parent),
-  publicDataModel(publicDataModel), tradeModel(publicDataModel.tradeModel)//, autoScrollEnabled(false)
+  channelName(channelName), entityManager(entityManager), tradeModel(entityManager)//, autoScrollEnabled(false)
 {
-  connect(&publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-  //connect(&tradeModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
+  // todo: update title
 
   tradeView = new QTreeView(this);
   //connect(tradeView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
@@ -30,7 +29,7 @@ TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, PublicDataModel
   headerView->setStretchLastSection(false);
   headerView->setResizeMode(1, QHeaderView::Stretch);
   settings.beginGroup("LiveTrades");
-  settings.beginGroup(publicDataModel.getMarketName());
+  settings.beginGroup(channelName);
   headerView->restoreState(settings.value("HeaderState").toByteArray());
   settings.endGroup();
   settings.endGroup();
@@ -39,51 +38,22 @@ TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, PublicDataModel
 void TradesWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("LiveTrades");
-  settings.beginGroup(publicDataModel.getMarketName());
+  settings.beginGroup(channelName);
   settings.setValue("HeaderState", tradeView->header()->saveState());
   settings.endGroup();
   settings.endGroup();
 }
 
-void TradesWidget::checkAutoScroll(const QModelIndex& index, int, int)
-{
-//  QScrollBar* scrollBar = tradeView->verticalScrollBar();
-//  if(scrollBar->value() == scrollBar->maximum())
-//    autoScrollEnabled = true;
-  QTimer::singleShot(100, this, SLOT(clearAbove()));
-}
-//
-//void TradesWidget::autoScroll(int, int)
-//{
-//  if(!autoScrollEnabled)
-//    return;
-//  QScrollBar* scrollBar = tradeView->verticalScrollBar();
-//  scrollBar->setValue(scrollBar->maximum());
-//  autoScrollEnabled = false;
-//}
-
-void TradesWidget::clearAbove()
-{
-//  QScrollBar* scrollBar = tradeView->verticalScrollBar();
-//  if(scrollBar->value() == scrollBar->maximum())
-//    autoScrollEnabled = true;
-  tradeModel.clearAbove(500);
-//  if(autoScrollEnabled)
-//  {
-//    QScrollBar* scrollBar = tradeView->verticalScrollBar();
-//    scrollBar->setValue(scrollBar->maximum());
-//  }
-}
-
 void TradesWidget::updateTitle()
 {
-  QString stateStr = publicDataModel.getStateName();
+  EDataSubscription* eDataSubscription = entityManager.getEntity<EDataSubscription>(0);
+  QString stateStr = eDataSubscription->getStateName();
 
   QString title;
   if(stateStr.isEmpty())
-    title = tr("%1 Live Trades").arg(publicDataModel.getMarketName());
+    title = tr("%1 Live Trades").arg(channelName);
   else
-    title = tr("%1 Live Trades (%2)").arg(publicDataModel.getMarketName(), stateStr);
+    title = tr("%1 Live Trades (%2)").arg(channelName, stateStr);
 
   QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
   dockWidget->setWindowTitle(title);

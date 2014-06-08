@@ -6,21 +6,16 @@ class TradesWidget : public QWidget
   Q_OBJECT
 
 public:
-  TradesWidget(QWidget* parent, QSettings& settings, PublicDataModel& publicDataModel);
+  TradesWidget(QWidget* parent, QSettings& settings, const QString& channelName, Entity::Manager& entityManager);
 
   void saveState(QSettings& settings);
 
 public slots:
-  void updateTitle();
-
-private slots:
-  void checkAutoScroll(const QModelIndex&, int, int);
-  //void autoScroll(int, int);
-  void clearAbove();
+  void updateTitle(); // todo ???
 
 private:
-  PublicDataModel& publicDataModel;
-  TradeModel& tradeModel;
+  QString channelName;
+  Entity::Manager& entityManager;
+  TradeModel tradeModel;
   QTreeView* tradeView;
-  //bool autoScrollEnabled;
 };

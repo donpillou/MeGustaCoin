@@ -7,11 +7,11 @@ public:
   static const EType eType = EType::dataMarket;
 
 public:
-  EDataMarket(BotProtocol::MarketAdapter& data) : Entity(eType, data.entityId)
+  EDataMarket(quint32 entityId, const QString& name, const QString& baseCurrency, const QString& commCurrency) : Entity(eType, entityId)
   {
-    name = BotProtocol::getString(data.name);
-    baseCurrency = BotProtocol::getString(data.currencyBase);
-    commCurrency = BotProtocol::getString(data.currencyComm);
+    this->name = name;
+    this->baseCurrency = baseCurrency;
+    this->commCurrency = commCurrency;
   }
 
   const QString& getName() const {return name;}

@@ -1,109 +1,25 @@
 
 #include "stdafx.h"
 
-TradeModel::TradeModel(PublicDataModel& publicDataModel) :
-  publicDataModel(publicDataModel),
+TradeModel::TradeModel(Entity::Manager& channelEntityManager) :
+  channelEntityManager(channelEntityManager),
   upIcon(QIcon(":/Icons/arrow_diag.png")), downIcon(QIcon(":/Icons/arrow_diag_red.png")), neutralIcon(QIcon(":/Icons/bullet_grey.png"))
 {
-  connect(&publicDataModel, SIGNAL(changedMarket()), this, SLOT(updateHeader()));
+  channelEntityManager.registerListener<EDataTradeData>(*this);
+  eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
+  Q_ASSERT(eDataSubscription);
 }
 
 TradeModel::~TradeModel()
 {
+  channelEntityManager.unregisterListener<EDataTradeData>(*this);
+
   qDeleteAll(trades);
-}
-
-void TradeModel::updateHeader()
-{
-  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
-}
-
-void TradeModel::reset()
-{
-  beginResetModel();
-  qDeleteAll(trades);
-  trades.clear();
-  endResetModel();
-  emit headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
-}
-
-void TradeModel::clearAbove(int tradeCount)
-{
-  int tradesToRemove = trades.size() - tradeCount;
-  if(tradesToRemove > 0)
-  {
-    beginRemoveRows(QModelIndex(), tradeCount, tradeCount + tradesToRemove - 1);
-    for(int i = trades.size() - 1;; --i)
-    {
-      delete trades.back();
-      trades.removeLast();
-      if(i == tradeCount)
-        break;
-    }
-    endRemoveRows();
-  }
-}
-
-void TradeModel::setTrades(const QList<DataProtocol::Trade>& tradesData)
-{
-  reset();
-
-  int tradesToInsert = qMin(tradesData.size(), 100);
-  if(tradesToInsert == 0)
-    return;
-
-  beginInsertRows(QModelIndex(), 0, tradesToInsert - 1);
-  trades.reserve(tradesToInsert);
-  for(int i = 0; i < tradesToInsert; ++i)
-    trades.append(new Trade);
-
-  double lastPrice = 0.;
-  for(int i = tradesData.size() - tradesToInsert, end = tradesData.size(), j = tradesToInsert - 1; i < end; ++i, --j)
-  {
-    const DataProtocol::Trade& tradeData = tradesData[i];
-    Trade* trade = trades[j];
-    trade->id = tradeData.id;
-    trade->time = tradeData.time / 1000ULL;
-    trade->price = tradeData.price;
-    trade->amount = tradeData.amount;
-    trade->icon = Trade::Icon::neutral;
-    if(lastPrice != 0.)
-    {
-      if(trade->price > lastPrice)
-        trade->icon = Trade::Icon::up;
-      else if(trade->price < lastPrice)
-        trade->icon = Trade::Icon::down;
-    }
-    lastPrice = tradeData.price;
-  }
-  endInsertRows();
-}
-
-void TradeModel::addTrade(const DataProtocol::Trade& tradeData)
-{
-  double lastPrice = trades.size() > 0 ? trades.front()->price : 0.;
-
-  beginInsertRows(QModelIndex(), 0, 0);
-  Trade* trade = new Trade;
-  trade->id = tradeData.id;
-  trade->time = tradeData.time / 1000ULL;
-  trade->price = tradeData.price;
-  trade->amount = tradeData.amount;
-  trade->icon = Trade::Icon::neutral;
-  if(lastPrice != 0.)
-  {
-    if(trade->price > lastPrice)
-      trade->icon = Trade::Icon::up;
-    else if(trade->price < lastPrice)
-      trade->icon = Trade::Icon::down;
-  }
-  trades.prepend(trade);
-  endInsertRows();
 }
 
 QModelIndex TradeModel::index(int row, int column, const QModelIndex& parent) const
 {
-  return createIndex(row, column, 0);
+  return createIndex(row, column, trades.at(row));
 }
 
 QModelIndex TradeModel::parent(const QModelIndex& child) const
@@ -123,10 +39,13 @@ int TradeModel::columnCount(const QModelIndex& parent) const
 
 QVariant TradeModel::data(const QModelIndex& index, int role) const
 {
-  if(!index.isValid())
+  const Trade* trade = (const Trade*)index.internalPointer();
+  if(!trade)
     return QVariant();
 
-  if(role == Qt::TextAlignmentRole)
+  switch(role)
+  {
+  case Qt::TextAlignmentRole:
     switch((Column)index.column())
     {
     case Column::price:
@@ -135,17 +54,10 @@ QVariant TradeModel::data(const QModelIndex& index, int role) const
     default:
       return (int)Qt::AlignLeft | (int)Qt::AlignVCenter;
     }
-
-  int row = index.row();
-  if(row < 0 || row >= trades.size())
-    return QVariant();
-  const Trade& trade = *trades[row];
-
-  switch(role)
-  {
+    break;
   case Qt::DecorationRole:
     if((Column)index.column() == Column::price)
-      switch(trade.icon)
+      switch(trade->icon)
       {
       case Trade::Icon::up:
         return upIcon;
@@ -160,7 +72,7 @@ QVariant TradeModel::data(const QModelIndex& index, int role) const
     {
     case Column::date:
       {
-        quint64 timeSinceTrade = QDateTime::currentDateTime().toTime_t() - trade.time;
+        quint64 timeSinceTrade = QDateTime::currentDateTime().toTime_t() - trade->date / 1000;
         if(timeSinceTrade < 60)
           return QString("a few seconds ago");
         if(timeSinceTrade < 120)
@@ -168,13 +80,9 @@ QVariant TradeModel::data(const QModelIndex& index, int role) const
         return QString("%1 minutes ago").arg(timeSinceTrade / 60);
       }
     case Column::amount:
-      return publicDataModel.formatAmount(trade.amount);
-      //return QString("%1 %2").arg(QLocale::system().toString(transaction.amount, 'f', 8), market->getCoinCurrency());
-      //return QString().sprintf("%.08f %s", transaction.amount, market->getCoinCurrency());
+      return eDataSubscription->formatAmount(trade->amount);
     case Column::price:
-      return publicDataModel.formatPrice(trade.price);
-      //return QString("%1 %2").arg(QLocale::system().toString(transaction.price, 'f', 2), market->getMarketCurrency());
-      //return QString().sprintf("%.02f %s", transaction.price, market->getMarketCurrency());
+      return eDataSubscription->formatPrice(trade->price);
     }
   }
   return QVariant();
@@ -201,10 +109,95 @@ QVariant TradeModel::headerData(int section, Qt::Orientation orientation, int ro
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount %1").arg(publicDataModel.getCoinCurrency());
+        return tr("Amount %1").arg(eDataSubscription->getCommCurrency());
       case Column::price:
-        return tr("Price %1").arg(publicDataModel.getMarketCurrency());
+        return tr("Price %1").arg(eDataSubscription->getBaseCurrency());
     }
   }
   return QVariant();
+}
+
+void TradeModel::addedEntity(Entity& entity)
+{
+  EDataTradeData* eDataTradeData = dynamic_cast<EDataTradeData*>(&entity);
+  if(eDataTradeData)
+  {
+    const QList<DataProtocol::Trade>& data = eDataTradeData->getData();
+
+    double lastPrice = 0.;
+    int tradesToInsert = data.size();
+    if(tradesToInsert == 0)
+      return;
+    bool isEmpty = trades.isEmpty();
+    int maxTrades = isEmpty ? 100 : 500;
+    if(tradesToInsert > maxTrades)
+    {
+      tradesToInsert = maxTrades;
+      lastPrice = data[maxTrades].price;
+    }
+    else if(!isEmpty)
+      lastPrice = trades.front()->price;
+  
+    beginInsertRows(QModelIndex(), 0, tradesToInsert - 1);
+    trades.reserve(trades.size() + tradesToInsert);
+  
+    for(int i = data.size() - tradesToInsert, end = data.size(); i < end; ++i)
+    {
+      const DataProtocol::Trade& tradeData = data[i];
+      Trade* trade = new Trade;
+      trade->date = tradeData.time;
+      trade->price = tradeData.price;
+      trade->amount = tradeData.amount;
+      trade->icon = Trade::Icon::neutral;
+      if(lastPrice != 0.)
+      {
+        if(trade->price > lastPrice)
+          trade->icon = Trade::Icon::up;
+        else if(trade->price < lastPrice)
+          trade->icon = Trade::Icon::down;
+      }
+      trades.prepend(trade);
+      lastPrice = tradeData.price;
+    }
+    endInsertRows();
+
+    int tradesToRemove = trades.size() - 500;
+    if(tradesToRemove > 0)
+    {
+      beginRemoveRows(QModelIndex(), 500, 500 + tradesToRemove - 1);
+      for(int i = trades.size() - 1;; --i)
+      {
+        delete trades.back();
+        trades.removeLast();
+        if(i == 500)
+          break;
+      }
+      endRemoveRows();
+    }
+
+    return;
+  }
+  Q_ASSERT(false);
+}
+
+void TradeModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+{
+  addedEntity(newEntity);
+}
+
+void TradeModel::removedEntity(Entity& entity)
+{
+}
+
+void TradeModel::removedAll(quint32 type)
+{
+  if((EType)type == EType::dataTradeData)
+  {
+    beginResetModel();
+    qDeleteAll(trades);
+    trades.clear();
+    endResetModel();
+    return;
+  }
+  Q_ASSERT(false);
 }

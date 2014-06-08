@@ -1,9 +1,16 @@
 
 #include "stdafx.h"
 
-GraphModel::GraphModel() : values(0)
+GraphModel::GraphModel(Entity::Manager& channelEntityManager) : channelEntityManager(channelEntityManager), values(0)
 {
+  channelEntityManager.registerListener<EDataTradeData>(*this);
+
   tradeSamples.reserve(7 * 24 * 60 * 60 + 1000);
+}
+
+GraphModel::~GraphModel()
+{
+  channelEntityManager.unregisterListener<EDataTradeData>(*this);
 }
 
 void GraphModel::addTrade(const DataProtocol::Trade& trade, quint64 tradeAge)
@@ -40,16 +47,25 @@ void GraphModel::addTrade(const DataProtocol::Trade& trade, quint64 tradeAge)
   }
 }
 
-//void GraphModel::addMarker(quint64 time, Marker marker)
-//{
-//  markers.insert(time, marker);
-//  emit dataAdded();
-//}
-//
-//void GraphModel::clearMarkers()
-//{
-//  if(markers.isEmpty())
-//    return;
-//  markers.clear();
-//  emit dataAdded();
-//}
+
+void GraphModel::addedEntity(Entity& entity)
+{
+  EDataTradeData* eDataTradeData = dynamic_cast<EDataTradeData*>(&entity);
+  if(eDataTradeData)
+  {
+    const QList<DataProtocol::Trade>& data = eDataTradeData->getData();
+    if(!data.isEmpty())
+    {
+      qint64 now = data.back().time;
+      for(QList<DataProtocol::Trade>::ConstIterator i = data.begin(), end = data.end(); i != end; ++i)
+        addTrade(*i, now - i->time);
+    }
+    return;
+  }
+  Q_ASSERT(false);
+}
+
+void GraphModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+{
+  addedEntity(newEntity);
+}

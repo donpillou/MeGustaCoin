@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataModel& dataModel) :
-  QWidget(parent), entityManager(entityManager), botService(botService), dataModel(dataModel), orderModel(entityManager)
+OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataService& dataService) :
+  QWidget(parent), entityManager(entityManager), botService(botService), dataService(dataService), orderModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
   //connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
@@ -107,11 +107,14 @@ void OrdersWidget::addOrderDraft(EBotMarketOrder::Type type)
   if(!eBotMarketAdapater)
     return;
   const QString& marketName = eBotMarketAdapater->getName();
-  const PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
+  Entity::Manager* channelEntityManager = dataService.getSubscription(marketName);
   double price = 0;
-  double bid, ask;
-  if(publicDataModel.getTicker(bid, ask))
-    price = type == EBotMarketOrder::Type::buy ? (bid + 0.01) : (ask - 0.01);
+  if(channelEntityManager)
+  {
+    EDataTickerData* eDataTickerData = channelEntityManager->getEntity<EDataTickerData>(0);
+    if(eDataTickerData)
+      price = type == EBotMarketOrder::Type::buy ? (eDataTickerData->getBid() + 0.01) : (eDataTickerData->getAsk() - 0.01);
+  }
 
   EBotMarketOrderDraft& eBotMarketOrderDraft = botService.createMarketOrderDraft(type, price);
   QModelIndex amountProxyIndex = orderModel.getDraftAmountIndex(eBotMarketOrderDraft);
