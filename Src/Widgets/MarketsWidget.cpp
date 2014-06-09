@@ -77,6 +77,9 @@ void MarketsWidget::editMarket()
 
 void MarketsWidget::removeMarket()
 {
+  if(QMessageBox::question(this, tr("Delete Market"), tr("Do you really want to delete the selected market?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
+    return;
+
   QModelIndexList selection = marketView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
   {
