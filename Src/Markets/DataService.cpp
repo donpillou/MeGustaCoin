@@ -292,19 +292,6 @@ void DataService::WorkerThread::receivedChannelInfo(const QString& channelName)
       quint32 entityId = globalEntityManager.getNewEntityId<EDataMarket>();
       EDataMarket* eDataMarket = new EDataMarket(entityId, channelName, baseCurrency, commCurrency);
       globalEntityManager.delegateEntity(*eDataMarket);
-
-      //Entity::Manager* channelEntityManager =  dataService.getSubscription(channelName);
-      //if(channelEntityManager)
-      //{
-      //  EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
-      //  if(eDataSubscription)
-      //  {
-      //    if(eDataSubscription->getBaseCurrency() != baseCurrency || eDataSubscription->getCommCurrency() != commCurrency)
-      //    {
-      //      // update
-      //    }
-      //  }
-      //}
     }
   };
 
@@ -410,13 +397,6 @@ void DataService::WorkerThread::receivedTrade(quint64 channelId, const DataProto
             EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
             eDataSubscription->setState(EDataSubscription::State::subscribed);
             channelEntityManager->updatedEntity(*eDataSubscription);
-
-            //const QList<DataProtocol::Trade>& trades = tradeData->getData();
-            //for(QList<DataProtocol::Trade>::ConstIterator i = trades.begin() + (trades.size() > 100 ? (trades.size() - 100) : 0), end = trades.end(); i != end; ++i)
-            //{
-            //  quint32 entityId = channelEntityManager->getNewEntityId<EDataTrade>();
-            //  channelEntityManager->delegateEntity(*new EDataTrade(entityId, *i));
-            //}
           }
           else
             delete tradeData;
@@ -445,8 +425,6 @@ void DataService::WorkerThread::receivedTrade(quint64 channelId, const DataProto
         if(it == dataService.activeSubscriptions.end())
           return;
         Entity::Manager* channelEntityManager = it.value();
-        //quint32 entityId = channelEntityManager->getNewEntityId<EDataTrade>();
-        //channelEntityManager->delegateEntity(*new EDataTrade(entityId, trade));
 
         EDataTradeData* eDataTradeData = channelEntityManager->getEntity<EDataTradeData>(0);
         if(eDataTradeData)
