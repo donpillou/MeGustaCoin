@@ -12,27 +12,6 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
   connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
 
-  /*
-  publicDataModels.insert("MtGox/USD", new PublicDataModel(this, QColor(0x7f, 0x00, 0x7f, 0x70)));
-  publicDataModels.insert("Bitstamp/USD", new PublicDataModel(this, QColor(0x00, 0x00, 0x7f, 0x70)));
-  publicDataModels.insert("BtcChina/CNY", new PublicDataModel(this, QColor(0x00, 0x7f, 0x7f, 0x70)));
-  publicDataModels.insert("Huobi/CNY", new PublicDataModel(this, QColor(0x61, 0x5f, 0x00, 0x70)));
-  for(QMap<QString, PublicDataModel*>::iterator i = publicDataModels.begin(), end = publicDataModels.end(); i != end; ++i)
-  {
-    MarketData marketData;
-    marketData.publicDataModel = i.value();
-    connect(marketData.publicDataModel, SIGNAL(updatedTicker()), this, SLOT(updateWindowTitleTicker()));
-    marketData.streamService = new MarketStreamService(this, dataModel, *marketData.publicDataModel, i.key());
-    marketData.tradesWidget = new TradesWidget(this, settings, *marketData.publicDataModel);
-    if(marketData.publicDataModel->getFeatures() & (int)MarketStream::Features::orderBook)
-      marketData.bookWidget = new BookWidget(this, settings, *marketData.publicDataModel);
-    else
-      marketData.bookWidget = 0;
-    marketData.graphWidget = new GraphWidget(this, settings, marketData.publicDataModel, i.key() + "_0", publicDataModels);
-    marketDataList.append(marketData);
-  }
-  */
-
   marketsWidget = new MarketsWidget(this, settings, globalEntityManager, botService);
   ordersWidget = new OrdersWidget(this, settings, globalEntityManager, botService, dataService);
   transactionsWidget = new TransactionsWidget(this, settings, globalEntityManager, botService);
@@ -70,43 +49,6 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   //addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
   //tabifyDockWidget(transactionsDockWidget, graphDockWidget);
 
-  /*
-  for(QList<MarketData>::iterator i = marketDataList.begin(), end = marketDataList.end(); i != end; ++i)
-  {
-    MarketData& marketData = *i;
-    marketData.graphDockWidget = new QDockWidget(this);
-    connect(marketData.graphDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableGraphUpdates(bool)));
-    marketData.graphDockWidget->setObjectName(marketData.publicDataModel->getMarketName() + "LiveGraph");
-    marketData.graphDockWidget->setWidget(marketData.graphWidget);
-    marketData.graphWidget->updateTitle();
-    addDockWidget(Qt::TopDockWidgetArea, marketData.graphDockWidget);
-    //marketData.graphDockWidget->setFloating(true);
-    marketData.graphDockWidget->hide();
-
-    if(marketData.bookWidget)
-    {
-      marketData.bookDockWidget = new QDockWidget(this);
-      connect(marketData.bookDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableOrderBookUpdates(bool)));
-      marketData.bookDockWidget->setObjectName(marketData.publicDataModel->getMarketName() + "OrderBook");
-      marketData.bookDockWidget->setWidget(marketData.bookWidget);
-      marketData.bookWidget->updateTitle();
-      addDockWidget(Qt::TopDockWidgetArea, marketData.bookDockWidget);
-      //marketData.bookDockWidget->setFloating(true);
-      marketData.bookDockWidget->hide();
-    }
-    else
-      marketData.bookDockWidget = 0;
-
-    marketData.tradesDockWidget = new QDockWidget(this);
-    connect(marketData.tradesDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableLiveTradesUpdates(bool)));
-    marketData.tradesDockWidget->setObjectName(marketData.publicDataModel->getMarketName() + "LiveTrades");
-    marketData.tradesDockWidget->setWidget(marketData.tradesWidget);
-    marketData.tradesWidget->updateTitle();
-    addDockWidget(Qt::TopDockWidgetArea, marketData.tradesDockWidget);
-    //marketData.tradesDockWidget->setFloating(true);
-    marketData.tradesDockWidget->hide();
-  }
-  */
   QDockWidget* botsDockWidget = new QDockWidget(tr("Bots"), this);
   botsDockWidget->setObjectName("Bots");
   botsDockWidget->setWidget(botsWidget);
@@ -121,12 +63,6 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   QMenuBar* menuBar = this->menuBar();
   QMenu* menu = menuBar->addMenu(tr("&Client"));
   connect(menu->addAction(tr("&Options...")), SIGNAL(triggered()), this, SLOT(showOptions()));
-  //QAction* action = menu->addAction(tr("&Login..."));
-  //action->setShortcut(QKeySequence(QKeySequence::Open));
-  //connect(action, SIGNAL(triggered()), this, SLOT(login()));
-  //action = menu->addAction(tr("Log&out"));
-  //action->setShortcut(QKeySequence(QKeySequence::Close));
-  //connect(action, SIGNAL(triggered()), this, SLOT(logout()));
   menu->addSeparator();
   QAction* action = menu->addAction(tr("&Exit"));
   action->setShortcut(QKeySequence::Quit);
@@ -294,33 +230,6 @@ void MainWindow::updateWindowTitle()
     setWindowTitle(title);
   }
 }
-
-//void MainWindow::updateWindowTitleTicker()
-//{
-//  PublicDataModel* sourceModel = qobject_cast<PublicDataModel*>(sender());
-//  if(sourceModel->getMarketName() == dataModel.getMarketName())
-//    updateWindowTitle();
-//}
-
-//void MainWindow::updateFocusPublicDataModel()
-//{
-//  const PublicDataModel* oldFocusPublicDataModel = graphWidget->getFocusPublicDataModel();
-//  if(oldFocusPublicDataModel)
-//    disconnect(oldFocusPublicDataModel, SIGNAL(updatedTicker()), this, SLOT(updateWindowTitle()));
-//  const QString& marketName = dataModel.getMarketName();
-//  if(marketName.isEmpty())
-//  {
-//    graphWidget->setFocusPublicDataModel(0);
-//    updateWindowTitle();
-//  }
-//  else
-//  {
-//    PublicDataModel& publicDataModel = dataModel.getDataChannel(marketName);
-//    graphWidget->setFocusPublicDataModel(&publicDataModel);
-//    connect(&publicDataModel, SIGNAL(updatedTicker()), this, SLOT(updateWindowTitle()));
-//    updateWindowTitle();
-//  }
-//}
 
 void MainWindow::updateViewMenu()
 {

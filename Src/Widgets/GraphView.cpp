@@ -96,13 +96,13 @@ void GraphView::paintEvent(QPaintEvent* event)
 
     if(enabledData & (int)Data::otherMarkets)
     {
-      const Bot::Values* values = graphModel.getValues();
+      const TradeHandler::Values* values = graphModel.getValues();
       if(values)
       {
         static unsigned int colors[] = { 0x0000FF, 0x8A2BE2, 0xA52A2A, 0x5F9EA0, 0x7FFF00, 0xD2691E, 0xFF7F50, 0x6495ED, 0xDC143C, 0x00FFFF, 0x00008B, 0x008B8B, 0xB8860B, 0xA9A9A9, 0x006400, 0xBDB76B, 0x8B008B, 0x556B2F, 0xFF8C00, 0x9932CC, 0x8B0000, 0xE9967A, 0x8FBC8F, 0x483D8B, 0x2F4F4F, 0x00CED1, 0x9400D3, 0xFF1493, 0x00BFFF, 0x696969, 0x1E90FF, 0xB22222, 0x228B22, 0xFF00FF, 0xFFD700, 0xDAA520, 0x808080, 0x008000, 0xADFF2F, 0xFF69B4, 0xCD5C5C, 0x4B0082 };
         int nextColorIndex = 0;
         //double averagePrice = graphModel->values->regressions[(int)Bot::Regressions::regression24h].average;
-        double averagePrice = values->regressions[(int)Bot::Regressions::regression6h].average;
+        double averagePrice = values->regressions[(int)TradeHandler::Regressions::regression6h].average;
         //double averagePrice = graphModel->values->bellRegressions[(int)Bot::BellRegressions::bellRegression15m].average;
         if(averagePrice > 0.)
           for(QMap<QString, GraphModel*>::ConstIterator i = graphModels.begin(), end = graphModels.end(); i != end; ++i)
@@ -110,12 +110,12 @@ void GraphView::paintEvent(QPaintEvent* event)
             const GraphModel* channelGraphModel = i.value();
             if(channelGraphModel != &graphModel || !(enabledData & ((int)Data::trades)))
             {
-              const Bot::Values* values = channelGraphModel->getValues();
+              const TradeHandler::Values* values = channelGraphModel->getValues();
               if(values)
               {
                 int colorIndex = nextColorIndex % (sizeof(colors) / sizeof(*colors));
                 //double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::Regressions::regression24h].average;
-                double otherAveragePrice = values->regressions[(int)Bot::Regressions::regression6h].average;
+                double otherAveragePrice = values->regressions[(int)TradeHandler::Regressions::regression6h].average;
                 //double otherAveragePrice = publicDataModel->graphModel.values->regressions[(int)Bot::BellRegressions::bellRegression15m].average;
                 if(otherAveragePrice > 0.)
                 {
@@ -554,7 +554,7 @@ void GraphView::drawBookPolyline(QPainter& painter, const QRect& rect, double ym
 
 void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax)
 {
-  const Bot::Values* values = graphModel.getValues();
+  const TradeHandler::Values* values = graphModel.getValues();
   if(!values)
     return;
 
@@ -566,9 +566,9 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
   double height = rect.height();
 
   static quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
-  for(int i = 0; i < (int)Bot::Regressions::numOfRegressions; ++i)
+  for(int i = 0; i < (int)TradeHandler::Regressions::numOfRegressions; ++i)
   {
-    const Bot::Values::RegressionLine& rl = values->regressions[i];
+    const TradeHandler::Values::RegressionLine& rl = values->regressions[i];
 
     const quint64& endTime = time;
     quint64 startTime = qMax(time - depths[i], hmin);
@@ -590,7 +590,7 @@ void GraphView::drawRegressionLines(QPainter& painter, const QRect& rect, double
 
 void GraphView::drawExpRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax)
 {
-  const Bot::Values* values = graphModel.getValues();
+  const TradeHandler::Values* values = graphModel.getValues();
   if(!values)
     return;
 
@@ -602,9 +602,9 @@ void GraphView::drawExpRegressionLines(QPainter& painter, const QRect& rect, dou
   double height = rect.height();
 
   static quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
-  for(int i = 0; i < (int)Bot::BellRegressions::numOfBellRegressions; ++i)
+  for(int i = 0; i < (int)TradeHandler::BellRegressions::numOfBellRegressions; ++i)
   {
-    const Bot::Values::RegressionLine& rl = values->bellRegressions[i];
+    const TradeHandler::Values::RegressionLine& rl = values->bellRegressions[i];
 
     const quint64& endTime = time;
     quint64 startTime = qMax(time - depths[i] * 3, hmin);

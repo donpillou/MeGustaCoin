@@ -1,9 +1,10 @@
 
 #pragma once
 
-class Bot
+class TradeHandler
 {
 public:
+
   enum class Regressions
   {
     regression1m,
@@ -48,66 +49,7 @@ public:
     RegressionLine bellRegressions[(int)BellRegressions::numOfBellRegressions];
   };
 
-  class Broker
-  {
-  public:
-    class Transaction
-    {
-    public:
-      enum class Type
-      {
-        buy,
-        sell,
-      };
-
-      quint64 id;
-      quint64 date;
-      double price;
-      double amount;
-      double fee;
-      Type type;
-    };
-
-    virtual ~Broker() {}
-    virtual bool buy(double price, double amount, quint64 timeout) = 0;
-    virtual bool sell(double price, double amount, quint64 timeout) = 0;
-    virtual double getBalanceBase() const = 0;
-    virtual double getBalanceComm() const = 0;
-    virtual double getFee() const = 0;
-    virtual unsigned int getOpenBuyOrderCount() const = 0;
-    virtual unsigned int getOpenSellOrderCount() const = 0;
-    virtual quint64 getTimeSinceLastBuy() const = 0;
-    virtual quint64 getTimeSinceLastSell() const = 0;
-
-    virtual void getTransactions(QList<Transaction>& transactions) const = 0;
-    virtual void getBuyTransactions(QList<Transaction>& transactions) const = 0;
-    virtual void getSellTransactions(QList<Transaction>& transactions) const = 0;
-    virtual void removeTransaction(quint64 id) = 0;
-    virtual void updateTransaction(quint64 id, const Transaction& transaction) = 0;
-
-    virtual void warning(const QString& message) = 0;
-  };
-
-  class Session
-  {
-  public:
-    virtual ~Session() {};
-    virtual void setParameters(double* parameters) = 0;
-    virtual void handle(const DataProtocol::Trade& trade, const Values& values) = 0;
-    virtual void handleBuy(const Broker::Transaction& transaction) = 0;
-    virtual void handleSell(const Broker::Transaction& transaction) = 0;
-  };
-
-  virtual ~Bot() {}
-  virtual Session* createSession(Broker& broker) = 0;
-  virtual unsigned int getParameterCount() const = 0;
-};
-
-class TradeHandler
-{
-public:
-
-  Bot::Values values;
+  Values values;
 
   void add(const DataProtocol::Trade& trade, quint64 tradeAge)
   {
@@ -115,7 +57,7 @@ public:
     bool updateValues = tradeAge == 0;
     quint64 time = trade.time / 1000ULL;
     quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
-    for(int i = 0; i < (int)Bot::Regressions::numOfRegressions; ++i)
+    for(int i = 0; i < (int)Regressions::numOfRegressions; ++i)
     {
       if(tradeAgeSecs <= depths[i])
       {
@@ -123,20 +65,20 @@ public:
         averager[i].limitToAge(depths[i]);
         if(updateValues)
         {
-          Bot::Values::RegressionLine& rl = values.regressions[i];
+          Values::RegressionLine& rl = values.regressions[i];
           averager[i].getLine(rl.price, rl.incline, rl.average);
         }
       }
     }
 
-    for(int i = 0; i < (int)Bot::BellRegressions::numOfBellRegressions; ++i)
+    for(int i = 0; i < (int)BellRegressions::numOfBellRegressions; ++i)
     {
       if(tradeAgeSecs <= depths[i] * 3ULL)
       {
         bellAverager[i].add(time, trade.amount, trade.price, depths[i]);
         if(updateValues)
         {
-          Bot::Values::RegressionLine& rl = values.bellRegressions[i];
+          Values::RegressionLine& rl = values.bellRegressions[i];
           bellAverager[i].getLine(depths[i], rl.price, rl.incline, rl.average);
         }
       }
@@ -384,6 +326,6 @@ private:
     double sumN;
   };
 
-  Averager averager[(int)Bot::Regressions::numOfRegressions];
-  BellAverager bellAverager[(int)Bot::BellRegressions::numOfBellRegressions];
+  Averager averager[(int)Regressions::numOfRegressions];
+  BellAverager bellAverager[(int)BellRegressions::numOfBellRegressions];
 };

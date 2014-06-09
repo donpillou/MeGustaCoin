@@ -24,7 +24,7 @@ public:
   ~GraphModel();
 
   const QList<TradeSample>& getTradeSamples() const {return tradeSamples;}
-  const Bot::Values* getValues() const {return values;}
+  const TradeHandler::Values* getValues() const {return values;}
 
 signals:
   void dataAdded();
@@ -34,7 +34,7 @@ private:
   TradeHandler tradeHander;
 
   QList<TradeSample> tradeSamples;
-  Bot::Values* values;
+  TradeHandler::Values* values;
 
 private:
   void addTrade(const DataProtocol::Trade& trade, quint64 tradeAge);

@@ -31,7 +31,6 @@
 #include "Entities/ELogMessage.h"
 #include "Entities/EDataService.h"
 #include "Entities/EDataMarket.h"
-//#include "Entities/EDataTrade.h"
 #include "Entities/EDataTradeData.h"
 #include "Entities/EDataTickerData.h"
 #include "Entities/EDataSubscription.h"
@@ -39,8 +38,7 @@
 #include "Markets/DataConnection.h"
 
 #include "Bots/BotConnection.h"
-#include "Bots/Bot.h"
-#include "Bots/ParticleSwarm.h"
+#include "Bots/TradeHandler.h"
 #include "Bots/BotDialog.h"
 
 #include "Models/GraphModel.h"
@@ -52,11 +50,7 @@
 #include "Models/BotSessionModel.h"
 #include "Models/BotMarketModel.h"
 #include "Models/TradeModel.h"
-//#include "Models/BookModel.h"
 #include "Models/LogModel.h"
-//#include "Models/PublicDataModel.h"
-//#include "Models/BotsModel.h"
-//#include "Models/DataModel.h"
 
 #include "Bots/BotService.h"
 #include "Markets/DataService.h"
@@ -66,7 +60,6 @@
 #include "Widgets/BotsWidget.h"
 #include "Widgets/TransactionsWidget.h"
 #include "Widgets/TradesWidget.h"
-#include "Widgets/BookWidget.h"
 #include "Widgets/GraphView.h"
 #include "Widgets/GraphWidget.h"
 #include "Widgets/LogWidget.h"
