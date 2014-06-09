@@ -4,7 +4,7 @@
 GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const QString& channelName, const QString& settingsSection, Entity::Manager& globalEntityManager, Entity::Manager& channelEntityManager, const GraphModel& graphModel, const QMap<QString, GraphModel*>& graphModels) :
   QWidget(parent), channelName(channelName), settingsSection(settingsSection), channelEntityManager(channelEntityManager)
 {
-  // todo: update title
+  channelEntityManager.registerListener<EDataSubscription>(*this);
 
   /*
   setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
@@ -119,6 +119,11 @@ GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const QString& ch
   settings.endGroup();
 }
 
+GraphWidget::~GraphWidget()
+{
+  channelEntityManager.unregisterListener<EDataSubscription>(*this);
+}
+
 void GraphWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("LiveGraph");
@@ -165,9 +170,6 @@ void GraphWidget::updateDataMenu()
   foreach(QAction* action, dataMenu->actions())
     dataSignalMapper->removeMappings(action);
   dataMenu->clear();
-
-  //if(!entityManager)
-  //  return;
 
   QAction* action = dataMenu->addAction(tr("Trades"));
   action->setCheckable(true);
@@ -229,4 +231,15 @@ void GraphWidget::updateTitle()
   QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
   dockWidget->setWindowTitle(title);
   dockWidget->toggleViewAction()->setText(tr("Live Graph"));
+}
+
+void GraphWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+{
+  EDataSubscription* eDataSubscription = dynamic_cast<EDataSubscription*>(&newEntity);
+  if(eDataSubscription)
+  {
+    updateTitle();
+    return;
+  }
+  Q_ASSERT(false);
 }

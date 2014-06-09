@@ -7,9 +7,8 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   globalEntityManager.delegateEntity(*new EBotService);
   globalEntityManager.delegateEntity(*new EDataService);
   globalEntityManager.registerListener<EBotMarketBalance>(*this);
+  globalEntityManager.registerListener<EBotService>(*this);
 
-  //connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateFocusPublicDataModel()));
-  //connect(&dataModel, SIGNAL(changedBalance()), this, SLOT(updateWindowTitle()));
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
   connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
 
@@ -172,6 +171,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 MainWindow::~MainWindow()
 {
   globalEntityManager.unregisterListener<EBotMarketBalance>(*this);
+  globalEntityManager.unregisterListener<EBotService>(*this);
 
   dataService.stop();
   botService.stop();
@@ -372,11 +372,12 @@ void MainWindow::createChannelData(const QString& channelName, const QString& cu
   if(it != channelDataMap.end())
     return;
 
-  ChannelData* channelData = &*channelDataMap.insert(channelName, ChannelData());
-  channelData->channelEntityManager.delegateEntity(*new EDataSubscription(currencyBase, currencyComm));
+  ChannelData& channelData = *channelDataMap.insert(channelName, ChannelData());
+  channelData.channelName = channelName;
+  channelData.channelEntityManager.delegateEntity(*new EDataSubscription(currencyBase, currencyComm));
 
   if(!channelGraphModels.contains(channelName))
-    channelGraphModels.insert(channelName, new GraphModel(channelData->channelEntityManager));
+    channelGraphModels.insert(channelName, new GraphModel(channelData.channelEntityManager));
 }
 
 MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
@@ -393,16 +394,28 @@ MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
     if(!eDataMarket)
       return 0;
 
-    ChannelData* channelData = &*channelDataMap.insert(channelName, ChannelData());
-    channelData->channelEntityManager.delegateEntity(*new EDataSubscription(eDataMarket->getBaseCurrency(), eDataMarket->getCommCurrency()));
+    ChannelData& channelData = *channelDataMap.insert(channelName, ChannelData());
+    channelData.channelName = channelName;
+    channelData.channelEntityManager.delegateEntity(*new EDataSubscription(eDataMarket->getBaseCurrency(), eDataMarket->getCommCurrency()));
 
     if(!channelGraphModels.contains(channelName))
-      channelGraphModels.insert(channelName, new GraphModel(channelData->channelEntityManager));
+      channelGraphModels.insert(channelName, new GraphModel(channelData.channelEntityManager));
 
-    return channelData;
+    return &channelData;
   }
   else
     return &*it;
+}
+
+void MainWindow::updateChannelSubscription(ChannelData& channelData)
+{
+  bool active = channelData.channelName == selectedChannelName ||
+    (channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) ||
+    (channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible());
+  if(active)
+    dataService.subscribe(channelData.channelName, channelData.channelEntityManager);
+  else
+    dataService.unsubscribe(channelData.channelName);
 }
 
 void MainWindow::createLiveTradeWidget(const QString& channelName)
@@ -469,22 +482,13 @@ void MainWindow::enableTradesUpdates(bool enable)
   QHash<QString, ChannelData>::Iterator it = channelDataMap.begin();
   for(QHash<QString, ChannelData>::Iterator end = channelDataMap.end(); it != end; ++it)
   {
-    const ChannelData& channelData = it.value();
+    ChannelData& channelData = it.value();
     if(channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent()) == sender)
-      goto found;
+    {
+      updateChannelSubscription(channelData);
+      return;
+    }
   }
-  return;
-found:
-  const QString& channelName = it.key();
-  if(channelName == selectedChannelName)
-    return;
-  ChannelData& channelData = it.value();
-  bool active = (channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) ||
-                (channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible());
-  if(active)
-    dataService.subscribe(channelName, channelData.channelEntityManager);
-  else
-    dataService.unsubscribe(channelName);
 }
 
 void MainWindow::enableGraphUpdates(bool enable)
@@ -493,35 +497,88 @@ void MainWindow::enableGraphUpdates(bool enable)
   QHash<QString, ChannelData>::Iterator it = channelDataMap.begin();
   for(QHash<QString, ChannelData>::Iterator end = channelDataMap.end(); it != end; ++it)
   {
-    const ChannelData& channelData = it.value();
+    ChannelData& channelData = it.value();
     if(channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent()) == sender)
-      goto found;
+    {
+      updateChannelSubscription(channelData);
+      return;
+    }
   }
-  return;
-found:
-  const QString& channelName = it.key();
-  if(channelName == selectedChannelName)
-    return;
-  ChannelData& channelData = it.value();
-  bool active = (channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) ||
-                (channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible());
-  if(active)
-    dataService.subscribe(channelName, channelData.channelEntityManager);
-  else
-    dataService.unsubscribe(channelName);
 }
 
 void MainWindow::addedEntity(Entity& entity)
 {
-  updateWindowTitle();
+  switch((EType)entity.getType())
+  {
+  case EType::botMarketBalance:
+  case EType::dataTickerData:
+    updateWindowTitle();
+    break;
+  default:
+    break;
+  }
 }
 
 void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  updateWindowTitle();
+  switch((EType)newEntity.getType())
+  {
+  case EType::botMarketBalance:
+  case EType::dataTickerData:
+    updateWindowTitle();
+    break;
+  case EType::botService:
+    {
+      QString oldSelectedChannelName = selectedChannelName;
+      selectedChannelName.clear();
+      EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
+      if(eBotService && eBotService->getSelectedMarketId() != 0)
+      {
+        EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
+        if(eBotMarket)
+        {
+          EBotMarketAdapter* eBotMarketAdpater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+          if(eBotMarketAdpater)
+            selectedChannelName = eBotMarketAdpater->getName();
+        }
+      }
+      if(selectedChannelName != oldSelectedChannelName)
+      {
+        if(!oldSelectedChannelName.isEmpty())
+        {
+          ChannelData* channelData = getChannelData(oldSelectedChannelName);
+          if(channelData)
+          {
+            updateChannelSubscription(*channelData);
+            channelData->channelEntityManager.unregisterListener<EDataTickerData>(*this);
+          }
+        }
+        if(!selectedChannelName.isEmpty())
+        {
+            ChannelData* channelData = getChannelData(selectedChannelName);
+            if(channelData)
+            {
+              dataService.subscribe(selectedChannelName, channelData->channelEntityManager);
+              channelData->channelEntityManager.registerListener<EDataTickerData>(*this);
+            }
+        }
+      }
+    }
+    break;
+  default:
+    break;
+  }
 }
 
 void MainWindow::removedAll(quint32 type)
 {
-  updateWindowTitle();
+  switch((EType)type)
+  {
+  case EType::botMarketBalance:
+  case EType::dataTickerData:
+    updateWindowTitle();
+    break;
+  default:
+    break;
+  }
 }

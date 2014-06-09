@@ -9,6 +9,7 @@ GraphView::GraphView(QWidget* parent, Entity::Manager& globalEntityManager, Enti
 {
   globalEntityManager.registerListener<EBotService>(*this);
   EDataSubscription* eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
+  connect(&graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
 }
 
 GraphView::~GraphView()

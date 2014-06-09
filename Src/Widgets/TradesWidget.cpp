@@ -1,20 +1,17 @@
 
 #include "stdafx.h"
 
-TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, const QString& channelName, Entity::Manager& entityManager) :
+TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, const QString& channelName, Entity::Manager& channelEntityManager) :
   QWidget(parent),
-  channelName(channelName), entityManager(entityManager), tradeModel(entityManager)//, autoScrollEnabled(false)
+  channelName(channelName), channelEntityManager(channelEntityManager), tradeModel(channelEntityManager)
 {
-  // todo: update title
+  channelEntityManager.registerListener<EDataSubscription>(*this);
 
   tradeView = new QTreeView(this);
-  //connect(tradeView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
   tradeView->setUniformRowHeights(true);
   tradeView->setModel(&tradeModel);
-  //tradeView->setSortingEnabled(true);
   tradeView->setRootIsDecorated(false);
   tradeView->setAlternatingRowColors(true);
-  //tradeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);
@@ -35,6 +32,11 @@ TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, const QString& 
   settings.endGroup();
 }
 
+TradesWidget::~TradesWidget()
+{
+  channelEntityManager.unregisterListener<EDataSubscription>(*this);
+}
+
 void TradesWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("LiveTrades");
@@ -46,7 +48,7 @@ void TradesWidget::saveState(QSettings& settings)
 
 void TradesWidget::updateTitle()
 {
-  EDataSubscription* eDataSubscription = entityManager.getEntity<EDataSubscription>(0);
+  EDataSubscription* eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
   QString stateStr = eDataSubscription->getStateName();
 
   QString title;
@@ -58,4 +60,15 @@ void TradesWidget::updateTitle()
   QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
   dockWidget->setWindowTitle(title);
   dockWidget->toggleViewAction()->setText(tr("Live Trades"));
+}
+
+void TradesWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+{
+  EDataSubscription* eDataSubscription = dynamic_cast<EDataSubscription*>(&newEntity);
+  if(eDataSubscription)
+  {
+    updateTitle();
+    return;
+  }
+  Q_ASSERT(false);
 }

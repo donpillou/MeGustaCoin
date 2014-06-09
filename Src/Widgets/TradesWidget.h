@@ -1,21 +1,22 @@
 
 #pragma once
 
-class TradesWidget : public QWidget
+class TradesWidget : public QWidget, public Entity::Listener
 {
-  Q_OBJECT
-
 public:
-  TradesWidget(QWidget* parent, QSettings& settings, const QString& channelName, Entity::Manager& entityManager);
+  TradesWidget(QWidget* parent, QSettings& settings, const QString& channelName, Entity::Manager& channelEntityManager);
+  ~TradesWidget();
 
   void saveState(QSettings& settings);
 
-public slots:
-  void updateTitle(); // todo ???
+  void updateTitle();
 
 private:
   QString channelName;
-  Entity::Manager& entityManager;
+  Entity::Manager& channelEntityManager;
   TradeModel tradeModel;
   QTreeView* tradeView;
+
+private: // Entity::Listener
+  virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
 };

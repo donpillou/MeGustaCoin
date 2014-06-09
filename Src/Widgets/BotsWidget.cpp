@@ -236,13 +236,12 @@ void BotsWidget::autoScroll(int, int)
 
 void BotsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  switch ((EType)newEntity.getType())
+  EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
+  if(eBotService)
   {
-  case EType::botService:
-    updateTitle(*dynamic_cast<EBotService*>(&newEntity));
+    updateTitle(*eBotService);
     updateToolBarButtons();
-    break;
-  default:
-    break;
+    return;
   }
+  Q_ASSERT(false);
 }

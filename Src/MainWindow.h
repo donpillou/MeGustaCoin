@@ -28,6 +28,7 @@ private:
 
   struct ChannelData
   {
+    QString channelName;
     TradesWidget* tradesWidget;
     GraphWidget* graphWidget;
     Entity::Manager channelEntityManager;
@@ -45,6 +46,7 @@ private:
   void startBotService();
   void createChannelData(const QString& channelName, const QString& currencyBase, const QString currencyComm);
   ChannelData* getChannelData(const QString& channelName);
+  void updateChannelSubscription(ChannelData& channelData);
 
 private: // QMainWindow
   virtual void closeEvent(QCloseEvent* event);
