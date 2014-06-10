@@ -305,6 +305,7 @@ void OrdersWidget::updateToolBarButtons()
 void OrdersWidget::refresh()
 {
   botService.refreshMarketOrders();
+  botService.refreshMarketBalance();
   //marketService.loadOrders();
   //marketService.loadBalance();
 }

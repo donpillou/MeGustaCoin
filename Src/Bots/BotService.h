@@ -17,6 +17,7 @@ public:
   void selectMarket(quint32 id);
   void refreshMarketOrders();
   void refreshMarketTransactions();
+  void refreshMarketBalance();
 
   EBotMarketOrderDraft& createMarketOrderDraft(EBotMarketOrder::Type type, double price);
   void submitMarketOrderDraft(EBotMarketOrderDraft& draft);

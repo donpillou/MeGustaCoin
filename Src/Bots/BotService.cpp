@@ -169,6 +169,16 @@ void BotService::refreshMarketTransactions()
   controlEntity(0, &controlMarket, sizeof(controlMarket));
 }
 
+void BotService::refreshMarketBalance()
+{
+  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+  BotProtocol::ControlMarket controlMarket;
+  controlMarket.entityType = BotProtocol::market;
+  controlMarket.entityId = eBotService->getSelectedMarketId();
+  controlMarket.cmd = BotProtocol::ControlMarket::refreshBalance;
+  controlEntity(0, &controlMarket, sizeof(controlMarket));
+}
+
 EBotMarketOrderDraft& BotService::createMarketOrderDraft(EBotMarketOrder::Type type, double price)
 {
   quint32 id = entityManager.getNewEntityId<EBotMarketOrderDraft>();
