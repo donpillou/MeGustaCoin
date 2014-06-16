@@ -11,7 +11,9 @@ public:
       engine,
       market,
       state,
-      last = state,
+      balanceBase,
+      balanceComm,
+      last = balanceComm,
   };
 
 public:
