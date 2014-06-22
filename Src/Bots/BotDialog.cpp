@@ -3,7 +3,7 @@
 
 BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(parent), entityManager(entityManager)
 {
-  setWindowTitle(tr("Add Bot"));
+  setWindowTitle(tr("Add Bot Session"));
 
   nameEdit = new QLineEdit(this);
   connect(nameEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged()));

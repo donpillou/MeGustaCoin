@@ -6,7 +6,7 @@ BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity:
 {
   entityManager.registerListener<EBotService>(*this);
 
-  setWindowTitle(tr("Bots "));
+  setWindowTitle(tr("Bot Sessions"));
 
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -51,8 +51,6 @@ BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity:
   layout->addWidget(toolBar);
   layout->addWidget(sessionView);
   setLayout(layout);
-
-  //connect(botsView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
 
   //QHeaderView* headerView = botsView->header();
   //headerView->resizeSection(0, 300);
@@ -141,12 +139,12 @@ void BotsWidget::updateTitle(EBotService& eBotService)
   
   QString title;
   if(stateStr.isEmpty())
-    title = tr("Bots ");
+    title = tr("Bot Sessions");
   else
-    title = tr("Bots (%1)").arg(stateStr);
+    title = tr("Bot Sessions (%1)").arg(stateStr);
   
   setWindowTitle(title);
-  tabFramework.toggleViewAction(this)->setText(tr("Bots"));
+  tabFramework.toggleViewAction(this)->setText(tr("Bot Sessions"));
 }
 
 void BotsWidget::updateToolBarButtons()
