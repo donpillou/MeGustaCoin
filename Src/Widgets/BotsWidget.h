@@ -31,7 +31,6 @@ private:
 
   QSplitter* splitter;
   QTreeView* sessionView;
-  QTreeView* orderView;
   QTreeView* transactionView;
   QSortFilterProxyModel* sessionProxyModel;
 

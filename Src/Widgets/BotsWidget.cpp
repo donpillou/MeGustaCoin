@@ -45,18 +45,6 @@ BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity:
   connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(updateToolBarButtons()));
   connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(sessionSelectionChanged()));
 
-  orderView = new QTreeView(this);
-  orderView->setUniformRowHeights(true);
-  SessionOrderSortProxyModel* orderProxyModel = new SessionOrderSortProxyModel(this);
-  orderProxyModel->setDynamicSortFilter(true);
-  orderProxyModel->setSourceModel(&orderModel);
-  orderView->setModel(orderProxyModel);
-  orderView->setSortingEnabled(true);
-  orderView->setRootIsDecorated(false);
-  orderView->setAlternatingRowColors(true);
-  orderView->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::DoubleClicked);
-  orderView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
   transactionView = new QTreeView(this);
   transactionView->setUniformRowHeights(true);
   SessionTransactionSortProxyModel* transactionProxyModel = new SessionTransactionSortProxyModel(this);
@@ -70,7 +58,6 @@ BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity:
   splitter = new QSplitter(Qt::Vertical, this);
   splitter->setHandleWidth(1);
   splitter->addWidget(sessionView);
-  splitter->addWidget(orderView);
   splitter->addWidget(transactionView);
 
   QVBoxLayout* layout = new QVBoxLayout;

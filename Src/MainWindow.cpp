@@ -17,6 +17,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, botService);
   //graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
   botsWidget = new BotsWidget(*this, settings, globalEntityManager, botService);
+  botOrderWidget = new BotOrderWidget(*this, settings, globalEntityManager);
   botLogWidget = new BotLogWidget(*this, settings, globalEntityManager);
   logWidget = new LogWidget(this, settings, globalEntityManager);
 
@@ -30,6 +31,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addTab(ordersWidget, QTabFramework::InsertOnTop, transactionsWidget);
   //addTab(graphWidget);
   addTab(botsWidget, QTabFramework::InsertOnTop, transactionsWidget);
+  addTab(botOrderWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botLogWidget, QTabFramework::InsertOnTop, transactionsWidget);
 
   QMenuBar* menuBar = this->menuBar();
@@ -219,6 +221,7 @@ void MainWindow::updateViewMenu()
   //viewMenu->addAction(toggleViewAction(graphWidget));
   viewMenu->addAction(toggleViewAction(logWidget));
   viewMenu->addAction(toggleViewAction(botsWidget));
+  viewMenu->addAction(toggleViewAction(botOrderWidget));
   viewMenu->addAction(toggleViewAction(botLogWidget));
   viewMenu->addSeparator();
   QList<EDataMarket*> channels;
