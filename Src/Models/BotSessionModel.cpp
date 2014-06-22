@@ -46,6 +46,16 @@ QVariant BotSessionModel::data(const QModelIndex& index, int role) const
 
   switch(role)
   {
+  case Qt::TextAlignmentRole:
+    switch((Column)index.column())
+    {
+    case Column::balanceBase:
+    case Column::balanceComm:
+      return (int)Qt::AlignRight | (int)Qt::AlignVCenter;
+    default:
+      return (int)Qt::AlignLeft | (int)Qt::AlignVCenter;
+    }
+    break;
   case Qt::DisplayRole:
     switch((Column)index.column())
     {

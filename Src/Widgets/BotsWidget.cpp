@@ -52,14 +52,15 @@ BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity:
   layout->addWidget(sessionView);
   setLayout(layout);
 
-  //QHeaderView* headerView = botsView->header();
+  QHeaderView* headerView = sessionView->header();
   //headerView->resizeSection(0, 300);
-  //headerView->resizeSection(1, 110);
-  //headerView->setStretchLastSection(false);
-  //headerView->setResizeMode(0, QHeaderView::Stretch);
-  //settings.beginGroup("Bots");
-  //headerView->restoreState(settings.value("HeaderState").toByteArray());
-  //settings.endGroup();
+  headerView->resizeSection((int)BotSessionModel::Column::balanceBase, 85);
+  headerView->resizeSection((int)BotSessionModel::Column::balanceComm, 85);
+  headerView->setStretchLastSection(false);
+  headerView->setResizeMode(0, QHeaderView::Stretch);
+  settings.beginGroup("BotSessions");
+  headerView->restoreState(settings.value("HeaderState").toByteArray());
+  settings.endGroup();
 }
 
 BotsWidget::~BotsWidget()
@@ -69,8 +70,8 @@ BotsWidget::~BotsWidget()
 
 void BotsWidget::saveState(QSettings& settings)
 {
-  settings.beginGroup("Bots");
-  //settings.setValue("HeaderState", botsView->header()->saveState());
+  settings.beginGroup("BotSessions");
+  settings.setValue("HeaderState", sessionView->header()->saveState());
   settings.endGroup();
 }
 
