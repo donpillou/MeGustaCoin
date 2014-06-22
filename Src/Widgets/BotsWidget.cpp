@@ -6,7 +6,7 @@ BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity:
 {
   entityManager.registerListener<EBotService>(*this);
 
-  setWindowTitle(tr("Bots"));
+  setWindowTitle(tr("Bots "));
 
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -166,13 +166,13 @@ void BotsWidget::optimize()
 void BotsWidget::updateTitle(EBotService& eBotService)
 {
   QString stateStr = eBotService.getStateName();
-
+  
   QString title;
   if(stateStr.isEmpty())
-    title = tr("Bots");
+    title = tr("Bots ");
   else
     title = tr("Bots (%1)").arg(stateStr);
-
+  
   setWindowTitle(title);
   tabFramework.toggleViewAction(this)->setText(tr("Bots"));
 }
