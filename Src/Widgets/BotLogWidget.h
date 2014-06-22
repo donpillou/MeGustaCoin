@@ -1,13 +1,12 @@
 
 #pragma once
 
-class BotLogWidget : public QWidget, public Entity::Listener
+class BotLogWidget : public QWidget
 {
   Q_OBJECT
 
 public:
   BotLogWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager);
-  ~BotLogWidget();
 
   void saveState(QSettings& settings);
 
@@ -21,10 +20,4 @@ private:
   SessionLogModel logModel;
   QTreeView* logView;
   bool autoScrollEnabled;
-
-private:
-  void updateTitle(EBotService& eBotService);
-
-private: // Entity::Listener
-  virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
 };
