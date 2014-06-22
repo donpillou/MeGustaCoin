@@ -17,6 +17,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, botService);
   //graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
   botsWidget = new BotsWidget(*this, settings, globalEntityManager, botService);
+  botLogWidget = new BotLogWidget(*this, settings, globalEntityManager);
   logWidget = new LogWidget(this, settings, globalEntityManager);
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
@@ -40,6 +41,9 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 
   botsWidget->setWindowTitle(tr("Bots"));
   addTab(botsWidget, QTabFramework::InsertOnTop, transactionsWidget);
+
+  botLogWidget->setWindowTitle(tr("Bot Log"));
+  addTab(botLogWidget, QTabFramework::InsertOnTop, transactionsWidget);
 
   QMenuBar* menuBar = this->menuBar();
   QMenu* menu = menuBar->addMenu(tr("&Client"));
@@ -228,6 +232,7 @@ void MainWindow::updateViewMenu()
   //viewMenu->addAction(toggleViewAction(graphWidget));
   viewMenu->addAction(toggleViewAction(logWidget));
   viewMenu->addAction(toggleViewAction(botsWidget));
+  viewMenu->addAction(toggleViewAction(botLogWidget));
   viewMenu->addSeparator();
   QList<EDataMarket*> channels;
   globalEntityManager.getAllEntities<EDataMarket>(channels);

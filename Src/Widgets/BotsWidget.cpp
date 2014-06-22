@@ -2,11 +2,9 @@
 #include "stdafx.h"
 
 BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  botService(botService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager), logModel(entityManager), autoScrollEnabled(false)
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  botService(botService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
-
-  connect(&logModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
 
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -67,19 +65,11 @@ BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity:
   transactionView->setRootIsDecorated(false);
   transactionView->setAlternatingRowColors(true);
 
-  logView = new QTreeView(this);
-  connect(logView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
-  logView->setUniformRowHeights(true);
-  logView->setModel(&logModel);
-  logView->setRootIsDecorated(false);
-  logView->setAlternatingRowColors(true);
-
   splitter = new QSplitter(Qt::Vertical, this);
   splitter->setHandleWidth(1);
   splitter->addWidget(sessionView);
   splitter->addWidget(orderView);
   splitter->addWidget(transactionView);
-  splitter->addWidget(logView);
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);
@@ -215,22 +205,6 @@ void BotsWidget::sessionSelectionChanged()
     EBotSession* eSession = (EBotSession*)modelIndex.internalPointer();
     botService.selectSession(eSession->getId());
   }
-}
-
-void BotsWidget::checkAutoScroll(const QModelIndex& index, int, int)
-{
-  QScrollBar* scrollBar = logView->verticalScrollBar();
-  if(scrollBar->value() == scrollBar->maximum())
-    autoScrollEnabled = true;
-}
-
-void BotsWidget::autoScroll(int, int)
-{
-  if(!autoScrollEnabled)
-    return;
-  QScrollBar* scrollBar = logView->verticalScrollBar();
-  scrollBar->setValue(scrollBar->maximum());
-  autoScrollEnabled = false;
 }
 
 void BotsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
