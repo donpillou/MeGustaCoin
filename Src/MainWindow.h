@@ -16,7 +16,7 @@ private:
   OrdersWidget* ordersWidget;
   BotsWidget* botsWidget;
   BotTransactionsWidget* botTransactionsWidget;
-  BotOrderWidget* botOrderWidget;
+  BotOrdersWidget* botOrdersWidget;
   BotLogWidget* botLogWidget;
   TransactionsWidget* transactionsWidget;
   //GraphWidget* graphWidget;

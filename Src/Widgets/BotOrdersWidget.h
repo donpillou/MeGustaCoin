@@ -1,10 +1,10 @@
 
 #pragma once
 
-class BotOrderWidget : public QWidget
+class BotOrdersWidget : public QWidget
 {
 public:
-  BotOrderWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager);
+  BotOrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager);
 
   void saveState(QSettings& settings);
 

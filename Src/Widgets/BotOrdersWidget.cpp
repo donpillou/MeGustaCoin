@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BotOrderWidget::BotOrderWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
+BotOrdersWidget::BotOrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  orderModel(entityManager)
 {
   setWindowTitle(tr("Bot Orders"));
@@ -40,7 +40,7 @@ BotOrderWidget::BotOrderWidget(QTabFramework& tabFramework, QSettings& settings,
 }
 
 
-void BotOrderWidget::saveState(QSettings& settings)
+void BotOrdersWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("BotOrders");
   settings.setValue("HeaderState", orderView->header()->saveState());
