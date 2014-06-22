@@ -8,7 +8,7 @@ GraphView::GraphView(QWidget* parent, Entity::Manager& globalEntityManager, Enti
   totalMin(DBL_MAX), totalMax(0.), volumeMax(0.)
 {
   globalEntityManager.registerListener<EBotService>(*this);
-  EDataSubscription* eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
+  eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
   connect(&graphModel, SIGNAL(dataAdded()), this, SLOT(update()));
 
   // setWindowTitle(tr("Live Graph"));

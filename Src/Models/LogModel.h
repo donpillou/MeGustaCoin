@@ -28,10 +28,10 @@ private:
 private:
   Entity::Manager& entityManager;
   QList<Item*> messages;
-  QString dateFormat;
   QVariant errorIcon;
   QVariant warningIcon;
   QVariant informationIcon;
+  QString dateFormat;
 
 private: // QAbstractItemModel
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
