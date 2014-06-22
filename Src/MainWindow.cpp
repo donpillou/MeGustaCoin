@@ -221,11 +221,13 @@ void MainWindow::updateViewMenu()
   viewMenu->addAction(toggleViewAction(ordersWidget));
   viewMenu->addAction(toggleViewAction(transactionsWidget));
   //viewMenu->addAction(toggleViewAction(graphWidget));
-  viewMenu->addAction(toggleViewAction(logWidget));
+  viewMenu->addSeparator();
   viewMenu->addAction(toggleViewAction(botsWidget));
   viewMenu->addAction(toggleViewAction(botTransactionsWidget));
   viewMenu->addAction(toggleViewAction(botOrdersWidget));
   viewMenu->addAction(toggleViewAction(botLogWidget));
+  viewMenu->addSeparator();
+  viewMenu->addAction(toggleViewAction(logWidget));
   viewMenu->addSeparator();
   QList<EDataMarket*> channels;
   globalEntityManager.getAllEntities<EDataMarket>(channels);
