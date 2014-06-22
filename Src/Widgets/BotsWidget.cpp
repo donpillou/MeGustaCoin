@@ -45,26 +45,11 @@ BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity:
   connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(updateToolBarButtons()));
   connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(sessionSelectionChanged()));
 
-  transactionView = new QTreeView(this);
-  transactionView->setUniformRowHeights(true);
-  SessionTransactionSortProxyModel* transactionProxyModel = new SessionTransactionSortProxyModel(this);
-  transactionProxyModel->setDynamicSortFilter(true);
-  transactionProxyModel->setSourceModel(&transactionModel);
-  transactionView->setModel(transactionProxyModel);
-  transactionView->setSortingEnabled(true);
-  transactionView->setRootIsDecorated(false);
-  transactionView->setAlternatingRowColors(true);
-
-  splitter = new QSplitter(Qt::Vertical, this);
-  splitter->setHandleWidth(1);
-  splitter->addWidget(sessionView);
-  splitter->addWidget(transactionView);
-
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);
   layout->setSpacing(0);
   layout->addWidget(toolBar);
-  layout->addWidget(splitter);
+  layout->addWidget(sessionView);
   setLayout(layout);
 
   //connect(botsView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));

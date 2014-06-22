@@ -59,6 +59,7 @@
 #include "Widgets/BotsWidget.h"
 #include "Widgets/BotLogWidget.h"
 #include "Widgets/BotOrderWidget.h"
+#include "Widgets/BotTransactionsWidget.h"
 #include "Widgets/TransactionsWidget.h"
 #include "Widgets/TradesWidget.h"
 #include "Widgets/GraphView.h"

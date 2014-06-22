@@ -29,9 +29,7 @@ private:
   SessionOrderModel orderModel;
   SessionTransactionModel transactionModel;
 
-  QSplitter* splitter;
   QTreeView* sessionView;
-  QTreeView* transactionView;
   QSortFilterProxyModel* sessionProxyModel;
 
   QAction* addAction;
