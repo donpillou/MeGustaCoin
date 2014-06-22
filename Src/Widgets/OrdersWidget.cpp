@@ -8,6 +8,8 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
   //connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
   //connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
 
+  setWindowTitle(tr("Orders"));
+
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
   toolBar->setIconSize(QSize(16, 16));

@@ -8,6 +8,8 @@ BotLogWidget::BotLogWidget(QTabFramework& tabFramework, QSettings& settings, Ent
 
   connect(&logModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
 
+  setWindowTitle(tr("Bot Log"));
+
   logView = new QTreeView(this);
   connect(logView->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), this, SLOT(autoScroll(int, int)));
   logView->setUniformRowHeights(true);

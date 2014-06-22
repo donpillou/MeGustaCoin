@@ -6,6 +6,8 @@ MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, E
 {
   entityManager.registerListener<EBotService>(*this);
 
+  setWindowTitle(tr("Markets"));
+
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
   toolBar->setIconSize(QSize(16, 16));

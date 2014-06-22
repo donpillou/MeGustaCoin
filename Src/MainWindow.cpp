@@ -24,25 +24,12 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   updateWindowTitle();
   resize(625, 400);
 
-  marketsWidget->setWindowTitle(tr("Markets"));
   addTab(marketsWidget);
-
-  logWidget->setWindowTitle(tr("Log"));
   addTab(logWidget, QTabFramework::InsertBottom, marketsWidget);
-
-  transactionsWidget->setWindowTitle(tr("Transactions"));
   addTab(transactionsWidget, QTabFramework::InsertRight, marketsWidget);
-
-  ordersWidget->setWindowTitle(tr("Orders"));
   addTab(ordersWidget, QTabFramework::InsertOnTop, transactionsWidget);
-
-  //graphWidget->setWindowTitle(tr("Live Graph"));
   //addTab(graphWidget);
-
-  botsWidget->setWindowTitle(tr("Bots"));
   addTab(botsWidget, QTabFramework::InsertOnTop, transactionsWidget);
-
-  botLogWidget->setWindowTitle(tr("Bot Log"));
   addTab(botLogWidget, QTabFramework::InsertOnTop, transactionsWidget);
 
   QMenuBar* menuBar = this->menuBar();

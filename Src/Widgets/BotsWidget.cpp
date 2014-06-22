@@ -6,6 +6,8 @@ BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity:
 {
   entityManager.registerListener<EBotService>(*this);
 
+  setWindowTitle(tr("Bots"));
+
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
   toolBar->setIconSize(QSize(16, 16));

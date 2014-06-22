@@ -8,6 +8,8 @@ TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& s
   //connect(&dataModel.transactionModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
   //connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
 
+  setWindowTitle(tr("Transactions"));
+
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
   toolBar->setIconSize(QSize(16, 16));
