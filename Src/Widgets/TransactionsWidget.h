@@ -6,7 +6,7 @@ class TransactionsWidget : public QWidget, public Entity::Listener
   Q_OBJECT
 
 public:
-  TransactionsWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
+  TransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
   ~TransactionsWidget();
 
   void saveState(QSettings& settings);
@@ -18,6 +18,7 @@ private slots:
   void updateToolBarButtons();
 
 private:
+  QTabFramework& tabFramework;
   Entity::Manager& entityManager;
   BotService& botService;
 

@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-GraphWidget::GraphWidget(QWidget* parent, QSettings& settings, const QString& channelName, const QString& settingsSection, Entity::Manager& globalEntityManager, Entity::Manager& channelEntityManager, const GraphModel& graphModel, const QMap<QString, GraphModel*>& graphModels) :
-  QWidget(parent), channelName(channelName), settingsSection(settingsSection), channelEntityManager(channelEntityManager)
+GraphWidget::GraphWidget(QTabFramework& tabFramework, QSettings& settings, const QString& channelName, const QString& settingsSection, Entity::Manager& globalEntityManager, Entity::Manager& channelEntityManager, const GraphModel& graphModel, const QMap<QString, GraphModel*>& graphModels) :
+  QWidget(&tabFramework), tabFramework(tabFramework), channelName(channelName), settingsSection(settingsSection), channelEntityManager(channelEntityManager)
 {
   channelEntityManager.registerListener<EDataSubscription>(*this);
 
@@ -228,9 +228,8 @@ void GraphWidget::updateTitle()
   //else
   //  title = tr("Live Graph (%1)").arg(tr("offline"));
 
-  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
-  dockWidget->setWindowTitle(title);
-  dockWidget->toggleViewAction()->setText(tr("Live Graph"));
+  setWindowTitle(title);
+  tabFramework.toggleViewAction(this)->setText(tr("Live Graph"));
 }
 
 void GraphWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)

@@ -7,3 +7,6 @@
 [submodule "Ext/mare"]
 	path = Ext/mare
 	url = https://github.com/craflin/mare
+[submodule "Ext/QTabFramework"]
+	path = Ext/QTabFramework
+	url = https://github.com/craflin/QTabFramework.git

@@ -1,7 +1,7 @@
 
 #pragma once
 
-class MainWindow : public QMainWindow, public Entity::Listener
+class MainWindow : public QTabFramework, public Entity::Listener
 {
   Q_OBJECT
 

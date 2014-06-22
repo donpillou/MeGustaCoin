@@ -12,53 +12,34 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
   connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
 
-  marketsWidget = new MarketsWidget(this, settings, globalEntityManager, botService);
-  ordersWidget = new OrdersWidget(this, settings, globalEntityManager, botService, dataService);
-  transactionsWidget = new TransactionsWidget(this, settings, globalEntityManager, botService);
+  marketsWidget = new MarketsWidget(*this, settings, globalEntityManager, botService);
+  ordersWidget = new OrdersWidget(*this, settings, globalEntityManager, botService, dataService);
+  transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, botService);
   //graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
-  botsWidget = new BotsWidget(this, settings, globalEntityManager, botService);
+  botsWidget = new BotsWidget(*this, settings, globalEntityManager, botService);
   logWidget = new LogWidget(this, settings, globalEntityManager);
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
   updateWindowTitle();
-  setDockNestingEnabled(true);
-  setCorner(Qt::TopLeftCorner, Qt::LeftDockWidgetArea);
-  //setTabPosition(Qt::AllDockWidgetAreas, QTabWidget::East);
   resize(625, 400);
 
-  QDockWidget* marketsDockWidget = new QDockWidget(tr("Markets"), this);
-  marketsDockWidget->setObjectName("Markets");
-  marketsDockWidget->setWidget(marketsWidget);
-  addDockWidget(Qt::TopDockWidgetArea, marketsDockWidget);
+  marketsWidget->setWindowTitle(tr("Markets"));
+  addTab(marketsWidget);
 
-  QDockWidget* transactionsDockWidget = new QDockWidget(tr("Transactions"), this);
-  transactionsDockWidget->setObjectName("Transactions");
-  transactionsDockWidget->setWidget(transactionsWidget);
-  addDockWidget(Qt::TopDockWidgetArea, transactionsDockWidget);
+  logWidget->setWindowTitle(tr("Log"));
+  addTab(logWidget, QTabFramework::InsertBottom, marketsWidget);
 
-  QDockWidget* ordersDockWidget = new QDockWidget(tr("Orders"), this);
-  ordersDockWidget->setObjectName("Orders");
-  ordersDockWidget->setWidget(ordersWidget);
-  addDockWidget(Qt::TopDockWidgetArea, ordersDockWidget);
-  tabifyDockWidget(transactionsDockWidget, ordersDockWidget);
+  transactionsWidget->setWindowTitle(tr("Transactions"));
+  addTab(transactionsWidget, QTabFramework::InsertRight, marketsWidget);
 
-  //QDockWidget* graphDockWidget = new QDockWidget(this);
-  //graphDockWidget->setObjectName("LiveGraph");
-  //graphDockWidget->setWidget(graphWidget);
-  //graphWidget->updateTitle();
-  //addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
-  //tabifyDockWidget(transactionsDockWidget, graphDockWidget);
+  ordersWidget->setWindowTitle(tr("Orders"));
+  addTab(ordersWidget, QTabFramework::InsertOnTop, transactionsWidget);
 
-  QDockWidget* botsDockWidget = new QDockWidget(tr("Bots"), this);
-  botsDockWidget->setObjectName("Bots");
-  botsDockWidget->setWidget(botsWidget);
-  addDockWidget(Qt::TopDockWidgetArea, botsDockWidget);
-  tabifyDockWidget(transactionsDockWidget, botsDockWidget);
+  //graphWidget->setWindowTitle(tr("Live Graph"));
+  //addTab(graphWidget);
 
-  QDockWidget* logDockWidget = new QDockWidget(tr("Log"), this);
-  logDockWidget->setObjectName("Log");
-  logDockWidget->setWidget(logWidget);
-  addDockWidget(Qt::TopDockWidgetArea, logDockWidget, Qt::Vertical);
+  botsWidget->setWindowTitle(tr("Bots"));
+  addTab(botsWidget, QTabFramework::InsertOnTop, transactionsWidget);
 
   QMenuBar* menuBar = this->menuBar();
   QMenu* menu = menuBar->addMenu(tr("&Client"));
@@ -97,8 +78,9 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
     createLiveGraphWidget(channelData[0]);
   }
 
-  restoreGeometry(settings.value("Geometry").toByteArray());
-  restoreState(settings.value("WindowState").toByteArray());
+  restoreLayout(settings.value("Layout").toByteArray());
+  //restoreGeometry(settings.value("Geometry").toByteArray());
+  //restoreState(settings.value("WindowState").toByteArray());
 
   startDataService();
   startBotService();
@@ -112,19 +94,19 @@ MainWindow::~MainWindow()
   dataService.stop();
   botService.stop();
 
-  // manually delete widgets since they hold a reference to the data model
-  for(QHash<QString, ChannelData>::Iterator i = channelDataMap.begin(), end = channelDataMap.end(); i != end; ++i)
-  {
-    ChannelData& channelData = i.value();
-    delete channelData.tradesWidget;
-    delete channelData.graphWidget;
-  }
-  delete marketsWidget;
-  delete ordersWidget;
-  delete transactionsWidget;
-  //delete graphWidget;
-  delete botsWidget;
-  delete logWidget;
+  //// manually delete widgets since they hold a reference to the data model
+  //for(QHash<QString, ChannelData>::Iterator i = channelDataMap.begin(), end = channelDataMap.end(); i != end; ++i)
+  //{
+  //  ChannelData& channelData = i.value();
+  //  delete channelData.tradesWidget;
+  //  delete channelData.graphWidget;
+  //}
+  //delete marketsWidget;
+  //delete ordersWidget;
+  //delete transactionsWidget;
+  ////delete graphWidget;
+  //delete botsWidget;
+  //delete logWidget;
 
   qDeleteAll(channelGraphModels);
 }
@@ -149,8 +131,7 @@ void MainWindow::startBotService()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-  settings.setValue("Geometry", saveGeometry());
-  settings.setValue("WindowState", saveState());
+  settings.setValue("Layout", saveLayout());
   ordersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
   //graphWidget->saveState(settings);
@@ -165,15 +146,17 @@ void MainWindow::closeEvent(QCloseEvent* event)
     EDataSubscription* eDataSubscription = channelData.channelEntityManager.getEntity<EDataSubscription>(0);
     if(!eDataSubscription)
       continue;
-    if(channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible())
+    if(channelData.tradesWidget)
     {
       channelData.tradesWidget->saveState(settings);
-      openedLiveTradesWidgets.append(channelName + "\n" + eDataSubscription->getBaseCurrency() + "\n" + eDataSubscription->getCommCurrency());
+      if(isVisible(channelData.tradesWidget))
+        openedLiveTradesWidgets.append(channelName + "\n" + eDataSubscription->getBaseCurrency() + "\n" + eDataSubscription->getCommCurrency());
     }
-    if(channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible())
+    if(channelData.graphWidget)
     {
       channelData.graphWidget->saveState(settings);
-      openedLiveGraphWidgets.append(channelName + "\n" + eDataSubscription->getBaseCurrency() + "\n" + eDataSubscription->getCommCurrency());
+      if(isVisible(channelData.graphWidget))
+        openedLiveGraphWidgets.append(channelName + "\n" + eDataSubscription->getBaseCurrency() + "\n" + eDataSubscription->getCommCurrency());
     }
   }
 
@@ -181,7 +164,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   settings.setValue("LiveTradesWidgets", openedLiveTradesWidgets);
   settings.setValue("LiveGraphWidgets", openedLiveGraphWidgets);
 
-  QMainWindow::closeEvent(event);
+  QTabFramework::closeEvent(event);
 }
 
 void MainWindow::updateWindowTitle()
@@ -239,12 +222,12 @@ void MainWindow::updateViewMenu()
   //action->setShortcut(QKeySequence(QKeySequence::Refresh));
   //connect(action, SIGNAL(triggered()), this, SLOT(refresh()));
   //viewMenu->addSeparator();
-  viewMenu->addAction(qobject_cast<QDockWidget*>(marketsWidget->parent())->toggleViewAction());
-  viewMenu->addAction(qobject_cast<QDockWidget*>(ordersWidget->parent())->toggleViewAction());
-  viewMenu->addAction(qobject_cast<QDockWidget*>(transactionsWidget->parent())->toggleViewAction());
-  //viewMenu->addAction(qobject_cast<QDockWidget*>(graphWidget->parent())->toggleViewAction());
-  viewMenu->addAction(qobject_cast<QDockWidget*>(logWidget->parent())->toggleViewAction());
-  viewMenu->addAction(qobject_cast<QDockWidget*>(botsWidget->parent())->toggleViewAction());
+  viewMenu->addAction(toggleViewAction(marketsWidget));
+  viewMenu->addAction(toggleViewAction(ordersWidget));
+  viewMenu->addAction(toggleViewAction(transactionsWidget));
+  //viewMenu->addAction(toggleViewAction(graphWidget));
+  viewMenu->addAction(toggleViewAction(logWidget));
+  viewMenu->addAction(toggleViewAction(botsWidget));
   viewMenu->addSeparator();
   QList<EDataMarket*> channels;
   globalEntityManager.getAllEntities<EDataMarket>(channels);
@@ -257,7 +240,7 @@ void MainWindow::updateViewMenu()
     ChannelData* channelData = it == channelDataMap.end() ? 0 : &it.value();
 
     if(channelData && channelData->tradesWidget)
-      subMenu->addAction(qobject_cast<QDockWidget*>(channelData->tradesWidget->parent())->toggleViewAction());
+      subMenu->addAction(toggleViewAction(channelData->tradesWidget));
     else
     {
       QAction* action = subMenu->addAction(tr("Live Trades"));
@@ -265,7 +248,7 @@ void MainWindow::updateViewMenu()
       connect(action, SIGNAL(triggered()), &liveTradesSignalMapper, SLOT(map()));
     }
     if(channelData && channelData->graphWidget)
-      subMenu->addAction(qobject_cast<QDockWidget*>(channelData->graphWidget->parent())->toggleViewAction());
+      subMenu->addAction(toggleViewAction(channelData->graphWidget));
     else
     {
       QAction* action = subMenu->addAction(tr("Live Graph"));
@@ -319,8 +302,8 @@ MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
 void MainWindow::updateChannelSubscription(ChannelData& channelData)
 {
   bool active = channelData.channelName == selectedChannelName ||
-    (channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent())->isVisible()) ||
-    (channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent())->isVisible());
+    (channelData.graphWidget && isVisible(channelData.graphWidget)) ||
+    (channelData.tradesWidget && isVisible(channelData.tradesWidget));
   if(active)
     dataService.subscribe(channelData.channelName, channelData.channelEntityManager);
   else
@@ -334,15 +317,11 @@ void MainWindow::createLiveTradeWidget(const QString& channelName)
     return;
   if(channelData->tradesWidget)
     return;
-  channelData->tradesWidget = new TradesWidget(this, settings, channelName, channelData->channelEntityManager);
-
-  QDockWidget* tradesDockWidget = new QDockWidget(this);
-  //connect(tradesDockWidget->toggleViewAction(), SIGNAL(toggled(bool)), this, SLOT(enableTradesUpdates(bool)));
-  connect(tradesDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableTradesUpdates(bool)));
-  tradesDockWidget->setObjectName(channelName + "LiveTrades");
-  tradesDockWidget->setWidget(channelData->tradesWidget);
+  channelData->tradesWidget = new TradesWidget(*this, settings, channelName, channelData->channelEntityManager);
+  channelData->tradesWidget->setObjectName(channelName + "LiveTrades");
+  addTab(channelData->tradesWidget);
+  connect(toggleViewAction(channelData->tradesWidget), SIGNAL(toggled(bool)), this, SLOT(enableTradesUpdates(bool)));
   channelData->tradesWidget->updateTitle();
-  addDockWidget(Qt::TopDockWidgetArea, tradesDockWidget);
   
   dataService.subscribe(channelName, channelData->channelEntityManager);
 }
@@ -357,15 +336,11 @@ void MainWindow::createLiveGraphWidget(const QString& channelName)
   GraphModel* channelGraphModel = channelGraphModels[channelName];
   Q_ASSERT(channelGraphModel);
 
-  channelData->graphWidget = new GraphWidget(this, settings, channelName, channelName + "_0", globalEntityManager, channelData->channelEntityManager, *channelGraphModel, channelGraphModels);
-
-  QDockWidget* graphDockWidget = new QDockWidget(this);
-  //connect(graphDockWidget->toggleViewAction(), SIGNAL(toggled(bool)), this, SLOT(enableGraphUpdates(bool)));
-  connect(graphDockWidget, SIGNAL(visibilityChanged(bool)), this, SLOT(enableGraphUpdates(bool)));
-  graphDockWidget->setObjectName(channelName + "LiveGraph");
-  graphDockWidget->setWidget(channelData->graphWidget);
+  channelData->graphWidget = new GraphWidget(*this, settings, channelName, channelName + "_0", globalEntityManager, channelData->channelEntityManager, *channelGraphModel, channelGraphModels);
+  channelData->graphWidget->setObjectName(channelName + "LiveGraph");
+  addTab(channelData->graphWidget);
+  connect(toggleViewAction(channelData->graphWidget), SIGNAL(toggled(bool)), this, SLOT(enableGraphUpdates(bool)));
   channelData->graphWidget->updateTitle();
-  addDockWidget(Qt::TopDockWidgetArea, graphDockWidget);
 
   dataService.subscribe(channelName, channelData->channelEntityManager);
 }
@@ -387,12 +362,12 @@ void MainWindow::about()
 
 void MainWindow::enableTradesUpdates(bool enable)
 {
-  QDockWidget* sender = qobject_cast<QDockWidget*>(this->sender());
+  QAction* sender = qobject_cast<QAction*>(this->sender());
   QHash<QString, ChannelData>::Iterator it = channelDataMap.begin();
   for(QHash<QString, ChannelData>::Iterator end = channelDataMap.end(); it != end; ++it)
   {
     ChannelData& channelData = it.value();
-    if(channelData.tradesWidget && qobject_cast<QDockWidget*>(channelData.tradesWidget->parent()) == sender)
+    if(channelData.tradesWidget && toggleViewAction(channelData.tradesWidget) == sender)
     {
       updateChannelSubscription(channelData);
       return;
@@ -402,12 +377,12 @@ void MainWindow::enableTradesUpdates(bool enable)
 
 void MainWindow::enableGraphUpdates(bool enable)
 {
-  QDockWidget* sender = qobject_cast<QDockWidget*>(this->sender());
+  QAction* sender = qobject_cast<QAction*>(this->sender());
   QHash<QString, ChannelData>::Iterator it = channelDataMap.begin();
   for(QHash<QString, ChannelData>::Iterator end = channelDataMap.end(); it != end; ++it)
   {
     ChannelData& channelData = it.value();
-    if(channelData.graphWidget && qobject_cast<QDockWidget*>(channelData.graphWidget->parent()) == sender)
+    if(channelData.graphWidget && toggleViewAction(channelData.graphWidget) == sender)
     {
       updateChannelSubscription(channelData);
       return;

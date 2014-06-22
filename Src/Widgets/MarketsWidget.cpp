@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-MarketsWidget::MarketsWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(parent), entityManager(entityManager), botService(botService), botMarketModel(entityManager)
+MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), botMarketModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
 
@@ -99,9 +99,8 @@ void MarketsWidget::updateTitle(EBotService& eBotService)
   else
     title = tr("Markets (%1)").arg(stateStr);
 
-  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
-  dockWidget->setWindowTitle(title);
-  dockWidget->toggleViewAction()->setText(tr("Markets"));
+  setWindowTitle(title);
+  tabFramework.toggleViewAction(this)->setText(tr("Markets"));
 }
 
 void MarketsWidget::updateToolBarButtons()

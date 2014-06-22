@@ -6,12 +6,13 @@ class MarketsWidget : public QWidget, public Entity::Listener
   Q_OBJECT
 
 public:
-  MarketsWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
+  MarketsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
   ~MarketsWidget();
 
   void saveState(QSettings& settings);
 
 private:
+  QTabFramework& tabFramework;
   Entity::Manager& entityManager;
   BotService& botService;
 

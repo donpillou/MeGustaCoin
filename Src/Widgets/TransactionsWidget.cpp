@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-TransactionsWidget::TransactionsWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(parent), entityManager(entityManager), botService(botService), transactionModel(entityManager)
+TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), transactionModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
   //connect(&dataModel.transactionModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
@@ -87,9 +87,9 @@ void TransactionsWidget::updateTitle(EBotService& eBotService)
     title = tr("Transactions");
   else
     title = tr("Transactions (%2)").arg(stateStr);
-  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
-  dockWidget->setWindowTitle(title);
-  dockWidget->toggleViewAction()->setText(tr("Transactions"));
+
+  setWindowTitle(title);
+  tabFramework.toggleViewAction(this)->setText(tr("Transactions"));
 }
 
 void TransactionsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)

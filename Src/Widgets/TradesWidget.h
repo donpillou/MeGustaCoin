@@ -4,7 +4,7 @@
 class TradesWidget : public QWidget, public Entity::Listener
 {
 public:
-  TradesWidget(QWidget* parent, QSettings& settings, const QString& channelName, Entity::Manager& channelEntityManager);
+  TradesWidget(QTabFramework& tabFramework, QSettings& settings, const QString& channelName, Entity::Manager& channelEntityManager);
   ~TradesWidget();
 
   void saveState(QSettings& settings);
@@ -12,6 +12,7 @@ public:
   void updateTitle();
 
 private:
+  QTabFramework& tabFramework;
   QString channelName;
   Entity::Manager& channelEntityManager;
   TradeModel tradeModel;

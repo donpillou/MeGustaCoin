@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataService& dataService) :
-  QWidget(parent), entityManager(entityManager), botService(botService), dataService(dataService), orderModel(entityManager)
+OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataService& dataService) :
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), dataService(dataService), orderModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
   //connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
@@ -318,9 +318,9 @@ void OrdersWidget::updateTitle(EBotService& eBotService)
     title = tr("Orders");
   else
     title = tr("Orders (%2)").arg(stateStr);
-  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
-  dockWidget->setWindowTitle(title);
-  dockWidget->toggleViewAction()->setText(tr("Orders"));
+
+  setWindowTitle(title);
+  tabFramework.toggleViewAction(this)->setText(tr("Orders"));
 }
 
 void OrdersWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)

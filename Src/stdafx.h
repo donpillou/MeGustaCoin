@@ -9,6 +9,7 @@
 #include "Tools/Json.h"
 #include "Tools/JobQueue.h"
 #include "Tools/Entity.h"
+#include "QTabFramework.h"
 
 #include "Markets/DataProtocol.h"
 #include "Bots/BotProtocol.h"

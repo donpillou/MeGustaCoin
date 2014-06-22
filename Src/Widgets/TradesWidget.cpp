@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-TradesWidget::TradesWidget(QWidget* parent, QSettings& settings, const QString& channelName, Entity::Manager& channelEntityManager) :
-  QWidget(parent),
+TradesWidget::TradesWidget(QTabFramework& tabFramework, QSettings& settings, const QString& channelName, Entity::Manager& channelEntityManager) :
+  QWidget(&tabFramework), tabFramework(tabFramework),
   channelName(channelName), channelEntityManager(channelEntityManager), tradeModel(channelEntityManager)
 {
   channelEntityManager.registerListener<EDataSubscription>(*this);
@@ -57,9 +57,8 @@ void TradesWidget::updateTitle()
   else
     title = tr("%1 Live Trades (%2)").arg(channelName, stateStr);
 
-  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
-  dockWidget->setWindowTitle(title);
-  dockWidget->toggleViewAction()->setText(tr("Live Trades"));
+  setWindowTitle(title);
+  tabFramework.toggleViewAction(this)->setText(tr("Live Trades"));
 }
 
 void TradesWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)

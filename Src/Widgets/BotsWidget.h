@@ -6,7 +6,7 @@ class BotsWidget : public QWidget, public Entity::Listener
   Q_OBJECT
 
 public:
-  BotsWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
+  BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
   ~BotsWidget();
 
   void saveState(QSettings& settings);
@@ -23,6 +23,7 @@ private slots:
   void autoScroll(int, int);
 
 private:
+  QTabFramework& tabFramework;
   Entity::Manager& entityManager;
   BotService& botService;
 

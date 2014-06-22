@@ -6,7 +6,7 @@ class GraphWidget : public QWidget, public Entity::Listener
   Q_OBJECT
 
 public:
-  GraphWidget(QWidget* parent, QSettings& settings, const QString& channelName, const QString& settingsSection, Entity::Manager& globalEntityManager, Entity::Manager& channelEntityManager, const GraphModel& graphModel, const QMap<QString, GraphModel*>& graphModels);
+  GraphWidget(QTabFramework& tabFramework, QSettings& settings, const QString& channelName, const QString& settingsSection, Entity::Manager& globalEntityManager, Entity::Manager& channelEntityManager, const GraphModel& graphModel, const QMap<QString, GraphModel*>& graphModels);
   ~GraphWidget();
 
   void saveState(QSettings& settings);
@@ -22,6 +22,7 @@ private slots:
   void updateDataMenu();
 
 private:
+  QTabFramework& tabFramework;
   QString channelName;
   QString settingsSection;
   Entity::Manager& channelEntityManager;

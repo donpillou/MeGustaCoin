@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-BotsWidget::BotsWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(parent), entityManager(entityManager),  botService(botService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager), logModel(entityManager), autoScrollEnabled(false)
+BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  botService(botService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager), logModel(entityManager), autoScrollEnabled(false)
 {
   entityManager.registerListener<EBotService>(*this);
 
@@ -181,9 +181,8 @@ void BotsWidget::updateTitle(EBotService& eBotService)
   else
     title = tr("Bots (%1)").arg(stateStr);
 
-  QDockWidget* dockWidget = qobject_cast<QDockWidget*>(parent());
-  dockWidget->setWindowTitle(title);
-  dockWidget->toggleViewAction()->setText(tr("Bots"));
+  setWindowTitle(title);
+  tabFramework.toggleViewAction(this)->setText(tr("Bots"));
 }
 
 void BotsWidget::updateToolBarButtons()

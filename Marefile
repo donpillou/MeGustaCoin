@@ -17,12 +17,16 @@ targets = {
         defines -= "QT_NO_DEBUG"
     }
     includePaths = {
-      "Src"
+      "Src",
+      "Ext/QTabFramework"
     }
     root = "Src"
     files = {
       "Src/**.cpp" = cppSource
       "Src/**.h"
+      "Ext/QTabFramework/QTabFramework.cpp" = cppSource + {
+        folder = "Tools"
+      }
     }
     
     qtRessourceFiles = "Src/Icons/**.png"
@@ -41,8 +45,14 @@ targets = {
       "Src/MainWindow.h"
       "Src/MarketDialog.h"
       "Src/Bots/BotDialog.h"
+      "Ext/QTabFramework/QTabFramework.h"
     }
     files += qtFiles
+    files += {
+      "Ext/QTabFramework/QTabFramework.h" += {
+        folder = "Tools"
+      }
+    }
     
     if(platform == "Linux") {
       libs += { "rt", "pthread", "QtGui", "QtCore", "curl" }

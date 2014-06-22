@@ -6,7 +6,7 @@ class OrdersWidget : public QWidget, public Entity::Listener
   Q_OBJECT
 
 public:
-  OrdersWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataService& dataService);
+  OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataService& dataService);
   ~OrdersWidget();
 
   void saveState(QSettings& settings);
@@ -24,6 +24,7 @@ private slots:
   void updateToolBarButtons();
 
 private:
+  QTabFramework& tabFramework;
   Entity::Manager& entityManager;
   BotService& botService;
   DataService& dataService;
