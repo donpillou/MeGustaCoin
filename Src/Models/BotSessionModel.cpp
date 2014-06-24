@@ -18,9 +18,9 @@ BotSessionModel::~BotSessionModel()
 
 QModelIndex BotSessionModel::index(int row, int column, const QModelIndex& parent) const
 {
-  if(row < 0)
-    return QModelIndex();
-  return createIndex(row, column, sessions.at(row));
+  if(hasIndex(row, column, parent))
+    return createIndex(row, column, sessions.at(row));
+  return QModelIndex();
 }
 
 QModelIndex BotSessionModel::parent(const QModelIndex& child) const

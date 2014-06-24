@@ -18,7 +18,9 @@ LogModel::~LogModel()
 
 QModelIndex LogModel::index(int row, int column, const QModelIndex& parent) const
 {
-  return createIndex(row, column, messages.at(row));
+  if(hasIndex(row, column, parent)) 
+    return createIndex(row, column, messages.at(row));
+  return QModelIndex();
 }
 
 QModelIndex LogModel::parent(const QModelIndex& child) const

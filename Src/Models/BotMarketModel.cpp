@@ -14,9 +14,9 @@ BotMarketModel::~BotMarketModel()
 
 QModelIndex BotMarketModel::index(int row, int column, const QModelIndex& parent) const
 {
-  if(row < 0)
-    return QModelIndex();
-  return createIndex(row, column, markets.at(row));
+  if(hasIndex(row, column, parent))
+    return createIndex(row, column, markets.at(row));
+  return QModelIndex();
 }
 
 QModelIndex BotMarketModel::parent(const QModelIndex& child) const

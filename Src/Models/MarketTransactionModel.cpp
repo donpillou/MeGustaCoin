@@ -19,7 +19,9 @@ MarketTransactionModel::~MarketTransactionModel()
 
 QModelIndex MarketTransactionModel::index(int row, int column, const QModelIndex& parent) const
 {
-  return createIndex(row, column, transactions.at(row));
+  if(hasIndex(row, column, parent))
+    return createIndex(row, column, transactions.at(row));
+  return QModelIndex();
 }
 
 QModelIndex MarketTransactionModel::parent(const QModelIndex& child) const

@@ -19,7 +19,9 @@ SessionTransactionModel::~SessionTransactionModel()
 
 QModelIndex SessionTransactionModel::index(int row, int column, const QModelIndex& parent) const
 {
-  return createIndex(row, column, transactions.at(row));
+  if(hasIndex(row, column, parent))
+    return createIndex(row, column, transactions.at(row));
+  return QModelIndex();
 }
 
 QModelIndex SessionTransactionModel::parent(const QModelIndex& child) const

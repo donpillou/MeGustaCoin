@@ -19,7 +19,9 @@ SessionOrderModel::~SessionOrderModel()
 
 QModelIndex SessionOrderModel::index(int row, int column, const QModelIndex& parent) const
 {
-  return createIndex(row, column, orders.at(row));
+  if(hasIndex(row, column, parent))
+    return createIndex(row, column, orders.at(row));
+  return QModelIndex();
 }
 
 QModelIndex SessionOrderModel::parent(const QModelIndex& child) const

@@ -19,7 +19,9 @@ TradeModel::~TradeModel()
 
 QModelIndex TradeModel::index(int row, int column, const QModelIndex& parent) const
 {
-  return createIndex(row, column, trades.at(row));
+  if(hasIndex(row, column, parent))
+    return createIndex(row, column, trades.at(row));
+  return QModelIndex();
 }
 
 QModelIndex TradeModel::parent(const QModelIndex& child) const
