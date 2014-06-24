@@ -16,6 +16,7 @@
 #include "Entities/EBotSessionOrder.h"
 #include "Entities/EBotSessionMarker.h"
 #include "Entities/EBotSessionTransaction.h"
+#include "Entities/EBotSessionItem.h"
 #include "Entities/EBotSessionLogMessage.h"
 #include "Entities/EBotSessionBalance.h"
 #include "Entities/EBotEngine.h"

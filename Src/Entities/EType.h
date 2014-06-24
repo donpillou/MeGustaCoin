@@ -8,6 +8,7 @@ enum class EType
   botSessionOrder,
   botSessionMarker,
   botSessionTransaction,
+  botSessionItem,
   botSessionLogMessage,
   botSessionBalance,
   botService,

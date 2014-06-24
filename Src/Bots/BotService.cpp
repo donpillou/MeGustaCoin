@@ -361,6 +361,7 @@ void BotService::WorkerThread::setState(EBotService::State state)
         entityManager.removeAll<EBotSession>();
         entityManager.removeAll<EBotMarketAdapter>();
         entityManager.removeAll<EBotSessionTransaction>();
+        entityManager.removeAll<EBotSessionItem>();
         entityManager.removeAll<EBotSessionOrder>();
         entityManager.removeAll<EBotSessionLogMessage>();
         entityManager.removeAll<EBotSessionMarker>();
@@ -673,6 +674,8 @@ EType BotService::WorkerThread::getEType(BotProtocol::EntityType entityType)
     return EType::botSession;
   case BotProtocol::sessionTransaction:
     return EType::botSessionTransaction;
+  case BotProtocol::sessionItem:
+    return EType::botSessionItem;
   case BotProtocol::sessionOrder:
     return EType::botSessionOrder;
   case BotProtocol::sessionLogMessage:
@@ -713,6 +716,10 @@ Entity* BotService::WorkerThread::createEntity(BotProtocol::Entity& data, size_t
   case BotProtocol::sessionTransaction:
     if(size >= sizeof(BotProtocol::Transaction))
       return new EBotSessionTransaction(*(BotProtocol::Transaction*)&data);
+    break;
+  case BotProtocol::sessionItem:
+    if(size >= sizeof(BotProtocol::SessionItem))
+      return new EBotSessionItem(*(BotProtocol::SessionItem*)&data);
     break;
   case BotProtocol::sessionOrder:
     if(size >= sizeof(BotProtocol::Order))

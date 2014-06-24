@@ -45,6 +45,7 @@ public:
     marketTransaction,
     marketOrder,
     marketBalance,
+    sessionItem,
   };
 
 #pragma pack(push, 4)
@@ -189,6 +190,22 @@ public:
     char message[129];
   };
 
+  struct SessionItem : public Entity
+  {
+    enum Type
+    {
+      buy,
+      sell
+    };
+
+    quint8 initialType;
+    quint8 currentType;
+    qint64 date;
+    double price;
+    double amount;
+    double flipPrice;
+  };
+
   struct ControlSession : public Entity
   {
     enum Command
@@ -200,6 +217,7 @@ public:
       requestTransactions,
       requestOrders,
       requestBalance,
+      requestItems,
     };
 
     quint8 cmd;
