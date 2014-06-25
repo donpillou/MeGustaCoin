@@ -28,6 +28,7 @@ public:
   const QDateTime& getDate() const {return date;}
   double getPrice() const {return price;}
   double getAmount() const {return amount;}
+  double getFlipPrice() const {return flipPrice;}
 
 private:
   Type initialType;
