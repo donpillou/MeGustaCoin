@@ -203,6 +203,7 @@ public:
     qint64 date;
     double price;
     double amount;
+    double profitablePrice;
     double flipPrice;
   };
 

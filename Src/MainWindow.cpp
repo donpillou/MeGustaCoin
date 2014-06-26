@@ -132,7 +132,13 @@ void MainWindow::closeEvent(QCloseEvent* event)
   ordersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
   //graphWidget->saveState(settings);
+  marketsWidget->saveState(settings);
   botsWidget->saveState(settings);
+  botTransactionsWidget->saveState(settings);
+  botItemsWidget->saveState(settings);
+  botOrdersWidget->saveState(settings);
+  botLogWidget->saveState(settings);
+  logWidget->saveState(settings);
 
   QStringList openedLiveTradesWidgets;
   QStringList openedLiveGraphWidgets;
@@ -157,7 +163,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
   }
 
-  logWidget->saveState(settings);
   settings.setValue("LiveTradesWidgets", openedLiveTradesWidgets);
   settings.setValue("LiveGraphWidgets", openedLiveGraphWidgets);
 

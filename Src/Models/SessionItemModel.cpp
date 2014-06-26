@@ -51,6 +51,7 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     case Column::price:
     case Column::value:
     case Column::amount:
+    case Column::profitablePrice:
     case Column::flipPrice:
       return (int)Qt::AlignRight | (int)Qt::AlignVCenter;
     default:
@@ -121,6 +122,8 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
       return eBotMarketAdapter->formatPrice(eItem->getPrice());
     case Column::value:
       return eBotMarketAdapter->formatPrice(eItem->getAmount() * eItem->getPrice());
+    case Column::profitablePrice:
+      return eBotMarketAdapter->formatPrice(eItem->getProfitablePrice());
     case Column::flipPrice:
       return eBotMarketAdapter->formatPrice(eItem->getFlipPrice());
     }
@@ -137,9 +140,11 @@ QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, 
   case Qt::TextAlignmentRole:
     switch((Column)section)
     {
-    case Column::price:
-    case Column::value:
     case Column::amount:
+    case Column::value:
+    case Column::price:
+    case Column::profitablePrice:
+    case Column::flipPrice:
       return Qt::AlignRight;
     default:
       return Qt::AlignLeft;
@@ -153,12 +158,16 @@ QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, 
         return tr("Current Type");
       case Column::date:
         return tr("Date");
+      case Column::value:
+        return tr("Value %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
       case Column::amount:
         return tr("Amount %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString());
       case Column::price:
-        return tr("Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
-      case Column::value:
-        return tr("Value %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+        return tr("Last Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+      case Column::profitablePrice:
+        return tr("Min Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+      case Column::flipPrice:
+        return tr("Next Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
     }
   }
   return QVariant();

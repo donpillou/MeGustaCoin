@@ -13,6 +13,7 @@ public:
       value,
       amount,
       price,
+      profitablePrice,
       flipPrice,
       last = flipPrice,
   };

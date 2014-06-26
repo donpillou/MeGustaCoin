@@ -20,6 +20,7 @@ public:
     date = QDateTime::fromMSecsSinceEpoch(data.date);
     price = data.price;
     amount = data.amount;
+    profitablePrice = data.profitablePrice;
     flipPrice = data.flipPrice;
   }
 
@@ -28,6 +29,7 @@ public:
   const QDateTime& getDate() const {return date;}
   double getPrice() const {return price;}
   double getAmount() const {return amount;}
+  double getProfitablePrice() const {return profitablePrice;}
   double getFlipPrice() const {return flipPrice;}
 
 private:
@@ -36,5 +38,6 @@ private:
   QDateTime date;
   double price; // >= 0
   double amount; // >= 0
+  double profitablePrice;
   double flipPrice;
 };

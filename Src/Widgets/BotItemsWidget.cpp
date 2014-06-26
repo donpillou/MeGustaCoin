@@ -30,6 +30,7 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
   headerView->resizeSection(4, 100);
   headerView->resizeSection(5, 85);
   headerView->resizeSection(6, 85);
+  headerView->resizeSection(7, 85);
   headerView->setStretchLastSection(false);
   headerView->setResizeMode(0, QHeaderView::Stretch);
   itemView->sortByColumn(1);
