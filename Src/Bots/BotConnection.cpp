@@ -209,7 +209,7 @@ bool BotConnection::controlEntity(quint32 requestId, const void* args, size_t si
 bool BotConnection::sendLoginRequest(const QString& userName)
 {
   BotProtocol::LoginRequest loginRequest;
-  setString(loginRequest.userName, userName);
+  BotProtocol::setString(loginRequest.userName, userName);
   return sendMessage(BotProtocol::loginRequest, 0, &loginRequest, sizeof(loginRequest));
 }
 
