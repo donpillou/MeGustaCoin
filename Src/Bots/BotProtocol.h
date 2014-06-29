@@ -15,6 +15,8 @@ public:
     authResponse,
     registerBotRequest,
     registerBotResponse,
+    registerBotHandlerRequest,
+    registerBotHandlerResponse,
     registerMarketRequest,
     registerMarketResponse,
     registerMarketHandlerRequest,
