@@ -53,10 +53,15 @@ public:
 
   void add(const DataProtocol::Trade& trade, quint64 tradeAge)
   {
+    static const quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
+
     quint64 tradeAgeSecs = tradeAge / 1000ULL;
+    if(tradeAgeSecs > depths[sizeof(depths) / sizeof(*depths) - 1] * 3ULL)
+      return;
+
     bool updateValues = tradeAge == 0;
     quint64 time = trade.time / 1000ULL;
-    quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
+
     for(int i = 0; i < (int)Regressions::numOfRegressions; ++i)
     {
       if(tradeAgeSecs <= depths[i])
