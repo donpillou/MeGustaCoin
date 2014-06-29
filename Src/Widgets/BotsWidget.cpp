@@ -150,7 +150,8 @@ void BotsWidget::updateTitle(EBotService& eBotService)
 
 void BotsWidget::updateToolBarButtons()
 {
-  bool connected = botService.isConnected();
+  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+  bool connected = eBotService->getState() == EBotService::State::connected;
   addAction->setEnabled(connected);
 
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();

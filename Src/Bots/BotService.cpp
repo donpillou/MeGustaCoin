@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotService::BotService(Entity::Manager& entityManager) :
-  entityManager(entityManager), thread(0), connected(false) {}
+  entityManager(entityManager), thread(0) {}
 
 BotService::~BotService()
 {
@@ -350,10 +350,6 @@ void BotService::WorkerThread::setState(EBotService::State state)
     {
       Entity::Manager& entityManager = botService.entityManager;
       EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-      if(state == EBotService::State::connected)
-        botService.connected = true;
-      else if(state == EBotService::State::offline)
-        botService.connected = false;
       eBotService->setState(state);
       if(state == EBotService::State::offline)
       {

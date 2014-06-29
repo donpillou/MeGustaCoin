@@ -263,7 +263,7 @@ void OrdersWidget::updateToolBarButtons()
 {
   QModelIndexList selection = orderView->selectionModel()->selectedRows();
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  bool connected = botService.isConnected();
+  bool connected = eBotService->getState() == EBotService::State::connected;
   bool marketSelected = connected && eBotService->getSelectedMarketId() != 0;
   bool canCancel = selection.size() > 0;
 

@@ -32,8 +32,6 @@ public:
   void stopSession(quint32 id);
   void selectSession(quint32 id);
 
-  bool isConnected() const {return connected;}
-
 private:
   class WorkerThread;
 
@@ -101,7 +99,6 @@ private:
 
   JobQueue<Event*> eventQueue;
   JobQueue<Job*> jobQueue;
-  bool connected;
 
 private:
   void createEntity(quint32 requestId, const void* args, size_t size);

@@ -107,7 +107,8 @@ void MarketsWidget::updateTitle(EBotService& eBotService)
 
 void MarketsWidget::updateToolBarButtons()
 {
-  bool connected = botService.isConnected();
+  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+  bool connected = eBotService->getState() == EBotService::State::connected;
   QModelIndexList selection = marketView->selectionModel()->selectedRows();
   bool marketSelected = !selection.isEmpty();
 
