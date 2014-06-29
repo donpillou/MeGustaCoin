@@ -5,8 +5,6 @@ TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& s
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), transactionModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
-  //connect(&dataModel.transactionModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-  //connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
 
   setWindowTitle(tr("Transactions"));
 

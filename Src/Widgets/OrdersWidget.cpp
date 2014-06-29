@@ -5,8 +5,6 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), dataService(dataService), orderModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
-  //connect(&dataModel.orderModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-  //connect(&dataModel, SIGNAL(changedMarket()), this, SLOT(updateToolBarButtons()));
 
   setWindowTitle(tr("Orders"));
 
