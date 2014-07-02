@@ -178,6 +178,7 @@ void OrdersWidget::cancelOrder()
 {
   QModelIndexList selection = orderView->selectionModel()->selectedRows();
   QList<EBotMarketOrder*> ordersToRemove;
+  QList<EBotMarketOrder*> ordersToCancel;
   foreach(const QModelIndex& proxyIndex, selection)
   {
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
@@ -190,11 +191,17 @@ void OrdersWidget::cancelOrder()
       ordersToRemove.append(eBotMarketOrder);
       break;
     case EBotMarketOrder::State::open:
-      botService.cancelMarketOrder(*eBotMarketOrder);
+      ordersToCancel.append(eBotMarketOrder);
       break;
     default:
       break;
     }
+  }
+  while(!ordersToCancel.isEmpty())
+  {
+    QList<EBotMarketOrder*>::Iterator last = --ordersToCancel.end();
+    botService.cancelMarketOrder(*(EBotMarketOrder*)*last);
+    ordersToCancel.erase(last);
   }
   while(!ordersToRemove.isEmpty())
   {
