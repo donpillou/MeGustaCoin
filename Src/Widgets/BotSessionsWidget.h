@@ -17,8 +17,8 @@ private slots:
   void simulate();
   void activate();
   void cancelBot();
-  void updateToolBarButtons();
   void sessionSelectionChanged();
+  void sessionDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
 private:
   QTabFramework& tabFramework;
@@ -32,6 +32,8 @@ private:
   QTreeView* sessionView;
   QSortFilterProxyModel* sessionProxyModel;
 
+  QSet<EBotSession*> selection;
+
   QAction* addAction;
   QAction* optimizeAction;
   QAction* simulateAction;
@@ -40,6 +42,8 @@ private:
 
 private:
   void updateTitle(EBotService& eBotService);
+  void updateToolBarButtons();
+  void updateSelection();
 
 private: // Entity::Listener
   virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);

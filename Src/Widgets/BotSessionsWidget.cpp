@@ -42,8 +42,8 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
   sessionView->setSortingEnabled(true);
   sessionView->setRootIsDecorated(false);
   sessionView->setAlternatingRowColors(true);
-  connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(updateToolBarButtons()));
   connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(sessionSelectionChanged()));
+  connect(&botSessionModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(sessionDataChanged(const QModelIndex&, const QModelIndex&)));
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);
@@ -154,13 +154,11 @@ void BotSessionsWidget::updateToolBarButtons()
   bool connected = eBotService->getState() == EBotService::State::connected;
   addAction->setEnabled(connected);
 
-  QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   bool sessionSelected = !selection.isEmpty();
   bool sessionStopped = false;
   if(sessionSelected)
   {
-    QModelIndex index = sessionProxyModel->mapToSource(selection.front());
-    EBotSession* eSession = (EBotSession*)index.internalPointer();
+    EBotSession* eSession = *selection.begin();
     sessionStopped = eSession->getState() == EBotSession::State::stopped;
   }
 
@@ -170,14 +168,40 @@ void BotSessionsWidget::updateToolBarButtons()
   cancelAction->setEnabled(connected && sessionSelected);
 }
 
+void BotSessionsWidget::updateSelection()
+{
+  QModelIndexList modelSelection = sessionView->selectionModel()->selectedRows();
+  selection.clear();
+  if(!modelSelection.isEmpty())
+  {
+    QModelIndex modelIndex = sessionProxyModel->mapToSource(modelSelection.front());
+    EBotSession* eSession = (EBotSession*)modelIndex.internalPointer();
+    selection.insert(eSession);
+  }
+  updateToolBarButtons();
+}
+
 void BotSessionsWidget::sessionSelectionChanged()
 {
-  QModelIndexList selection = sessionView->selectionModel()->selectedRows();
+  updateSelection();
   if(!selection.isEmpty())
+    botService.selectSession((*selection.begin())->getId());
+}
+
+void BotSessionsWidget::sessionDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+  QModelIndex index = topLeft;
+  for(int i = topLeft.row(), end = bottomRight.row();;)
   {
-    QModelIndex modelIndex = sessionProxyModel->mapToSource(selection.front());
-    EBotSession* eSession = (EBotSession*)modelIndex.internalPointer();
-    botService.selectSession(eSession->getId());
+    EBotSession* eBotSession = (EBotSession*)index.internalPointer();
+    if(selection.contains(eBotSession))
+    {
+      updateSelection();
+      break;
+    }
+    if(i++ == end)
+      break;
+    index = index.sibling(i, 0);
   }
 }
 
