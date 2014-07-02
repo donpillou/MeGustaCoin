@@ -16,7 +16,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   ordersWidget = new OrdersWidget(*this, settings, globalEntityManager, botService, dataService);
   transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, botService);
   //graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
-  botsWidget = new BotsWidget(*this, settings, globalEntityManager, botService);
+  botSessionsWidget = new BotSessionsWidget(*this, settings, globalEntityManager, botService);
   botTransactionsWidget = new BotTransactionsWidget(*this, settings, globalEntityManager);
   botItemsWidget = new BotItemsWidget(*this, settings, globalEntityManager, botService, dataService);
   botOrdersWidget = new BotOrdersWidget(*this, settings, globalEntityManager);
@@ -32,7 +32,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addTab(transactionsWidget, QTabFramework::InsertRight, marketsWidget);
   addTab(ordersWidget, QTabFramework::InsertOnTop, transactionsWidget);
   //addTab(graphWidget);
-  addTab(botsWidget, QTabFramework::InsertOnTop, transactionsWidget);
+  addTab(botSessionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botTransactionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botItemsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
@@ -133,7 +133,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   transactionsWidget->saveState(settings);
   //graphWidget->saveState(settings);
   marketsWidget->saveState(settings);
-  botsWidget->saveState(settings);
+  botSessionsWidget->saveState(settings);
   botTransactionsWidget->saveState(settings);
   botItemsWidget->saveState(settings);
   botOrdersWidget->saveState(settings);
@@ -229,7 +229,7 @@ void MainWindow::updateViewMenu()
   viewMenu->addAction(toggleViewAction(transactionsWidget));
   //viewMenu->addAction(toggleViewAction(graphWidget));
   viewMenu->addSeparator();
-  viewMenu->addAction(toggleViewAction(botsWidget));
+  viewMenu->addAction(toggleViewAction(botSessionsWidget));
   viewMenu->addAction(toggleViewAction(botTransactionsWidget));
   viewMenu->addAction(toggleViewAction(botItemsWidget));
   viewMenu->addAction(toggleViewAction(botOrdersWidget));

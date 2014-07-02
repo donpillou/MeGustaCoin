@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
+BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  botService(botService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
@@ -63,19 +63,19 @@ BotsWidget::BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity:
   settings.endGroup();
 }
 
-BotsWidget::~BotsWidget()
+BotSessionsWidget::~BotSessionsWidget()
 {
   entityManager.unregisterListener<EBotService>(*this);
 }
 
-void BotsWidget::saveState(QSettings& settings)
+void BotSessionsWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("BotSessions");
   settings.setValue("HeaderState", sessionView->header()->saveState());
   settings.endGroup();
 }
 
-void BotsWidget::addBot()
+void BotSessionsWidget::addBot()
 {
   BotDialog botDialog(this, entityManager);
   if(botDialog.exec() != QDialog::Accepted)
@@ -84,7 +84,7 @@ void BotsWidget::addBot()
   botService.createSession(botDialog.getName(), botDialog.getEngineId(), botDialog.getMarketId(), botDialog.getBalanceBase(), botDialog.getBalanceComm());
 }
 
-void BotsWidget::cancelBot()
+void BotSessionsWidget::cancelBot()
 {
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
@@ -98,7 +98,7 @@ void BotsWidget::cancelBot()
   }
 }
 
-void BotsWidget::activate()
+void BotSessionsWidget::activate()
 {
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
@@ -110,7 +110,7 @@ void BotsWidget::activate()
   }
 }
 
-void BotsWidget::simulate()
+void BotSessionsWidget::simulate()
 {
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
@@ -122,7 +122,7 @@ void BotsWidget::simulate()
   }
 }
 
-void BotsWidget::optimize()
+void BotSessionsWidget::optimize()
 {
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
@@ -134,7 +134,7 @@ void BotsWidget::optimize()
   }
 }
 
-void BotsWidget::updateTitle(EBotService& eBotService)
+void BotSessionsWidget::updateTitle(EBotService& eBotService)
 {
   QString stateStr = eBotService.getStateName();
   
@@ -148,7 +148,7 @@ void BotsWidget::updateTitle(EBotService& eBotService)
   tabFramework.toggleViewAction(this)->setText(tr("Bot Sessions"));
 }
 
-void BotsWidget::updateToolBarButtons()
+void BotSessionsWidget::updateToolBarButtons()
 {
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
   bool connected = eBotService->getState() == EBotService::State::connected;
@@ -170,7 +170,7 @@ void BotsWidget::updateToolBarButtons()
   cancelAction->setEnabled(connected && sessionSelected);
 }
 
-void BotsWidget::sessionSelectionChanged()
+void BotSessionsWidget::sessionSelectionChanged()
 {
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   if(!selection.isEmpty())
@@ -181,7 +181,7 @@ void BotsWidget::sessionSelectionChanged()
   }
 }
 
-void BotsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void BotSessionsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
   if(eBotService)

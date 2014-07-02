@@ -1,13 +1,13 @@
 
 #pragma once
 
-class BotsWidget : public QWidget, public Entity::Listener
+class BotSessionsWidget : public QWidget, public Entity::Listener
 {
   Q_OBJECT
 
 public:
-  BotsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
-  ~BotsWidget();
+  BotSessionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
+  ~BotSessionsWidget();
 
   void saveState(QSettings& settings);
 

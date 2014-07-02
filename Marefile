@@ -34,7 +34,7 @@ targets = {
     qtMocFiles = {
       "Src/Widgets/MarketsWidget.h"
       "Src/Widgets/OrdersWidget.h"
-      "Src/Widgets/BotsWidget.h"
+      "Src/Widgets/BotSessionsWidget.h"
       "Src/Widgets/BotLogWidget.h"
       "Src/Widgets/TransactionsWidget.h"
       "Src/Widgets/LogWidget.h"
