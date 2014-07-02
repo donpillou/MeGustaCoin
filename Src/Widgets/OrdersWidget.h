@@ -47,5 +47,4 @@ private:
 
 private: // Entity::Listener
   virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
-
 };

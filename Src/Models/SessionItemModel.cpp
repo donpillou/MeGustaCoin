@@ -2,12 +2,14 @@
 #include "stdafx.h"
 
 SessionItemModel::SessionItemModel(Entity::Manager& entityManager) :
-  entityManager(entityManager),
+  entityManager(entityManager), draftStr(tr("draft")), submittingStr(tr("submitting...")),
   buyStr(tr("buy")), sellStr(tr("sell")),
+  buyingStr(tr("buying...")), sellingStr(tr("selling...")),
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
   entityManager.registerListener<EBotSessionItem>(*this);
+  entityManager.registerListener<EBotSessionItemDraft>(*this);
 
   eBotMarketAdapter = 0;
 }
@@ -15,6 +17,13 @@ SessionItemModel::SessionItemModel(Entity::Manager& entityManager) :
 SessionItemModel::~SessionItemModel()
 {
   entityManager.unregisterListener<EBotSessionItem>(*this);
+  entityManager.unregisterListener<EBotSessionItemDraft>(*this);
+}
+
+QModelIndex SessionItemModel::getDraftAmountIndex(EBotSessionItemDraft& draft)
+{
+  int index = items.indexOf(&draft);
+  return createIndex(index, (int)Column::amount, &draft);
 }
 
 QModelIndex SessionItemModel::index(int row, int column, const QModelIndex& parent) const
@@ -45,7 +54,9 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
   if(!eItem)
     return QVariant();
 
-  if(role == Qt::TextAlignmentRole)
+  switch(role)
+  {
+  case Qt::TextAlignmentRole:
     switch((Column)index.column())
     {
     case Column::price:
@@ -57,14 +68,11 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     default:
       return (int)Qt::AlignLeft | (int)Qt::AlignVCenter;
     }
-
-  switch(role)
-  {
   case Qt::DecorationRole:
     switch((Column)index.column())
     {
-    case Column::initialType:
-      switch(eItem->getInitialType())
+    case Column::type:
+      switch(eItem->getType())
       {
       case EBotSessionItem::Type::sell:
         return sellIcon;
@@ -74,13 +82,17 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
         break;
       }
       break;
-    case Column::currentType:
-      switch(eItem->getCurrentType())
+    case Column::state:
+      switch(eItem->getState())
       {
-      case EBotSessionItem::Type::sell:
+      case EBotSessionItem::State::waitSell:
+      case EBotSessionItem::State::selling:
         return sellIcon;
-      case EBotSessionItem::Type::buy:
+      case EBotSessionItem::State::waitBuy:
+      case EBotSessionItem::State::buying:
         return buyIcon;
+      case EBotSessionItem::State::draft:
+        return eItem->getType() == EBotSessionItem::Type::sell ? sellIcon : buyIcon;
       default:
         break;
       }
@@ -89,11 +101,22 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
       break;
     }
     break;
+  case Qt::EditRole:
+    switch((Column)index.column())
+    {
+    case Column::amount:
+      return eItem->getAmount();
+    case Column::flipPrice:
+      return eItem->getFlipPrice();
+    default:
+      break;
+    }
+    break;
   case Qt::DisplayRole:
     switch((Column)index.column())
     {
-    case Column::initialType:
-      switch(eItem->getInitialType())
+    case Column::type:
+      switch(eItem->getType())
       {
       case EBotSessionItem::Type::buy:
         return buyStr;
@@ -103,13 +126,21 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
         break;
       }
       break;
-    case Column::currentType:
-      switch(eItem->getCurrentType())
+    case Column::state:
+      switch(eItem->getState())
       {
-      case EBotSessionItem::Type::buy:
+      case EBotSessionItem::State::waitBuy:
         return buyStr;
-      case EBotSessionItem::Type::sell:
+      case EBotSessionItem::State::buying:
+        return buyingStr;
+      case EBotSessionItem::State::waitSell:
         return sellStr;
+      case EBotSessionItem::State::selling:
+        return sellingStr;
+      case EBotSessionItem::State::draft:
+        return draftStr;
+      case EBotSessionItem::State::submitting:
+        return submittingStr;
       default:
         break;
       }
@@ -119,16 +150,71 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     case Column::amount:
       return eBotMarketAdapter->formatAmount(eItem->getAmount());
     case Column::price:
-      return eBotMarketAdapter->formatPrice(eItem->getPrice());
+      return eItem->getPrice() == 0 ? QString() : eBotMarketAdapter->formatPrice(eItem->getPrice());
     case Column::value:
-      return eBotMarketAdapter->formatPrice(eItem->getAmount() * eItem->getPrice());
+      return eBotMarketAdapter->formatPrice(eItem->getAmount() * eItem->getFlipPrice());
     case Column::profitablePrice:
-      return eBotMarketAdapter->formatPrice(eItem->getProfitablePrice());
+      return eItem->getPrice() == 0 ? QString() : eBotMarketAdapter->formatPrice(eItem->getProfitablePrice());
     case Column::flipPrice:
       return eBotMarketAdapter->formatPrice(eItem->getFlipPrice());
     }
   }
   return QVariant();
+}
+
+Qt::ItemFlags SessionItemModel::flags(const QModelIndex &index) const
+{
+  const EBotSessionItem* eItem = (const EBotSessionItem*)index.internalPointer();
+  if(!eItem)
+    return 0;
+
+  Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+  if(eItem->getState() == EBotSessionItem::State::draft)
+  {
+    Column column = (Column)index.column();
+    if(column == Column::amount || column == Column::flipPrice)
+      flags |= Qt::ItemIsEditable;
+  }
+  return flags;
+}
+
+bool SessionItemModel::setData(const QModelIndex & index, const QVariant & value, int role)
+{
+  if (role != Qt::EditRole)
+    return false;
+
+  EBotSessionItem* eItem = (EBotSessionItem*)index.internalPointer();
+  if(!eItem)
+    return false;
+
+  if(eItem->getState() != EBotSessionItem::State::draft)
+    return false;
+
+  switch((Column)index.column())
+  {
+  case Column::flipPrice:
+    {
+      double newPrice = value.toDouble();
+      if(newPrice <= 0. || newPrice == eItem->getPrice())
+        return false;
+      if(eItem->getState() == EBotSessionItem::State::draft)
+        eItem->setFlipPrice(newPrice);
+      return true;
+    }
+  case Column::amount:
+    {
+      double newAmount = value.toDouble();
+      if(newAmount <= 0. || newAmount == eItem->getAmount())
+        return false;
+      if(eItem->getState() == EBotSessionItem::State::draft)
+        eItem->setAmount(newAmount);
+      return true;
+    }
+  default:
+    break;
+  }
+
+  return false;
 }
 
 QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -152,10 +238,10 @@ QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, 
   case Qt::DisplayRole:
     switch((Column)section)
     {
-      case Column::initialType:
-        return tr("Initial Type");
-      case Column::currentType:
-        return tr("Current Type");
+      case Column::type:
+        return tr("Type");
+      case Column::state:
+        return tr("State");
       case Column::date:
         return tr("Date");
       case Column::value:
@@ -203,6 +289,11 @@ void SessionItemModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   Q_ASSERT(false);
 }
 
+void SessionItemModel::addedEntity(Entity& entity, Entity& replacedEntity)
+{
+  updatedEntitiy(replacedEntity, entity);
+}
+
 void SessionItemModel::removedEntity(Entity& entity)
 {
   EBotSessionItem* eItem = dynamic_cast<EBotSessionItem*>(&entity);
@@ -219,7 +310,8 @@ void SessionItemModel::removedEntity(Entity& entity)
 
 void SessionItemModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::botSessionItem)
+  if((EType)type == EType::botSessionItem|| 
+     (EType)type == EType::botSessionItemDraft)
   {
     emit beginResetModel();
     items.clear();

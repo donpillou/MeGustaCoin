@@ -9,6 +9,7 @@ enum class EType
   botSessionMarker,
   botSessionTransaction,
   botSessionItem,
+  botSessionItemDraft,
   botSessionLogMessage,
   botSessionBalance,
   botService,

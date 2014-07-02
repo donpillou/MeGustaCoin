@@ -200,8 +200,16 @@ public:
       sell
     };
 
-    quint8 initialType;
-    quint8 currentType;
+    enum State
+    {
+      waitBuy,
+      buying,
+      waitSell,
+      selling,
+    };
+
+    quint8 type;
+    quint8 state;
     qint64 date;
     double price;
     double amount;

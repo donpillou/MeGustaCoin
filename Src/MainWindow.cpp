@@ -18,7 +18,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   //graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
   botsWidget = new BotsWidget(*this, settings, globalEntityManager, botService);
   botTransactionsWidget = new BotTransactionsWidget(*this, settings, globalEntityManager);
-  botItemsWidget = new BotItemsWidget(*this, settings, globalEntityManager);
+  botItemsWidget = new BotItemsWidget(*this, settings, globalEntityManager, botService, dataService);
   botOrdersWidget = new BotOrdersWidget(*this, settings, globalEntityManager);
   botLogWidget = new BotLogWidget(*this, settings, globalEntityManager);
   logWidget = new LogWidget(this, settings, globalEntityManager);

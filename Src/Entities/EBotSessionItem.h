@@ -1,6 +1,8 @@
 
 #pragma once
 
+class EBotSessionItemDraft;
+
 class EBotSessionItem : public Entity
 {
 public:
@@ -8,33 +10,50 @@ public:
 
   enum class Type
   {
-    buy = BotProtocol::Transaction::buy,
-    sell = BotProtocol::Transaction::sell,
+    buy = BotProtocol::SessionItem::buy,
+    sell = BotProtocol::SessionItem::sell,
+  };
+
+  enum class State
+  {
+    waitBuy = BotProtocol::SessionItem::waitBuy,
+    buying = BotProtocol::SessionItem::buying,
+    waitSell = BotProtocol::SessionItem::waitSell,
+    selling = BotProtocol::SessionItem::selling,
+    draft,
+    submitting,
   };
 
 public:
   EBotSessionItem(BotProtocol::SessionItem& data) : Entity(eType, data.entityId)
   {
-    initialType = (Type)data.initialType;
-    currentType = (Type)data.currentType;
+    type = (Type)data.type;
+    state = (State)data.state;
     date = QDateTime::fromMSecsSinceEpoch(data.date);
     price = data.price;
     amount = data.amount;
     profitablePrice = data.profitablePrice;
     flipPrice = data.flipPrice;
   }
+  EBotSessionItem(quint32 id, const EBotSessionItemDraft& sessionItem);
 
-  Type getInitialType() const {return initialType;}
-  Type getCurrentType() const {return currentType;}
+  Type getType() const {return type;}
+  State getState() const {return state;}
+  void setState(State state) {this->state = state;}
   const QDateTime& getDate() const {return date;}
   double getPrice() const {return price;}
   double getAmount() const {return amount;}
+  void setAmount(double amount) {this->amount = amount;}
   double getProfitablePrice() const {return profitablePrice;}
   double getFlipPrice() const {return flipPrice;}
+  void setFlipPrice(double flipPrice) {this->flipPrice = flipPrice;}
 
-private:
-  Type initialType;
-  Type currentType;
+protected:
+  EBotSessionItem(EType type, quint32 id) : Entity(type, id) {}
+
+protected:
+  Type type;
+  State state;
   QDateTime date;
   double price; // >= 0
   double amount; // >= 0

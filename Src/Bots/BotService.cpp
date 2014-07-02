@@ -295,6 +295,32 @@ void BotService::selectSession(quint32 id)
   controlEntity(0, &controlSession, sizeof(controlSession));
 }
 
+EBotSessionItemDraft& BotService::createSessionItemDraft(EBotSessionItem::Type type, double flipPrice)
+{
+  quint32 id = entityManager.getNewEntityId<EBotSessionItemDraft>();
+  EBotSessionItemDraft* eBotSessionItemDraft = new EBotSessionItemDraft(id, type, QDateTime::currentDateTime(), flipPrice);
+  entityManager.delegateEntity(*eBotSessionItemDraft);
+  return *eBotSessionItemDraft;
+}
+
+void BotService::submitSessionItemDraft(EBotSessionItemDraft& draft)
+{
+  if(draft.getState() != EBotSessionItemDraft::State::draft)
+    return;
+  draft.setState(EBotSessionItemDraft::State::submitting);
+  entityManager.updatedEntity(draft);
+
+  BotProtocol::SessionItem sessionItem;
+  sessionItem.entityType = BotProtocol::sessionItem;
+  sessionItem.entityId = 0;
+  sessionItem.type = (quint8)draft.getType();;
+  sessionItem.price = draft.getPrice();
+  sessionItem.amount = draft.getAmount();
+  sessionItem.profitablePrice = draft.getProfitablePrice();
+  sessionItem.flipPrice = draft.getFlipPrice();
+  createEntity(draft.getId(), &sessionItem, sizeof(sessionItem));
+}
+
 void BotService::addLogMessage(ELogMessage::Type type, const QString& message)
 {
   ELogMessage* logMessage = new ELogMessage(type, message);
@@ -358,6 +384,7 @@ void BotService::WorkerThread::setState(EBotService::State state)
         entityManager.removeAll<EBotMarketAdapter>();
         entityManager.removeAll<EBotSessionTransaction>();
         entityManager.removeAll<EBotSessionItem>();
+        entityManager.removeAll<EBotSessionItemDraft>();
         entityManager.removeAll<EBotSessionOrder>();
         entityManager.removeAll<EBotSessionLogMessage>();
         entityManager.removeAll<EBotSessionMarker>();
@@ -584,49 +611,57 @@ void BotService::WorkerThread::receivedControlEntityResponse(quint32 requestId, 
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
-void BotService::WorkerThread::receivedCreateEntityResponse(quint32 requestId, const BotProtocol::Entity& entity)
+void BotService::WorkerThread::receivedCreateEntityResponse(quint32 requestId, BotProtocol::Entity& entity, size_t size)
 {
-  EType eType = EType::none;
+  Entity* newEntity = 0;
   switch((BotProtocol::EntityType)entity.entityType)
   {
   case BotProtocol::marketOrder:
-    eType = EType::botMarketOrder;
+  case BotProtocol::sessionItem:
+    newEntity = createEntity(entity, size);
     break;
   default:
     return;
   }
-  if(eType == EType::none)
+  if(!newEntity)
     return;
 
   class CreateEntityResponseEvent : public Event
   {
   public:
-    CreateEntityResponseEvent(EType eType, quint32 entityId, quint32 requestId) : eType(eType), entityId(entityId), requestId(requestId) {}
+    CreateEntityResponseEvent(Entity* entity, quint32 requestId) : entity(entity), requestId(requestId) {}
   private:
-    EType eType;
-    quint32 entityId;
+    Entity* entity;
     quint32 requestId;
   public: // Event
     virtual void handle(BotService& botService)
     {
       Entity::Manager& entityManager = botService.entityManager;
-      switch(eType)
+      switch((EType)entity->getType())
       {
       case EType::botMarketOrder:
         {
           EBotMarketOrderDraft* eBotMarketOrderDraft = entityManager.getEntity<EBotMarketOrderDraft>(requestId);
           if(!eBotMarketOrderDraft)
             return;
-          EBotMarketOrder* eBotMarketOrder = new EBotMarketOrder(entityId, *eBotMarketOrderDraft);
-          entityManager.delegateEntity(*eBotMarketOrder, *eBotMarketOrderDraft);
+          //EBotMarketOrder* eBotMarketOrder = new EBotMarketOrder(entityId, *eBotMarketOrderDraft);
+          entityManager.delegateEntity(*entity, *eBotMarketOrderDraft);
         }
         break;
+      case EType::botSessionItem:
+        {
+          EBotSessionItemDraft* eBotSessionItemDraft = entityManager.getEntity<EBotSessionItemDraft>(requestId);
+          if(!eBotSessionItemDraft)
+            return;
+          //EBotSessionItem* eBotSessionItem = new EBotSessionItem(entityId, *eBotSessionItemDraft);
+          entityManager.delegateEntity(*entity, *eBotSessionItemDraft);
+        }
       default:
         break;
       }
     }
   };
-  eventQueue.append(new CreateEntityResponseEvent(eType, entity.entityId, requestId));
+  eventQueue.append(new CreateEntityResponseEvent(newEntity, requestId));
   QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 

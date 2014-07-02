@@ -7,8 +7,8 @@ public:
   enum class Column
   {
       first,
-      initialType = first,
-      currentType,
+      type = first,
+      state,
       date,
       value,
       amount,
@@ -22,12 +22,18 @@ public:
   SessionItemModel(Entity::Manager& entityManager);
   ~SessionItemModel();
 
+  QModelIndex getDraftAmountIndex(EBotSessionItemDraft& draft);
+
 private:
   Entity::Manager& entityManager;
   EBotMarketAdapter* eBotMarketAdapter;
   QList<EBotSessionItem*> items;
+  QVariant draftStr;
+  QVariant submittingStr;
   QVariant buyStr;
   QVariant sellStr;
+  QVariant buyingStr;
+  QVariant sellingStr;
   QVariant sellIcon;
   QVariant buyIcon;
   QString dateFormat;
@@ -38,11 +44,14 @@ private: // QAbstractItemModel
   virtual int rowCount(const QModelIndex& parent) const;
   virtual int columnCount(const QModelIndex& parent) const;
   virtual QVariant data(const QModelIndex& index, int role) const;
+  virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+  virtual bool setData(const QModelIndex & index, const QVariant & value, int role);
   virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 private: // Entity::Listener
   virtual void addedEntity(Entity& entity);
   virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
+  virtual void addedEntity(Entity& entity, Entity& replacedEntity);
   virtual void removedEntity(Entity& entity);
   virtual void removedAll(quint32 type);
 };

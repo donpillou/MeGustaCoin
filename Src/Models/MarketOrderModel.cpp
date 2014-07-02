@@ -53,7 +53,9 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
   if(!eOrder)
     return QVariant();
 
-  if(role == Qt::TextAlignmentRole)
+  switch(role)
+  {
+  case Qt::TextAlignmentRole:
     switch((Column)index.column())
     {
     case Column::price:
@@ -64,9 +66,6 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
     default:
       return (int)Qt::AlignLeft | (int)Qt::AlignVCenter;
     }
-
-  switch(role)
-  {
   case Qt::DecorationRole:
     if((Column)index.column() == Column::type)
       switch(eOrder->getType())

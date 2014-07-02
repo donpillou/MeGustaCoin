@@ -13,7 +13,7 @@ public:
     virtual void receivedRemoveEntity(const BotProtocol::Entity& entity) {}
     virtual void receivedRemoveAllEntities(const BotProtocol::Entity& entity) {}
     virtual void receivedControlEntityResponse(quint32 requestId, BotProtocol::Entity& entity, size_t size) {}
-    virtual void receivedCreateEntityResponse(quint32 requestId, const BotProtocol::Entity& entity) {}
+    virtual void receivedCreateEntityResponse(quint32 requestId, BotProtocol::Entity& entity, size_t size) {};
     virtual void receivedErrorResponse(quint32 requestId, BotProtocol::ErrorResponse& response) {}
   };
 
