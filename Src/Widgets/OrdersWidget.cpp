@@ -57,7 +57,8 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
 
   connect(&orderModel, SIGNAL(editedOrderPrice(const QModelIndex&, double)), this, SLOT(editedOrderPrice(const QModelIndex&, double)));
   connect(&orderModel, SIGNAL(editedOrderAmount(const QModelIndex&, double)), this, SLOT(editedOrderAmount(const QModelIndex&, double)));
-  connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
+  connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(orderSelectionChanged()));
+  connect(&orderModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(orderDataChanged(const QModelIndex&, const QModelIndex&)));
 
   QHeaderView* headerView = orderView->header();
   headerView->resizeSection(0, 50);
@@ -184,19 +185,47 @@ void OrdersWidget::editedOrderAmount(const QModelIndex& index, double amount)
   botService.updateMarketOrder(*eBotMarketOrder, eBotMarketOrder->getPrice(), amount);
 }
 
+void OrdersWidget::orderSelectionChanged()
+{
+  QModelIndexList modelSelection = orderView->selectionModel()->selectedRows();
+  selection.clear();
+  if(!modelSelection.isEmpty())
+  {
+    QModelIndex modelIndex = proxyModel->mapToSource(modelSelection.front());
+    EBotMarketOrder* eOrder = (EBotMarketOrder*)modelIndex.internalPointer();
+    selection.insert(eOrder);
+  }
+  updateToolBarButtons();
+}
+
+void OrdersWidget::orderDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+  QModelIndex index = topLeft;
+  for(int i = topLeft.row(), end = bottomRight.row();;)
+  {
+    EBotMarketOrder* eOrder = (EBotMarketOrder*)index.internalPointer();
+    if(selection.contains(eOrder))
+    {
+      orderSelectionChanged();
+      break;
+    }
+    if(i++ == end)
+      break;
+    index = index.sibling(i, 0);
+  }
+}
+
 void OrdersWidget::updateToolBarButtons()
 {
-  QModelIndexList selection = orderView->selectionModel()->selectedRows();
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
   bool connected = eBotService->getState() == EBotService::State::connected;
   bool marketSelected = connected && eBotService->getSelectedMarketId() != 0;
-  bool canCancel = selection.size() > 0;
+  bool canCancel = !selection.isEmpty();
 
   bool draftSelected = false;
-  foreach(const QModelIndex& proxyIndex, selection)
+  for(QSet<EBotMarketOrder*>::Iterator i = selection.begin(), end = selection.end(); i != end; ++i)
   {
-    QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
+    EBotMarketOrder* eBotMarketOrder = *i;
     if(eBotMarketOrder->getState() == EBotMarketOrder::State::draft)
     {
       draftSelected = true;

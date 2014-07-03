@@ -21,7 +21,8 @@ private slots:
   void cancelOrder();
   void editedOrderPrice(const QModelIndex& index, double price);
   void editedOrderAmount(const QModelIndex& index, double amount);
-  void updateToolBarButtons();
+  void orderSelectionChanged();
+  void orderDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
 private:
   QTabFramework& tabFramework;
@@ -34,6 +35,8 @@ private:
   QTreeView* orderView;
   QSortFilterProxyModel* proxyModel;
 
+  QSet<EBotMarketOrder*> selection;
+
   QAction* refreshAction;
   QAction* buyAction;
   QAction* sellAction;
@@ -44,6 +47,7 @@ private:
 
 private:
     void updateTitle(EBotService& eBotService);
+    void updateToolBarButtons();
 
 private: // Entity::Listener
   virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
