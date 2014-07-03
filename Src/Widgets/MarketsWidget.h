@@ -19,6 +19,8 @@ private:
   QTreeView* marketView;
   QSortFilterProxyModel* proxyModel;
 
+  QSet<EBotMarket*> selection;
+
   QAction* addAction;
   QAction* editAction;
   QAction* removeAction;
@@ -29,11 +31,13 @@ private slots:
   void addMarket();
   void editMarket();
   void removeMarket();
-  void updateToolBarButtons();
   void marketSelectionChanged();
+  void marketDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
 private:
   void updateTitle(EBotService& eBotService);
+  void updateToolBarButtons();
+  void updateSelection();
 
 private: // Entity::Listener
   virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);

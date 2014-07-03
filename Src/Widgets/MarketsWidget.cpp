@@ -30,6 +30,8 @@ MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, E
   marketView->setSortingEnabled(true);
   marketView->setRootIsDecorated(false);
   marketView->setAlternatingRowColors(true);
+  connect(marketView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(marketSelectionChanged()));
+  connect(&botMarketModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(marketDataChanged(const QModelIndex&, const QModelIndex&)));
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);
@@ -37,9 +39,6 @@ MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, E
   layout->addWidget(toolBar);
   layout->addWidget(marketView);
   setLayout(layout);
-
-  connect(marketView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
-  connect(marketView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(marketSelectionChanged()));
 
   QHeaderView* headerView = marketView->header();
   headerView->resizeSection(0, 100);
@@ -109,7 +108,6 @@ void MarketsWidget::updateToolBarButtons()
 {
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
   bool connected = eBotService->getState() == EBotService::State::connected;
-  QModelIndexList selection = marketView->selectionModel()->selectedRows();
   bool marketSelected = !selection.isEmpty();
 
   addAction->setEnabled(connected);
@@ -117,14 +115,40 @@ void MarketsWidget::updateToolBarButtons()
   removeAction->setEnabled(connected && marketSelected);
 }
 
+void MarketsWidget::updateSelection()
+{
+  QModelIndexList modelSelection = marketView->selectionModel()->selectedRows();
+  selection.clear();
+  if(!modelSelection.isEmpty())
+  {
+    QModelIndex modelIndex = proxyModel->mapToSource(modelSelection.front());
+    EBotMarket* eBotMarket = (EBotMarket*)modelIndex.internalPointer();
+    selection.insert(eBotMarket);
+  }
+  updateToolBarButtons();
+}
+
 void MarketsWidget::marketSelectionChanged()
 {
-  QModelIndexList selection = marketView->selectionModel()->selectedRows();
+  updateSelection();
   if(!selection.isEmpty())
+    botService.selectMarket((*selection.begin())->getId());
+}
+
+void MarketsWidget::marketDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+  QModelIndex index = topLeft;
+  for(int i = topLeft.row(), end = bottomRight.row();;)
   {
-    QModelIndex modelIndex = proxyModel->mapToSource(selection.front());
-    EBotMarket* eBotMarket = (EBotMarket*)modelIndex.internalPointer();
-    botService.selectMarket(eBotMarket->getId());
+    EBotMarket* eBotSession = (EBotMarket*)index.internalPointer();
+    if(selection.contains(eBotSession))
+    {
+      updateSelection();
+      break;
+    }
+    if(i++ == end)
+      break;
+    index = index.sibling(i, 0);
   }
 }
 
