@@ -30,7 +30,7 @@ private:
   SessionTransactionModel transactionModel;
 
   QTreeView* sessionView;
-  QSortFilterProxyModel* sessionProxyModel;
+  QSortFilterProxyModel* proxyModel;
 
   QSet<EBotSession*> selection;
 

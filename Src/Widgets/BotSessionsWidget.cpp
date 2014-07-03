@@ -35,10 +35,10 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
 
   sessionView = new QTreeView(this);
   sessionView->setUniformRowHeights(true);
-  sessionProxyModel = new QSortFilterProxyModel(this);
-  sessionProxyModel->setDynamicSortFilter(true);
-  sessionProxyModel->setSourceModel(&botSessionModel);
-  sessionView->setModel(sessionProxyModel);
+  proxyModel = new QSortFilterProxyModel(this);
+  proxyModel->setDynamicSortFilter(true);
+  proxyModel->setSourceModel(&botSessionModel);
+  sessionView->setModel(proxyModel);
   sessionView->setSortingEnabled(true);
   sessionView->setRootIsDecorated(false);
   sessionView->setAlternatingRowColors(true);
@@ -89,7 +89,7 @@ void BotSessionsWidget::cancelBot()
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
   {
-    QModelIndex index = sessionProxyModel->mapToSource(proxyIndex);
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
     if(eSession->getState() == EBotSession::State::stopped)
       botService.removeSession(eSession->getId());
@@ -103,7 +103,7 @@ void BotSessionsWidget::activate()
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
   {
-    QModelIndex index = sessionProxyModel->mapToSource(proxyIndex);
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
     if(eSession->getState() == EBotSession::State::stopped)
       botService.startSession(eSession->getId());
@@ -115,7 +115,7 @@ void BotSessionsWidget::simulate()
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
   {
-    QModelIndex index = sessionProxyModel->mapToSource(proxyIndex);
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
     if(eSession->getState() == EBotSession::State::stopped)
       botService.startSessionSimulation(eSession->getId());
@@ -127,7 +127,7 @@ void BotSessionsWidget::optimize()
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
   {
-    QModelIndex index = sessionProxyModel->mapToSource(proxyIndex);
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
     if(eSession->getState() == EBotSession::State::stopped)
       botService.startSession(eSession->getId());
@@ -174,7 +174,7 @@ void BotSessionsWidget::updateSelection()
   selection.clear();
   if(!modelSelection.isEmpty())
   {
-    QModelIndex modelIndex = sessionProxyModel->mapToSource(modelSelection.front());
+    QModelIndex modelIndex = proxyModel->mapToSource(modelSelection.front());
     EBotSession* eSession = (EBotSession*)modelIndex.internalPointer();
     selection.insert(eSession);
   }
