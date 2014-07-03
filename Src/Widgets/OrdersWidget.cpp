@@ -189,9 +189,9 @@ void OrdersWidget::orderSelectionChanged()
 {
   QModelIndexList modelSelection = orderView->selectionModel()->selectedRows();
   selection.clear();
-  if(!modelSelection.isEmpty())
+  for(QModelIndexList::Iterator i = modelSelection.begin(), end = modelSelection.end(); i != end; ++i)
   {
-    QModelIndex modelIndex = proxyModel->mapToSource(modelSelection.front());
+    QModelIndex modelIndex = proxyModel->mapToSource(*i);
     EBotMarketOrder* eOrder = (EBotMarketOrder*)modelIndex.internalPointer();
     selection.insert(eOrder);
   }
