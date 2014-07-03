@@ -15,7 +15,8 @@ private slots:
   void newBuyItem();
   void newSellItem();
   void submitItem();
-  void updateToolBarButtons();
+  void itemSelectionChanged();
+  void itemDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
 private:
   QTabFramework& tabFramework;
@@ -28,12 +29,15 @@ private:
   QTreeView* itemView;
   QSortFilterProxyModel* proxyModel;
 
+  QSet<EBotSessionItem*> selection;
+
   QAction* buyAction;
   QAction* sellAction;
   QAction* submitAction;
 
 private:
   void addSessionItemDraft(EBotSessionItem::Type type);
+  void updateToolBarButtons();
 
 private: // Entity::Listener
   virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);

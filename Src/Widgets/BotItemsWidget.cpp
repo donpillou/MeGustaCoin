@@ -47,7 +47,8 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
   layout->addWidget(itemView);
   setLayout(layout);
 
-  connect(itemView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection &, const QItemSelection &)), this, SLOT(updateToolBarButtons()));
+  connect(itemView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(itemSelectionChanged()));
+  connect(&itemModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(itemDataChanged(const QModelIndex&, const QModelIndex&)));
 
   QHeaderView* headerView = itemView->header();
   headerView->resizeSection(0, 50);
@@ -130,6 +131,36 @@ void BotItemsWidget::addSessionItemDraft(EBotSessionItem::Type type)
   itemView->edit(amountIndex);
 }
 
+void BotItemsWidget::itemSelectionChanged()
+{
+  QModelIndexList modelSelection = itemView->selectionModel()->selectedRows();
+  selection.clear();
+  if(!modelSelection.isEmpty())
+  {
+    QModelIndex modelIndex = proxyModel->mapToSource(modelSelection.front());
+    EBotSessionItem* eItem = (EBotSessionItem*)modelIndex.internalPointer();
+    selection.insert(eItem);
+  }
+  updateToolBarButtons();
+}
+
+void BotItemsWidget::itemDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+{
+  QModelIndex index = topLeft;
+  for(int i = topLeft.row(), end = bottomRight.row();;)
+  {
+    EBotSessionItem* eItem = (EBotSessionItem*)index.internalPointer();
+    if(selection.contains(eItem))
+    {
+      itemSelectionChanged();
+      break;
+    }
+    if(i++ == end)
+      break;
+    index = index.sibling(i, 0);
+  }
+}
+
 void BotItemsWidget::updateToolBarButtons()
 {
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
@@ -143,12 +174,10 @@ void BotItemsWidget::updateToolBarButtons()
       sessionRunning = true;
   }
 
-  QModelIndexList selection = itemView->selectionModel()->selectedRows();
   bool draftSelected = false;
-  foreach(const QModelIndex& proxyIndex, selection)
+  for(QSet<EBotSessionItem*>::Iterator i = selection.begin(), end = selection.end(); i != end; ++i)
   {
-    QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    EBotSessionItem* eBotMarketOrder = (EBotSessionItem*)index.internalPointer();
+    EBotSessionItem* eBotMarketOrder = *i;
     if(eBotMarketOrder->getState() == EBotSessionItem::State::draft)
     {
       draftSelected = true;
