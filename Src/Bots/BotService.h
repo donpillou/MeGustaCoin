@@ -34,6 +34,8 @@ public:
 
   EBotSessionItemDraft& createSessionItemDraft(EBotSessionItem::Type type, double flipPrice);
   void submitSessionItemDraft(EBotSessionItemDraft& draft);
+  void cancelSessionItem(EBotSessionItem& item);
+  void removeSessionItemDraft(EBotSessionItemDraft& draft);
 
 private:
   class WorkerThread;

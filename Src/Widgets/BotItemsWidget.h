@@ -15,6 +15,7 @@ private slots:
   void newBuyItem();
   void newSellItem();
   void submitItem();
+  void cancelItem();
   void itemSelectionChanged();
   void itemDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
 
@@ -34,6 +35,7 @@ private:
   QAction* buyAction;
   QAction* sellAction;
   QAction* submitAction;
+  QAction* cancelAction;
 
 private:
   void addSessionItemDraft(EBotSessionItem::Type type);

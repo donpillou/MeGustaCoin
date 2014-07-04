@@ -28,6 +28,11 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
   submitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_U));
   connect(submitAction, SIGNAL(triggered()), this, SLOT(submitItem()));
 
+  cancelAction = toolBar->addAction(QIcon(":/Icons/cancel2.png"), tr("&Cancel"));
+  cancelAction->setEnabled(false);
+  cancelAction->setShortcut(QKeySequence(Qt::Key_Delete));
+  connect(cancelAction, SIGNAL(triggered()), this, SLOT(cancelItem()));
+
   itemView = new QTreeView(this);
   itemView->setUniformRowHeights(true);
   proxyModel = new SessionItemSortProxyModel(this);
@@ -102,6 +107,43 @@ void BotItemsWidget::submitItem()
   }
 }
 
+void BotItemsWidget::cancelItem()
+{
+  QModelIndexList selection = itemView->selectionModel()->selectedRows();
+  QList<EBotSessionItem*> itemsToRemove;
+  QList<EBotSessionItem*> itemsToCancel;
+  foreach(const QModelIndex& proxyIndex, selection)
+  {
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
+    EBotSessionItem* eItem = (EBotSessionItem*)index.internalPointer();
+    switch(eItem->getState())
+    {
+    case EBotSessionItem::State::draft:
+      itemsToRemove.append(eItem);
+      break;
+    case EBotSessionItem::State::waitBuy:
+    case EBotSessionItem::State::waitSell:
+      itemsToCancel.append(eItem);
+      break;
+    default:
+      break;
+    }
+  }
+  while(!itemsToCancel.isEmpty())
+  {
+    QList<EBotSessionItem*>::Iterator last = --itemsToCancel.end();
+    botService.cancelSessionItem(*(EBotSessionItem*)*last);
+    itemsToCancel.erase(last);
+  }
+  while(!itemsToRemove.isEmpty())
+  {
+    QList<EBotSessionItem*>::Iterator last = --itemsToRemove.end();
+    botService.removeSessionItemDraft(*(EBotSessionItemDraft*)*last);
+    itemsToRemove.erase(last);
+  }
+
+}
+
 void BotItemsWidget::addSessionItemDraft(EBotSessionItem::Type type)
 {
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
@@ -167,6 +209,8 @@ void BotItemsWidget::updateToolBarButtons()
   bool connected = eBotService->getState() == EBotService::State::connected;
   bool sessionSelected = connected && eBotService->getSelectedSessionId() != 0;
   bool sessionRunning = false;
+  bool canCancel = !selection.isEmpty();
+
   if(sessionSelected)
   {
     EBotSession* eSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
@@ -188,6 +232,7 @@ void BotItemsWidget::updateToolBarButtons()
   buyAction->setEnabled(sessionSelected);
   sellAction->setEnabled(sessionSelected);
   submitAction->setEnabled(draftSelected && sessionRunning);
+  cancelAction->setEnabled(canCancel);
 }
 
 void BotItemsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)

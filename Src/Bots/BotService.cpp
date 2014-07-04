@@ -321,6 +321,23 @@ void BotService::submitSessionItemDraft(EBotSessionItemDraft& draft)
   createEntity(draft.getId(), &sessionItem, sizeof(sessionItem));
 }
 
+void BotService::cancelSessionItem(EBotSessionItem& item)
+{
+  removeEntity(0, BotProtocol::sessionItem, item.getId());
+}
+
+void BotService::removeSessionItemDraft(EBotSessionItemDraft& draft)
+{
+  switch(draft.getState())
+  {
+  case EBotSessionItem::State::draft:
+    break;
+  default:
+    return;
+  }
+  entityManager.removeEntity<EBotSessionItemDraft>(draft.getId());
+}
+
 void BotService::addLogMessage(ELogMessage::Type type, const QString& message)
 {
   ELogMessage* logMessage = new ELogMessage(type, message);
