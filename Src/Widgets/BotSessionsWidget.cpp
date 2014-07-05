@@ -17,9 +17,9 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
   addAction->setEnabled(false);
   connect(addAction, SIGNAL(triggered()), this, SLOT(addBot()));
 
-  optimizeAction = toolBar->addAction(QIcon(":/Icons/chart_curve.png"), tr("&Optimize"));
-  optimizeAction->setEnabled(false);
-  connect(optimizeAction, SIGNAL(triggered()), this, SLOT(optimize()));
+  //optimizeAction = toolBar->addAction(QIcon(":/Icons/chart_curve.png"), tr("&Optimize"));
+  //optimizeAction->setEnabled(false);
+  //connect(optimizeAction, SIGNAL(triggered()), this, SLOT(optimize()));
 
   simulateAction = toolBar->addAction(QIcon(":/Icons/user_gray_go_gray.png"), tr("&Simulate"));
   simulateAction->setEnabled(false);
