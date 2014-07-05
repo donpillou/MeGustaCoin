@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 SessionItemModel::SessionItemModel(Entity::Manager& entityManager) :
-  entityManager(entityManager), draftStr(tr("draft")), submittingStr(tr("submitting...")),
+  entityManager(entityManager), draftStr(tr("draft")),
   buyStr(tr("buy")), sellStr(tr("sell")),
   buyingStr(tr("buying...")), sellingStr(tr("selling...")),
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
@@ -139,8 +139,6 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
         return sellingStr;
       case EBotSessionItem::State::draft:
         return draftStr;
-      case EBotSessionItem::State::submitting:
-        return submittingStr;
       default:
         break;
       }

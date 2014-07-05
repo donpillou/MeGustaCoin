@@ -29,7 +29,6 @@ private:
   EBotMarketAdapter* eBotMarketAdapter;
   QList<EBotSessionItem*> items;
   QVariant draftStr;
-  QVariant submittingStr;
   QVariant buyStr;
   QVariant sellStr;
   QVariant buyingStr;

@@ -21,7 +21,6 @@ public:
     waitSell = BotProtocol::SessionItem::waitSell,
     selling = BotProtocol::SessionItem::selling,
     draft,
-    submitting,
   };
 
 public:

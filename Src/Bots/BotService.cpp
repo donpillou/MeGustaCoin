@@ -307,8 +307,6 @@ void BotService::submitSessionItemDraft(EBotSessionItemDraft& draft)
 {
   if(draft.getState() != EBotSessionItemDraft::State::draft)
     return;
-  draft.setState(EBotSessionItemDraft::State::submitting);
-  entityManager.updatedEntity(draft);
 
   BotProtocol::SessionItem sessionItem;
   sessionItem.entityType = BotProtocol::sessionItem;
