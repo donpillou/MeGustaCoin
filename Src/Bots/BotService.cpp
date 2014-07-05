@@ -319,6 +319,18 @@ void BotService::submitSessionItemDraft(EBotSessionItemDraft& draft)
   createEntity(draft.getId(), &sessionItem, sizeof(sessionItem));
 }
 
+void BotService::updateSessionItem(EBotSessionItem& item, double flipPrice)
+{
+  if(item.getState() != EBotSessionItem::State::waitBuy && item.getState() != EBotSessionItem::State::waitSell)
+    return;
+
+  BotProtocol::SessionItem updatedItem;
+  updatedItem.entityType = BotProtocol::sessionItem;
+  updatedItem.entityId = item.getId();
+  updatedItem.flipPrice = flipPrice;
+  updateEntity(0, &updatedItem, sizeof(updatedItem));
+}
+
 void BotService::cancelSessionItem(EBotSessionItem& item)
 {
   removeEntity(0, BotProtocol::sessionItem, item.getId());

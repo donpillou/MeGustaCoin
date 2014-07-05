@@ -34,6 +34,7 @@ public:
 
   EBotSessionItemDraft& createSessionItemDraft(EBotSessionItem::Type type, double flipPrice);
   void submitSessionItemDraft(EBotSessionItemDraft& draft);
+  void updateSessionItem(EBotSessionItem& item, double flipPrice);
   void cancelSessionItem(EBotSessionItem& item);
   void removeSessionItemDraft(EBotSessionItemDraft& draft);
 

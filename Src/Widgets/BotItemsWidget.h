@@ -18,6 +18,7 @@ private slots:
   void cancelItem();
   void itemSelectionChanged();
   void itemDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+  void editedItemFlipPrice(const QModelIndex& index, double price);
 
 private:
   QTabFramework& tabFramework;

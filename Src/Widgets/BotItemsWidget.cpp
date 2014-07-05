@@ -54,6 +54,7 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
 
   connect(itemView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(itemSelectionChanged()));
   connect(&itemModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(itemDataChanged(const QModelIndex&, const QModelIndex&)));
+  connect(&itemModel, SIGNAL(editedItemFlipPrice(const QModelIndex&, double)), this, SLOT(editedItemFlipPrice(const QModelIndex&, double)));
 
   QHeaderView* headerView = itemView->header();
   headerView->resizeSection(0, 50);
@@ -201,6 +202,12 @@ void BotItemsWidget::itemDataChanged(const QModelIndex& topLeft, const QModelInd
       break;
     index = index.sibling(i, 0);
   }
+}
+
+void BotItemsWidget::editedItemFlipPrice(const QModelIndex& index, double flipPrice)
+{
+  EBotSessionItem* eitem = (EBotSessionItem*)index.internalPointer();
+  botService.updateSessionItem(*eitem, flipPrice);
 }
 
 void BotItemsWidget::updateToolBarButtons()

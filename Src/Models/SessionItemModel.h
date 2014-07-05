@@ -3,6 +3,8 @@
 
 class SessionItemModel : public QAbstractItemModel, public Entity::Listener
 {
+Q_OBJECT
+
 public:
   enum class Column
   {
@@ -24,9 +26,14 @@ public:
 
   QModelIndex getDraftAmountIndex(EBotSessionItemDraft& draft);
 
+signals:
+  void editedItemFlipPrice(const QModelIndex& index, double price);
+
 private:
   Entity::Manager& entityManager;
   EBotMarketAdapter* eBotMarketAdapter;
+  EBotService* eBotService;
+  EBotSession* eSelectedSession;
   QList<EBotSessionItem*> items;
   QVariant draftStr;
   QVariant buyStr;

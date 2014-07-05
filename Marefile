@@ -42,6 +42,7 @@ targets = {
       "Src/Widgets/BotItemsWidget.h"
       "Src/Models/MarketOrderModel.h"
       "Src/Models/GraphModel.h"
+      "Src/Models/SessionItemModel.h"
       "Src/Markets/DataService.h"
       "Src/Bots/BotService.h"
       "Src/MainWindow.h"
