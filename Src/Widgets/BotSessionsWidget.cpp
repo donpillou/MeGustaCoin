@@ -92,7 +92,11 @@ void BotSessionsWidget::cancelBot()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
     if(eSession->getState() == EBotSession::State::stopped)
+    {
+      if(QMessageBox::question(this, tr("Delete Session"), tr("Do you really want to delete the selected session?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
+          return;
       botService.removeSession(eSession->getId());
+    }
     else
       botService.stopSession(eSession->getId());
   }
