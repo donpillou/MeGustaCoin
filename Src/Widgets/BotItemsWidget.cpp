@@ -209,7 +209,6 @@ void BotItemsWidget::updateToolBarButtons()
   bool connected = eBotService->getState() == EBotService::State::connected;
   bool sessionSelected = connected && eBotService->getSelectedSessionId() != 0;
   bool sessionRunning = false;
-  bool canCancel = !selection.isEmpty();
 
   if(sessionSelected)
   {
@@ -219,14 +218,18 @@ void BotItemsWidget::updateToolBarButtons()
   }
 
   bool draftSelected = false;
+  bool canCancel = false;
   for(QSet<EBotSessionItem*>::Iterator i = selection.begin(), end = selection.end(); i != end; ++i)
   {
     EBotSessionItem* eBotMarketOrder = *i;
     if(eBotMarketOrder->getState() == EBotSessionItem::State::draft)
     {
       draftSelected = true;
+      canCancel = true;
       break;
     }
+    else if(sessionRunning)
+      canCancel = true;
   }
 
   buyAction->setEnabled(sessionSelected);
