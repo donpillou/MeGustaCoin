@@ -33,6 +33,7 @@ public:
     amount = data.amount;
     profitablePrice = data.profitablePrice;
     flipPrice = data.flipPrice;
+    orderId = data.orderId;
   }
   EBotSessionItem(quint32 id, const EBotSessionItemDraft& sessionItem);
 
@@ -46,6 +47,7 @@ public:
   double getProfitablePrice() const {return profitablePrice;}
   double getFlipPrice() const {return flipPrice;}
   void setFlipPrice(double flipPrice) {this->flipPrice = flipPrice;}
+  quint32 getOrderId() const {return orderId;}
 
 protected:
   EBotSessionItem(EType type, quint32 id) : Entity(type, id) {}
@@ -58,4 +60,5 @@ protected:
   double amount; // >= 0
   double profitablePrice;
   double flipPrice;
+  quint32 orderId;
 };

@@ -16,5 +16,6 @@ public:
     this->amount = 0.;
     this->profitablePrice = 0.;
     this->flipPrice = flipPrice;
+    this->orderId = 0;
   }
 };

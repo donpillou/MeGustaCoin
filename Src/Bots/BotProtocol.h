@@ -215,6 +215,7 @@ public:
     double amount;
     double profitablePrice;
     double flipPrice;
+    quint32 orderId;
   };
 
   struct ControlSession : public Entity
