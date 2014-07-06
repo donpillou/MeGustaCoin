@@ -32,8 +32,6 @@ signals:
 private:
   Entity::Manager& entityManager;
   EBotMarketAdapter* eBotMarketAdapter;
-  EBotService* eBotService;
-  EBotSession* eSelectedSession;
   QList<EBotSessionItem*> items;
   QVariant draftStr;
   QVariant buyStr;

@@ -215,33 +215,22 @@ void BotItemsWidget::updateToolBarButtons()
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
   bool connected = eBotService->getState() == EBotService::State::connected;
   bool sessionSelected = connected && eBotService->getSelectedSessionId() != 0;
-  bool sessionRunning = false;
-
-  if(sessionSelected)
-  {
-    EBotSession* eSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
-    if(eSession->getState() == EBotSession::State::running || eSession->getState() == EBotSession::State::simulating)
-      sessionRunning = true;
-  }
+  bool canCancel = !selection.isEmpty();
 
   bool draftSelected = false;
-  bool canCancel = false;
   for(QSet<EBotSessionItem*>::Iterator i = selection.begin(), end = selection.end(); i != end; ++i)
   {
     EBotSessionItem* eBotMarketOrder = *i;
     if(eBotMarketOrder->getState() == EBotSessionItem::State::draft)
     {
       draftSelected = true;
-      canCancel = true;
       break;
     }
-    else if(sessionRunning)
-      canCancel = true;
   }
 
   buyAction->setEnabled(sessionSelected);
   sellAction->setEnabled(sessionSelected);
-  submitAction->setEnabled(draftSelected && sessionRunning);
+  submitAction->setEnabled(draftSelected);
   cancelAction->setEnabled(canCancel);
 }
 
