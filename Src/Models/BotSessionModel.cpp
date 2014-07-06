@@ -117,7 +117,7 @@ QVariant BotSessionModel::data(const QModelIndex& index, int role) const
               eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
           }
         }
-        return eBotMarketAdapter ? eBotMarketAdapter->formatPrice(eBotSessionBalance->getAvailableBtc()) : QString();
+        return eBotMarketAdapter ? eBotMarketAdapter->formatAmount(eBotSessionBalance->getAvailableBtc()) : QString();
       }
     }
   }
