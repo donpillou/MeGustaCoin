@@ -27,6 +27,7 @@ private:
 private:
   Entity::Manager& entityManager;
   QList<Item*> messages;
+  QVariant informationIcon;
   QString dateFormat;
 
 private: // QAbstractItemModel

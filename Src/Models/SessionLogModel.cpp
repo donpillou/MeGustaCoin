@@ -3,6 +3,7 @@
 
 SessionLogModel::SessionLogModel(Entity::Manager& entityManager) :
   entityManager(entityManager),
+  informationIcon(QIcon(":/Icons/information.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
   entityManager.registerListener<EBotSessionLogMessage>(*this);
@@ -45,6 +46,10 @@ QVariant SessionLogModel::data(const QModelIndex& index, int role) const
 
   switch(role)
   {
+  case Qt::DecorationRole:
+    if((Column)index.column() == Column::message)
+      return informationIcon;
+    break;
   case Qt::DisplayRole:
     switch((Column)index.column())
     {
