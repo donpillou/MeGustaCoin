@@ -632,7 +632,7 @@ void GraphView::drawMarkers(QPainter& painter, const QRect& rect, double vmin, d
   globalEntityManager.getAllEntities<EBotSessionMarker>(markersUnsorted); // todo: optimize this by keeping markersUnsorted as member variable
   if(markersUnsorted.isEmpty())
     return;
-  QMap<quint64, EBotSessionMarker::Type> markers;
+  QMultiMap<quint64, EBotSessionMarker::Type> markers;
   foreach(EBotSessionMarker* marker, markersUnsorted)
     markers.insert(marker->getDate() / 1000, marker->getType());
 
