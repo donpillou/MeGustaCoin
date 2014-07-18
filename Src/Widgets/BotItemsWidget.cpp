@@ -130,6 +130,17 @@ void BotItemsWidget::cancelItem()
       break;
     }
   }
+  if(!itemsToCancel.isEmpty())
+  {
+    if(itemsToCancel.size() == 1)
+    {
+      if(QMessageBox::question(this, tr("Delete Item"), tr("Do you really want to delete the selected item?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+        return;
+    }
+    else if(QMessageBox::question(this, tr("Delete Items"), tr("Do you really want to delete the selected items?"), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+      return;
+  }
+
   while(!itemsToCancel.isEmpty())
   {
     QList<EBotSessionItem*>::Iterator last = --itemsToCancel.end();
