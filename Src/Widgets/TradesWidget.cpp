@@ -7,6 +7,8 @@ TradesWidget::TradesWidget(QTabFramework& tabFramework, QSettings& settings, con
 {
   channelEntityManager.registerListener<EDataSubscription>(*this);
 
+  connect(&tradeModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)), this, SLOT(rowsAboutToBeRemoved(const QModelIndex&, int, int)));
+
   tradeView = new QTreeView(this);
   tradeView->setUniformRowHeights(true);
   tradeView->setModel(&tradeModel);
@@ -59,6 +61,21 @@ void TradesWidget::updateTitle()
 
   setWindowTitle(title);
   tabFramework.toggleViewAction(this)->setText(tr("Live Trades"));
+}
+
+void TradesWidget::rowsAboutToBeRemoved(const QModelIndex& parent, int start, int end)
+{
+  // ensure the rows to be removed are not selected. otherwise the remove operation will mess up the scroll position.
+  QModelIndexList selection = tradeView->selectionModel()->selectedRows();
+  for(QModelIndexList::Iterator i = selection.begin(), iend = selection.end(); i != iend; ++i)
+  {
+    int row = i->row();
+    if(row >= start && row <= end)
+    {
+      tradeView->selectionModel()->clear();
+      return;
+    }
+  }
 }
 
 void TradesWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)

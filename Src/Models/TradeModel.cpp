@@ -126,16 +126,18 @@ void TradeModel::addedEntity(Entity& entity)
   {
     const QList<DataProtocol::Trade>& data = eDataTradeData->getData();
 
+    const int totalMaxTrades = 500;
+
     double lastPrice = 0.;
     int tradesToInsert = data.size();
     if(tradesToInsert == 0)
       return;
     bool isEmpty = trades.isEmpty();
-    int maxTrades = isEmpty ? 100 : 500;
+    int maxTrades = isEmpty ? 100 : totalMaxTrades;
     if(tradesToInsert > maxTrades)
     {
+      lastPrice = data[tradesToInsert - maxTrades - 1].price;
       tradesToInsert = maxTrades;
-      lastPrice = data[maxTrades].price;
     }
     else if(!isEmpty)
       lastPrice = trades.front()->price;
@@ -163,15 +165,15 @@ void TradeModel::addedEntity(Entity& entity)
     }
     endInsertRows();
 
-    int tradesToRemove = trades.size() - 500;
+    int tradesToRemove = trades.size() - totalMaxTrades;
     if(tradesToRemove > 0)
     {
-      beginRemoveRows(QModelIndex(), 500, 500 + tradesToRemove - 1);
+      beginRemoveRows(QModelIndex(), totalMaxTrades, totalMaxTrades + tradesToRemove - 1);
       for(int i = trades.size() - 1;; --i)
       {
         delete trades.back();
         trades.removeLast();
-        if(i == 500)
+        if(i == totalMaxTrades)
           break;
       }
       endRemoveRows();

@@ -40,6 +40,7 @@ targets = {
       "Src/Widgets/LogWidget.h"
       "Src/Widgets/GraphWidget.h"
       "Src/Widgets/BotItemsWidget.h"
+      "Src/Widgets/TradesWidget.h"
       "Src/Models/MarketOrderModel.h"
       "Src/Models/GraphModel.h"
       "Src/Models/SessionItemModel.h"
