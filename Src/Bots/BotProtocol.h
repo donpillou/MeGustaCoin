@@ -48,6 +48,7 @@ public:
     marketOrder,
     marketBalance,
     sessionItem,
+    sessionProperty,
   };
 
 #pragma pack(push, 4)
@@ -216,6 +217,26 @@ public:
     double profitablePrice;
     double flipPrice;
     quint32 orderId;
+  };
+
+  struct SessionProperty : public Entity
+  {
+    enum Type
+    {
+      number,
+      string,
+    };
+    enum Flag
+    {
+      none = 0x00,
+      readOnly = 0x01,
+    };
+
+    quint8 type;
+    quint32 flags;
+    char name[33];
+    char value[33];
+    char unit[17];
   };
 
   struct ControlSession : public Entity

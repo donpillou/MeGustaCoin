@@ -12,6 +12,7 @@ enum class EType
   botSessionItemDraft,
   botSessionLogMessage,
   botSessionBalance,
+  botSessionProperty,
   botService,
   botEngine,
   botSession,

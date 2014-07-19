@@ -20,6 +20,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   botTransactionsWidget = new BotTransactionsWidget(*this, settings, globalEntityManager);
   botItemsWidget = new BotItemsWidget(*this, settings, globalEntityManager, botService, dataService);
   botOrdersWidget = new BotOrdersWidget(*this, settings, globalEntityManager);
+  botPropertiesWidget = new BotPropertiesWidget(*this, settings, globalEntityManager);
   botLogWidget = new BotLogWidget(*this, settings, globalEntityManager);
   logWidget = new LogWidget(this, settings, globalEntityManager);
 
@@ -34,8 +35,9 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   //addTab(graphWidget);
   addTab(botSessionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botTransactionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  addTab(botItemsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
+  addTab(botItemsWidget, QTabFramework::InsertOnTop, transactionsWidget);
+  addTab(botPropertiesWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botLogWidget, QTabFramework::InsertOnTop, transactionsWidget);
 
   QMenuBar* menuBar = this->menuBar();
@@ -137,6 +139,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   botTransactionsWidget->saveState(settings);
   botItemsWidget->saveState(settings);
   botOrdersWidget->saveState(settings);
+  botPropertiesWidget->saveState(settings);
   botLogWidget->saveState(settings);
   logWidget->saveState(settings);
 
@@ -231,8 +234,9 @@ void MainWindow::updateViewMenu()
   viewMenu->addSeparator();
   viewMenu->addAction(toggleViewAction(botSessionsWidget));
   viewMenu->addAction(toggleViewAction(botTransactionsWidget));
-  viewMenu->addAction(toggleViewAction(botItemsWidget));
   viewMenu->addAction(toggleViewAction(botOrdersWidget));
+  viewMenu->addAction(toggleViewAction(botItemsWidget));
+  viewMenu->addAction(toggleViewAction(botPropertiesWidget));
   viewMenu->addAction(toggleViewAction(botLogWidget));
   viewMenu->addSeparator();
   viewMenu->addAction(toggleViewAction(logWidget));

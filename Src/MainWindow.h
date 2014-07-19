@@ -18,6 +18,7 @@ private:
   BotTransactionsWidget* botTransactionsWidget;
   BotItemsWidget* botItemsWidget;
   BotOrdersWidget* botOrdersWidget;
+  BotPropertiesWidget* botPropertiesWidget;
   BotLogWidget* botLogWidget;
   TransactionsWidget* transactionsWidget;
   //GraphWidget* graphWidget;
