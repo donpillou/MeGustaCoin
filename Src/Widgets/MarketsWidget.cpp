@@ -43,12 +43,12 @@ MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, E
   QHeaderView* headerView = marketView->header();
   headerView->resizeSection(0, 100);
   headerView->resizeSection(1, 60);
-  headerView->setStretchLastSection(false);
-  headerView->setResizeMode(0, QHeaderView::Stretch);
   marketView->sortByColumn(0);
   settings.beginGroup("Markets");
   headerView->restoreState(settings.value("HeaderState").toByteArray());
   settings.endGroup();
+  headerView->setStretchLastSection(false);
+  headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
 MarketsWidget::~MarketsWidget()

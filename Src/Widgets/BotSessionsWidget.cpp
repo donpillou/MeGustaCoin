@@ -56,11 +56,11 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
   //headerView->resizeSection(0, 300);
   headerView->resizeSection((int)BotSessionModel::Column::balanceBase, 85);
   headerView->resizeSection((int)BotSessionModel::Column::balanceComm, 85);
-  headerView->setStretchLastSection(false);
-  headerView->setResizeMode(0, QHeaderView::Stretch);
   settings.beginGroup("BotSessions");
   headerView->restoreState(settings.value("HeaderState").toByteArray());
   settings.endGroup();
+  headerView->setStretchLastSection(false);
+  headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
 BotSessionsWidget::~BotSessionsWidget()

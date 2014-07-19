@@ -68,12 +68,12 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
   headerView->resizeSection(4, 100);
   headerView->resizeSection(5, 85);
   headerView->resizeSection(6, 85);
-  headerView->setStretchLastSection(false);
-  headerView->setResizeMode(0, QHeaderView::Stretch);
   orderView->sortByColumn(2);
   settings.beginGroup("Orders");
   headerView->restoreState(settings.value("HeaderState").toByteArray());
   settings.endGroup();
+  headerView->setStretchLastSection(false);
+  headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
 OrdersWidget::~OrdersWidget()

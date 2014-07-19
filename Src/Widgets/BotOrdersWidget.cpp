@@ -31,12 +31,12 @@ BotOrdersWidget::BotOrdersWidget(QTabFramework& tabFramework, QSettings& setting
   headerView->resizeSection(3, 100);
   headerView->resizeSection(4, 85);
   headerView->resizeSection(5, 85);
-  headerView->setStretchLastSection(false);
-  headerView->setResizeMode(0, QHeaderView::Stretch);
   orderView->sortByColumn(1);
   settings.beginGroup("BotOrders");
   headerView->restoreState(settings.value("HeaderState").toByteArray());
   settings.endGroup();
+  headerView->setStretchLastSection(false);
+  headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
 

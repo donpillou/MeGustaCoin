@@ -25,13 +25,13 @@ TradesWidget::TradesWidget(QTabFramework& tabFramework, QSettings& settings, con
   headerView->resizeSection(0, 110);
   headerView->resizeSection(1, 105);
   headerView->resizeSection(2, 105);
-  headerView->setStretchLastSection(false);
-  headerView->setResizeMode(1, QHeaderView::Stretch);
   settings.beginGroup("LiveTrades");
   settings.beginGroup(channelName);
   headerView->restoreState(settings.value("HeaderState").toByteArray());
   settings.endGroup();
   settings.endGroup();
+  headerView->setStretchLastSection(false);
+  headerView->setResizeMode(1, QHeaderView::Stretch);
 }
 
 TradesWidget::~TradesWidget()

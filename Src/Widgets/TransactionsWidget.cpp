@@ -43,12 +43,12 @@ TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& s
   headerView->resizeSection(4, 85);
   headerView->resizeSection(5, 75);
   headerView->resizeSection(6, 85);
-  headerView->setStretchLastSection(false);
-  headerView->setResizeMode(0, QHeaderView::Stretch);
   transactionView->sortByColumn(1);
   settings.beginGroup("Transactions");
   headerView->restoreState(settings.value("HeaderState").toByteArray());
   settings.endGroup();
+  headerView->setStretchLastSection(false);
+  headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
 TransactionsWidget::~TransactionsWidget()
