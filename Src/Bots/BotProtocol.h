@@ -129,7 +129,7 @@ public:
     qint64 date;
     double price;
     double amount;
-    double fee;
+    double total;
   };
 
   struct Order : public Entity
@@ -144,7 +144,7 @@ public:
     qint64 date;
     double price;
     double amount;
-    double fee;
+    double total;
     qint64 timeout;
   };
 
@@ -251,6 +251,7 @@ public:
       requestOrders,
       requestBalance,
       requestItems,
+      requestProperties,
     };
 
     quint8 cmd;

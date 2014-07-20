@@ -20,17 +20,8 @@ public:
     date = QDateTime::fromMSecsSinceEpoch(data.date);
     price = data.price;
     amount = data.amount;
-    fee = data.fee;
-
-    switch(type)
-    {
-    case Type::buy:
-      total = -(price * amount + fee);
-      break;
-    case Type::sell:
-      total = price * amount - fee;
-      break;
-    }
+    total = data.total;
+    fee = qAbs(total - price * amount);
   }
 
   Type getType() const {return type;}

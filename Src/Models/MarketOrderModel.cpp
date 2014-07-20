@@ -131,7 +131,7 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
       }
       break;
     case Column::total:
-        return eOrder->getTotal() > 0 ? (QString("+") + eBotMarketAdapter->formatPrice(eOrder->getTotal())) : eBotMarketAdapter->formatPrice(eOrder->getTotal());
+        return eOrder->getType() == EBotMarketOrder::Type::sell ? (QString("+") + eBotMarketAdapter->formatPrice(eOrder->getTotal())) : eBotMarketAdapter->formatPrice(-eOrder->getTotal());
     }
   }
   return QVariant();
@@ -174,10 +174,14 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
         return false;
       if(eOrder->getState() == EBotMarketOrder::State::draft)
       {
-        eOrder->setPrice(newPrice);
         EBotMarketBalance* eBotMarketBalance = entityManager.getEntity<EBotMarketBalance>(0);
         if(eBotMarketBalance)
-          eOrder->setFee(qCeil(eOrder->getAmount() * eOrder->getPrice() * eBotMarketBalance->getFee() * 100.) / 100.);
+        {
+          double total = eOrder->getType() == EBotMarketOrder::Type::buy ?
+            qCeil(eOrder->getAmount() * newPrice * (1. + eBotMarketBalance->getFee()) * 100.) / 100. :
+            qFloor(eOrder->getAmount() * newPrice * (1. - eBotMarketBalance->getFee()) * 100.) / 100.;
+          eOrder->setPrice(newPrice, total);
+        }
       }
       else if(eOrder->getState() == EBotMarketOrder::State::open)
       {
@@ -193,10 +197,14 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
         return false;
       if(eOrder->getState() == EBotMarketOrder::State::draft)
       {
-        eOrder->setAmount(newAmount);
         EBotMarketBalance* eBotMarketBalance = entityManager.getEntity<EBotMarketBalance>(0);
         if(eBotMarketBalance)
-          eOrder->setFee(qCeil(eOrder->getAmount() * eOrder->getPrice() * eBotMarketBalance->getFee() * 100.) / 100.);
+        {
+          double total = eOrder->getType() == EBotMarketOrder::Type::buy ?
+            qCeil(newAmount * eOrder->getPrice() * (1. + eBotMarketBalance->getFee()) * 100.) / 100. :
+            qFloor(newAmount * eOrder->getPrice() * (1. - eBotMarketBalance->getFee()) * 100.) / 100.;
+          eOrder->setAmount(newAmount, total);
+        }
       }
       else if(eOrder->getState() == EBotMarketOrder::State::open)
       {

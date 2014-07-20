@@ -33,9 +33,8 @@ public:
     date = QDateTime::fromMSecsSinceEpoch(data.date);
     price = data.price;
     amount = data.amount;
-    fee = data.fee;
-
-    updateTotal();
+    total = data.total;
+    fee = qAbs(total - price * amount);
     state = State::open;
   }
   EBotMarketOrder(quint32 id, const EBotMarketOrderDraft& order);
@@ -43,23 +42,20 @@ public:
   Type getType() const {return type;}
   const QDateTime& getDate() const {return date;}
   double getPrice() const {return price;}
-  void setPrice(double price)
+  void setPrice(double price, double total)
   {
     this->price = price;
-    updateTotal();
+    this->total = total;
+    fee = qAbs(total - price * amount);
   }
   double getAmount() const {return amount;}
-  void setAmount(double amount)
+  void setAmount(double amount, double total)
   {
     this->amount = amount;
-    updateTotal();
+    this->total = total;
+    fee = qAbs(total - price * amount);
   }
   double getFee() const {return fee;}
-  void setFee(double fee)
-  {
-    this->fee = fee;
-    updateTotal();
-  }
   double getTotal() const {return total;}
   State getState() const {return state;}
   void setState(State state) {this->state = state;}
@@ -75,17 +71,4 @@ protected:
   double fee;
   double total;
   State state;
-
-  void updateTotal()
-  {
-    switch(type)
-    {
-    case Type::buy:
-      total = -(price * amount + fee);
-      break;
-    case Type::sell:
-      total = price * amount - fee;
-      break;
-    }
-  }
 };

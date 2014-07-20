@@ -95,7 +95,7 @@ QVariant SessionTransactionModel::data(const QModelIndex& index, int role) const
     case Column::fee:
       return eBotMarketAdapter->formatPrice(eTransaction->getFee());
     case Column::total:
-      return eTransaction->getTotal() > 0 ? (QString("+") + eBotMarketAdapter->formatPrice(eTransaction->getTotal())) : eBotMarketAdapter->formatPrice(eTransaction->getTotal());
+      return eTransaction->getType() == EBotSessionTransaction::Type::sell ? (QString("+") + eBotMarketAdapter->formatPrice(eTransaction->getTotal())) : eBotMarketAdapter->formatPrice(-eTransaction->getTotal());
     }
   }
   return QVariant();

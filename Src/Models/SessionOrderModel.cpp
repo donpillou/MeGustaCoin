@@ -93,7 +93,7 @@ QVariant SessionOrderModel::data(const QModelIndex& index, int role) const
     case Column::value:
       return eBotMarketAdapter->formatPrice(eOrder->getAmount() * eOrder->getPrice());
     case Column::total:
-        return eOrder->getTotal() > 0 ? (QString("+") + eBotMarketAdapter->formatPrice(eOrder->getTotal())) : eBotMarketAdapter->formatPrice(eOrder->getTotal());
+        return eOrder->getType() == EBotSessionOrder::Type::sell ? (QString("+") + eBotMarketAdapter->formatPrice(eOrder->getTotal())) : eBotMarketAdapter->formatPrice(-eOrder->getTotal());
     }
   }
   return QVariant();
