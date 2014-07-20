@@ -13,8 +13,8 @@ public:
     this->state = State::draft;
     this->date = date;
     this->price = 0.;
-    this->amount = 0.;
-    this->total = 0.;
+    this->balanceComm = 0.;
+    this->balanceBase = 0.;
     this->profitablePrice = 0.;
     this->flipPrice = flipPrice;
     this->orderId = 0;

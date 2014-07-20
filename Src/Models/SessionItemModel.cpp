@@ -23,7 +23,7 @@ SessionItemModel::~SessionItemModel()
 QModelIndex SessionItemModel::getDraftAmountIndex(EBotSessionItemDraft& draft)
 {
   int index = items.indexOf(&draft);
-  return createIndex(index, (int)Column::amount, &draft);
+  return createIndex(index, (int)(draft.getType() == EBotSessionItem::Type::buy ? Column::balanceBase : Column::balanceComm), &draft);
 }
 
 QModelIndex SessionItemModel::index(int row, int column, const QModelIndex& parent) const
@@ -60,9 +60,8 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     switch((Column)index.column())
     {
     case Column::price:
-    case Column::value:
-    case Column::amount:
-    case Column::total:
+    case Column::balanceBase:
+    case Column::balanceComm:
     case Column::profitablePrice:
     case Column::flipPrice:
       return (int)Qt::AlignRight | (int)Qt::AlignVCenter;
@@ -105,8 +104,10 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
   case Qt::EditRole:
     switch((Column)index.column())
     {
-    case Column::amount:
-      return eItem->getAmount();
+    case Column::balanceBase:
+      return eItem->getBalanceBase();
+    case Column::balanceComm:
+      return eItem->getBalanceComm();
     case Column::flipPrice:
       return eItem->getFlipPrice();
     default:
@@ -146,32 +147,12 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
       break;
     case Column::date:
       return eItem->getDate().toString(dateFormat);
-    case Column::amount:
-      return eBotMarketAdapter->formatAmount(eItem->getAmount());
+    case Column::balanceBase:
+      return eBotMarketAdapter->formatPrice(eItem->getBalanceBase());
+    case Column::balanceComm:
+      return eBotMarketAdapter->formatAmount(eItem->getBalanceComm());
     case Column::price:
       return eItem->getPrice() == 0 ? QString() : eBotMarketAdapter->formatPrice(eItem->getPrice());
-    case Column::value:
-      return eItem->getPrice() == 0 ? QString() : eBotMarketAdapter->formatPrice(eItem->getAmount() * eItem->getPrice());
-    case Column::total:
-      {
-        if(eItem->getTotal() == 0.)
-          return QString();
-        EBotSessionItem::Type lastType = eItem->getType();
-        switch(eItem->getState())
-        {
-        case EBotSessionItem::State::waitBuy:
-        case EBotSessionItem::State::buying:
-          lastType = EBotSessionItem::Type::sell;
-          break;
-        case EBotSessionItem::State::waitSell:
-        case EBotSessionItem::State::selling:
-          lastType = EBotSessionItem::Type::buy;
-          break;
-        default:
-          break;
-        }
-        return lastType == EBotSessionItem::Type::sell ? (QString("+") + eBotMarketAdapter->formatPrice(eItem->getTotal())) : eBotMarketAdapter->formatPrice(-eItem->getTotal());
-      }
     case Column::profitablePrice:
       return eItem->getPrice() == 0 ? QString() : eBotMarketAdapter->formatPrice(eItem->getProfitablePrice());
     case Column::flipPrice:
@@ -193,7 +174,7 @@ Qt::ItemFlags SessionItemModel::flags(const QModelIndex &index) const
   case EBotSessionItem::State::draft:
     {
       Column column = (Column)index.column();
-      if(column == Column::amount || column == Column::flipPrice)
+      if(column == (eItem->getType() == EBotSessionItem::Type::buy ? Column::balanceBase : Column::balanceComm) || column == Column::flipPrice)
         flags |= Qt::ItemIsEditable;
     }
     break;
@@ -234,13 +215,24 @@ bool SessionItemModel::setData(const QModelIndex & index, const QVariant & value
           eItem->setFlipPrice(newPrice);
         return true;
       }
-    case Column::amount:
+    case Column::balanceBase:
+      if(eItem->getType() == EBotSessionItem::Type::buy)
       {
-        double newAmount = value.toDouble();
-        if(newAmount <= 0. || newAmount == eItem->getAmount())
+        double newBalanceBase = value.toDouble();
+        if(newBalanceBase <= 0. || newBalanceBase == eItem->getBalanceBase())
           return false;
         if(eItem->getState() == EBotSessionItem::State::draft)
-          eItem->setAmount(newAmount);
+          eItem->setBalanceBase(newBalanceBase);
+        return true;
+      }
+    case Column::balanceComm:
+      if(eItem->getType() == EBotSessionItem::Type::sell)
+      {
+        double newBalanceComm = value.toDouble();
+        if(newBalanceComm <= 0. || newBalanceComm == eItem->getBalanceComm())
+          return false;
+        if(eItem->getState() == EBotSessionItem::State::draft)
+          eItem->setBalanceComm(newBalanceComm);
         return true;
       }
     default:
@@ -272,8 +264,8 @@ QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, 
   case Qt::TextAlignmentRole:
     switch((Column)section)
     {
-    case Column::amount:
-    case Column::value:
+    case Column::balanceBase:
+    case Column::balanceComm:
     case Column::price:
     case Column::profitablePrice:
     case Column::flipPrice:
@@ -290,14 +282,12 @@ QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, 
         return tr("State");
       case Column::date:
         return tr("Date");
-      case Column::value:
-        return tr("Last Value %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
-      case Column::amount:
-        return tr("Last Amount %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString());
       case Column::price:
         return tr("Last Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
-      case Column::total:
-        return tr("Last Total %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+      case Column::balanceBase:
+        return tr("Balance %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+      case Column::balanceComm:
+        return tr("Balance %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString());
       case Column::profitablePrice:
         return tr("Min Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
       case Column::flipPrice:

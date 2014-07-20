@@ -12,10 +12,9 @@ public:
       type = first,
       state,
       date,
-      value,
-      amount,
+      balanceBase,
+      balanceComm,
       price,
-      total,
       profitablePrice,
       flipPrice,
       last = flipPrice,
@@ -75,10 +74,10 @@ private: // QSortFilterProxyModel
     {
     case SessionItemModel::Column::date:
       return leftItem->getDate().msecsTo(rightItem->getDate()) > 0;
-    case SessionItemModel::Column::value:
-      return leftItem->getAmount() * rightItem->getPrice() < rightItem->getAmount() * rightItem->getPrice();
-    case SessionItemModel::Column::amount:
-      return leftItem->getAmount() < rightItem->getAmount();
+    case SessionItemModel::Column::balanceComm:
+      return leftItem->getBalanceComm() < rightItem->getBalanceComm();
+    case SessionItemModel::Column::balanceBase:
+      return leftItem->getBalanceBase() < rightItem->getBalanceBase();
     case SessionItemModel::Column::price:
       return leftItem->getPrice() < rightItem->getPrice();
     case SessionItemModel::Column::flipPrice:

@@ -210,8 +210,8 @@ public:
     quint8 state;
     qint64 date;
     double price;
-    double amount;
-    double total;
+    double balanceComm;
+    double balanceBase;
     double profitablePrice;
     double flipPrice;
     quint32 orderId;

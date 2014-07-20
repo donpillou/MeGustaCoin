@@ -30,8 +30,8 @@ public:
     state = (State)data.state;
     date = QDateTime::fromMSecsSinceEpoch(data.date);
     price = data.price;
-    amount = data.amount;
-    total = data.total;
+    balanceComm = data.balanceComm;
+    balanceBase = data.balanceBase;
     profitablePrice = data.profitablePrice;
     flipPrice = data.flipPrice;
     orderId = data.orderId;
@@ -43,9 +43,10 @@ public:
   void setState(State state) {this->state = state;}
   const QDateTime& getDate() const {return date;}
   double getPrice() const {return price;}
-  double getAmount() const {return amount;}
-  void setAmount(double amount) {this->amount = amount;}
-  double getTotal() const {return total;}
+  double getBalanceComm() const {return balanceComm;}
+  void setBalanceComm(double balanceComm) {this->balanceComm = balanceComm;}
+  double getBalanceBase() const {return balanceBase;}
+  void setBalanceBase(double balanceBase) {this->balanceBase = balanceBase;}
   double getProfitablePrice() const {return profitablePrice;}
   double getFlipPrice() const {return flipPrice;}
   void setFlipPrice(double flipPrice) {this->flipPrice = flipPrice;}
@@ -59,8 +60,8 @@ protected:
   State state;
   QDateTime date;
   double price; // >= 0
-  double amount; // >= 0
-  double total; // >= 0
+  double balanceComm; // >= 0
+  double balanceBase; // >= 0
   double profitablePrice;
   double flipPrice;
   quint32 orderId;

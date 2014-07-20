@@ -311,7 +311,8 @@ void BotService::submitSessionItemDraft(EBotSessionItemDraft& draft)
   sessionItem.entityId = 0;
   sessionItem.type = (quint8)draft.getType();;
   sessionItem.price = draft.getPrice();
-  sessionItem.amount = draft.getAmount();
+  sessionItem.balanceComm = draft.getBalanceComm();
+  sessionItem.balanceBase = draft.getBalanceBase();
   sessionItem.profitablePrice = draft.getProfitablePrice();
   sessionItem.flipPrice = draft.getFlipPrice();
   createEntity(draft.getId(), &sessionItem, sizeof(sessionItem));
