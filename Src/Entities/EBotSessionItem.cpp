@@ -8,6 +8,7 @@ EBotSessionItem::EBotSessionItem(quint32 id, const EBotSessionItemDraft& session
   date = sessionItem.getDate();
   price = sessionItem.getPrice();
   amount = sessionItem.getAmount();
+  total = sessionItem.getTotal();
   profitablePrice = sessionItem.getProfitablePrice();
   flipPrice = sessionItem.getFlipPrice();
   orderId = sessionItem.getOrderId();

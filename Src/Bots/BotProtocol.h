@@ -214,6 +214,7 @@ public:
     qint64 date;
     double price;
     double amount;
+    double total;
     double profitablePrice;
     double flipPrice;
     quint32 orderId;

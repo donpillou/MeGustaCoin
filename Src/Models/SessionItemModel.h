@@ -15,6 +15,7 @@ public:
       value,
       amount,
       price,
+      total,
       profitablePrice,
       flipPrice,
       last = flipPrice,

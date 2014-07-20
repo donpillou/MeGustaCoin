@@ -31,6 +31,7 @@ public:
     date = QDateTime::fromMSecsSinceEpoch(data.date);
     price = data.price;
     amount = data.amount;
+    total = data.total;
     profitablePrice = data.profitablePrice;
     flipPrice = data.flipPrice;
     orderId = data.orderId;
@@ -44,6 +45,7 @@ public:
   double getPrice() const {return price;}
   double getAmount() const {return amount;}
   void setAmount(double amount) {this->amount = amount;}
+  double getTotal() const {return total;}
   double getProfitablePrice() const {return profitablePrice;}
   double getFlipPrice() const {return flipPrice;}
   void setFlipPrice(double flipPrice) {this->flipPrice = flipPrice;}
@@ -58,6 +60,7 @@ protected:
   QDateTime date;
   double price; // >= 0
   double amount; // >= 0
+  double total; // >= 0
   double profitablePrice;
   double flipPrice;
   quint32 orderId;

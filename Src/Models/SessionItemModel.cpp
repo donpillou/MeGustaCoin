@@ -62,6 +62,7 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     case Column::price:
     case Column::value:
     case Column::amount:
+    case Column::total:
     case Column::profitablePrice:
     case Column::flipPrice:
       return (int)Qt::AlignRight | (int)Qt::AlignVCenter;
@@ -150,7 +151,27 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     case Column::price:
       return eItem->getPrice() == 0 ? QString() : eBotMarketAdapter->formatPrice(eItem->getPrice());
     case Column::value:
-      return eBotMarketAdapter->formatPrice(eItem->getAmount() * eItem->getFlipPrice());
+      return eItem->getPrice() == 0 ? QString() : eBotMarketAdapter->formatPrice(eItem->getAmount() * eItem->getPrice());
+    case Column::total:
+      {
+        if(eItem->getTotal() == 0.)
+          return QString();
+        EBotSessionItem::Type lastType = eItem->getType();
+        switch(eItem->getState())
+        {
+        case EBotSessionItem::State::waitBuy:
+        case EBotSessionItem::State::buying:
+          lastType = EBotSessionItem::Type::sell;
+          break;
+        case EBotSessionItem::State::waitSell:
+        case EBotSessionItem::State::selling:
+          lastType = EBotSessionItem::Type::buy;
+          break;
+        default:
+          break;
+        }
+        return lastType == EBotSessionItem::Type::sell ? (QString("+") + eBotMarketAdapter->formatPrice(eItem->getTotal())) : eBotMarketAdapter->formatPrice(-eItem->getTotal());
+      }
     case Column::profitablePrice:
       return eItem->getPrice() == 0 ? QString() : eBotMarketAdapter->formatPrice(eItem->getProfitablePrice());
     case Column::flipPrice:
@@ -270,11 +291,13 @@ QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, 
       case Column::date:
         return tr("Date");
       case Column::value:
-        return tr("Value %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+        return tr("Last Value %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
       case Column::amount:
-        return tr("Amount %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString());
+        return tr("Last Amount %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString());
       case Column::price:
         return tr("Last Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+      case Column::total:
+        return tr("Last Total %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
       case Column::profitablePrice:
         return tr("Min Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
       case Column::flipPrice:
