@@ -242,7 +242,7 @@ void BotService::removeMarketOrderDraft(EBotMarketOrderDraft& draft)
   entityManager.removeEntity<EBotMarketOrderDraft>(draft.getId());
 }
 
-void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm)
+void BotService::createSession(const QString& name, quint32 engineId, quint32 marketId)
 {
   BotProtocol::Session session;
   session.entityType = BotProtocol::session;
@@ -250,8 +250,6 @@ void BotService::createSession(const QString& name, quint32 engineId, quint32 ma
   BotProtocol::setString(session.name, name);
   session.botEngineId = engineId;
   session.marketId = marketId;
-  session.balanceBase = balanceBase;
-  session.balanceComm = balanceComm;
   createEntity(0, &session, sizeof(session));
 }
 
@@ -416,7 +414,6 @@ void BotService::WorkerThread::setState(EBotService::State state)
         entityManager.removeAll<EBotSessionOrder>();
         entityManager.removeAll<EBotSessionLogMessage>();
         entityManager.removeAll<EBotSessionMarker>();
-        entityManager.removeAll<EBotSessionBalance>();
         entityManager.removeAll<EBotMarketTransaction>();
         entityManager.removeAll<EBotMarketOrder>();
         entityManager.removeAll<EBotMarketOrderDraft>();
@@ -743,8 +740,6 @@ EType BotService::WorkerThread::getEType(BotProtocol::EntityType entityType)
     return EType::botSessionLogMessage;
   case BotProtocol::sessionMarker:
     return EType::botSessionMarker;
-  case BotProtocol::sessionBalance:
-    return EType::botSessionBalance;
   case BotProtocol::market:
     return EType::botMarket;
   case BotProtocol::marketTransaction:
@@ -797,10 +792,6 @@ Entity* BotService::WorkerThread::createEntity(BotProtocol::Entity& data, size_t
   case BotProtocol::sessionLogMessage:
     if(size >= sizeof(BotProtocol::SessionLogMessage))
       return new EBotSessionLogMessage(*(BotProtocol::SessionLogMessage*)&data);
-    break;
-  case BotProtocol::sessionBalance:
-    if(size >= sizeof(BotProtocol::Balance))
-      return new EBotSessionBalance(*(BotProtocol::Balance*)&data);
     break;
   case BotProtocol::market:
     if(size >= sizeof(BotProtocol::Market))

@@ -11,24 +11,24 @@ public:
   QString getName() const {return nameEdit->text();}
   quint32 getEngineId() const;
   quint32 getMarketId() const;
-  double getBalanceBase() const {return balanceBaseSpinBox->value();}
-  double getBalanceComm() const {return balanceCommSpinBox->value();}
+  //double getBalanceBase() const {return balanceBaseSpinBox->value();}
+  //double getBalanceComm() const {return balanceCommSpinBox->value();}
 
 private:
   Entity::Manager& entityManager;
   QLineEdit* nameEdit;
   QComboBox* engineComboBox;
   QComboBox* marketComboBox;
-  QDoubleSpinBox * balanceBaseSpinBox;
-  QDoubleSpinBox * balanceCommSpinBox;
+  //QDoubleSpinBox * balanceBaseSpinBox;
+  //QDoubleSpinBox * balanceCommSpinBox;
   QPushButton* okButton;
-  QLabel* balanceBaseLabel;
-  QLabel* balanceCommLabel;
+  //QLabel* balanceBaseLabel;
+  //QLabel* balanceCommLabel;
 
 private:
   virtual void showEvent(QShowEvent* event);
 
 private slots:
   void textChanged();
-  void marketSelectionChanged(int index);
+  //void marketSelectionChanged(int index);
 };

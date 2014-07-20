@@ -54,8 +54,6 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
 
   QHeaderView* headerView = sessionView->header();
   //headerView->resizeSection(0, 300);
-  headerView->resizeSection((int)BotSessionModel::Column::balanceBase, 85);
-  headerView->resizeSection((int)BotSessionModel::Column::balanceComm, 85);
   settings.beginGroup("BotSessions");
   headerView->restoreState(settings.value("HeaderState").toByteArray());
   settings.endGroup();
@@ -81,7 +79,7 @@ void BotSessionsWidget::addBot()
   if(botDialog.exec() != QDialog::Accepted)
     return;
   
-  botService.createSession(botDialog.getName(), botDialog.getEngineId(), botDialog.getMarketId(), botDialog.getBalanceBase(), botDialog.getBalanceComm());
+  botService.createSession(botDialog.getName(), botDialog.getEngineId(), botDialog.getMarketId());
 }
 
 void BotSessionsWidget::cancelBot()

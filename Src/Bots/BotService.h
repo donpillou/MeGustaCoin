@@ -25,7 +25,7 @@ public:
   void cancelMarketOrder(EBotMarketOrder& order);
   void removeMarketOrderDraft(EBotMarketOrderDraft& draft);
 
-  void createSession(const QString& name, quint32 engineId, quint32 marketId, double balanceBase, double balanceComm);
+  void createSession(const QString& name, quint32 engineId, quint32 marketId);
   void removeSession(quint32 id);
   void startSessionSimulation(quint32 id);
   void startSession(quint32 id);

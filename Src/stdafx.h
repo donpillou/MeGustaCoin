@@ -19,7 +19,6 @@
 #include "Entities/EBotSessionItem.h"
 #include "Entities/EBotSessionItemDraft.h"
 #include "Entities/EBotSessionLogMessage.h"
-#include "Entities/EBotSessionBalance.h"
 #include "Entities/EBotSessionProperty.h"
 #include "Entities/EBotEngine.h"
 #include "Entities/EBotSession.h"

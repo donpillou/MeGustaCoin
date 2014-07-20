@@ -42,7 +42,6 @@ public:
     sessionOrder,
     sessionMarker,
     sessionLogMessage,
-    sessionBalance,
     market,
     marketTransaction,
     marketOrder,
@@ -101,8 +100,6 @@ public:
     quint32 botEngineId;
     quint32 marketId;
     quint8 state;
-    double balanceBase;
-    double balanceComm;
   };
 
   struct BotEngine : public Entity
@@ -250,7 +247,6 @@ public:
       select,
       requestTransactions,
       requestOrders,
-      requestBalance,
       requestItems,
       requestProperties,
     };
@@ -271,6 +267,9 @@ public:
       refreshTransactions,
       refreshOrders,
       refreshBalance,
+      requestTransactions,
+      requestOrders,
+      requestBalance,
     };
 
     quint8 cmd;
