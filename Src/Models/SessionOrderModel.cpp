@@ -138,56 +138,77 @@ QVariant SessionOrderModel::headerData(int section, Qt::Orientation orientation,
 
 void SessionOrderModel::addedEntity(Entity& entity)
 {
-  EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
-  if(eOrder)
+  switch((EType)entity.getType())
   {
-    int index = orders.size();
-    beginInsertRows(QModelIndex(), index, index);
-    orders.append(eOrder);
-    endInsertRows();
-    return;
+  case EType::botSessionOrder:
+    {
+      EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
+      int index = orders.size();
+      beginInsertRows(QModelIndex(), index, index);
+      orders.append(eOrder);
+      endInsertRows();
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void SessionOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EBotSessionOrder* oldEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&oldEntity);
-  if(oldEBotSessionOrder)
+  switch((EType)oldEntity.getType())
   {
-    EBotSessionOrder* newEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&newEntity);
-    int index = orders.indexOf(oldEBotSessionOrder);
-    orders[index] = newEBotSessionOrder; 
-    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionOrder);
-    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotSessionOrder);
-    emit dataChanged(leftModelIndex, rightModelIndex);
-    return;
+  case EType::botSessionOrder:
+    {
+      EBotSessionOrder* oldEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&oldEntity);
+      EBotSessionOrder* newEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&newEntity);
+      int index = orders.indexOf(oldEBotSessionOrder);
+      orders[index] = newEBotSessionOrder; 
+      QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionOrder);
+      QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotSessionOrder);
+      emit dataChanged(leftModelIndex, rightModelIndex);
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void SessionOrderModel::removedEntity(Entity& entity)
 {
-  EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
-  if(eOrder)
+  switch((EType)entity.getType())
   {
-    int index = orders.indexOf(eOrder);
-    beginRemoveRows(QModelIndex(), index, index);
-    orders.removeAt(index);
-    endRemoveRows();
-    return;
+  case EType::botSessionOrder:
+    {
+      EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
+      int index = orders.indexOf(eOrder);
+      beginRemoveRows(QModelIndex(), index, index);
+      orders.removeAt(index);
+      endRemoveRows();
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void SessionOrderModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::botSessionOrder)
+  switch((EType)type)
   {
-    emit beginResetModel();
-    orders.clear();
-    emit endResetModel();
-    return;
+  case EType::botSessionOrder:
+    if(!orders.isEmpty())
+    {
+      emit beginResetModel();
+      orders.clear();
+      emit endResetModel();
+    }
+    break;
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }

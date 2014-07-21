@@ -261,32 +261,44 @@ QVariant MarketOrderModel::headerData(int section, Qt::Orientation orientation, 
 
 void MarketOrderModel::addedEntity(Entity& entity)
 {
-  EBotMarketOrder* eOrder = dynamic_cast<EBotMarketOrder*>(&entity);
-  if(eOrder)
+  switch((EType)entity.getType())
   {
-    int index = orders.size();
-    beginInsertRows(QModelIndex(), index, index);
-    orders.append(eOrder);
-    endInsertRows();
-    return;
+  case EType::botMarketOrder:
+  case EType::botMarketOrderDraft:
+    {
+      EBotMarketOrder* eOrder = dynamic_cast<EBotMarketOrder*>(&entity);
+      int index = orders.size();
+      beginInsertRows(QModelIndex(), index, index);
+      orders.append(eOrder);
+      endInsertRows();
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void MarketOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EBotMarketOrder* oldEBotMarketOrder = dynamic_cast<EBotMarketOrder*>(&oldEntity);
-  if(oldEBotMarketOrder)
+  switch((EType)oldEntity.getType())
   {
-    EBotMarketOrder* newEBotMarketOrder = dynamic_cast<EBotMarketOrder*>(&newEntity);
-    int index = orders.indexOf(oldEBotMarketOrder);
-    orders[index] = newEBotMarketOrder; 
-    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotMarketOrder);
-    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotMarketOrder);
-    emit dataChanged(leftModelIndex, rightModelIndex);
-    return;
+  case EType::botMarketOrder:
+  case EType::botMarketOrderDraft:
+    {
+      EBotMarketOrder* oldEBotMarketOrder = dynamic_cast<EBotMarketOrder*>(&oldEntity);
+      EBotMarketOrder* newEBotMarketOrder = dynamic_cast<EBotMarketOrder*>(&newEntity);
+      int index = orders.indexOf(oldEBotMarketOrder);
+      orders[index] = newEBotMarketOrder; 
+      QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotMarketOrder);
+      QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotMarketOrder);
+      emit dataChanged(leftModelIndex, rightModelIndex);
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void MarketOrderModel::addedEntity(Entity& entity, Entity& replacedEntity)
@@ -296,30 +308,38 @@ void MarketOrderModel::addedEntity(Entity& entity, Entity& replacedEntity)
 
 void MarketOrderModel::removedEntity(Entity& entity)
 {
-  EBotMarketOrder* eOrder = dynamic_cast<EBotMarketOrder*>(&entity);
-  if(eOrder)
+  switch((EType)entity.getType())
   {
-    int index = orders.indexOf(eOrder);
-    beginRemoveRows(QModelIndex(), index, index);
-    orders.removeAt(index);
-    endRemoveRows();
-    return;
+  case EType::botMarketOrder:
+  case EType::botMarketOrderDraft:
+    {
+      EBotMarketOrder* eOrder = dynamic_cast<EBotMarketOrder*>(&entity);
+      int index = orders.indexOf(eOrder);
+      beginRemoveRows(QModelIndex(), index, index);
+      orders.removeAt(index);
+      endRemoveRows();
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void MarketOrderModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::botMarketOrder || 
-     (EType)type == EType::botMarketOrderDraft)
+  switch((EType)type)
   {
+  case EType::botMarketOrder:
+  case EType::botMarketOrderDraft:
     if(!orders.isEmpty())
     {
       emit beginResetModel();
       orders.clear();
       emit endResetModel();
     }
-    return;
+    break;
+  default:
+    Q_ASSERT(false);
   }
-  Q_ASSERT(false);
 }

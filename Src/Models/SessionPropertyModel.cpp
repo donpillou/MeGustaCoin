@@ -93,56 +93,77 @@ QVariant SessionPropertyModel::headerData(int section, Qt::Orientation orientati
 
 void SessionPropertyModel::addedEntity(Entity& entity)
 {
-  EBotSessionProperty* eProperty = dynamic_cast<EBotSessionProperty*>(&entity);
-  if(eProperty)
+  switch((EType)entity.getType())
   {
-    int index = properties.size();
-    beginInsertRows(QModelIndex(), index, index);
-    properties.append(eProperty);
-    endInsertRows();
-    return;
+  case EType::botSessionProperty:
+    {
+      EBotSessionProperty* eProperty = dynamic_cast<EBotSessionProperty*>(&entity);
+      int index = properties.size();
+      beginInsertRows(QModelIndex(), index, index);
+      properties.append(eProperty);
+      endInsertRows();
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void SessionPropertyModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EBotSessionProperty* oldEBotSessionProperty = dynamic_cast<EBotSessionProperty*>(&oldEntity);
-  if(oldEBotSessionProperty)
+  switch((EType)oldEntity.getType())
   {
-    EBotSessionProperty* newEBotSessionProperty = dynamic_cast<EBotSessionProperty*>(&newEntity);
-    int index = properties.indexOf(oldEBotSessionProperty);
-    properties[index] = newEBotSessionProperty; 
-    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionProperty);
-    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotSessionProperty);
-    emit dataChanged(leftModelIndex, rightModelIndex);
-    return;
+  case EType::botSessionProperty:
+    {
+      EBotSessionProperty* oldEBotSessionProperty = dynamic_cast<EBotSessionProperty*>(&oldEntity);
+      EBotSessionProperty* newEBotSessionProperty = dynamic_cast<EBotSessionProperty*>(&newEntity);
+      int index = properties.indexOf(oldEBotSessionProperty);
+      properties[index] = newEBotSessionProperty; 
+      QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionProperty);
+      QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotSessionProperty);
+      emit dataChanged(leftModelIndex, rightModelIndex);
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void SessionPropertyModel::removedEntity(Entity& entity)
 {
-  EBotSessionProperty* eProperty = dynamic_cast<EBotSessionProperty*>(&entity);
-  if(eProperty)
+  switch((EType)entity.getType())
   {
-    int index = properties.indexOf(eProperty);
-    beginRemoveRows(QModelIndex(), index, index);
-    properties.removeAt(index);
-    endRemoveRows();
-    return;
+  case EType::botSessionProperty:
+    {
+      EBotSessionProperty* eProperty = dynamic_cast<EBotSessionProperty*>(&entity);
+      int index = properties.indexOf(eProperty);
+      beginRemoveRows(QModelIndex(), index, index);
+      properties.removeAt(index);
+      endRemoveRows();
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void SessionPropertyModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::botSessionProperty)
+  switch((EType)type)
   {
-    emit beginResetModel();
-    properties.clear();
-    emit endResetModel();
-    return;
+  case EType::botSessionProperty:
+    if(!properties.isEmpty())
+    {
+      emit beginResetModel();
+      properties.clear();
+      emit endResetModel();
+    }
+    break;
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }

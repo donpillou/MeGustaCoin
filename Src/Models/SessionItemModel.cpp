@@ -10,6 +10,7 @@ SessionItemModel::SessionItemModel(Entity::Manager& entityManager) :
 {
   entityManager.registerListener<EBotSessionItem>(*this);
   entityManager.registerListener<EBotSessionItemDraft>(*this);
+  entityManager.registerListener<EBotService>(*this);
 
   eBotMarketAdapter = 0;
 }
@@ -18,6 +19,7 @@ SessionItemModel::~SessionItemModel()
 {
   entityManager.unregisterListener<EBotSessionItem>(*this);
   entityManager.unregisterListener<EBotSessionItemDraft>(*this);
+  entityManager.unregisterListener<EBotService>(*this);
 }
 
 QModelIndex SessionItemModel::getDraftAmountIndex(EBotSessionItemDraft& draft)
@@ -311,6 +313,8 @@ void SessionItemModel::addedEntity(Entity& entity)
       endInsertRows();
       break;
     }
+  case EType::botService:
+    break;
   default:
     Q_ASSERT(false);
     break;
@@ -331,6 +335,27 @@ void SessionItemModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
       QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionItem);
       QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotSessionItem);
       emit dataChanged(leftModelIndex, rightModelIndex);
+      break;
+    }
+  case EType::botService:
+    {
+      EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
+      EBotMarketAdapter* newMarketAdapter = 0;
+      if(eBotService && eBotService->getSelectedSessionId() != 0)
+      {
+        EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
+        if(eBotSession && eBotSession->getMarketId() != 0)
+        {
+          EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotSession->getMarketId());
+          if(eBotMarket && eBotMarket->getMarketAdapterId() != 0)
+            newMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+        }
+      }
+      if(newMarketAdapter != eBotMarketAdapter)
+      {
+        eBotMarketAdapter = newMarketAdapter;
+        headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
+      }
       break;
     }
   default:
@@ -358,6 +383,8 @@ void SessionItemModel::removedEntity(Entity& entity)
       endRemoveRows();
       break;
     }
+  case EType::botService:
+    break;
   default:
     Q_ASSERT(false);
     break;
@@ -370,10 +397,15 @@ void SessionItemModel::removedAll(quint32 type)
   {
   case EType::botSessionItem:
   case EType::botSessionItemDraft:
-    emit beginResetModel();
-    items.clear();
-    emit endResetModel();
+    if(!items.isEmpty())
+    {
+      emit beginResetModel();
+      items.clear();
+      emit endResetModel();
+    }
     break;;
+  case EType::botService:
+    break;
   default:
     Q_ASSERT(false);
     break;

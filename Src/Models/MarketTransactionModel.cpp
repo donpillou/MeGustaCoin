@@ -143,56 +143,77 @@ QVariant MarketTransactionModel::headerData(int section, Qt::Orientation orienta
 
 void MarketTransactionModel::addedEntity(Entity& entity)
 {
-  EBotMarketTransaction* eTransaction = dynamic_cast<EBotMarketTransaction*>(&entity);
-  if(eTransaction)
+  switch((EType)entity.getType())
   {
-    int index = transactions.size();
-    beginInsertRows(QModelIndex(), index, index);
-    transactions.append(eTransaction);
-    endInsertRows();
-    return;
+  case EType::botMarketTransaction:
+    {
+      EBotMarketTransaction* eTransaction = dynamic_cast<EBotMarketTransaction*>(&entity);
+      int index = transactions.size();
+      beginInsertRows(QModelIndex(), index, index);
+      transactions.append(eTransaction);
+      endInsertRows();
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EBotMarketTransaction* oldEBotMarketTransaction = dynamic_cast<EBotMarketTransaction*>(&oldEntity);
-  if(oldEBotMarketTransaction)
+  switch((EType)oldEntity.getType())
   {
-    EBotMarketTransaction* newEBotMarketTransaction = dynamic_cast<EBotMarketTransaction*>(&newEntity);
-    int index = transactions.indexOf(oldEBotMarketTransaction);
-    transactions[index] = newEBotMarketTransaction; 
-    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotMarketTransaction);
-    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotMarketTransaction);
-    emit dataChanged(leftModelIndex, rightModelIndex);
-    return;
+  case EType::botMarketTransaction:
+    {
+      EBotMarketTransaction* oldEBotMarketTransaction = dynamic_cast<EBotMarketTransaction*>(&oldEntity);
+      EBotMarketTransaction* newEBotMarketTransaction = dynamic_cast<EBotMarketTransaction*>(&newEntity);
+      int index = transactions.indexOf(oldEBotMarketTransaction);
+      transactions[index] = newEBotMarketTransaction; 
+      QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotMarketTransaction);
+      QModelIndex rightModelIndex = createIndex(index, (int)Column::last, newEBotMarketTransaction);
+      emit dataChanged(leftModelIndex, rightModelIndex);
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void MarketTransactionModel::removedEntity(Entity& entity)
 {
-  EBotMarketTransaction* eTransaction = dynamic_cast<EBotMarketTransaction*>(&entity);
-  if(eTransaction)
+  switch((EType)entity.getType())
   {
-    int index = transactions.indexOf(eTransaction);
-    beginRemoveRows(QModelIndex(), index, index);
-    transactions.removeAt(index);
-    endRemoveRows();
-    return;
+  case EType::botMarketTransaction:
+    {
+      EBotMarketTransaction* eTransaction = dynamic_cast<EBotMarketTransaction*>(&entity);
+      int index = transactions.indexOf(eTransaction);
+      beginRemoveRows(QModelIndex(), index, index);
+      transactions.removeAt(index);
+      endRemoveRows();
+      break;
+    }
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
 
 void MarketTransactionModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::botMarketTransaction)
+  switch((EType)type)
   {
-    emit beginResetModel();
-    transactions.clear();
-    emit endResetModel();
-    return;
+  case EType::botMarketTransaction:
+    if(!transactions.isEmpty())
+    {
+      emit beginResetModel();
+      transactions.clear();
+      emit endResetModel();
+    }
+    break;
+  default:
+    Q_ASSERT(false);
+    break;
   }
-  Q_ASSERT(false);
 }
