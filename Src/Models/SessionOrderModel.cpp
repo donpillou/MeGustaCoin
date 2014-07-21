@@ -8,6 +8,7 @@ SessionOrderModel::SessionOrderModel(Entity::Manager& entityManager) :
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
   entityManager.registerListener<EBotSessionOrder>(*this);
+  entityManager.registerListener<EBotService>(*this);
 
   eBotMarketAdapter = 0;
 }
@@ -15,6 +16,7 @@ SessionOrderModel::SessionOrderModel(Entity::Manager& entityManager) :
 SessionOrderModel::~SessionOrderModel()
 {
   entityManager.unregisterListener<EBotSessionOrder>(*this);
+  entityManager.unregisterListener<EBotService>(*this);
 }
 
 QModelIndex SessionOrderModel::index(int row, int column, const QModelIndex& parent) const
@@ -149,6 +151,8 @@ void SessionOrderModel::addedEntity(Entity& entity)
       endInsertRows();
       break;
     }
+  case EType::botService:
+    break;
   default:
     Q_ASSERT(false);
     break;
@@ -170,6 +174,27 @@ void SessionOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
       emit dataChanged(leftModelIndex, rightModelIndex);
       break;
     }
+  case EType::botService:
+    {
+      EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
+      EBotMarketAdapter* newMarketAdapter = 0;
+      if(eBotService && eBotService->getSelectedSessionId() != 0)
+      {
+        EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
+        if(eBotSession && eBotSession->getMarketId() != 0)
+        {
+          EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotSession->getMarketId());
+          if(eBotMarket && eBotMarket->getMarketAdapterId() != 0)
+            newMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+        }
+      }
+      if(newMarketAdapter != eBotMarketAdapter)
+      {
+        eBotMarketAdapter = newMarketAdapter;
+        headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
+      }
+      break;
+    }
   default:
     Q_ASSERT(false);
     break;
@@ -189,6 +214,8 @@ void SessionOrderModel::removedEntity(Entity& entity)
       endRemoveRows();
       break;
     }
+  case EType::botService:
+    break;
   default:
     Q_ASSERT(false);
     break;
@@ -206,6 +233,8 @@ void SessionOrderModel::removedAll(quint32 type)
       orders.clear();
       emit endResetModel();
     }
+    break;
+  case EType::botService:
     break;
   default:
     Q_ASSERT(false);

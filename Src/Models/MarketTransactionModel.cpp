@@ -8,6 +8,7 @@ MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
   entityManager.registerListener<EBotMarketTransaction>(*this);
+  entityManager.registerListener<EBotService>(*this);
 
   eBotMarketAdapter = 0;
 }
@@ -15,6 +16,7 @@ MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
 MarketTransactionModel::~MarketTransactionModel()
 {
   entityManager.unregisterListener<EBotMarketTransaction>(*this);
+  entityManager.unregisterListener<EBotService>(*this);
 }
 
 QModelIndex MarketTransactionModel::index(int row, int column, const QModelIndex& parent) const
@@ -154,6 +156,8 @@ void MarketTransactionModel::addedEntity(Entity& entity)
       endInsertRows();
       break;
     }
+  case EType::botService:
+    break;
   default:
     Q_ASSERT(false);
     break;
@@ -175,6 +179,23 @@ void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity
       emit dataChanged(leftModelIndex, rightModelIndex);
       break;
     }
+  case EType::botService:
+    {
+      EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
+      EBotMarketAdapter* newMarketAdapter = 0;
+      if(eBotService && eBotService->getSelectedMarketId() != 0)
+      {
+        EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
+        if(eBotMarket && eBotMarket->getMarketAdapterId() != 0)
+          newMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+      }
+      if(newMarketAdapter != eBotMarketAdapter)
+      {
+        eBotMarketAdapter = newMarketAdapter;
+        headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
+      }
+      break;
+    }
   default:
     Q_ASSERT(false);
     break;
@@ -194,6 +215,8 @@ void MarketTransactionModel::removedEntity(Entity& entity)
       endRemoveRows();
       break;
     }
+  case EType::botService:
+    break;
   default:
     Q_ASSERT(false);
     break;
@@ -211,6 +234,8 @@ void MarketTransactionModel::removedAll(quint32 type)
       transactions.clear();
       emit endResetModel();
     }
+    break;
+  case EType::botService:
     break;
   default:
     Q_ASSERT(false);
