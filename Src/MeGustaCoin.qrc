@@ -21,5 +21,9 @@
   <file>Icons/user_gray_add.png</file>
   <file>Icons/cart_add.png</file>
   <file>Icons/cart_edit.png</file>
+  <file>Icons/close.png</file>
+  <file>Icons/close_hot.png</file>
+  <file>Icons/close_cold.png</file>
+  <file>Icons/close_pressed.png</file>
 </qresource>
 </RCC>
