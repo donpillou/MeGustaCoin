@@ -347,6 +347,22 @@ void BotService::removeSessionItemDraft(EBotSessionItemDraft& draft)
   entityManager.removeEntity<EBotSessionItemDraft>(draft.getId());
 }
 
+void BotService::updateSessionProperty(EBotSessionProperty& property, const QString& value)
+{
+  if(property.getFlags() & EBotSessionProperty::readOnly)
+    return;
+
+  BotProtocol::SessionProperty updatedProperty;
+  updatedProperty.entityType = BotProtocol::sessionProperty;
+  updatedProperty.entityId = property.getId();
+  updatedProperty.type = (quint32)property.getType();
+  updatedProperty.flags = property.getFlags();
+  BotProtocol::setString(updatedProperty.name, property.getName());
+  BotProtocol::setString(updatedProperty.value, value);
+  BotProtocol::setString(updatedProperty.unit, property.getUnit());
+  updateEntity(0, &updatedProperty, sizeof(updatedProperty));
+}
+
 void BotService::addLogMessage(ELogMessage::Type type, const QString& message)
 {
   ELogMessage* logMessage = new ELogMessage(type, message);

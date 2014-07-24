@@ -38,6 +38,8 @@ public:
   void cancelSessionItem(EBotSessionItem& item);
   void removeSessionItemDraft(EBotSessionItemDraft& draft);
 
+  void updateSessionProperty(EBotSessionProperty& property, const QString& value);
+
 private:
   class WorkerThread;
 

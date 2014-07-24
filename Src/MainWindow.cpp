@@ -20,7 +20,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   botTransactionsWidget = new BotTransactionsWidget(*this, settings, globalEntityManager);
   botItemsWidget = new BotItemsWidget(*this, settings, globalEntityManager, botService, dataService);
   botOrdersWidget = new BotOrdersWidget(*this, settings, globalEntityManager);
-  botPropertiesWidget = new BotPropertiesWidget(*this, settings, globalEntityManager);
+  botPropertiesWidget = new BotPropertiesWidget(*this, settings, globalEntityManager, botService);
   botLogWidget = new BotLogWidget(*this, settings, globalEntityManager);
   logWidget = new LogWidget(this, settings, globalEntityManager);
 

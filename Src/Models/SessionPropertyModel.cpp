@@ -50,6 +50,18 @@ QVariant SessionPropertyModel::data(const QModelIndex& index, int role) const
     default:
       return (int)Qt::AlignLeft | (int)Qt::AlignVCenter;
     }
+  case Qt::EditRole:
+    switch((Column)index.column())
+    {
+    case Column::value:
+      if(eProperty->getType() == EBotSessionProperty::Type::number)
+        return eProperty->getValue().toDouble();
+      else
+        return eProperty->getValue();
+    default:
+      break;
+    }
+    break;
   case Qt::DisplayRole:
     switch((Column)index.column())
     {
@@ -63,6 +75,62 @@ QVariant SessionPropertyModel::data(const QModelIndex& index, int role) const
     }
   }
   return QVariant();
+}
+
+Qt::ItemFlags SessionPropertyModel::flags(const QModelIndex &index) const
+{
+  const EBotSessionProperty* eProperty = (const EBotSessionProperty*)index.internalPointer();
+  if(!eProperty)
+    return 0;
+
+  Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+  switch((Column)index.column())
+  {
+  case Column::value:
+    {
+      if(!(eProperty->getFlags() & EBotSessionProperty::readOnly))
+        flags |= Qt::ItemIsEditable;
+    }
+    break;
+  default:
+    break;
+  }
+  return flags;
+}
+
+bool SessionPropertyModel::setData(const QModelIndex & index, const QVariant & value, int role)
+{
+  if (role != Qt::EditRole)
+    return false;
+
+  const EBotSessionProperty* eProperty = (const EBotSessionProperty*)index.internalPointer();
+  if(!eProperty)
+    return false;
+
+  switch((Column)index.column())
+  {
+  case Column::value:
+    if(!(eProperty->getFlags() & EBotSessionProperty::readOnly))
+    {
+      if(eProperty->getType() == EBotSessionProperty::Type::number)
+      {
+        double newValue = value.toDouble();
+        if(newValue != eProperty->getValue().toDouble())
+          editedProperty(index, newValue);
+      }
+      else
+      {
+        QString newValue = value.toString();
+        if(newValue != eProperty->getValue())
+          editedProperty(index, newValue);
+      }
+      return true;
+    }
+    break;
+  default:
+    break;
+  }
+  return false;
 }
 
 QVariant SessionPropertyModel::headerData(int section, Qt::Orientation orientation, int role) const
