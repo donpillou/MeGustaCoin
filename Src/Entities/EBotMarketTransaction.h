@@ -20,7 +20,7 @@ public:
     price = data.price;
     amount = data.amount;
     total = data.total;
-    fee = fee = qAbs(total - price * amount);
+    fee = qAbs(total - price * amount);
   }
 
   Type getType() const {return type;}
