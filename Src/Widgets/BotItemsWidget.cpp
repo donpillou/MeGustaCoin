@@ -7,7 +7,7 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
   entityManager.registerListener<EBotService>(*this);
   entityManager.registerListener<EBotSession>(*this);
 
-  setWindowTitle(tr("Bot Items"));
+  setWindowTitle(tr("Bot Assets"));
 
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
