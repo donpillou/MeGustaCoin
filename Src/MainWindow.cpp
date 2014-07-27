@@ -266,7 +266,7 @@ void MainWindow::createChannelData(const QString& channelName, const QString& cu
 
   ChannelData& channelData = *channelDataMap.insert(channelName, ChannelData());
   channelData.channelEntityManager = new Entity::Manager();
-  channelData.graphModel = new GraphModel(channelName, *channelData.channelEntityManager, graphService);
+  channelData.graphModel = new GraphModel(channelName, globalEntityManager, *channelData.channelEntityManager, graphService);
   channelData.channelEntityManager->delegateEntity(*new EDataSubscription(currencyBase, currencyComm));
 }
 
@@ -286,7 +286,7 @@ MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
 
     ChannelData& channelData = *channelDataMap.insert(channelName, ChannelData());
     channelData.channelEntityManager = new Entity::Manager();
-    channelData.graphModel = new GraphModel(channelName, *channelData.channelEntityManager, graphService);
+    channelData.graphModel = new GraphModel(channelName, globalEntityManager, *channelData.channelEntityManager, graphService);
     channelData.channelEntityManager->delegateEntity(*new EDataSubscription(eDataMarket->getBaseCurrency(), eDataMarket->getCommCurrency()));
 
     return &channelData;

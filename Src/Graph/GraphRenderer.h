@@ -38,7 +38,7 @@ public:
   void addSessionMarker(const EBotSessionMarker& marker);
   void clearSessionMarker();
 
-  bool isUpToDate() const {return upToDate;}
+  bool isUpToDate() const {return upToDate || width == 0 || height == 0;}
 
   QImage& render(const QMap<QString, GraphRenderer*>& graphDataByName);
 

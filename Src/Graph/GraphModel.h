@@ -8,7 +8,7 @@ class GraphModel : public QObject, public Entity::Listener
   Q_OBJECT
 
 public:
-  GraphModel(const QString& channelName, Entity::Manager& channelEntityManager, GraphService& graphService);
+  GraphModel(const QString& channelName, Entity::Manager& globalEntityManager, Entity::Manager& channelEntityManager, GraphService& graphService);
   ~GraphModel();
 
   const QString& getChannelName() const {return channelName;}
@@ -28,6 +28,7 @@ signals:
 
 private:
   QString channelName;
+  Entity::Manager& globalEntityManager;
   Entity::Manager& channelEntityManager;
   GraphService& graphService;
   QImage image;
@@ -35,7 +36,10 @@ private:
   int maxAge;
   unsigned int enabledData;
 
+  bool addSessionMarkers;
+
 private: // Entity::Listener
   virtual void addedEntity(Entity& entity);
   virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
+  virtual void removedAll(quint32 type);
 };
