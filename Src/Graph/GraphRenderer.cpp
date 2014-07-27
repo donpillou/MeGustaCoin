@@ -157,7 +157,7 @@ QImage& GraphRenderer::render(const QMap<QString, GraphRenderer*>& graphDataByNa
       {
         static unsigned int colors[] = { 0x0000FF, 0x8A2BE2, 0xA52A2A, 0x5F9EA0, 0x7FFF00, 0xD2691E, 0xFF7F50, 0x6495ED, 0xDC143C, 0x00FFFF, 0x00008B, 0x008B8B, 0xB8860B, 0xA9A9A9, 0x006400, 0xBDB76B, 0x8B008B, 0x556B2F, 0xFF8C00, 0x9932CC, 0x8B0000, 0xE9967A, 0x8FBC8F, 0x483D8B, 0x2F4F4F, 0x00CED1, 0x9400D3, 0xFF1493, 0x00BFFF, 0x696969, 0x1E90FF, 0xB22222, 0x228B22, 0xFF00FF, 0xFFD700, 0xDAA520, 0x808080, 0x008000, 0xADFF2F, 0xFF69B4, 0xCD5C5C, 0x4B0082 };
         int nextColorIndex = 0;
-        double averagePrice = values->regressions[(int)TradeHandler::Regressions::regression6h].average;
+        double averagePrice = values->regressions[(int)TradeHandler::Regressions::regression24h].average;
         if(averagePrice > 0.)
           for(QMap<QString, GraphRenderer*>::ConstIterator i = graphDataByName.begin(), end = graphDataByName.end(); i != end; ++i)
           {
@@ -168,7 +168,7 @@ QImage& GraphRenderer::render(const QMap<QString, GraphRenderer*>& graphDataByNa
               if(values)
               {
                 int colorIndex = nextColorIndex % (sizeof(colors) / sizeof(*colors));
-                double otherAveragePrice = values->regressions[(int)TradeHandler::Regressions::regression6h].average;
+                double otherAveragePrice = values->regressions[(int)TradeHandler::Regressions::regression24h].average;
                 if(otherAveragePrice > 0.)
                 {
                   QColor color(colors[colorIndex]);
