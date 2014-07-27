@@ -1,8 +1,6 @@
 
 #pragma once
 
-class PublicDataModel;
-
 class TradeModel : public QAbstractItemModel, public Entity::Listener
 {
 public:

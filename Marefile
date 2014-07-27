@@ -32,6 +32,8 @@ targets = {
     qtRessourceFiles = "Src/Icons/**.png"
     qtRccFiles = "Src/MeGustaCoin.qrc"
     qtMocFiles = {
+      "Src/Graph/GraphModel.h"
+      "Src/Graph/GraphService.h"
       "Src/Widgets/MarketsWidget.h"
       "Src/Widgets/OrdersWidget.h"
       "Src/Widgets/BotSessionsWidget.h"
@@ -43,7 +45,6 @@ targets = {
       "Src/Widgets/BotPropertiesWidget.h"
       "Src/Widgets/TradesWidget.h"
       "Src/Models/MarketOrderModel.h"
-      "Src/Models/GraphModel.h"
       "Src/Models/SessionItemModel.h"
       "Src/Models/SessionPropertyModel.h"
       "Src/Markets/DataService.h"

@@ -1,16 +1,11 @@
 
 #include "stdafx.h"
 
-GraphWidget::GraphWidget(QTabFramework& tabFramework, QSettings& settings, const QString& channelName, const QString& settingsSection, Entity::Manager& globalEntityManager, Entity::Manager& channelEntityManager, const GraphModel& graphModel, const QMap<QString, GraphModel*>& graphModels) :
-  QWidget(&tabFramework), tabFramework(tabFramework), channelName(channelName), settingsSection(settingsSection), channelEntityManager(channelEntityManager)
+GraphWidget::GraphWidget(QTabFramework& tabFramework, QSettings& settings, const QString& channelName, const QString& settingsSection, Entity::Manager& channelEntityManager, GraphModel& graphModel) :
+  QWidget(&tabFramework), tabFramework(tabFramework), channelName(channelName), settingsSection(settingsSection), channelEntityManager(channelEntityManager), graphModel(graphModel)
 {
   channelEntityManager.registerListener<EDataSubscription>(*this);
 
-  /*
-  setFrameStyle(QFrame::StyledPanel | QFrame::Sunken);
-  setBackgroundRole(QPalette::Base);
-  setAutoFillBackground(true);
-  */
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
   toolBar->setIconSize(QSize(16, 16));
@@ -94,7 +89,7 @@ GraphWidget::GraphWidget(QTabFramework& tabFramework, QSettings& settings, const
   frame->setBackgroundRole(QPalette::Base);
   frame->setAutoFillBackground(true);
 
-  graphView = new GraphView(this, globalEntityManager, channelEntityManager, graphModel, graphModels);
+  graphView = new GraphView(this, graphModel);
   QVBoxLayout* graphLayout = new QVBoxLayout;
   graphLayout->setMargin(0);
   graphLayout->setSpacing(0);
@@ -113,8 +108,8 @@ GraphWidget::GraphWidget(QTabFramework& tabFramework, QSettings& settings, const
   action = qobject_cast<QAction*>(zoomSignalMapper->mapping(settings.value("Zoom", 60 * 60).toUInt()));
   action->setChecked(true);
   zoomSignalMapper->map(action);
-  unsigned int enabledData = settings.value("EnabledData", (unsigned int)graphView->getEnabledData()).toUInt();
-  graphView->setEnabledData(enabledData);
+  unsigned int enabledData = settings.value("EnabledData", graphModel.getEnabledData()).toUInt();
+  graphModel.setEnabledData(enabledData);
   settings.endGroup();
   settings.endGroup();
 }
@@ -128,8 +123,8 @@ void GraphWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("LiveGraph");
   settings.beginGroup(settingsSection);
-  settings.setValue("Zoom", graphView->getMaxAge());
-  settings.setValue("EnabledData", graphView->getEnabledData());
+  settings.setValue("Zoom", graphModel.getMaxAge());
+  settings.setValue("EnabledData", graphModel.getEnabledData());
   settings.endGroup();
   settings.endGroup();
 }
@@ -150,19 +145,17 @@ void GraphWidget::setZoom(int maxTime)
 {
   QAction* srcAction = qobject_cast<QAction*>(zoomSignalMapper->mapping(maxTime));
   zoomAction->setText(srcAction->text());
-  graphView->setMaxAge(maxTime);
-  graphView->update();
+  graphModel.setMaxAge(maxTime);
 }
 
 void GraphWidget::setEnabledData(int data)
 {
-  unsigned int enabledData = graphView->getEnabledData();
+  unsigned int enabledData = graphModel.getEnabledData();
   bool enable = (enabledData & data) == 0;
   if(enable)
-    graphView->setEnabledData(enabledData | data);
+    graphModel.setEnabledData(enabledData | data);
   else
-    graphView->setEnabledData(enabledData & ~data);
-  graphView->update();
+    graphModel.setEnabledData(enabledData & ~data);
 }
 
 void GraphWidget::updateDataMenu()
@@ -173,33 +166,26 @@ void GraphWidget::updateDataMenu()
 
   QAction* action = dataMenu->addAction(tr("Trades"));
   action->setCheckable(true);
-  dataSignalMapper->setMapping(action, (int)GraphView::Data::trades);
+  dataSignalMapper->setMapping(action, GraphRenderer::trades);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
   action = dataMenu->addAction(tr("Trade Volume"));
   action->setCheckable(true);
-  dataSignalMapper->setMapping(action, (int)GraphView::Data::tradeVolume);
+  dataSignalMapper->setMapping(action, GraphRenderer::tradeVolume);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
-  //if(publicDataModel->getFeatures() & (int)MarketStream::Features::orderBook)
-  //{
-  //  action = dataMenu->addAction(tr("Order Book"));
-  //  action->setCheckable(true);
-  //  dataSignalMapper->setMapping(action, (int)GraphView::Data::orderBook);
-  //  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
-  //}
   action = dataMenu->addAction(tr("Volume Weighted Regression Lines"));
   action->setCheckable(true);
-  dataSignalMapper->setMapping(action, (int)GraphView::Data::regressionLines);
+  dataSignalMapper->setMapping(action, GraphRenderer::regressionLines);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
   action = dataMenu->addAction(tr("Other Markets"));
   action->setCheckable(true);
-  dataSignalMapper->setMapping(action, (int)GraphView::Data::otherMarkets);
+  dataSignalMapper->setMapping(action, GraphRenderer::otherMarkets);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
   action = dataMenu->addAction(tr("Bell Volume Weighted Regession Lines"));
   action->setCheckable(true);
-  dataSignalMapper->setMapping(action, (int)GraphView::Data::expRegressionLines);
+  dataSignalMapper->setMapping(action, GraphRenderer::expRegressionLines);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
 
-  unsigned int enabledData = graphView->getEnabledData();
+  unsigned int enabledData = graphModel.getEnabledData();
   for(int i = 0; i < 16; ++i)
     if(enabledData & (1 << i))
     {

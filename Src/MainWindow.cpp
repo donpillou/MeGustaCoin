@@ -83,6 +83,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 
   startDataService();
   startBotService();
+  graphService.start();
 }
 
 MainWindow::~MainWindow()
@@ -92,22 +93,9 @@ MainWindow::~MainWindow()
 
   dataService.stop();
   botService.stop();
+  graphService.stop();
 
-  //// manually delete widgets since they hold a reference to the data model
-  //for(QHash<QString, ChannelData>::Iterator i = channelDataMap.begin(), end = channelDataMap.end(); i != end; ++i)
-  //{
-  //  ChannelData& channelData = i.value();
-  //  delete channelData.tradesWidget;
-  //  delete channelData.graphWidget;
-  //}
-  //delete marketsWidget;
-  //delete ordersWidget;
-  //delete transactionsWidget;
-  ////delete graphWidget;
-  //delete botsWidget;
-  //delete logWidget;
-
-  qDeleteAll(channelGraphModels);
+  //qDeleteAll(channelGraphModels);
 }
 
 void MainWindow::startDataService()
@@ -149,7 +137,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   {
     const QString& channelName = i.key();
     ChannelData& channelData = i.value();
-    EDataSubscription* eDataSubscription = channelData.channelEntityManager.getEntity<EDataSubscription>(0);
+    EDataSubscription* eDataSubscription = channelData.channelEntityManager->getEntity<EDataSubscription>(0);
     if(!eDataSubscription)
       continue;
     if(channelData.tradesWidget)
@@ -277,11 +265,9 @@ void MainWindow::createChannelData(const QString& channelName, const QString& cu
     return;
 
   ChannelData& channelData = *channelDataMap.insert(channelName, ChannelData());
-  channelData.channelName = channelName;
-  channelData.channelEntityManager.delegateEntity(*new EDataSubscription(currencyBase, currencyComm));
-
-  if(!channelGraphModels.contains(channelName))
-    channelGraphModels.insert(channelName, new GraphModel(channelData.channelEntityManager));
+  channelData.channelEntityManager = new Entity::Manager();
+  channelData.graphModel = new GraphModel(channelName, *channelData.channelEntityManager, graphService);
+  channelData.channelEntityManager->delegateEntity(*new EDataSubscription(currencyBase, currencyComm));
 }
 
 MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
@@ -299,11 +285,9 @@ MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
       return 0;
 
     ChannelData& channelData = *channelDataMap.insert(channelName, ChannelData());
-    channelData.channelName = channelName;
-    channelData.channelEntityManager.delegateEntity(*new EDataSubscription(eDataMarket->getBaseCurrency(), eDataMarket->getCommCurrency()));
-
-    if(!channelGraphModels.contains(channelName))
-      channelGraphModels.insert(channelName, new GraphModel(channelData.channelEntityManager));
+    channelData.channelEntityManager = new Entity::Manager();
+    channelData.graphModel = new GraphModel(channelName, *channelData.channelEntityManager, graphService);
+    channelData.channelEntityManager->delegateEntity(*new EDataSubscription(eDataMarket->getBaseCurrency(), eDataMarket->getCommCurrency()));
 
     return &channelData;
   }
@@ -313,13 +297,14 @@ MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
 
 void MainWindow::updateChannelSubscription(ChannelData& channelData)
 {
-  bool active = channelData.channelName == selectedChannelName ||
+  const QString& channelName = channelData.graphModel->getChannelName();
+  bool active = channelName == selectedChannelName ||
     (channelData.graphWidget && isVisible(channelData.graphWidget)) ||
     (channelData.tradesWidget && isVisible(channelData.tradesWidget));
   if(active)
-    dataService.subscribe(channelData.channelName, channelData.channelEntityManager);
+    dataService.subscribe(channelName, *channelData.channelEntityManager);
   else
-    dataService.unsubscribe(channelData.channelName);
+    dataService.unsubscribe(channelName);
 }
 
 void MainWindow::createLiveTradeWidget(const QString& channelName)
@@ -329,13 +314,13 @@ void MainWindow::createLiveTradeWidget(const QString& channelName)
     return;
   if(channelData->tradesWidget)
     return;
-  channelData->tradesWidget = new TradesWidget(*this, settings, channelName, channelData->channelEntityManager);
+  channelData->tradesWidget = new TradesWidget(*this, settings, channelName, *channelData->channelEntityManager);
   channelData->tradesWidget->setObjectName(channelName + "LiveTrades");
   addTab(channelData->tradesWidget);
   connect(toggleViewAction(channelData->tradesWidget), SIGNAL(toggled(bool)), this, SLOT(enableTradesUpdates(bool)));
   channelData->tradesWidget->updateTitle();
   
-  dataService.subscribe(channelName, channelData->channelEntityManager);
+  dataService.subscribe(channelName, *channelData->channelEntityManager);
 }
 
 void MainWindow::createLiveGraphWidget(const QString& channelName)
@@ -345,16 +330,16 @@ void MainWindow::createLiveGraphWidget(const QString& channelName)
     return;
   if(channelData->graphWidget)
     return;
-  GraphModel* channelGraphModel = channelGraphModels[channelName];
-  Q_ASSERT(channelGraphModel);
+//  GraphModel* channelGraphModel = channelGraphModels[channelName];
+//  Q_ASSERT(channelGraphModel);
 
-  channelData->graphWidget = new GraphWidget(*this, settings, channelName, channelName + "_0", globalEntityManager, channelData->channelEntityManager, *channelGraphModel, channelGraphModels);
+  channelData->graphWidget = new GraphWidget(*this, settings, channelName, channelName + "_0", *channelData->channelEntityManager, *channelData->graphModel);
   channelData->graphWidget->setObjectName(channelName + "LiveGraph");
   addTab(channelData->graphWidget);
   connect(toggleViewAction(channelData->graphWidget), SIGNAL(toggled(bool)), this, SLOT(enableGraphUpdates(bool)));
   channelData->graphWidget->updateTitle();
 
-  dataService.subscribe(channelName, channelData->channelEntityManager);
+  dataService.subscribe(channelName, *channelData->channelEntityManager);
 }
 
 void MainWindow::showOptions()
@@ -446,7 +431,7 @@ void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
           if(channelData)
           {
             updateChannelSubscription(*channelData);
-            channelData->channelEntityManager.unregisterListener<EDataTickerData>(*this);
+            channelData->channelEntityManager->unregisterListener<EDataTickerData>(*this);
           }
         }
         if(!selectedChannelName.isEmpty())
@@ -454,8 +439,8 @@ void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
             ChannelData* channelData = getChannelData(selectedChannelName);
             if(channelData)
             {
-              dataService.subscribe(selectedChannelName, channelData->channelEntityManager);
-              channelData->channelEntityManager.registerListener<EDataTickerData>(*this);
+              dataService.subscribe(selectedChannelName, *channelData->channelEntityManager);
+              channelData->channelEntityManager->registerListener<EDataTickerData>(*this);
             }
         }
       }

@@ -42,7 +42,11 @@
 #include "Bots/TradeHandler.h"
 #include "Bots/BotDialog.h"
 
-#include "Models/GraphModel.h"
+#include "Graph/GraphRenderer.h"
+#include "Graph/GraphModel.h"
+#include "Graph/GraphView.h"
+#include "Graph/GraphService.h"
+
 #include "Models/SessionOrderModel.h"
 #include "Models/SessionTransactionModel.h"
 #include "Models/SessionItemModel.h"
@@ -68,7 +72,6 @@
 #include "Widgets/BotPropertiesWidget.h"
 #include "Widgets/TransactionsWidget.h"
 #include "Widgets/TradesWidget.h"
-#include "Widgets/GraphView.h"
 #include "Widgets/GraphWidget.h"
 #include "Widgets/LogWidget.h"
 

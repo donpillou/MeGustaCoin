@@ -29,20 +29,25 @@ private:
   Entity::Manager globalEntityManager;
   DataService dataService;
   BotService botService;
+  GraphService graphService;
   QString selectedChannelName;
 
   struct ChannelData
   {
-    QString channelName;
     TradesWidget* tradesWidget;
     GraphWidget* graphWidget;
-    Entity::Manager channelEntityManager;
+    Entity::Manager* channelEntityManager;
+    GraphModel* graphModel;
 
-    ChannelData() : tradesWidget(0), graphWidget(0) {}
+    ChannelData() : tradesWidget(0), graphWidget(0), channelEntityManager(0), graphModel(0) {}
+    ~ChannelData()
+    {
+      delete graphModel;
+      delete channelEntityManager;
+    }
   };
 
   QHash<QString, ChannelData> channelDataMap;
-  QMap<QString, GraphModel*> channelGraphModels;
   QSignalMapper liveTradesSignalMapper;
   QSignalMapper liveGraphSignalMapper;
 
