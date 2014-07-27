@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include <cfloat>
 
-GraphRenderer::GraphRenderer() : values(0), upToDate(false), enabledData(trades | expRegressionLines), height(0), width(0), image(0), time(0),
+GraphRenderer::GraphRenderer() : values(0), upToDate(false), enabledData(trades | expRegressionLines), height(0), width(0), image(0), time(0), ownTime(0),
   maxAge(60 * 60), totalMin(DBL_MAX), totalMax(0.), volumeMax(0.)
 {
   tradeSamples.reserve(7 * 24 * 60 * 60 + 1000);
@@ -101,8 +101,10 @@ QImage& GraphRenderer::render(const QMap<QString, GraphRenderer*>& graphDataByNa
     const TradeSample& tradeSample = tradeSamples.back();
     addToMinMax(tradeSample.max);
     addToMinMax(tradeSample.min);
-    if(tradeSample.time > time)
-      time = tradeSample.time;
+    if(tradeSample.time > ownTime)
+      ownTime = tradeSample.time;
+    if(ownTime > time)
+      time = ownTime;
   }
 
   if(enabledData & (int)Data::otherMarkets)
@@ -551,8 +553,8 @@ void GraphRenderer::drawRegressionLines(QPainter& painter, const QRect& rect, do
   {
     const TradeHandler::Values::RegressionLine& rl = values->regressions[i];
 
-    const quint64& endTime = time;
-    quint64 startTime = qMax(time - depths[i], hmin);
+    const quint64& endTime = ownTime;
+    quint64 startTime = qMax(endTime - depths[i], hmin);
     if((qint64)hmin - (qint64)startTime > maxAge / 2)
       break;
     
@@ -586,8 +588,8 @@ void GraphRenderer::drawExpRegressionLines(QPainter& painter, const QRect& rect,
   {
     const TradeHandler::Values::RegressionLine& rl = values->bellRegressions[i];
 
-    const quint64& endTime = time;
-    quint64 startTime = qMax(time - depths[i] * 3, hmin);
+    const quint64& endTime = ownTime;
+    quint64 startTime = qMax(endTime - depths[i] * 3, hmin);
     if((qint64)hmin - (qint64)startTime > maxAge / 2)
       break;
 

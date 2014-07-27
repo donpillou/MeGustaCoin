@@ -78,6 +78,7 @@ private:
   QImage* image;
 
   quint64 time;
+  quint64 ownTime;
   int maxAge;
   double totalMin;
   double totalMax;
