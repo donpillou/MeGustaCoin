@@ -123,13 +123,13 @@ void DataConnection::handleMessage(DataProtocol::MessageType messageType, char* 
       DataProtocol::SubscribeResponse* subscribeResponse = (DataProtocol::SubscribeResponse*)data;
       subscribeResponse->channel[sizeof(subscribeResponse->channel) - 1] = '\0';
       QString channelName(subscribeResponse->channel);
-      callback->receivedSubscribeResponse(channelName, subscribeResponse->channelId);
+      callback->receivedSubscribeResponse(channelName, subscribeResponse->channelId, subscribeResponse->flags);
     }
     break;
   case DataProtocol::MessageType::unsubscribeResponse:
-    if(size >= sizeof(DataProtocol::SubscribeResponse))
+    if(size >= sizeof(DataProtocol::UnsubscribeResponse))
     {
-      DataProtocol::SubscribeResponse* unsubscribeResponse = (DataProtocol::SubscribeResponse*)data;
+      DataProtocol::UnsubscribeResponse* unsubscribeResponse = (DataProtocol::UnsubscribeResponse*)data;
       unsubscribeResponse->channel[sizeof(unsubscribeResponse->channel) - 1] = '\0';
       QString channelName(unsubscribeResponse->channel);
       callback->receivedUnsubscribeResponse(channelName, unsubscribeResponse->channelId);
@@ -237,7 +237,7 @@ bool DataConnection::readTrade(quint64& channelId, DataProtocol::Trade& trade)
     ReadTradeCallback(quint64& channelId, DataProtocol::Trade& trade) : channelId(channelId), trade(trade), finished(false) {}
 
     virtual void receivedChannelInfo(const QString& channelName) {}
-    virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId) {}
+    virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId, quint32 flags) {}
     virtual void receivedUnsubscribeResponse(const QString& channelName, quint64 channelId) {}
     virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker) {}
     virtual void receivedErrorResponse(const QString& message) {}

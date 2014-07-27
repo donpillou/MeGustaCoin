@@ -59,6 +59,7 @@ public:
   {
     char channel[33];
     quint64 channelId;
+    quint32 flags;
   };
   struct UnsubscribeRequest
   {

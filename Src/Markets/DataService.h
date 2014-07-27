@@ -63,7 +63,7 @@ private:
 
   private: // DataConnection::Callback
     virtual void receivedChannelInfo(const QString& channelName);
-    virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId);
+    virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId, quint32 flags);
     virtual void receivedUnsubscribeResponse(const QString& channelName, quint64 channelId);
     virtual void receivedTrade(quint64 channelId, const DataProtocol::Trade& trade);
     virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker);

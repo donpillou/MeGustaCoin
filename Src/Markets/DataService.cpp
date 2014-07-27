@@ -300,15 +300,16 @@ void DataService::WorkerThread::receivedChannelInfo(const QString& channelName)
   //information(QString("Found channel %1.").arg(channelName));
 }
 
-void DataService::WorkerThread::receivedSubscribeResponse(const QString& channelName, quint64 channelId)
+void DataService::WorkerThread::receivedSubscribeResponse(const QString& channelName, quint64 channelId, quint32 flags)
 {
   class SubscribeResponseEvent : public Event
   {
   public:
-    SubscribeResponseEvent(const QString& channelName, quint64 channelId) : channelName(channelName), channelId(channelId) {}
+    SubscribeResponseEvent(const QString& channelName, quint64 channelId, quint32 flags) : channelName(channelName), channelId(channelId), flags(flags) {}
   private:
     QString channelName;
     quint64 channelId;
+    quint32 flags;
   private: // Event
     virtual void handle(DataService& dataService)
     {
@@ -317,14 +318,14 @@ void DataService::WorkerThread::receivedSubscribeResponse(const QString& channel
       {
         dataService.activeSubscriptions[channelId] = channelEntityManager;
         EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
-        eDataSubscription->setState(EDataSubscription::State::loading);
+        eDataSubscription->setState(flags & DataProtocol::syncFlag ? EDataSubscription::State::subscribed : EDataSubscription::State::loading);
         channelEntityManager->updatedEntity(*eDataSubscription);
         dataService.addLogMessage(ELogMessage::Type::information, QString("Subscribed to channel %1.").arg(channelName));
       }
     }
   };
 
-  eventQueue.append(new SubscribeResponseEvent(channelName, channelId));
+  eventQueue.append(new SubscribeResponseEvent(channelName, channelId, flags));
   QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
   replayedTrades.remove(channelId);
 }
