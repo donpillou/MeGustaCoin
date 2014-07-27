@@ -156,6 +156,12 @@ void GraphService::addTradeData(GraphModel& graphModel, const QList<DataProtocol
     virtual void execute(WorkerThread& workerThread)
     {
       workerThread.graphData[&graphModel].addTradeData(data);
+      for(QHash<GraphModel*, GraphRenderer>::Iterator i = workerThread.graphData.begin(), end = workerThread.graphData.end(); i != end; ++i)
+      {
+        GraphRenderer& graphRenderer = *i;
+        if(graphRenderer.getEnabledData() & GraphRenderer::otherMarkets)
+          graphRenderer.setUpToDate(false);
+      }
     }
   };
   jobQueue.append(new AddTradeDataJob(graphModel, data));

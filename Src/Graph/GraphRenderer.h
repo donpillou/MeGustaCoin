@@ -33,12 +33,14 @@ public:
   void setSize(const QSize& size);
   void setMaxAge(int maxAge);
   void setEnabledData(unsigned int data);
+  unsigned int getEnabledData() const {return enabledData;}
 
   void addTradeData(const QList<DataProtocol::Trade>& data);
   void addSessionMarker(const EBotSessionMarker& marker);
   void clearSessionMarker();
 
   bool isUpToDate() const {return upToDate || width == 0 || height == 0;}
+  void setUpToDate(bool value) {upToDate = value;}
 
   QImage& render(const QMap<QString, GraphRenderer*>& graphDataByName);
 
