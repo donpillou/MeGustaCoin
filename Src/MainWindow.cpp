@@ -295,10 +295,10 @@ MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
     return &*it;
 }
 
-void MainWindow::updateChannelSubscription(ChannelData& channelData)
+void MainWindow::updateChannelSubscription(ChannelData& channelData, bool enable)
 {
   const QString& channelName = channelData.graphModel->getChannelName();
-  bool active = channelName == selectedChannelName ||
+  bool active = enable || channelName == selectedChannelName ||
     (channelData.graphWidget && isVisible(channelData.graphWidget)) ||
     (channelData.tradesWidget && isVisible(channelData.tradesWidget));
   if(active)
@@ -366,7 +366,7 @@ void MainWindow::enableTradesUpdates(bool enable)
     ChannelData& channelData = it.value();
     if(channelData.tradesWidget && toggleViewAction(channelData.tradesWidget) == sender)
     {
-      updateChannelSubscription(channelData);
+      updateChannelSubscription(channelData, enable);
       return;
     }
   }
@@ -381,7 +381,7 @@ void MainWindow::enableGraphUpdates(bool enable)
     ChannelData& channelData = it.value();
     if(channelData.graphWidget && toggleViewAction(channelData.graphWidget) == sender)
     {
-      updateChannelSubscription(channelData);
+      updateChannelSubscription(channelData, enable);
       return;
     }
   }
@@ -430,7 +430,7 @@ void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
           ChannelData* channelData = getChannelData(oldSelectedChannelName);
           if(channelData)
           {
-            updateChannelSubscription(*channelData);
+            updateChannelSubscription(*channelData, false);
             channelData->channelEntityManager->unregisterListener<EDataTickerData>(*this);
           }
         }
