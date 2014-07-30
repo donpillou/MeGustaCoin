@@ -15,7 +15,7 @@ public:
   };
 
 public:
-  EBotService() : Entity(eType, 0), state(State::offline), selectedSessionId(0), selectedMarketId(0) {}
+  EBotService() : Entity(eType, 0), state(State::offline), selectedSessionId(0), selectedMarketId(0), loadingMarketOrders(false), loadingMarketTransactions(false) {}
 
   State getState() const {return state;}
   void setState(State state) {this->state = state;}
@@ -25,6 +25,12 @@ public:
 
   quint32 getSelectedMarketId() const {return selectedMarketId;}
   void setSelectedMarketId(quint32 id) {selectedMarketId = id;}
+
+  bool getLoadingMarketOrders() const {return loadingMarketOrders;};
+  void setLoadingMarketOrders(bool loading) {loadingMarketOrders = loading;}
+
+  bool getLoadingMarketTransactions() const {return loadingMarketTransactions;}
+  void setLoadingMarketTransactions(bool loading) {loadingMarketTransactions = loading;}
 
   QString getStateName() const
   {
@@ -43,8 +49,13 @@ public:
     return QString();
   }
 
+  QString getMarketOrdersState() const {return loadingMarketOrders ? QObject::tr("loading...") : QString();}
+  QString getMarketTransitionsState() const {return loadingMarketTransactions ? QObject::tr("loading...") : QString();}
+
 private:
   State state;
   quint32 selectedSessionId;
   quint32 selectedMarketId;
+  bool loadingMarketOrders;
+  bool loadingMarketTransactions;
 };

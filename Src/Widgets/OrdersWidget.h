@@ -46,8 +46,8 @@ private:
   void addOrderDraft(EBotMarketOrder::Type type);
 
 private:
-    void updateTitle(EBotService& eBotService);
-    void updateToolBarButtons();
+  void updateTitle(EBotService& eBotService);
+  void updateToolBarButtons();
 
 private: // Entity::Listener
   virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);

@@ -251,6 +251,8 @@ void OrdersWidget::updateTitle(EBotService& eBotService)
   QString stateStr = eBotService.getStateName();
   QString title;
   if(stateStr.isEmpty())
+    stateStr = eBotService.getMarketOrdersState();
+  if(stateStr.isEmpty())
     title = tr("Orders");
   else
     title = tr("Orders (%2)").arg(stateStr);

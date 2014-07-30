@@ -84,6 +84,8 @@ void TransactionsWidget::updateTitle(EBotService& eBotService)
   QString stateStr = eBotService.getStateName();
   QString title;
   if(stateStr.isEmpty())
+    stateStr = eBotService.getMarketTransitionsState();
+  if(stateStr.isEmpty())
     title = tr("Transactions");
   else
     title = tr("Transactions (%2)").arg(stateStr);

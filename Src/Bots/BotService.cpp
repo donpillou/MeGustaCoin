@@ -157,6 +157,8 @@ void BotService::refreshMarketOrders()
   controlMarket.entityId = eBotService->getSelectedMarketId();
   controlMarket.cmd = BotProtocol::ControlMarket::refreshOrders;
   controlEntity(0, &controlMarket, sizeof(controlMarket));
+  eBotService->setLoadingMarketOrders(true);
+  entityManager.updatedEntity(*eBotService);
 }
 
 void BotService::refreshMarketTransactions()
@@ -167,6 +169,8 @@ void BotService::refreshMarketTransactions()
   controlMarket.entityId = eBotService->getSelectedMarketId();
   controlMarket.cmd = BotProtocol::ControlMarket::refreshTransactions;
   controlEntity(0, &controlMarket, sizeof(controlMarket));
+  eBotService->setLoadingMarketTransactions(true);
+  entityManager.updatedEntity(*eBotService);
 }
 
 void BotService::refreshMarketBalance()
@@ -438,6 +442,8 @@ void BotService::WorkerThread::setState(EBotService::State state)
         entityManager.removeAll<EBotMarket>();
         eBotService->setSelectedMarketId(0);
         eBotService->setSelectedSessionId(0);
+        eBotService->setLoadingMarketOrders(false);
+        eBotService->setLoadingMarketTransactions(false);
       }
       entityManager.updatedEntity(*eBotService);
     }
@@ -617,6 +623,22 @@ void BotService::WorkerThread::receivedControlEntityResponse(quint32 requestId, 
               Entity::Manager& entityManager = botService.entityManager;
               EBotService* eBotService = entityManager.getEntity<EBotService>(0);
               eBotService->setSelectedMarketId(entity->entityId);
+              entityManager.updatedEntity(*eBotService);
+            }
+            break;
+          case BotProtocol::ControlMarket::refreshOrders:
+            {
+              Entity::Manager& entityManager = botService.entityManager;
+              EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+              eBotService->setLoadingMarketOrders(false);
+              entityManager.updatedEntity(*eBotService);
+            }
+            break;
+          case BotProtocol::ControlMarket::refreshTransactions:
+            {
+              Entity::Manager& entityManager = botService.entityManager;
+              EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+              eBotService->setLoadingMarketTransactions(false);
               entityManager.updatedEntity(*eBotService);
             }
             break;
