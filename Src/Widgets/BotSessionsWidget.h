@@ -19,6 +19,7 @@ private slots:
   void cancelBot();
   void sessionSelectionChanged();
   void sessionDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+  void sessionDataAdded(const QModelIndex& parent, int start, int end);
 
 private:
   QTabFramework& tabFramework;
@@ -33,6 +34,7 @@ private:
   QSortFilterProxyModel* proxyModel;
 
   QSet<EBotSession*> selection;
+  quint32 selectedSessionId;
 
   QAction* addAction;
   QAction* optimizeAction;

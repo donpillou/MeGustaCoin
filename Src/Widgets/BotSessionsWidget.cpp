@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  botService(botService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager)
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  botService(botService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager), selectedSessionId(0)
 {
   entityManager.registerListener<EBotService>(*this);
 
@@ -44,6 +44,7 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
   sessionView->setAlternatingRowColors(true);
   connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(sessionSelectionChanged()));
   connect(&botSessionModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(sessionDataChanged(const QModelIndex&, const QModelIndex&)));
+  connect(&botSessionModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(sessionDataAdded(const QModelIndex&, int, int)));
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);
@@ -56,6 +57,7 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
   //headerView->resizeSection(0, 300);
   settings.beginGroup("BotSessions");
   headerView->restoreState(settings.value("HeaderState").toByteArray());
+  selectedSessionId = settings.value("SelectedSessionId").toUInt();
   settings.endGroup();
   headerView->setStretchLastSection(false);
   headerView->setResizeMode(0, QHeaderView::Stretch);
@@ -70,6 +72,7 @@ void BotSessionsWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("BotSessions");
   settings.setValue("HeaderState", sessionView->header()->saveState());
+  settings.setValue("SelectedSessionId", selectedSessionId);
   settings.endGroup();
 }
 
@@ -180,6 +183,8 @@ void BotSessionsWidget::updateSelection()
     EBotSession* eSession = (EBotSession*)modelIndex.internalPointer();
     selection.insert(eSession);
   }
+  if(!selection.isEmpty())
+    selectedSessionId = (*selection.begin())->getId();
   updateToolBarButtons();
 }
 
@@ -204,6 +209,27 @@ void BotSessionsWidget::sessionDataChanged(const QModelIndex& topLeft, const QMo
     if(i++ == end)
       break;
     index = index.sibling(i, 0);
+  }
+}
+
+void BotSessionsWidget::sessionDataAdded(const QModelIndex& parent, int start, int end)
+{
+  if(selection.isEmpty() && selectedSessionId)
+  {
+    for(int i = start;;)
+    {
+      QModelIndex index = botSessionModel.index(i, 0, parent);
+      EBotSession* eBotSession = (EBotSession*)index.internalPointer();
+      if(eBotSession->getId() == selectedSessionId)
+      {
+        QModelIndex proxyIndex = proxyModel->mapFromSource(index);
+        QModelIndex proxyIndexEnd = proxyModel->mapFromSource(botSessionModel.index(i, botSessionModel.columnCount(parent) - 1, parent));
+        sessionView->selectionModel()->select(QItemSelection(proxyIndex, proxyIndexEnd), QItemSelectionModel::Select);
+        break;
+      }
+      if(i++ == end)
+        break;
+    }
   }
 }
 

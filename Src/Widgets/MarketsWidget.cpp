@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), botMarketModel(entityManager)
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), selectedMarketId(0), botMarketModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
 
@@ -32,6 +32,7 @@ MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, E
   marketView->setAlternatingRowColors(true);
   connect(marketView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(marketSelectionChanged()));
   connect(&botMarketModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(marketDataChanged(const QModelIndex&, const QModelIndex&)));
+  connect(&botMarketModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(marketDataAdded(const QModelIndex&, int, int)));
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);
@@ -46,6 +47,7 @@ MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, E
   marketView->sortByColumn(0);
   settings.beginGroup("Markets");
   headerView->restoreState(settings.value("HeaderState").toByteArray());
+  selectedMarketId = settings.value("SelectedMarketId").toUInt();
   settings.endGroup();
   headerView->setStretchLastSection(false);
   headerView->setResizeMode(0, QHeaderView::Stretch);
@@ -60,6 +62,7 @@ void MarketsWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("Markets");
   settings.setValue("HeaderState", marketView->header()->saveState());
+  settings.setValue("SelectedMarketId", selectedMarketId);
   settings.endGroup();
 }
 
@@ -125,6 +128,8 @@ void MarketsWidget::updateSelection()
     EBotMarket* eBotMarket = (EBotMarket*)modelIndex.internalPointer();
     selection.insert(eBotMarket);
   }
+  if(!selection.isEmpty())
+    selectedMarketId = (*selection.begin())->getId();
   updateToolBarButtons();
 }
 
@@ -140,8 +145,8 @@ void MarketsWidget::marketDataChanged(const QModelIndex& topLeft, const QModelIn
   QModelIndex index = topLeft;
   for(int i = topLeft.row(), end = bottomRight.row();;)
   {
-    EBotMarket* eBotSession = (EBotMarket*)index.internalPointer();
-    if(selection.contains(eBotSession))
+    EBotMarket* eBotMarket = (EBotMarket*)index.internalPointer();
+    if(selection.contains(eBotMarket))
     {
       updateSelection();
       break;
@@ -149,6 +154,27 @@ void MarketsWidget::marketDataChanged(const QModelIndex& topLeft, const QModelIn
     if(i++ == end)
       break;
     index = index.sibling(i, 0);
+  }
+}
+
+void MarketsWidget::marketDataAdded(const QModelIndex& parent, int start, int end)
+{
+  if(selection.isEmpty() && selectedMarketId)
+  {
+    for(int i = start;;)
+    {
+      QModelIndex index = botMarketModel.index(i, 0, parent);
+      EBotMarket* eBotMarket = (EBotMarket*)index.internalPointer();
+      if(eBotMarket->getId() == selectedMarketId)
+      {
+        QModelIndex proxyIndex = proxyModel->mapFromSource(index);
+        QModelIndex proxyIndexEnd = proxyModel->mapFromSource(botMarketModel.index(i, botMarketModel.columnCount(parent) - 1, parent));
+        marketView->selectionModel()->select(QItemSelection(proxyIndex, proxyIndexEnd), QItemSelectionModel::Select);
+        break;
+      }
+      if(i++ == end)
+        break;
+    }
   }
 }
 

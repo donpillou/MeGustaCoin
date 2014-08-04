@@ -20,6 +20,7 @@ private:
   QSortFilterProxyModel* proxyModel;
 
   QSet<EBotMarket*> selection;
+  quint32 selectedMarketId;
 
   QAction* addAction;
   QAction* editAction;
@@ -33,6 +34,7 @@ private slots:
   void removeMarket();
   void marketSelectionChanged();
   void marketDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+  void marketDataAdded(const QModelIndex& parent, int start, int end);
 
 private:
   void updateTitle(EBotService& eBotService);

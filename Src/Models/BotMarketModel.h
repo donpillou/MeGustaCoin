@@ -24,7 +24,7 @@ private:
   QVariant startingVar;
   QVariant runningVar;
 
-private: // QAbstractItemModel
+public: // QAbstractItemModel
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;
   virtual QModelIndex parent(const QModelIndex& child) const;
   virtual int rowCount(const QModelIndex& parent) const;
