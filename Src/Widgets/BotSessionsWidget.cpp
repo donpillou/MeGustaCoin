@@ -44,6 +44,8 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
   sessionView->setAlternatingRowColors(true);
   connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(sessionSelectionChanged()));
   connect(&botSessionModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(sessionDataChanged(const QModelIndex&, const QModelIndex&)));
+  connect(&botSessionModel, SIGNAL(rowsRemoved(const QModelIndex&, int, int)), this, SLOT(sessionDataRemoved(const QModelIndex&, int, int)));
+  connect(&botSessionModel, SIGNAL(modelReset()), this, SLOT(sessionDataReset()));
   connect(&botSessionModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(sessionDataAdded(const QModelIndex&, int, int)));
 
   QVBoxLayout* layout = new QVBoxLayout;
@@ -210,6 +212,23 @@ void BotSessionsWidget::sessionDataChanged(const QModelIndex& topLeft, const QMo
       break;
     index = index.sibling(i, 0);
   }
+}
+
+void BotSessionsWidget::sessionDataRemoved(const QModelIndex& parent, int start, int end)
+{
+  for(int i = start;;)
+  {
+    QModelIndex index = botSessionModel.index(i, 0, parent);
+    EBotSession* eBotSession = (EBotSession*)index.internalPointer();
+    selection.remove(eBotSession);
+    if(i++ == end)
+      break;
+  }
+}
+
+void BotSessionsWidget::sessionDataReset()
+{
+  selection.clear();
 }
 
 void BotSessionsWidget::sessionDataAdded(const QModelIndex& parent, int start, int end)

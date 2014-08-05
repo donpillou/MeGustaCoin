@@ -19,6 +19,8 @@ private slots:
   void cancelBot();
   void sessionSelectionChanged();
   void sessionDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+  void sessionDataRemoved(const QModelIndex& parent, int start, int end);
+  void sessionDataReset();
   void sessionDataAdded(const QModelIndex& parent, int start, int end);
 
 private:

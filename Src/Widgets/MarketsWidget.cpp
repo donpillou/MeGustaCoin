@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), selectedMarketId(0), botMarketModel(entityManager)
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), botMarketModel(entityManager), selectedMarketId(0)
 {
   entityManager.registerListener<EBotService>(*this);
 
@@ -32,6 +32,8 @@ MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, E
   marketView->setAlternatingRowColors(true);
   connect(marketView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(marketSelectionChanged()));
   connect(&botMarketModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(marketDataChanged(const QModelIndex&, const QModelIndex&)));
+  connect(&botMarketModel, SIGNAL(rowsRemoved(const QModelIndex&, int, int)), this, SLOT(marketDataRemoved(const QModelIndex&, int, int)));
+  connect(&botMarketModel, SIGNAL(modelReset()), this, SLOT(marketDataReset()));
   connect(&botMarketModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(marketDataAdded(const QModelIndex&, int, int)));
 
   QVBoxLayout* layout = new QVBoxLayout;
@@ -155,6 +157,23 @@ void MarketsWidget::marketDataChanged(const QModelIndex& topLeft, const QModelIn
       break;
     index = index.sibling(i, 0);
   }
+}
+
+void MarketsWidget::marketDataRemoved(const QModelIndex& parent, int start, int end)
+{
+  for(int i = start;;)
+  {
+    QModelIndex index = botMarketModel.index(i, 0, parent);
+    EBotMarket* eBotMarket = (EBotMarket*)index.internalPointer();
+    selection.remove(eBotMarket);
+    if(i++ == end)
+      break;
+  }
+}
+
+void MarketsWidget::marketDataReset()
+{
+  selection.clear();
 }
 
 void MarketsWidget::marketDataAdded(const QModelIndex& parent, int start, int end)

@@ -16,6 +16,8 @@ private:
   Entity::Manager& entityManager;
   BotService& botService;
 
+  BotMarketModel botMarketModel;
+
   QTreeView* marketView;
   QSortFilterProxyModel* proxyModel;
 
@@ -26,14 +28,14 @@ private:
   QAction* editAction;
   QAction* removeAction;
 
-  BotMarketModel botMarketModel;
-
 private slots:
   void addMarket();
   void editMarket();
   void removeMarket();
   void marketSelectionChanged();
   void marketDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
+  void marketDataRemoved(const QModelIndex& parent, int start, int end);
+  void marketDataReset();
   void marketDataAdded(const QModelIndex& parent, int start, int end);
 
 private:
