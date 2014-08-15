@@ -12,11 +12,9 @@ GraphWidget::GraphWidget(QTabFramework& tabFramework, QSettings& settings, const
   toolBar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
   zoomAction = toolBar->addAction(QIcon(":/Icons/zoom.png"), tr("1 Hour"));
-  //zoomAction->setEnabled(false);
   QMenu* zoomMenu = new QMenu(this);
   QActionGroup* zoomActionGroup = new QActionGroup(zoomMenu);
   zoomSignalMapper = new QSignalMapper(zoomMenu);
-  //connect(zoomAction, SIGNAL(triggered()), zoomSignalMapper, SLOT(map()));
   connect(zoomSignalMapper, SIGNAL(mapped(int)), SLOT(setZoom(int)));
   QAction* action = zoomMenu->addAction(tr("10 Minutes"));
   action->setCheckable(true);
@@ -129,18 +127,6 @@ void GraphWidget::saveState(QSettings& settings)
   settings.endGroup();
 }
 
-//void GraphWidget::setFocusPublicDataModel(const PublicDataModel* publicDataModel)
-//{
-//  if(this->publicDataModel)
-//    disconnect(this->publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-//  this->publicDataModel = publicDataModel;
-//  if(publicDataModel)
-//    connect(publicDataModel, SIGNAL(changedState()), this, SLOT(updateTitle()));
-//
-//  graphView->setFocusPublicDataModel(publicDataModel);
-//  updateTitle();
-//}
-
 void GraphWidget::setZoom(int maxTime)
 {
   QAction* srcAction = qobject_cast<QAction*>(zoomSignalMapper->mapping(maxTime));
@@ -204,15 +190,10 @@ void GraphWidget::updateTitle()
   QString stateStr = eDataSubscription->getStateName();
 
   QString title;
-  //if(entityManager)
-  {
-    if(stateStr.isEmpty())
-      title = tr("%1 Live Graph").arg(channelName);
-    else
-      title = tr("%1 Live Graph (%2)").arg(channelName, stateStr);
-  }
-  //else
-  //  title = tr("Live Graph (%1)").arg(tr("offline"));
+  if(stateStr.isEmpty())
+    title = tr("%1 Live Graph").arg(channelName);
+  else
+    title = tr("%1 Live Graph (%2)").arg(channelName, stateStr);
 
   setWindowTitle(title);
   tabFramework.toggleViewAction(this)->setText(tr("Live Graph"));
