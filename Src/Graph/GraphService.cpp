@@ -89,6 +89,24 @@ void GraphService::unregisterGraphModel(GraphModel& graphModel)
   }
 }
 
+void GraphService::enable(GraphModel& graphModel, bool enable)
+{
+  class EnableJob : public Job
+  {
+  public:
+    EnableJob(GraphModel& graphModel, bool enable) : graphModel(graphModel), enable(enable) {}
+  private:
+    GraphModel& graphModel;
+    bool enable;
+  public: // Job
+    virtual void execute(WorkerThread& workerThread)
+    {
+      workerThread.graphData[&graphModel].enable(enable);
+    }
+  };
+  jobQueue.append(new EnableJob(graphModel, enable));
+}
+
 void GraphService::setSize(GraphModel& graphModel, const QSize& size)
 {
   class SetSizeJob : public Job
@@ -240,7 +258,7 @@ void GraphService::WorkerThread::run()
     for(QHash<GraphModel*, GraphRenderer>::Iterator i = graphData.begin(), end = graphData.end(); i != end; ++i)
     {
       GraphRenderer& renderer = *i;
-      if(!renderer.isUpToDate())
+      if(renderer.isEnabled() && !renderer.isUpToDate())
       {
         GraphModel* graphModel = i.key();
         QImage& image = renderer.render(graphDataByName);

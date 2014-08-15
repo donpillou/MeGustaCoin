@@ -15,6 +15,7 @@ public:
   void registerGraphModel(GraphModel& graphModel);
   void unregisterGraphModel(GraphModel& graphModel);
 
+  void enable(GraphModel& graphModel, bool enable);
   void setSize(GraphModel& graphModel, const QSize& size);
   void setMaxAge(GraphModel& graphModel, int maxAge);
   void setEnabledData(GraphModel& graphModel, unsigned int data);

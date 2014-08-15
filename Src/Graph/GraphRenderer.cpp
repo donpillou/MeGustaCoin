@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include <cfloat>
 
-GraphRenderer::GraphRenderer() : values(0), upToDate(false), enabledData(trades | expRegressionLines), height(0), width(0), image(0), time(0), ownTime(0),
+GraphRenderer::GraphRenderer() : values(0), enabled(false), upToDate(false), enabledData(trades | expRegressionLines), height(0), width(0), image(0), time(0), ownTime(0),
   maxAge(60 * 60), totalMin(DBL_MAX), totalMax(0.), volumeMax(0.)
 {
   tradeSamples.reserve(7 * 24 * 60 * 60 + 1000);

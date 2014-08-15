@@ -199,6 +199,18 @@ void GraphWidget::updateTitle()
   tabFramework.toggleViewAction(this)->setText(tr("Live Graph"));
 }
 
+void GraphWidget::showEvent(QShowEvent* event)
+{
+  QWidget::showEvent(event);
+  graphModel.enable(true);
+}
+
+void GraphWidget::hideEvent(QHideEvent* event)
+{
+  QWidget::hideEvent(event);
+  graphModel.enable(false);
+}
+
 void GraphWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   EDataSubscription* eDataSubscription = dynamic_cast<EDataSubscription*>(&newEntity);

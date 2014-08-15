@@ -32,6 +32,10 @@ private:
   QMenu* dataMenu;
   QSignalMapper* dataSignalMapper;
 
+private: // QWidget
+  virtual void showEvent(QShowEvent* event);
+  virtual void hideEvent(QHideEvent* event);
+
 private: // Entity::Listener
   virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);
 };

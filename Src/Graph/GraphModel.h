@@ -17,6 +17,7 @@ public:
   void swapImage(QImage& image);
   void redraw();
 
+  void enable(bool enable);
   void setSize(const QSize& size);
   void setMaxAge(int maxAge);
   int getMaxAge() const {return maxAge;}

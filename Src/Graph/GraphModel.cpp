@@ -29,6 +29,11 @@ void GraphModel::redraw()
   emit dataChanged();
 }
 
+void GraphModel::enable(bool enable)
+{
+  graphService.enable(*this, enable);
+}
+
 void GraphModel::setSize(const QSize& size)
 {
   graphService.setSize(*this, size);

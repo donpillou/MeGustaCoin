@@ -30,6 +30,7 @@ public:
   GraphRenderer();
   ~GraphRenderer();
 
+  void enable(bool enable) {enabled = enable;}
   void setSize(const QSize& size);
   void setMaxAge(int maxAge);
   void setEnabledData(unsigned int data);
@@ -39,7 +40,8 @@ public:
   void addSessionMarker(const EBotSessionMarker& marker);
   void clearSessionMarker();
 
-  bool isUpToDate() const {return upToDate || width == 0 || height == 0;}
+  bool isEnabled() const {return enabled && width != 0 && height != 0;}
+  bool isUpToDate() const {return upToDate;}
   void setUpToDate(bool value) {upToDate = value;}
 
   QImage& render(const QMap<QString, GraphRenderer*>& graphDataByName);
@@ -72,6 +74,7 @@ private:
   QList<TradeSample> tradeSamples;
   QMultiMap<quint64, EBotSessionMarker::Type> markers;
   TradeHandler::Values* values;
+  bool enabled;
   bool upToDate;
 
   unsigned int enabledData;
