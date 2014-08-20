@@ -38,10 +38,12 @@ public:
 
 private:
   SocketConnection connection;
-  QByteArray recvBuffer;
+  QByteArray recvBuffer2;
   QString error;
   Callback* callback;
   qint64 serverTimeToLocalTime;
+
+  bool receiveMessage(DataProtocol::Header& header, char*& data, size_t& size);
 
   void handleMessage(DataProtocol::MessageType messageType, char* data, unsigned int dataSize);
 };

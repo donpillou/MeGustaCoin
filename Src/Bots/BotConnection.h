@@ -7,8 +7,6 @@ public:
   class Callback
   {
   public:
-    virtual void receivedLoginResponse(const BotProtocol::LoginResponse& response) {}
-    virtual void receivedAuthResponse() {}
     virtual void receivedUpdateEntity(BotProtocol::Entity& entity, size_t size) {}
     virtual void receivedRemoveEntity(const BotProtocol::Entity& entity) {}
     virtual void receivedRemoveAllEntities(const BotProtocol::Entity& entity) {}
@@ -30,10 +28,12 @@ public:
 
 private:
   SocketConnection connection;
-  QByteArray recvBuffer;
+  QByteArray recvBuffer2;
   QString error;
   Callback* callback;
   qint64 serverTimeToLocalTime;
+
+  bool receiveMessage(BotProtocol::Header& header, char*& data, size_t& size);
 
   void handleMessage(const BotProtocol::Header& header, char* data, size_t dataSize);
 
@@ -41,16 +41,6 @@ private:
   bool sendLoginRequest(const QString& userName);
   bool sendAuthRequest(const QByteArray& signature);
 
-  bool receiveLoginResponse(BotProtocol::LoginResponse& loginResponse);
-  bool receiveAuthResponse();
-
-  //template<size_t N> void setString(char(&str)[N], const QString& value)
-  //{
-  //  QByteArray buf = value.toUtf8();
-  //  size_t size = buf.length() + 1;
-  //  if(size > N - 1)
-  //    size = N - 1;
-  //  memcpy(str, buf.constData(), size);
-  //  str[N - 1] = '\0';
-  //}
+  bool receiveLoginResponse2(BotProtocol::LoginResponse& loginResponse);
+  bool receiveAuthResponse2();
 };

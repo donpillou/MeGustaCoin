@@ -4,7 +4,7 @@
 bool BotConnection::connect(const QString& server, quint16 port, const QString& userName, const QString& password)
 {
   connection.close();
-  recvBuffer.clear();
+  recvBuffer2.clear();
 
   if(!connection.connect(server, port))
   {
@@ -15,7 +15,7 @@ bool BotConnection::connect(const QString& server, quint16 port, const QString& 
   if(!sendLoginRequest(userName))
     return false;
   BotProtocol::LoginResponse loginResponse;
-  if(!receiveLoginResponse(loginResponse))
+  if(!receiveLoginResponse2(loginResponse))
     return false;
 
   QByteArray passwordData = password.toUtf8();
@@ -23,9 +23,10 @@ bool BotConnection::connect(const QString& server, quint16 port, const QString& 
   QByteArray signature = Sha256::hmac(QByteArray((char*)loginResponse.loginKey, 32), pwhmac);
   if(!sendAuthRequest(signature))
     return false;
-  if(!receiveAuthResponse())
+  if(!receiveAuthResponse2())
     return false;
 
+  recvBuffer2.clear();
   return true;
 }
 
@@ -38,22 +39,14 @@ bool BotConnection::process(Callback& callback)
 {
   this->callback = &callback;
 
-  if(!recvBuffer.isEmpty())
-  {
-    unsigned int bufferSize = recvBuffer.size();
-    if(bufferSize >= sizeof(BotProtocol::Header) && bufferSize >= ((const BotProtocol::Header*)recvBuffer.data())->size)
-      goto handle; // skip recv
-  }
-
-  if(!connection.recv(recvBuffer))
+  if(!connection.recv(recvBuffer2))
   {
     error = connection.getLastError();
     return false;
   }
 
-handle:
-  char* buffer = recvBuffer.data();
-  unsigned int bufferSize = recvBuffer.size();
+  char* buffer = recvBuffer2.data();
+  unsigned int bufferSize = recvBuffer2.size();
 
   for(;;)
   {
@@ -70,17 +63,43 @@ handle:
         handleMessage(*header, (char*)(header + 1), header->size - sizeof(BotProtocol::Header));
         buffer += header->size;
         bufferSize -= header->size;
-        break;
+        continue;
       }
     }
     break;
   }
-  if(buffer > recvBuffer.data())
-    recvBuffer.remove(0, buffer - recvBuffer.data());
-  if(recvBuffer.size() > 4000)
+  if(buffer > recvBuffer2.data())
+    recvBuffer2.remove(0, buffer - recvBuffer2.data());
+  if(recvBuffer2.size() > 4000)
   {
     error = "Received invalid data.";
     return false;
+  }
+  return true;
+}
+
+bool BotConnection::receiveMessage(BotProtocol::Header& header, char*& data, size_t& size)
+{
+  if(connection.recv((char*)&header, sizeof(header), sizeof(header)) != sizeof(header))
+  {
+    error = connection.getLastError();
+    return false;
+  }
+  if(header.size < sizeof(BotProtocol::Header))
+  {
+    error = "Received invalid data.";
+    return false;
+  }
+  size = header.size - sizeof(header);
+  if(size > 0)
+  {
+    recvBuffer2.resize(size);
+    data = recvBuffer2.data();
+    if(connection.recv(data, size, size) != size)
+    {
+      error = connection.getLastError();
+      return false;
+    }
   }
   return true;
 }
@@ -89,13 +108,6 @@ void BotConnection::handleMessage(const BotProtocol::Header& header, char* data,
 {
   switch((BotProtocol::MessageType)header.messageType)
   {
-  case BotProtocol::loginResponse:
-    if(size >= sizeof(BotProtocol::LoginResponse))
-      callback->receivedLoginResponse(*(BotProtocol::LoginResponse*)data);
-    break;
-  case BotProtocol::authResponse:
-    callback->receivedAuthResponse();
-    break;
   case BotProtocol::updateEntity:
     if(size >= sizeof(BotProtocol::Entity))
       callback->receivedUpdateEntity(*(BotProtocol::Entity*)data, size);
@@ -221,71 +233,44 @@ bool BotConnection::sendAuthRequest(const QByteArray& signature)
   return sendMessage(BotProtocol::authRequest, 0, &authRequest, sizeof(authRequest));
 }
 
-bool BotConnection::receiveLoginResponse(BotProtocol::LoginResponse& loginResponse)
+bool BotConnection::receiveLoginResponse2(BotProtocol::LoginResponse& loginResponse)
 {
-  struct LoginCallback : public Callback
+  BotProtocol::Header header;
+  char* data;
+  size_t size;
+  if(!receiveMessage(header, data, size))
+    return false;
+  if(header.messageType == BotProtocol::errorResponse && size >= sizeof(BotProtocol::ErrorResponse))
   {
-    BotProtocol::LoginResponse& loginResponse;
-    QString error;
-    bool finished;
-  
-    LoginCallback(BotProtocol::LoginResponse& loginResponse) : loginResponse(loginResponse), finished(false) {}
-  
-  public:
-    virtual void receivedLoginResponse(const BotProtocol::LoginResponse& response)
-    {
-      loginResponse = response;
-      finished = true;
-    }
-    virtual void receivedErrorResponse(quint32 requestId, BotProtocol::ErrorResponse& response)
-    {
-      error = BotProtocol::getString(response.errorMessage);
-      finished = true;
-    }
-  } callback(loginResponse);
-
-  do
-  {
-    if(!process(callback))
-      return false;
-  } while(!callback.finished);
-  if(!callback.error.isEmpty())
-  {
-    error = callback.error;
+    BotProtocol::ErrorResponse* errorResponse = (BotProtocol::ErrorResponse*)data;
+    error = BotProtocol::getString(errorResponse->errorMessage);
     return false;
   }
+  if(header.messageType != BotProtocol::loginResponse || size < sizeof(BotProtocol::LoginResponse))
+  {
+    error = "Could not receive login response.";
+    return false;
+  }
+  loginResponse = *(BotProtocol::LoginResponse*)data;
   return true;
 }
 
-bool BotConnection::receiveAuthResponse()
+bool BotConnection::receiveAuthResponse2()
 {
-  struct AuthCallback : public Callback
+  BotProtocol::Header header;
+  char* data;
+  size_t size;
+  if(!receiveMessage(header, data, size))
+    return false;
+  if(header.messageType == BotProtocol::errorResponse && size >= sizeof(BotProtocol::ErrorResponse))
   {
-    QString error;
-    bool finished;
-  
-    AuthCallback() : finished(false) {}
-  
-  public:
-    virtual void receivedAuthResponse()
-    {
-      finished = true;
-    }
-    virtual void receivedErrorResponse(quint32 requestId, BotProtocol::ErrorResponse& response)
-    {
-      error = BotProtocol::getString(response.errorMessage);
-      finished = true;
-    }
-  } callback;
-
-  do
+    BotProtocol::ErrorResponse* errorResponse = (BotProtocol::ErrorResponse*)data;
+    error = BotProtocol::getString(errorResponse->errorMessage);
+    return false;
+  }
+  if(header.messageType != BotProtocol::authResponse)
   {
-    if(!process(callback))
-      return false;
-  } while(!callback.finished);
-  if(!callback.error.isEmpty())
-  {
-    error = callback.error;
+    error = "Could not receive auth response.";
     return false;
   }
   return true;

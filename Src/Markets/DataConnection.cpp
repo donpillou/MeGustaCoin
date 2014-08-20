@@ -4,7 +4,7 @@
 bool DataConnection::connect(const QString& server, quint16 port)
 {
   connection.close();
-  recvBuffer.clear();
+  recvBuffer2.clear();
 
   if(!connection.connect(server, port == 0 ? 40123 : port))
   {
@@ -13,43 +13,38 @@ bool DataConnection::connect(const QString& server, quint16 port)
   }
 
   // request server time
-  DataProtocol::Header header;
-  header.size = sizeof(header);
-  header.destination = header.source = 0;
-  header.messageType = DataProtocol::timeRequest;
-  if(!connection.send((char*)&header, sizeof(header)))
   {
-    error = connection.getLastError();
-    return false;
-  }
-  qint64 localRequestTime = QDateTime::currentDateTime().toTime_t() * 1000ULL;
-  QByteArray recvBuffer;
-  recvBuffer.reserve(sizeof(DataProtocol::Header) + sizeof(DataProtocol::TimeResponse));
-  do
-  {
-    if(!connection.recv(recvBuffer))
+    DataProtocol::Header header;
+    header.size = sizeof(header);
+    header.destination = header.source = 0;
+    header.messageType = DataProtocol::timeRequest;
+    if(!connection.send((char*)&header, sizeof(header)))
     {
       error = connection.getLastError();
       return false;
     }
-  } while((unsigned int)recvBuffer.length() < sizeof(DataProtocol::Header) + sizeof(DataProtocol::TimeResponse));
-  qint64 localResponseTime = QDateTime::currentDateTime().toTime_t() * 1000ULL;
-  {
-    DataProtocol::Header* header = (DataProtocol::Header*)recvBuffer.data();
-    DataProtocol::TimeResponse* timeResponse2 = (DataProtocol::TimeResponse*)(header + 1);
-    if(header->size != sizeof(DataProtocol::Header) + sizeof(DataProtocol::TimeResponse))
+    qint64 localRequestTime = QDateTime::currentDateTime().toTime_t() * 1000ULL;
+    char* data;
+    size_t size;
+    if(!receiveMessage(header, data, size))
+      return false;
+    qint64 localResponseTime = QDateTime::currentDateTime().toTime_t() * 1000ULL;
+    if(header.messageType == DataProtocol::errorResponse && size >= sizeof(DataProtocol::ErrorResponse))
     {
-      error = "Received invalid data.";
+      DataProtocol::ErrorResponse* errorResponse = (DataProtocol::ErrorResponse*)data;
+      error = DataProtocol::getString(errorResponse->errorMessage);
       return false;
     }
-    if(header->messageType != DataProtocol::timeResponse)
+    if(header.messageType != DataProtocol::timeResponse || size < sizeof(DataProtocol::TimeResponse))
     {
       error = "Could not request server time.";
       return false;
     }
-    serverTimeToLocalTime = (localResponseTime - localRequestTime) / 2 + localRequestTime - timeResponse2->time;
+    DataProtocol::TimeResponse* timeResponse = (DataProtocol::TimeResponse*)data;
+    serverTimeToLocalTime = (localResponseTime - localRequestTime) / 2 + localRequestTime - timeResponse->time;
   }
 
+  recvBuffer2.clear();
   return true;
 }
 
@@ -62,14 +57,14 @@ bool DataConnection::process(Callback& callback)
 {
   this->callback = &callback;
 
-  if(!connection.recv(recvBuffer))
+  if(!connection.recv(recvBuffer2))
   {
     error = connection.getLastError();
     return false;
   }
 
-  char* buffer = recvBuffer.data();
-  unsigned int bufferSize = recvBuffer.size();
+  char* buffer = recvBuffer2.data();
+  unsigned int bufferSize = recvBuffer2.size();
 
   for(;;)
   {
@@ -91,12 +86,38 @@ bool DataConnection::process(Callback& callback)
     }
     break;
   }
-  if(buffer > recvBuffer.data())
-    recvBuffer.remove(0, buffer - recvBuffer.data());
-  if(recvBuffer.size() > 4000)
+  if(buffer > recvBuffer2.data())
+    recvBuffer2.remove(0, buffer - recvBuffer2.data());
+  if(recvBuffer2.size() > 4000)
   {
     error = "Received invalid data.";
     return false;
+  }
+  return true;
+}
+
+bool DataConnection::receiveMessage(DataProtocol::Header& header, char*& data, size_t& size)
+{
+  if(connection.recv((char*)&header, sizeof(header), sizeof(header)) != sizeof(header))
+  {
+    error = connection.getLastError();
+    return false;
+  }
+  if(header.size < sizeof(DataProtocol::Header))
+  {
+    error = "Received invalid data.";
+    return false;
+  }
+  size = header.size - sizeof(header);
+  if(size > 0)
+  {
+    recvBuffer2.resize(size);
+    data = recvBuffer2.data();
+    if(connection.recv(data, size, size) != size)
+    {
+      error = connection.getLastError();
+      return false;
+    }
   }
   return true;
 }

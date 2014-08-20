@@ -109,4 +109,9 @@ public:
   };
 #pragma pack(pop)
 
+  template<size_t N> static QString getString(char(&str)[N])
+  {
+    str[N - 1] = '\0';
+    return str;
+  }
 };

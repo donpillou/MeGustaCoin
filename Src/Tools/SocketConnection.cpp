@@ -181,10 +181,10 @@ bool SocketConnection::send(const char* data, int len)
   return true;
 }
 
-bool SocketConnection::recv(QByteArray& data)
+int SocketConnection::recv(char* data, int size)
 {
   if((SOCKET)(intptr_t)s == INVALID_SOCKET)
-    return false;
+    return -1;
 
   // try sending
   if(!sendBuffer.isEmpty())
@@ -199,12 +199,12 @@ bool SocketConnection::recv(QByteArray& data)
       else if(status != CURLE_OK)
       {
         error = QString(curl_easy_strerror(status)) + ".";
-        return false;
+        return -1;
       }
       if(sent == 0)
       {
         error = "Connection was closed.";
-        return false;
+        return -1;
       }
       totalSent += sent;
     }
@@ -220,7 +220,7 @@ bool SocketConnection::recv(QByteArray& data)
     if(WSAEventSelect((SOCKET)s, socketEvent, FD_READ | FD_CLOSE | (requireSocketEventWriteMode ? FD_WRITE : 0)) == SOCKET_ERROR)
     {
       error = getSocketErrorString();
-      return false;
+      return -1;
     }
     socketEventWriteMode = requireSocketEventWriteMode;
   }
@@ -236,11 +236,11 @@ bool SocketConnection::recv(QByteArray& data)
     break;
   case WSA_WAIT_EVENT_0 + 1: // cancel event
     WSAResetEvent(cancelEvent);
-    return true;
+    return 0;
   case WSA_WAIT_FAILED:
   default:
     error = getSocketErrorString();
-    return false;
+    return -1;
   }
 #else
   fd_set rfds;
@@ -261,13 +261,13 @@ bool SocketConnection::recv(QByteArray& data)
     if(selectResult == -1)
     {
       error = getSocketErrorString();
-      return false;
+      return -1;
     }
     if(FD_ISSET(cancelPipe[0], &rfds))
     {
       char buf;
       read(cancelPipe[0], &buf, 1);
-      return true;
+      return 0;
     }
     break;
   }
@@ -279,7 +279,7 @@ bool SocketConnection::recv(QByteArray& data)
   if(WSAEnumNetworkEvents((SOCKET)s, socketEvent, &networkEvents) ==  SOCKET_ERROR)
   {
     error = getSocketErrorString();
-    return false;
+    return -1;
   }
 #endif
 
@@ -290,26 +290,50 @@ bool SocketConnection::recv(QByteArray& data)
   if(FD_ISSET((int)(intptr_t)s, &rfds))
 #endif
   {
-    int bufferSize = data.size();
-    int bufferCapacity = bufferSize + 1500;
-    data.resize(bufferCapacity);
     size_t received = 0;
-    CURLcode status = curl_easy_recv(curl, (char*)data.data() + bufferSize, bufferCapacity - bufferSize, &received);
-    data.resize(bufferSize + received);
+    CURLcode status = curl_easy_recv(curl, data, size, &received);
     if(status != CURLE_AGAIN)
     {
       if(status != CURLE_OK)
       {
         error = QString(curl_easy_strerror(status)) + ".";
-        return false;
+        return -1;
       }
       if(received == 0)
       {
         error = "Connection was closed.";
-        return false;
+        return -1;
       }
+      return received;
     }
   }
+  return 0;
+}
+
+int SocketConnection::recv(char* data, int maxSize, int minSize)
+{
+  int r = recv(data, maxSize);
+  if(r < 0)
+    return r;
+  while(r < minSize)
+  {
+    int i = recv(data + r, maxSize - r);
+    if(r < 0)
+      return 0;
+    r += i;
+  }
+  return r;
+}
+
+bool SocketConnection::recv(QByteArray& data)
+{
+  size_t dataSize = data.size();
+  size_t dataCapacity = dataSize + 15000;
+  data.resize(dataCapacity);
+  int received = recv((char*)data.data() + dataSize, dataCapacity - dataSize);
+  if(received < 0)
+    return false;
+  data.resize(dataSize + received);
   return true;
 }
 
