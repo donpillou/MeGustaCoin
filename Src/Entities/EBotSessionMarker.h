@@ -13,6 +13,8 @@ public:
     sell = BotProtocol::Marker::sell,
     buyAttempt = BotProtocol::Marker::buyAttempt,
     sellAttempt = BotProtocol::Marker::sellAttempt,
+    goodBuy = BotProtocol::Marker::goodBuy,
+    goodSell = BotProtocol::Marker::goodSell,
   };
 
 public:

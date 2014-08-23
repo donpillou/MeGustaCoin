@@ -153,6 +153,8 @@ public:
       sell,
       buyAttempt,
       sellAttempt,
+      goodBuy,
+      goodSell,
     };
 
     quint8 type;

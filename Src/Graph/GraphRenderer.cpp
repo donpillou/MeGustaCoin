@@ -618,19 +618,34 @@ void GraphRenderer::drawMarkers(QPainter& painter, const QRect& rect, double vmi
   quint64 hmax = time;
   quint64 hmin = hmax - maxAge;
 
-  QPoint* lineData = (QPoint*)alloca(markers.size() * 2 * sizeof(QPoint));
-  QPoint* currentLinePoint = lineData;
+  QPoint* cyanLineData = (QPoint*)alloca(markers.size() * 2 * sizeof(QPoint));
+  QPoint* orangeLineData = (QPoint*)alloca(markers.size() * 2 * sizeof(QPoint));
+  QPoint* cyanCurrentLinePoint = cyanLineData;
+  QPoint* orangeCurrentLinePoint = orangeLineData;
   for(QMap<quint64, EBotSessionMarker::Type>::ConstIterator i = markers.begin(), end = markers.end(); i != end; ++i)
   {
     const quint64& time = i.key();
     if(time < hmin)
       continue;
     int x = leftInt + (time - hmin) * widthInt / maxAge;
+    EBotSessionMarker::Type markerType = i.value();
+    QPoint* currentLinePoint;
+    if(markerType >= EBotSessionMarker::Type::goodBuy)
+    {
+      currentLinePoint = orangeCurrentLinePoint;
+      orangeCurrentLinePoint += 2;
+    }
+    else
+    {
+      currentLinePoint = cyanCurrentLinePoint;
+      cyanCurrentLinePoint += 2;
+    }
     currentLinePoint[0].setX(x);
     currentLinePoint[1].setX(x);
     switch(i.value())
     {
     case EBotSessionMarker::Type::buy:
+    case EBotSessionMarker::Type::goodBuy:
       currentLinePoint[0].setY(bottomInt);
       currentLinePoint[1].setY(midInt);
       break;
@@ -639,6 +654,7 @@ void GraphRenderer::drawMarkers(QPainter& painter, const QRect& rect, double vmi
       currentLinePoint[1].setY(bottomMidInt);
       break;
     case EBotSessionMarker::Type::sell:
+    case EBotSessionMarker::Type::goodSell:
       currentLinePoint[0].setY(midInt);
       currentLinePoint[1].setY(topInt);
       break;
@@ -650,7 +666,14 @@ void GraphRenderer::drawMarkers(QPainter& painter, const QRect& rect, double vmi
     currentLinePoint += 2;
   }
 
-  QPen markerPen(Qt::darkCyan);
-  painter.setPen(markerPen);
-  painter.drawLines(lineData, (currentLinePoint - lineData) / 2);
+  if(cyanCurrentLinePoint > cyanLineData)
+  {
+    painter.setPen(QPen(Qt::darkCyan));
+    painter.drawLines(cyanLineData, (cyanCurrentLinePoint - cyanLineData) / 2);
+  }
+  if(orangeCurrentLinePoint > orangeLineData)
+  {
+    painter.setPen(QPen(Qt::darkYellow));
+    painter.drawLines(orangeLineData, (orangeCurrentLinePoint - orangeLineData) / 2);
+  }
 }
