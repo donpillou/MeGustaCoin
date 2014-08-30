@@ -10,21 +10,21 @@ public:
 
   enum class Type
   {
-    buy = BotProtocol::SessionItem::buy,
-    sell = BotProtocol::SessionItem::sell,
+    buy = BotProtocol::SessionAsset::buy,
+    sell = BotProtocol::SessionAsset::sell,
   };
 
   enum class State
   {
-    waitBuy = BotProtocol::SessionItem::waitBuy,
-    buying = BotProtocol::SessionItem::buying,
-    waitSell = BotProtocol::SessionItem::waitSell,
-    selling = BotProtocol::SessionItem::selling,
+    waitBuy = BotProtocol::SessionAsset::waitBuy,
+    buying = BotProtocol::SessionAsset::buying,
+    waitSell = BotProtocol::SessionAsset::waitSell,
+    selling = BotProtocol::SessionAsset::selling,
     draft,
   };
 
 public:
-  EBotSessionItem(BotProtocol::SessionItem& data) : Entity(eType, data.entityId)
+  EBotSessionItem(BotProtocol::SessionAsset& data) : Entity(eType, data.entityId)
   {
     type = (Type)data.type;
     state = (State)data.state;

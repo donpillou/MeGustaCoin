@@ -310,16 +310,16 @@ void BotService::submitSessionItemDraft(EBotSessionItemDraft& draft)
   if(draft.getState() != EBotSessionItemDraft::State::draft)
     return;
 
-  BotProtocol::SessionItem sessionItem;
-  sessionItem.entityType = BotProtocol::sessionItem;
-  sessionItem.entityId = 0;
-  sessionItem.type = (quint8)draft.getType();;
-  sessionItem.price = draft.getPrice();
-  sessionItem.balanceComm = draft.getBalanceComm();
-  sessionItem.balanceBase = draft.getBalanceBase();
-  sessionItem.profitablePrice = draft.getProfitablePrice();
-  sessionItem.flipPrice = draft.getFlipPrice();
-  createEntity(draft.getId(), &sessionItem, sizeof(sessionItem));
+  BotProtocol::SessionAsset sessionAsset;
+  sessionAsset.entityType = BotProtocol::sessionAsset;
+  sessionAsset.entityId = 0;
+  sessionAsset.type = (quint8)draft.getType();;
+  sessionAsset.price = draft.getPrice();
+  sessionAsset.balanceComm = draft.getBalanceComm();
+  sessionAsset.balanceBase = draft.getBalanceBase();
+  sessionAsset.profitablePrice = draft.getProfitablePrice();
+  sessionAsset.flipPrice = draft.getFlipPrice();
+  createEntity(draft.getId(), &sessionAsset, sizeof(sessionAsset));
 }
 
 void BotService::updateSessionItem(EBotSessionItem& item, double flipPrice)
@@ -327,16 +327,16 @@ void BotService::updateSessionItem(EBotSessionItem& item, double flipPrice)
   if(item.getState() != EBotSessionItem::State::waitBuy && item.getState() != EBotSessionItem::State::waitSell)
     return;
 
-  BotProtocol::SessionItem updatedItem;
-  updatedItem.entityType = BotProtocol::sessionItem;
-  updatedItem.entityId = item.getId();
-  updatedItem.flipPrice = flipPrice;
-  updateEntity(0, &updatedItem, sizeof(updatedItem));
+  BotProtocol::SessionAsset updatedAsset;
+  updatedAsset.entityType = BotProtocol::sessionAsset;
+  updatedAsset.entityId = item.getId();
+  updatedAsset.flipPrice = flipPrice;
+  updateEntity(0, &updatedAsset, sizeof(updatedAsset));
 }
 
 void BotService::cancelSessionItem(EBotSessionItem& item)
 {
-  removeEntity(0, BotProtocol::sessionItem, item.getId());
+  removeEntity(0, BotProtocol::sessionAsset, item.getId());
 }
 
 void BotService::removeSessionItemDraft(EBotSessionItemDraft& draft)
@@ -681,7 +681,7 @@ void BotService::WorkerThread::receivedCreateEntityResponse(quint32 requestId, B
   switch((BotProtocol::EntityType)entity.entityType)
   {
   case BotProtocol::marketOrder:
-  case BotProtocol::sessionItem:
+  case BotProtocol::sessionAsset:
     newEntity = createEntity(entity, size);
     break;
   default:
@@ -769,7 +769,7 @@ EType BotService::WorkerThread::getEType(BotProtocol::EntityType entityType)
     return EType::botSession;
   case BotProtocol::sessionTransaction:
     return EType::botSessionTransaction;
-  case BotProtocol::sessionItem:
+  case BotProtocol::sessionAsset:
     return EType::botSessionItem;
   case BotProtocol::sessionProperty:
     return EType::botSessionProperty;
@@ -812,9 +812,9 @@ Entity* BotService::WorkerThread::createEntity(BotProtocol::Entity& data, size_t
     if(size >= sizeof(BotProtocol::Transaction))
       return new EBotSessionTransaction(*(BotProtocol::Transaction*)&data);
     break;
-  case BotProtocol::sessionItem:
-    if(size >= sizeof(BotProtocol::SessionItem))
-      return new EBotSessionItem(*(BotProtocol::SessionItem*)&data);
+  case BotProtocol::sessionAsset:
+    if(size >= sizeof(BotProtocol::SessionAsset))
+      return new EBotSessionItem(*(BotProtocol::SessionAsset*)&data);
     break;
   case BotProtocol::sessionProperty:
     if(size >= sizeof(BotProtocol::SessionProperty))
