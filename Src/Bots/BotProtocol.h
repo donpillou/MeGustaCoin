@@ -212,6 +212,8 @@ public:
     quint8 state;
     qint64 date;
     double price;
+    double investComm;
+    double investBase;
     double balanceComm;
     double balanceBase;
     double profitablePrice;
