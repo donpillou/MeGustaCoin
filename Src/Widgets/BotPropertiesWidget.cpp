@@ -15,6 +15,22 @@ BotPropertiesWidget::BotPropertiesWidget(QTabFramework& tabFramework, QSettings&
   propertyView->setSortingEnabled(true);
   propertyView->setRootIsDecorated(false);
   propertyView->setAlternatingRowColors(true);
+
+  class PropertyDelegate : public QItemDelegate
+  {
+  public:
+    PropertyDelegate(QObject* parent) : QItemDelegate(parent) {}
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+    {
+      QWidget* widget = QItemDelegate::createEditor(parent, option, index);
+      QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(widget);
+      if(spinBox)
+        spinBox->setDecimals(8);
+      return widget;
+    }
+  };
+
+  propertyView->setItemDelegate(new PropertyDelegate(this));
   //propertyView->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::DoubleClicked);
   //propertyView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
