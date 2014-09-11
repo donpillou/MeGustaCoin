@@ -62,6 +62,8 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     switch((Column)index.column())
     {
     case Column::price:
+    case Column::investBase:
+    case Column::investComm:
     case Column::balanceBase:
     case Column::balanceComm:
     case Column::profitablePrice:
@@ -149,6 +151,10 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
       break;
     case Column::date:
       return eItem->getDate().toString(dateFormat);
+    case Column::investBase:
+      return eBotMarketAdapter->formatPrice(eItem->getInvestBase());
+    case Column::investComm:
+      return eBotMarketAdapter->formatAmount(eItem->getInvestComm());
     case Column::balanceBase:
       return eBotMarketAdapter->formatPrice(eItem->getBalanceBase());
     case Column::balanceComm:
@@ -266,6 +272,8 @@ QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, 
   case Qt::TextAlignmentRole:
     switch((Column)section)
     {
+    case Column::investBase:
+    case Column::investComm:
     case Column::balanceBase:
     case Column::balanceComm:
     case Column::price:
@@ -286,6 +294,10 @@ QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, 
         return tr("Date");
       case Column::price:
         return tr("Last Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+      case Column::investBase:
+        return tr("Input %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+      case Column::investComm:
+        return tr("Input %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString());
       case Column::balanceBase:
         return tr("Balance %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
       case Column::balanceComm:

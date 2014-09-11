@@ -30,6 +30,8 @@ public:
     state = (State)data.state;
     date = QDateTime::fromMSecsSinceEpoch(data.date);
     price = data.price;
+    investComm = data.investComm;
+    investBase = data.investBase;
     balanceComm = data.balanceComm;
     balanceBase = data.balanceBase;
     profitablePrice = data.profitablePrice;
@@ -43,6 +45,8 @@ public:
   void setState(State state) {this->state = state;}
   const QDateTime& getDate() const {return date;}
   double getPrice() const {return price;}
+  double getInvestComm() const {return investComm;}
+  double getInvestBase() const {return investBase;}
   double getBalanceComm() const {return balanceComm;}
   void setBalanceComm(double balanceComm) {this->balanceComm = balanceComm;}
   double getBalanceBase() const {return balanceBase;}
@@ -60,6 +64,8 @@ protected:
   State state;
   QDateTime date;
   double price; // >= 0
+  double investComm; // >= 0
+  double investBase; // >= 0
   double balanceComm; // >= 0
   double balanceBase; // >= 0
   double profitablePrice;

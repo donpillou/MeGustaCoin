@@ -7,6 +7,8 @@ EBotSessionItem::EBotSessionItem(quint32 id, const EBotSessionItemDraft& session
   state = sessionItem.getState();
   date = sessionItem.getDate();
   price = sessionItem.getPrice();
+  investComm = sessionItem.getInvestComm();
+  investBase = sessionItem.getInvestBase();
   balanceComm = sessionItem.getBalanceComm();
   balanceBase = sessionItem.getBalanceBase();
   profitablePrice = sessionItem.getProfitablePrice();

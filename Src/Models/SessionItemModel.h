@@ -12,6 +12,8 @@ public:
       type = first,
       state,
       date,
+      investBase,
+      investComm,
       balanceBase,
       balanceComm,
       price,

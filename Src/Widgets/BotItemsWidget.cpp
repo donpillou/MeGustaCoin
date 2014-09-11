@@ -63,8 +63,10 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
   headerView->resizeSection(3, 85);
   headerView->resizeSection(4, 100);
   headerView->resizeSection(5, 85);
-  headerView->resizeSection(6, 85);
+  headerView->resizeSection(6, 100);
   headerView->resizeSection(7, 85);
+  headerView->resizeSection(8, 85);
+  headerView->resizeSection(9, 85);
   itemView->sortByColumn(1);
   settings.beginGroup("BotItems");
   headerView->restoreState(settings.value("HeaderState").toByteArray());
