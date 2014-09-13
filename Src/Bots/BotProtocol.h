@@ -189,7 +189,7 @@ public:
   struct SessionLogMessage : public Entity
   {
     qint64 date;
-    char message[129];
+    char message[257];
   };
 
   struct SessionAsset : public Entity
