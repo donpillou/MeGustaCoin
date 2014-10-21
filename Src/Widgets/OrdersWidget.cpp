@@ -45,6 +45,21 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
   orderView->setSortingEnabled(true);
   orderView->setRootIsDecorated(false);
   orderView->setAlternatingRowColors(true);
+
+  class OrderDelegate : public QStyledItemDelegate
+  {
+  public:
+    OrderDelegate(QObject* parent) : QStyledItemDelegate(parent) {}
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+    {
+      QWidget* widget = QStyledItemDelegate::createEditor(parent, option, index);
+      QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(widget);
+      if(spinBox)
+        spinBox->setDecimals(8);
+      return widget;
+    }
+  };
+  orderView->setItemDelegateForColumn((int)MarketOrderModel::Column::amount, new OrderDelegate(this));
   orderView->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::DoubleClicked);
   orderView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
