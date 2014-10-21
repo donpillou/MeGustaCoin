@@ -1,26 +1,24 @@
 MegucoClient
 ===========
 
-MegucoClient is a client for the Meguco Trade Framework. The aim of the Meguco Trade Framework is to provide a
-framework for developing, optimizing and controlling bots for Bitcoin exchanges like Bitstamp.
-
-Meguco Trade Framework is "Work in Progress". Pretty much nothing works right now.
+MegucoClient is a client for the Meguco Trade Framework. The aim of the Meguco Trade Framework project is to
+provide a framework to develop, optimize and control bots for Bitcoin exchanges like Bitstamp.
 
 Please note that this software is release under the GPL version 2 (see LICENSE file). Hence, The Meguco Trade
 Framework comes with absolutely no warranty and the author/authors cannot be hold responsible for any
-correctly or incorrectly initiated transactions using this software. Be careful if you are planning on using
-MeGustaCoin (or similar software), since it may easily contain malicious code that snatches some money from
+correctly or incorrectly initiated transactions from this software. Be careful if you are planning on using
+MegucoClient (or similar software), since it may easily contain malicious code that snatches some money from
 your account. If you are not exactly sure what you are doing, you should stop here.
 
 
 Getting started
 ===============
 
-The Meguco Trade Framework consits of a client MegucoClient, an exchange data collector daemon and other
-daemons... TODO!
+The Meguco Trade Framework consists of a client (MegucoClient), an exchange data collector daemon (MegucoData)
+and a bot manager daemon (MegucoBot).
 
 All components of the Meguco Trade Framework are designed to be easily compilable from source. That way,
-everyone can look into the source code (to ensure its clean) and you do not have to reply on precompiled
+everyone can look into the source code (to ensure its clean) and you do not have to rely on precompiled
 binaries that may contain malicious code. You should not try to download a precompiled binaries from
 third-party sources.
 
@@ -42,7 +40,6 @@ Compiling the Meguco Trade Framework requires the following steps:
 Linux
 -----
 
-I am working on that. You could try roughly this:
 ```
 sudo apt-get install git g++ libqt4-dev libcurl4-openssl-dev
 cd ~/somedir
@@ -61,5 +58,3 @@ cd MegucoBot
 git submodule update --init
 ./generate
 ```
-
-
