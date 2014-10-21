@@ -16,23 +16,22 @@ BotPropertiesWidget::BotPropertiesWidget(QTabFramework& tabFramework, QSettings&
   propertyView->setRootIsDecorated(false);
   propertyView->setAlternatingRowColors(true);
 
-  class PropertyDelegate : public QItemDelegate
+  class PropertyDelegate : public QStyledItemDelegate
   {
   public:
-    PropertyDelegate(QObject* parent) : QItemDelegate(parent) {}
+    PropertyDelegate(QObject* parent) : QStyledItemDelegate(parent) {}
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
     {
-      QWidget* widget = QItemDelegate::createEditor(parent, option, index);
+      QWidget* widget = QStyledItemDelegate::createEditor(parent, option, index);
       QDoubleSpinBox* spinBox = qobject_cast<QDoubleSpinBox*>(widget);
       if(spinBox)
         spinBox->setDecimals(8);
       return widget;
     }
   };
-
-  propertyView->setItemDelegate(new PropertyDelegate(this));
-  //propertyView->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::DoubleClicked);
-  //propertyView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+  propertyView->setItemDelegateForColumn((int)SessionPropertyModel::Column::value, new PropertyDelegate(this));
+  propertyView->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::DoubleClicked);
+  //itemView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
   connect(&propertyModel, SIGNAL(editedProperty(const QModelIndex&, double)), this, SLOT(editedProperty(const QModelIndex&, double)));
   connect(&propertyModel, SIGNAL(editedProperty(const QModelIndex&, const QString&)), this, SLOT(editedProperty(const QModelIndex&, const QString&)));
