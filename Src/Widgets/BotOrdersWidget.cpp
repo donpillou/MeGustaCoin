@@ -15,8 +15,6 @@ BotOrdersWidget::BotOrdersWidget(QTabFramework& tabFramework, QSettings& setting
   orderView->setSortingEnabled(true);
   orderView->setRootIsDecorated(false);
   orderView->setAlternatingRowColors(true);
-  //orderView->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::DoubleClicked);
-  //orderView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);
@@ -38,7 +36,6 @@ BotOrdersWidget::BotOrdersWidget(QTabFramework& tabFramework, QSettings& setting
   headerView->setStretchLastSection(false);
   headerView->setResizeMode(0, QHeaderView::Stretch);
 }
-
 
 void BotOrdersWidget::saveState(QSettings& settings)
 {
