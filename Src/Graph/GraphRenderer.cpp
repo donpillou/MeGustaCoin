@@ -6,6 +6,7 @@ GraphRenderer::GraphRenderer() : values(0), enabled(false), upToDate(false), ena
   maxAge(60 * 60), totalMin(DBL_MAX), totalMax(0.), volumeMax(0.)
 {
   tradeSamples.reserve(7 * 24 * 60 * 60 + 1000);
+  lowResTradeSamples.reserve(6 * 31 * 24 * 60 * 60 / 300 + 1000);
 }
 
 GraphRenderer::~GraphRenderer()
@@ -46,22 +47,26 @@ void GraphRenderer::addTradeData(const QList<DataProtocol::Trade>& data)
   for(QList<DataProtocol::Trade>::ConstIterator i = data.begin(), end = data.end(); i != end; ++i)
   {
     const DataProtocol::Trade& trade = *i;
+
     quint64 time = trade.time / 1000;
-
-    TradeSample* tradeSample;
     if(tradeSamples.isEmpty() || tradeSamples.last().time != time)
+    {
       tradeSamples.append(TradeSample());
-    tradeSample =  &tradeSamples.last();
-
-    tradeSample->time = time;
-    tradeSample->last = trade.price;
-    if(tradeSample->amount == 0.)
-      tradeSample->min = tradeSample->max = tradeSample->first = trade.price;
-    else if(trade.price < tradeSample->min)
-      tradeSample->min = trade.price;
-    else if(trade.price > tradeSample->max)
-      tradeSample->max = trade.price;
-    tradeSample->amount += trade.amount;
+      TradeSample& tradeSample =  tradeSamples.last();
+      tradeSample.time = time;
+      tradeSample.min = tradeSample.max = tradeSample.first = tradeSample.last= trade.price;
+      tradeSample.amount = trade.amount;
+    }
+    else
+    {
+      TradeSample& tradeSample =  tradeSamples.last();
+      tradeSample.last = trade.price;
+      if(trade.price < tradeSample.min)
+        tradeSample.min = trade.price;
+      else if(trade.price > tradeSample.max)
+        tradeSample.max = trade.price;
+      tradeSample.amount += trade.amount;
+    }
 
     qint64 tradeAge = now - trade.time;
     if(tradeAge < 24ULL * 60ULL * 60ULL * 1000ULL)
@@ -75,6 +80,26 @@ void GraphRenderer::addTradeData(const QList<DataProtocol::Trade>& data)
 
         values = &tradeHandler.values;
       }
+    }
+
+    quint64 lowResTime = trade.time / (1000 * 300) * 300;
+    if(lowResTradeSamples.isEmpty() || lowResTradeSamples.last().time != lowResTime)
+    {
+      lowResTradeSamples.append(TradeSample());
+      TradeSample& tradeSample = lowResTradeSamples.last();
+      tradeSample.time = lowResTime;
+      tradeSample.min = tradeSample.max = tradeSample.first = tradeSample.last= trade.price;
+      tradeSample.amount = trade.amount;
+    }
+    else
+    {
+      TradeSample& tradeSample = lowResTradeSamples.last();
+      tradeSample.last = trade.price;
+      if(trade.price < tradeSample.min)
+        tradeSample.min = trade.price;
+      else if(trade.price > tradeSample.max)
+        tradeSample.max = trade.price;
+      tradeSample.amount += trade.amount;
     }
   }
 
@@ -245,15 +270,15 @@ void GraphRenderer::prepareTradePolyline(const QRect& rect, double ymin, double 
     QPointF* currentPoint = polyData;
     QPoint* currentVolumePoint = volumeData;
 
-    const QList<TradeSample>& tradeSamples = graphModel.tradeSamples;
+    const QList<TradeSample>& tradeSamples = maxAge < 7 * 24 * 60 * 60 ? graphModel.tradeSamples : graphModel.lowResTradeSamples;
     int i = 0, count = tradeSamples.size();
-    for(int step = qMax(tradeSamples.size() / 2, 1);;)
+    for(int step = qMax(tradeSamples.size() / 2, 1);;) // todo: use count
     {
       if(i + step < count && tradeSamples.at(i + step).time < vmin)
         i += step;
       else if(step == 1)
         break;
-      if(step > 1)
+      if(step > 1) // todo: remove this check?
         step /= 2;
     }
     if(i < count)

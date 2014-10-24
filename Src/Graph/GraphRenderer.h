@@ -72,6 +72,7 @@ private:
 private:
   TradeHandler tradeHandler;
   QList<TradeSample> tradeSamples;
+  QList<TradeSample> lowResTradeSamples;
   QMultiMap<quint64, EBotSessionMarker::Type> markers;
   TradeHandler::Values* values;
   bool enabled;
