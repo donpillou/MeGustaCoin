@@ -155,7 +155,6 @@ QImage& GraphRenderer::render(const QMap<QString, GraphRenderer*>& graphDataByNa
     QPainter painter(image);
     painter.fillRect(0, 0, width, height, QApplication::palette().base());
     painter.setRenderHint(QPainter::Antialiasing);
-    //painter.setPen(Qt::black);
 
     double vmin = totalMin;
     double vmax = qMax(totalMax, vmin + 1.);
@@ -275,13 +274,13 @@ void GraphRenderer::prepareTradePolyline(const QRect& rect, double ymin, double 
 
     const QList<TradeSample>& tradeSamples = maxAge < 7 * 24 * 60 * 60 ? graphModel.tradeSamples : graphModel.lowResTradeSamples;
     int i = 0, count = tradeSamples.size();
-    for(int step = qMax(tradeSamples.size() / 2, 1);;) // todo: use count
+    for(int step = qMax(count / 2, 1);;)
     {
       if(i + step < count && tradeSamples.at(i + step).time < vmin)
         i += step;
       else if(step == 1)
         break;
-      if(step > 1) // todo: remove this check?
+      if(step > 1)
         step /= 2;
     }
     if(i < count)
@@ -519,18 +518,17 @@ void GraphRenderer::drawTradePolylines(QPainter& painter)
       cleanup = true;
       continue;
     }
+    if(!graphModelData.polyDataCount)
+      continue;
     const GraphRenderer* graphData = i.key();
     if(graphData == this)
       focusGraphModelData = &graphModelData;
     else
     {
-      if(graphModelData.polyDataCount > 0)
-      {
-        QPen rangePen(graphModelData.color);
-        rangePen.setWidth(2);
-        painter.setPen(rangePen);
-        painter.drawPolyline(graphModelData.polyData, graphModelData.polyDataCount);
-      }
+      QPen rangePen(graphModelData.color);
+      rangePen.setWidth(2);
+      painter.setPen(rangePen);
+      painter.drawPolyline(graphModelData.polyData, graphModelData.polyDataCount);
     }
     graphModelData.updated = false;
   }
