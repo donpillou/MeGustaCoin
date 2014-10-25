@@ -55,7 +55,8 @@ void GraphService::registerGraphModel(GraphModel& graphModel)
       QHash<GraphModel*, GraphRenderer>::Iterator it = workerThread.graphData.find(&graphModel);
       if(it != workerThread.graphData.end())
         workerThread.graphData.erase(it);
-      it = workerThread.graphData.insert(&graphModel, GraphRenderer());
+      const QString& channelName = graphModel.getChannelName();
+      it = workerThread.graphData.insert(&graphModel, GraphRenderer(channelName));
       GraphRenderer& graphRenderer = *it;
       workerThread.graphDataByName.insert(graphModel.getChannelName(), &graphRenderer);
     }

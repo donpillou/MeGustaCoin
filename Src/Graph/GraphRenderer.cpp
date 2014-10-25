@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include <cfloat>
 
-GraphRenderer::GraphRenderer() : values(0), enabled(false), upToDate(false), enabledData(trades | expRegressionLines), height(0), width(0), image(0), time(0), ownTime(0),
+GraphRenderer::GraphRenderer(const QString& channelName) : channelName(channelName), values(0), enabled(false), upToDate(false), enabledData(trades | expRegressionLines), height(0), width(0), image(0), time(0), ownTime(0),
   maxAge(60 * 60), totalMin(DBL_MAX), totalMax(0.), volumeMax(0.)
 {
   tradeSamples.reserve(7 * 24 * 60 * 60 + 1000);
@@ -155,7 +155,7 @@ QImage& GraphRenderer::render(const QMap<QString, GraphRenderer*>& graphDataByNa
     QPainter painter(image);
     painter.fillRect(0, 0, width, height, QApplication::palette().base());
     painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(Qt::black);
+    //painter.setPen(Qt::black);
 
     double vmin = totalMin;
     double vmax = qMax(totalMax, vmin + 1.);
@@ -229,6 +229,9 @@ QImage& GraphRenderer::render(const QMap<QString, GraphRenderer*>& graphDataByNa
 
     //if(enabledData & (int)Data::sessionMarkers)
       drawMarkers(painter, plotRect, vmin, vmax);
+
+    if(enabledData & (int)Data::key)
+      drawKey(painter);
     break;
   }
 
@@ -700,5 +703,62 @@ void GraphRenderer::drawMarkers(QPainter& painter, const QRect& rect, double vmi
   {
     painter.setPen(QPen(Qt::darkYellow));
     painter.drawLines(orangeLineData, (orangeCurrentLinePoint - orangeLineData) / 2);
+  }
+}
+
+void GraphRenderer::drawKey(QPainter& painter)
+{
+  QSize maxSize;
+  int& rheight = maxSize.rheight();
+  int& rwidth = maxSize.rwidth();
+  rwidth = 0;
+  int polylineCount = 0;
+  const PolylineData* focusGraphModelData = 0;
+  for(QHash<const GraphRenderer*, PolylineData>::Iterator i = polylineData.begin(), end = polylineData.end(); i != end; ++i)
+  {
+    PolylineData& data = *i;
+    if(data.removeThis || !data.polyDataCount)
+      continue;
+
+    const GraphRenderer* graphData = i.key();
+    const QSize labelSize = painter.fontMetrics().size(Qt::TextSingleLine, graphData->getChannelName());
+    rheight = labelSize.height();
+    int width = labelSize.width();
+    if(width > rwidth)
+      rwidth = width;
+    if(graphData == this)
+      focusGraphModelData = &data;
+    ++polylineCount;
+  }
+
+  const QPalette& platte = QApplication::palette();
+  QColor bgColor = platte.base().color();
+  bgColor.setAlpha(0xaa);
+  painter.setBrush(bgColor);
+  painter.setPen(Qt::darkGray);
+  painter.drawRect(10, 10, rwidth + 20 + 20, (rheight + 10) * polylineCount + 10);
+  int ypos = 20;
+  painter.setPen(platte.text().color());
+  
+  if(focusGraphModelData)
+  {
+    painter.fillRect(QRect(20, ypos + (rheight - 10) / 2 + 1, 10, 10), focusGraphModelData->color);
+    painter.drawText(QRect(20 + 20, ypos, rwidth, rheight), getChannelName());
+    ypos += rheight + 10;
+  }
+
+  for(QHash<const GraphRenderer*, PolylineData>::Iterator i = polylineData.begin(), end = polylineData.end(); i != end; ++i)
+  {
+    PolylineData& data = *i;
+
+    if(data.removeThis || !data.polyDataCount)
+      continue;
+
+    if(&data != focusGraphModelData)
+    {
+      painter.fillRect(QRect(20, ypos + (rheight - 10) / 2 + 1, 10, 10), data.color);
+      painter.drawText(QRect(20 + 20, ypos, rwidth, rheight), i.key()->getChannelName());
+      ypos += rheight + 10;
+    }
   }
 }

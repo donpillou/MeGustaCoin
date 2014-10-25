@@ -11,8 +11,8 @@ public:
     orderBook = 0x04,
     regressionLines = 0x08,
     otherMarkets = 0x10,
-    //estimates = 0x20,
     expRegressionLines = 0x20,
+    key = 0x40,
     all = 0xffff,
   };
 
@@ -27,7 +27,7 @@ public:
   };
 
 public:
-  GraphRenderer();
+  GraphRenderer(const QString& channelName = QString());
   ~GraphRenderer();
 
   void enable(bool enable) {enabled = enable;}
@@ -35,6 +35,7 @@ public:
   void setMaxAge(int maxAge);
   void setEnabledData(unsigned int data);
   unsigned int getEnabledData() const {return enabledData;}
+  const QString& getChannelName() const {return channelName;}
 
   void addTradeData(const QList<DataProtocol::Trade>& data);
   void addSessionMarker(const EBotSessionMarker& marker);
@@ -70,6 +71,7 @@ private:
   };
 
 private:
+  QString channelName;
   TradeHandler tradeHandler;
   QList<TradeSample> tradeSamples;
   QList<TradeSample> lowResTradeSamples;
@@ -99,6 +101,7 @@ private:
   void drawRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax);
   void drawExpRegressionLines(QPainter& painter, const QRect& rect, double vmin, double vmax);
   void drawMarkers(QPainter& painter, const QRect& rect, double vmin, double vmax);
+  void drawKey(QPainter& painter);
 
   inline void addToMinMax(double price)
   {

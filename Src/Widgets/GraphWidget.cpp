@@ -175,7 +175,11 @@ void GraphWidget::updateDataMenu()
     dataSignalMapper->removeMappings(action);
   dataMenu->clear();
 
-  QAction* action = dataMenu->addAction(tr("Trades"));
+  QAction* action = dataMenu->addAction(tr("Key"));
+  action->setCheckable(true);
+  dataSignalMapper->setMapping(action, GraphRenderer::key);
+  connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
+  action = dataMenu->addAction(tr("Trades"));
   action->setCheckable(true);
   dataSignalMapper->setMapping(action, GraphRenderer::trades);
   connect(action, SIGNAL(triggered()), dataSignalMapper, SLOT(map()));
