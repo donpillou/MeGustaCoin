@@ -28,7 +28,7 @@ void DataService::stop()
   if(!thread)
     return;
 
-  jobQueue.append(0); // cancel worker thread
+  jobQueue.append(0, 0); // cancel worker thread
   thread->interrupt();
   thread->wait();
   delete thread;
@@ -71,8 +71,9 @@ void DataService::subscribe(const QString& channel, Entity::Manager& channelEnti
     if(!data.isEmpty())
       lastReceivedTradeId = data.back().id;
   }
-  jobQueue.append(new SubscriptionJob(channel, lastReceivedTradeId));
-  if(thread)
+  bool wasEmpty;
+  jobQueue.append(new SubscriptionJob(channel, lastReceivedTradeId), &wasEmpty);
+  if(wasEmpty && thread)
     thread->interrupt();
   EDataSubscription* eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
   eDataSubscription->setState(EDataSubscription::State::subscribing);
@@ -104,8 +105,9 @@ void DataService::unsubscribe(const QString& channel)
   };
 
   addLogMessage(ELogMessage::Type::information, QString("Unsubscribing from channel %1...").arg(channel));
-  jobQueue.append(new UnsubscriptionJob(channel));
-  if(thread)
+  bool wasEmpty;
+  jobQueue.append(new UnsubscriptionJob(channel), &wasEmpty);
+  if(wasEmpty && thread)
     thread->interrupt();
 }
 
@@ -155,8 +157,10 @@ void DataService::WorkerThread::addMessage(ELogMessage::Type type, const QString
         dataService.addLogMessage(type, message);
     }
   };
-  eventQueue.append(new LogMessageEvent(type, message));
-  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new LogMessageEvent(type, message), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
 }
 
 void DataService::WorkerThread::setState(EDataService::State state)
@@ -201,8 +205,10 @@ void DataService::WorkerThread::setState(EDataService::State state)
     }
   };
 
-  eventQueue.append(new SetStateEvent(state));
-  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new SetStateEvent(state), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
 }
 
 void DataService::WorkerThread::process()
@@ -295,8 +301,10 @@ void DataService::WorkerThread::receivedChannelInfo(const QString& channelName)
     }
   };
 
-  eventQueue.append(new ChannelInfoEvent(channelName));
-  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new ChannelInfoEvent(channelName), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
   //information(QString("Found channel %1.").arg(channelName));
 }
 
@@ -325,8 +333,10 @@ void DataService::WorkerThread::receivedSubscribeResponse(const QString& channel
     }
   };
 
-  eventQueue.append(new SubscribeResponseEvent(channelName, channelId, flags));
-  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new SubscribeResponseEvent(channelName, channelId, flags), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
   replayedTrades.remove(channelId);
 }
 
@@ -353,8 +363,10 @@ void DataService::WorkerThread::receivedUnsubscribeResponse(const QString& chann
     }
   };
 
-  eventQueue.append(new UnsubscribeResponseEvent(channelName, channelId));
-  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new UnsubscribeResponseEvent(channelName, channelId), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
   replayedTrades.remove(channelId);
 }
 
@@ -405,8 +417,10 @@ void DataService::WorkerThread::receivedTrade(quint64 channelId, const DataProto
       };
 
       SetTradesEvent* setTradesEvent = new SetTradesEvent(channelId, tradeData);
-      eventQueue.append(setTradesEvent);
-      QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+      bool wasEmpty;
+      eventQueue.append(setTradesEvent, &wasEmpty);
+      if(wasEmpty)
+        QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
       replayedTrades.remove(channelId);
     }
   }
@@ -441,8 +455,10 @@ void DataService::WorkerThread::receivedTrade(quint64 channelId, const DataProto
       }
     };
 
-    eventQueue.append(new AddTradeEvent(channelId, trade));
-    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+    bool wasEmpty;
+    eventQueue.append(new AddTradeEvent(channelId, trade), &wasEmpty);
+    if(wasEmpty)
+      QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
   }
 }
 
@@ -476,8 +492,10 @@ void DataService::WorkerThread::receivedTicker(quint64 channelId, const DataProt
     }
   };
 
-  eventQueue.append(new AddTickerEvent(channelId, ticker));
-  QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new AddTickerEvent(channelId, ticker), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
 }
 
 void DataService::WorkerThread::receivedErrorResponse(const QString& message)

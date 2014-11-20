@@ -28,7 +28,7 @@ void BotService::stop()
   if(!thread)
     return;
 
-  jobQueue.append(0); // cancel worker thread
+  jobQueue.append(0, 0); // cancel worker thread
   thread->interrupt();
   thread->wait();
   delete thread;
@@ -54,8 +54,9 @@ void BotService::createEntity(quint32 requestId, const void* args, size_t size)
     }
   };
 
-  jobQueue.append(new CreateEntityJob(requestId, QByteArray((const char*)args, (int)size)));
-  if(thread)
+  bool wasEmpty;
+  jobQueue.append(new CreateEntityJob(requestId, QByteArray((const char*)args, (int)size)), &wasEmpty);
+  if(wasEmpty && thread)
     thread->interrupt();
 }
 
@@ -75,8 +76,9 @@ void BotService::updateEntity(quint32 requestId, const void* args, size_t size)
     }
   };
 
-  jobQueue.append(new UpdateEntityJob(requestId, QByteArray((const char*)args, (int)size)));
-  if(thread)
+  bool wasEmpty;
+  jobQueue.append(new UpdateEntityJob(requestId, QByteArray((const char*)args, (int)size)), &wasEmpty);
+  if(wasEmpty && thread)
     thread->interrupt();
 }
 
@@ -97,8 +99,9 @@ void BotService::removeEntity(quint32 requestId, BotProtocol::EntityType type, q
     }
   };
 
-  jobQueue.append(new RemoveEntityJob(requestId, type, id));
-  if(thread)
+  bool wasEmpty;
+  jobQueue.append(new RemoveEntityJob(requestId, type, id), &wasEmpty);
+  if(wasEmpty && thread)
     thread->interrupt();
 }
 
@@ -118,8 +121,9 @@ void BotService::controlEntity(quint32 requestId, const void* args, size_t size)
     }
   };
 
-  jobQueue.append(new ControlEntityJob(requestId, QByteArray((const char*)args, (int)size)));
-  if(thread)
+  bool wasEmpty;
+  jobQueue.append(new ControlEntityJob(requestId, QByteArray((const char*)args, (int)size)), &wasEmpty);
+  if(wasEmpty && thread)
     thread->interrupt();
 }
 
@@ -407,8 +411,10 @@ void BotService::WorkerThread::addMessage(ELogMessage::Type type, const QString&
       botService.addLogMessage(type, message);
     }
   };
-  eventQueue.append(new LogMessageEvent(type, message));
-  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new LogMessageEvent(type, message), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
 void BotService::WorkerThread::setState(EBotService::State state)
@@ -450,8 +456,10 @@ void BotService::WorkerThread::setState(EBotService::State state)
       entityManager.updatedEntity(*eBotService);
     }
   };
-  eventQueue.append(new SetStateEvent(state));
-  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new SetStateEvent(state), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
 void BotService::WorkerThread::process()
@@ -533,8 +541,10 @@ void BotService::WorkerThread::receivedUpdateEntity(BotProtocol::Entity& data, s
       botService.entityManager.delegateEntity(entity);
     }
   };
-  eventQueue.append(new UpdateEntityEvent(*entity));
-  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new UpdateEntityEvent(*entity), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
 void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& entity)
@@ -572,8 +582,10 @@ void BotService::WorkerThread::receivedRemoveEntity(const BotProtocol::Entity& e
       }
     }
   };
-  eventQueue.append(new RemoveEntityEvent(eType, entity.entityId));
-  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new RemoveEntityEvent(eType, entity.entityId), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
 void BotService::WorkerThread::receivedRemoveAllEntities(const BotProtocol::Entity& entity)
@@ -595,8 +607,10 @@ void BotService::WorkerThread::receivedRemoveAllEntities(const BotProtocol::Enti
       entityManager.removeAll((quint32)eType);
     }
   };
-  eventQueue.append(new RemoveAllEntitiesEvent(eType));
-  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new RemoveAllEntitiesEvent(eType), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
 void BotService::WorkerThread::receivedControlEntityResponse(quint32 requestId, BotProtocol::Entity& entity, size_t size)
@@ -673,8 +687,10 @@ void BotService::WorkerThread::receivedControlEntityResponse(quint32 requestId, 
       }
     }
   };
-  eventQueue.append(new ControlEntityResponseEvent(QByteArray((const char*)&entity, (int)size)));
-  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new ControlEntityResponseEvent(QByteArray((const char*)&entity, (int)size)), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
 void BotService::WorkerThread::receivedCreateEntityResponse(quint32 requestId, BotProtocol::Entity& entity, size_t size)
@@ -727,8 +743,10 @@ void BotService::WorkerThread::receivedCreateEntityResponse(quint32 requestId, B
       }
     }
   };
-  eventQueue.append(new CreateEntityResponseEvent(newEntity, requestId));
-  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new CreateEntityResponseEvent(newEntity, requestId), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
 void BotService::WorkerThread::receivedErrorResponse(quint32 requestId, BotProtocol::ErrorResponse& response)
@@ -759,8 +777,10 @@ void BotService::WorkerThread::receivedErrorResponse(quint32 requestId, BotProto
     }
   };
   QString errorMessage = BotProtocol::getString(response.errorMessage);
-  eventQueue.append(new ErrorResponseEvent(requestId, (BotProtocol::EntityType)response.entityType, (BotProtocol::MessageType)response.messageType, errorMessage));
-  QTimer::singleShot(0, &botService, SLOT(handleEvents()));
+  bool wasEmpty;
+  eventQueue.append(new ErrorResponseEvent(requestId, (BotProtocol::EntityType)response.entityType, (BotProtocol::MessageType)response.messageType, errorMessage), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &botService, SLOT(handleEvents()));
 }
 
 EType BotService::WorkerThread::getEType(BotProtocol::EntityType entityType)

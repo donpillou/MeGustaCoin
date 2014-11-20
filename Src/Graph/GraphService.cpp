@@ -26,7 +26,7 @@ void GraphService::stop()
   if(!thread)
     return;
 
-  jobQueue.append(0); // cancel worker thread
+  jobQueue.append(0, 0); // cancel worker thread
   //thread->interrupt();
   thread->wait();
   delete thread;
@@ -61,7 +61,7 @@ void GraphService::registerGraphModel(GraphModel& graphModel)
       workerThread.graphDataByName.insert(graphModel.getChannelName(), &graphRenderer);
     }
   };
-  jobQueue.append(new RegisterGraphModelJob(graphModel));
+  jobQueue.append(new RegisterGraphModelJob(graphModel), 0);
 }
 
 void GraphService::unregisterGraphModel(GraphModel& graphModel)
@@ -82,7 +82,7 @@ void GraphService::unregisterGraphModel(GraphModel& graphModel)
       workerThread.graphDataByName.remove(graphModel.getChannelName());
     }
   };
-  jobQueue.append(new UnregisterGraphModelJob(graphModel));
+  jobQueue.append(new UnregisterGraphModelJob(graphModel), 0);
 
   {
     QMutexLocker lock(&mutex);
@@ -105,7 +105,7 @@ void GraphService::enable(GraphModel& graphModel, bool enable)
       workerThread.graphData[&graphModel].enable(enable);
     }
   };
-  jobQueue.append(new EnableJob(graphModel, enable));
+  jobQueue.append(new EnableJob(graphModel, enable), 0);
 }
 
 void GraphService::setSize(GraphModel& graphModel, const QSize& size)
@@ -123,7 +123,7 @@ void GraphService::setSize(GraphModel& graphModel, const QSize& size)
       workerThread.graphData[&graphModel].setSize(size);
     }
   };
-  jobQueue.append(new SetSizeJob(graphModel, size));
+  jobQueue.append(new SetSizeJob(graphModel, size), 0);
 }
 
 void GraphService::setMaxAge(GraphModel& graphModel, int maxAge)
@@ -141,7 +141,7 @@ void GraphService::setMaxAge(GraphModel& graphModel, int maxAge)
       workerThread.graphData[&graphModel].setMaxAge(maxAge);
     }
   };
-  jobQueue.append(new SetMaxAgeJob(graphModel, maxAge));
+  jobQueue.append(new SetMaxAgeJob(graphModel, maxAge), 0);
 }
 
 void GraphService::setEnabledData(GraphModel& graphModel, unsigned int data)
@@ -159,7 +159,7 @@ void GraphService::setEnabledData(GraphModel& graphModel, unsigned int data)
       workerThread.graphData[&graphModel].setEnabledData(data);
     }
   };
-  jobQueue.append(new SetEnabledDataJob(graphModel, data));
+  jobQueue.append(new SetEnabledDataJob(graphModel, data), 0);
 }
 
 void GraphService::addTradeData(GraphModel& graphModel, const QList<DataProtocol::Trade>& data)
@@ -183,7 +183,7 @@ void GraphService::addTradeData(GraphModel& graphModel, const QList<DataProtocol
       }
     }
   };
-  jobQueue.append(new AddTradeDataJob(graphModel, data));
+  jobQueue.append(new AddTradeDataJob(graphModel, data), 0);
 }
 
 void GraphService::addSessionMarker(GraphModel& graphModel, const EBotSessionMarker& marker)
@@ -201,7 +201,7 @@ void GraphService::addSessionMarker(GraphModel& graphModel, const EBotSessionMar
       workerThread.graphData[&graphModel].addSessionMarker(marker);
     }
   };
-  jobQueue.append(new AddSessionMarkerJob(graphModel, marker));
+  jobQueue.append(new AddSessionMarkerJob(graphModel, marker), 0);
 }
 
 void GraphService::clearSessionMarker(GraphModel& graphModel)
@@ -218,7 +218,7 @@ void GraphService::clearSessionMarker(GraphModel& graphModel)
       workerThread.graphData[&graphModel].clearSessionMarker();
     }
   };
-  jobQueue.append(new ClearSessionMarkerJob(graphModel));
+  jobQueue.append(new ClearSessionMarkerJob(graphModel), 0);
 }
 
 void GraphService::handleEvents()
@@ -298,8 +298,10 @@ void GraphService::WorkerThread::run()
               graphModel.redraw();
             }
           };
-          graphService.eventQueue.append(new DataChangedEvent(*graphModel));
-          QTimer::singleShot(0, &graphService, SLOT(handleEvents()));
+          bool wasEmpty;
+          graphService.eventQueue.append(new DataChangedEvent(*graphModel), &wasEmpty);
+          if(wasEmpty)
+            QTimer::singleShot(0, &graphService, SLOT(handleEvents()));
         }
 
         if(jobQueue.get(job, 0))

@@ -4,16 +4,20 @@
 template <class T> class JobQueue
 {
 public:
-  void append(const T& job)
+  void append(const T& job, bool* wasEmpty)
   {
     QMutexLocker sync(&jobMutex);
+    if(wasEmpty)
+      *wasEmpty = jobs.empty();
     jobs.append(job);
     createdJobCondition.wakeAll();
   }
 
-  void prepend(const T& job)
+  void prepend(const T& job, bool* wasEmpty)
   {
     QMutexLocker sync(&jobMutex);
+    if(wasEmpty)
+      *wasEmpty = jobs.empty();
     jobs.append(job);
     createdJobCondition.wakeAll();
   }
