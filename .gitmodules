@@ -10,3 +10,6 @@
 [submodule "Ext/QTabFramework"]
 	path = Ext/QTabFramework
 	url = https://github.com/craflin/QTabFramework.git
+[submodule "Ext/libzlimdbclient"]
+	path = Ext/libzlimdbclient
+	url = https://github.com/craflin/libzlimdbclient.git
