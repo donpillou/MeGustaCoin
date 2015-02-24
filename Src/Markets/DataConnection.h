@@ -4,14 +4,6 @@
 class DataConnection
 {
 public:
-  class Trade
-  {
-  public:
-    double amount;
-    quint64 time;
-    double price;
-  };
-
   class Callback
   {
   public:
