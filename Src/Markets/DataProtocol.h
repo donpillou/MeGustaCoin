@@ -1,6 +1,9 @@
 
 #pragma once
 
+// todo: remove this file
+
+#if 0
 class DataProtocol
 {
 public:
@@ -115,3 +118,5 @@ public:
     return str;
   }
 };
+
+#endif

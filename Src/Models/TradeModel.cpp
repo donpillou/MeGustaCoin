@@ -124,7 +124,7 @@ void TradeModel::addedEntity(Entity& entity)
   EDataTradeData* eDataTradeData = dynamic_cast<EDataTradeData*>(&entity);
   if(eDataTradeData)
   {
-    const QList<DataProtocol::Trade>& data = eDataTradeData->getData();
+    const QList<EDataTradeData::Trade>& data = eDataTradeData->getData();
 
     const int totalMaxTrades = 500;
 
@@ -147,7 +147,7 @@ void TradeModel::addedEntity(Entity& entity)
   
     for(int i = data.size() - tradesToInsert, end = data.size(); i < end; ++i)
     {
-      const DataProtocol::Trade& tradeData = data[i];
+      const EDataTradeData::Trade& tradeData = data[i];
       Trade* trade = new Trade;
       trade->date = tradeData.time;
       trade->price = tradeData.price;

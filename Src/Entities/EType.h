@@ -22,6 +22,7 @@ enum class EType
   botMarketOrderDraft,
   botMarketTransaction,
   botMarketBalance,
+  databaseService,
   dataService,
   dataMarket,
   dataTradeData,

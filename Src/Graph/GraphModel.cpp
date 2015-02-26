@@ -56,7 +56,7 @@ void GraphModel::addedEntity(Entity& entity)
   EDataTradeData* eDataTradeData = dynamic_cast<EDataTradeData*>(&entity);
   if(eDataTradeData)
   {
-    const QList<DataProtocol::Trade>& data = eDataTradeData->getData(); 
+    const QList<EDataTradeData::Trade>& data = eDataTradeData->getData(); 
     if(!data.isEmpty())
     {
       graphService.addTradeData(*this, data);

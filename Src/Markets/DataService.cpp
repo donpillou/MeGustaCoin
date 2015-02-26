@@ -9,17 +9,17 @@ DataService::~DataService()
   stop();
 }
 
-void DataService::start(const QString& server)
+void DataService::start(const QString& server, const QString& userName, const QString& password)
 {
   if(thread)
   {
-     if(server == thread->getServer())
+     if(server == thread->getServer() && userName == thread->getUserName() && password == thread->getPassword())
        return;
      stop();
      Q_ASSERT(!thread);
   }
 
-  thread = new WorkerThread(*this, eventQueue, jobQueue, server);
+  thread = new WorkerThread(*this, eventQueue, jobQueue, server, userName, password);
   thread->start();
 }
 
@@ -34,79 +34,127 @@ void DataService::stop()
   delete thread;
   thread = 0;
 
-  handleEvents(); // better than qDeleteAll(eventQueue.getAll()); ;)
+  handleEvents();
+  Q_ASSERT(eventQueue.isEmpty());
   qDeleteAll(jobQueue.getAll());
 }
 
-void DataService::subscribe(const QString& channel, Entity::Manager& channelEntityManager)
+void DataService::subscribe(const QString& channelName, Entity::Manager& channelEntityManager)
 {
-  if(subscriptions.contains(channel))
+  if(subscriptions.contains(channelName))
     return;
-  subscriptions.insert(channel, &channelEntityManager);
+  subscriptions.insert(channelName, &channelEntityManager);
   if(!isConnected)
     return;
 
-  class SubscriptionJob : public Job
+  class SubscriptionJob : public Job, public Event
   {
   public:
-    SubscriptionJob(const QString& channel, quint64 lastReceivedTradeId) : channel(channel), lastReceivedTradeId(lastReceivedTradeId) {}
+    SubscriptionJob(const QString& channelName, quint32 channelId, quint64 lastReceivedTradeId) : channelName(channelName), channelId(channelId), lastReceivedTradeId(lastReceivedTradeId), eTradeData(0) {}
+    ~SubscriptionJob() {delete eTradeData;}
   private:
-    QString channel;
+    QString channelName;
+    quint32 channelId;
     quint64 lastReceivedTradeId;
+    EDataTradeData* eTradeData;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.subscribe(channel, lastReceivedTradeId))
-        return false;
+      WorkerThread::SubscriptionData& data = workerThread.subscriptionData[channelId];
+      data.channelName = channelName;
+      if(data.eTradeData)
+        delete data.eTradeData;
+      data.eTradeData = new EDataTradeData;
+
+      if(!workerThread.connection.subscribe(channelId, lastReceivedTradeId))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not subscribe to channel %1: %2").arg(channelName, workerThread.connection.getLastError())), false;
+      
+      eTradeData = data.eTradeData;
+      data.eTradeData = 0;
       return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      Entity::Manager* channelEntityManager = dataService.getSubscription(channelName);
+      if(channelEntityManager)
+      {
+        channelEntityManager->delegateEntity(*eTradeData);
+        eTradeData = 0;
+        dataService.activeSubscriptions[channelId] = channelEntityManager;
+        EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
+        eDataSubscription->setState(EDataSubscription::State::subscribed);
+        channelEntityManager->updatedEntity(*eDataSubscription);
+        EDataMarket* eDataMarket = dataService.globalEntityManager.getEntity<EDataMarket>(channelId);
+        dataService.addLogMessage(ELogMessage::Type::information, QString("Subscribed to channel %1.").arg(eDataMarket->getName()));
+      }
     }
   };
 
-  addLogMessage(ELogMessage::Type::information, QString("Subscribing to channel %1...").arg(channel));
-  EDataTradeData* eDataTradeData = channelEntityManager.getEntity<EDataTradeData>(0);
-  quint64 lastReceivedTradeId = 0;
-  if(eDataTradeData)
+  addLogMessage(ELogMessage::Type::information, QString("Subscribing to channel %1...").arg(channelName));
+
+  quint32 channelId = getChannelId(channelName);
+  if(channelId)
   {
-    const QList<DataProtocol::Trade>& data = eDataTradeData->getData();
-    if(!data.isEmpty())
-      lastReceivedTradeId = data.back().id;
+    EDataTradeData* eDataTradeData = channelEntityManager.getEntity<EDataTradeData>(0);
+    quint64 lastReceivedTradeId = 0;
+    if(eDataTradeData)
+    {
+      const QList<EDataTradeData::Trade>& data = eDataTradeData->getData();
+      if(!data.isEmpty())
+        lastReceivedTradeId = data.back().id;
+    }
+    bool wasEmpty;
+    jobQueue.append(new SubscriptionJob(channelName, channelId, lastReceivedTradeId), &wasEmpty);
+    if(wasEmpty && thread)
+      thread->interrupt();
   }
-  bool wasEmpty;
-  jobQueue.append(new SubscriptionJob(channel, lastReceivedTradeId), &wasEmpty);
-  if(wasEmpty && thread)
-    thread->interrupt();
   EDataSubscription* eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
   eDataSubscription->setState(EDataSubscription::State::subscribing);
   channelEntityManager.updatedEntity(*eDataSubscription);
 }
 
-void DataService::unsubscribe(const QString& channel)
+void DataService::unsubscribe(const QString& channelName)
 {
-  QHash<QString, Entity::Manager*>::Iterator it = subscriptions.find(channel);
+  QHash<QString, Entity::Manager*>::Iterator it = subscriptions.find(channelName);
   if(it == subscriptions.end())
     return;
   subscriptions.erase(it);
   if(!isConnected)
     return;
 
-  class UnsubscriptionJob : public Job
+  class UnsubscriptionJob : public Job, public Event
   {
   public:
-    UnsubscriptionJob(const QString& channel) : channel(channel) {}
+    UnsubscriptionJob(const QString& channelName, quint32 channelId) : channelName(channelName), channelId(channelId) {}
   private:
-    QString channel;
+    QString channelName;
+    quint32 channelId;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.unsubscribe(channel))
-        return false;
+      if(!workerThread.connection.unsubscribe(channelId))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not unsubscribe from channel %1: %2").arg(channelName, workerThread.connection.getLastError())), false;
       return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      QHash<quint32, Entity::Manager*>::Iterator it = dataService.activeSubscriptions.find(channelId);
+      if(it == dataService.activeSubscriptions.end())
+        return;
+      Entity::Manager* channelEntityManager = it.value();
+      dataService.activeSubscriptions.erase(it);
+      EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
+      eDataSubscription->setState(EDataSubscription::State::unsubscribed);
+      dataService.addLogMessage(ELogMessage::Type::information, QString("Unsubscribed from channel %1.").arg(channelName));
     }
   };
 
-  addLogMessage(ELogMessage::Type::information, QString("Unsubscribing from channel %1...").arg(channel));
+  quint32 channelId = getChannelId(channelName);
+  addLogMessage(ELogMessage::Type::information, QString("Unsubscribing from channel %1...").arg(channelName));
   bool wasEmpty;
-  jobQueue.append(new UnsubscriptionJob(channel), &wasEmpty);
+  jobQueue.append(new UnsubscriptionJob(channelName, channelId), &wasEmpty);
   if(wasEmpty && thread)
     thread->interrupt();
 }
@@ -135,6 +183,16 @@ void DataService::addLogMessage(ELogMessage::Type type, const QString& message)
 {
   ELogMessage* logMessage = new ELogMessage(type, message);
   globalEntityManager.delegateEntity(*logMessage);
+}
+
+quint32 DataService::getChannelId(const QString& channelName)
+{
+  QList<EDataMarket*> eDataMarkets;
+  globalEntityManager.getAllEntities<EDataMarket>(eDataMarkets);
+  for(QList<EDataMarket*>::Iterator i = eDataMarkets.begin(), end = eDataMarkets.end(); i != end; ++i)
+    if((*i)->getName() == channelName)
+      return (*i)->getId();
+  return 0;
 }
 
 void DataService::WorkerThread::interrupt()
@@ -187,7 +245,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
       else if(state == EDataService::State::offline)
       {
         dataService.isConnected = false;
-        for(QHash<quint64, Entity::Manager*>::ConstIterator i = dataService.activeSubscriptions.begin(), end = dataService.activeSubscriptions.end(); i != end; ++i)
+        for(QHash<quint32, Entity::Manager*>::ConstIterator i = dataService.activeSubscriptions.begin(), end = dataService.activeSubscriptions.end(); i != end; ++i)
         {
           Entity::Manager* channelEntityManager = i.value();
           EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
@@ -198,9 +256,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
       }
       eDataService->setState(state);
       if(state == EDataService::State::offline)
-      {
         globalEntityManager.removeAll<EDataMarket>();
-      }
       globalEntityManager.updatedEntity(*eDataService);
     }
   };
@@ -228,17 +284,14 @@ void DataService::WorkerThread::process()
 
   // create connection
   QStringList addr = server.split(':');
-  if(!connection.connect(addr.size() > 0 ? addr[0] : QString(), addr.size() > 1 ? addr[1].toULong() : 0))
-  {
-    addMessage(ELogMessage::Type::error, QString("Could not connect to data service: %1").arg(connection.getLastError()));
-    return;
-  }
+  if(!connection.connect(addr.size() > 0 ? addr[0] : QString(), addr.size() > 1 ? addr[1].toULong() : 0, userName, password, *this))
+    return addMessage(ELogMessage::Type::error, QString("Could not connect to data service: %1").arg(connection.getLastError()));
   addMessage(ELogMessage::Type::information, "Connected to data service.");
   setState(EDataService::State::connected);
 
   // load channel list
   if(!connection.loadChannelList())
-    goto error;
+    return addMessage(ELogMessage::Type::error, QString("Could not load channel list: %1").arg(connection.getLastError()));
 
   // loop
   for(;;)
@@ -251,16 +304,34 @@ void DataService::WorkerThread::process()
         return;
       }
       if(!job->execute(*this))
-        goto error;
-      delete job;
+      {
+        delete job;
+        if(!connection.isConnected())
+          break;
+      }
+      else
+      {
+        Event* event = dynamic_cast<Event*>(job);
+        if(event)
+        {
+          bool wasEmpty;
+          eventQueue.append(event, &wasEmpty);
+          if(wasEmpty)
+            QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+        }
+        else
+          delete job;
+      }
     }
-
-    if(!connection.process(*this))
+    if(!connection.isConnected())
       break;
-  }
 
-error:
-  addMessage(ELogMessage::Type::error, QString("Lost connection to data service: %1").arg(connection.getLastError()));
+    if(!connection.process())
+    {
+      addMessage(ELogMessage::Type::error, QString("Lost connection to data service: %1").arg(connection.getLastError()));
+      break;
+    }
+  }
 }
 
 void DataService::WorkerThread::run()
@@ -271,8 +342,7 @@ void DataService::WorkerThread::run()
     process();
     setState(EDataService::State::offline);
 
-    qDeleteAll(replayedTrades);
-    replayedTrades.clear();
+    subscriptionData.clear();
 
     if(canceled)
       return;
@@ -280,44 +350,50 @@ void DataService::WorkerThread::run()
   }
 }
 
-void DataService::WorkerThread::receivedChannelInfo(const QString& channelName)
+void DataService::WorkerThread::receivedChannelInfo(quint32 channelId, const QString& channelName)
 {
   class ChannelInfoEvent : public Event
   {
   public:
-    ChannelInfoEvent(const QString& channelName) : channelName(channelName) {}
+    ChannelInfoEvent(quint64 channelId, const QString& channelName) : channelId(channelId), channelName(channelName) {}
   private:
+    quint32 channelId;
     QString channelName;
   public: // Event
     virtual void handle(DataService& dataService)
     {
-      QString baseCurrency = channelName.mid(channelName.lastIndexOf('/') + 1);
-      QString commCurrency("BTC"); // todo: receive commCurrency from data server
+      int firstSlash = channelName.indexOf('/');
+      int secondSlash = channelName.indexOf('/', firstSlash + 1);
+      QString baseCurrency = channelName.mid(secondSlash + 1);
+      QString commCurrency = channelName.mid(firstSlash + 1, secondSlash - (firstSlash + 1));
 
       Entity::Manager& globalEntityManager = dataService.globalEntityManager;
-      quint32 entityId = globalEntityManager.getNewEntityId<EDataMarket>();
-      EDataMarket* eDataMarket = new EDataMarket(entityId, channelName, baseCurrency, commCurrency);
+      EDataMarket* eDataMarket = new EDataMarket(channelId, channelName, baseCurrency, commCurrency);
       globalEntityManager.delegateEntity(*eDataMarket);
     }
   };
 
   bool wasEmpty;
-  eventQueue.append(new ChannelInfoEvent(channelName), &wasEmpty);
+  eventQueue.append(new ChannelInfoEvent(channelId, channelName), &wasEmpty);
   if(wasEmpty)
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
   //information(QString("Found channel %1.").arg(channelName));
 }
 
-void DataService::WorkerThread::receivedSubscribeResponse(const QString& channelName, quint64 channelId, quint32 flags)
+void DataService::WorkerThread::receivedSubscribeResponse(quint32 channelId)
 {
+  QHash<quint32, SubscriptionData>::Iterator it =  subscriptionData.find(channelId);
+  if(it == subscriptionData.end())
+    return;
+  SubscriptionData& data = it.value();
+
   class SubscribeResponseEvent : public Event
   {
   public:
-    SubscribeResponseEvent(const QString& channelName, quint64 channelId, quint32 flags) : channelName(channelName), channelId(channelId), flags(flags) {}
+    SubscribeResponseEvent(quint64 channelId, const QString& channelName) : channelId(channelId), channelName(channelName) {}
   private:
+    quint32 channelId;
     QString channelName;
-    quint64 channelId;
-    quint32 flags;
   private: // Event
     virtual void handle(DataService& dataService)
     {
@@ -326,117 +402,42 @@ void DataService::WorkerThread::receivedSubscribeResponse(const QString& channel
       {
         dataService.activeSubscriptions[channelId] = channelEntityManager;
         EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
-        eDataSubscription->setState(flags & DataProtocol::syncFlag ? EDataSubscription::State::subscribed : EDataSubscription::State::loading);
+        eDataSubscription->setState(EDataSubscription::State::loading);
         channelEntityManager->updatedEntity(*eDataSubscription);
-        dataService.addLogMessage(ELogMessage::Type::information, QString("Subscribed to channel %1.").arg(channelName));
       }
     }
   };
 
   bool wasEmpty;
-  eventQueue.append(new SubscribeResponseEvent(channelName, channelId, flags), &wasEmpty);
+  eventQueue.append(new SubscribeResponseEvent(channelId, data.channelName), &wasEmpty);
   if(wasEmpty)
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
-  replayedTrades.remove(channelId);
 }
 
-void DataService::WorkerThread::receivedUnsubscribeResponse(const QString& channelName, quint64 channelId)
+void DataService::WorkerThread::receivedTrade(quint32 channelId, const meguco_trade_entity& tradeData)
 {
-  class UnsubscribeResponseEvent : public Event
-  {
-  public:
-    UnsubscribeResponseEvent(const QString& channelName, quint64 channelId) : channelName(channelName), channelId(channelId) {}
-  private:
-    QString channelName;
-    quint64 channelId;
-  private: // Event
-    virtual void handle(DataService& dataService)
-    {
-      QHash<quint64, Entity::Manager*>::Iterator it = dataService.activeSubscriptions.find(channelId);
-      if(it == dataService.activeSubscriptions.end())
-        return;
-      Entity::Manager* channelEntityManager = it.value();
-      dataService.activeSubscriptions.erase(it);
-      EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
-      eDataSubscription->setState(EDataSubscription::State::unsubscribed);
-      dataService.addLogMessage(ELogMessage::Type::information, QString("Unsubscribed from channel %1.").arg(channelName));
-    }
-  };
+  EDataTradeData::Trade trade;
+  trade.id = tradeData.entity.id;
+  trade.time = tradeData.entity.time;
+  trade.price = tradeData.price;
+  trade.amount = tradeData.amount;
 
-  bool wasEmpty;
-  eventQueue.append(new UnsubscribeResponseEvent(channelName, channelId), &wasEmpty);
-  if(wasEmpty)
-    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
-  replayedTrades.remove(channelId);
-}
-
-void DataService::WorkerThread::receivedTrade(quint64 channelId, const DataProtocol::Trade& trade)
-{
-  if(trade.flags & DataProtocol::replayedFlag)
-  {
-    QHash<quint64, EDataTradeData*>::Iterator it = replayedTrades.find(channelId);
-    EDataTradeData* tradeData;
-    if(it == replayedTrades.end())
-    {
-      tradeData = new EDataTradeData;
-      replayedTrades.insert(channelId, tradeData);
-    }
-    else
-      tradeData = it.value();
-    tradeData->addTrade(trade);
-
-    if(trade.flags & DataProtocol::syncFlag)
-    {
-      class SetTradesEvent : public Event
-      {
-      public:
-        SetTradesEvent(quint64 channelId, EDataTradeData* tradeData) : channelId(channelId), tradeData(tradeData) {}
-      private:
-        quint64 channelId;
-        EDataTradeData* tradeData;
-      private: // Event
-        virtual void handle(DataService& dataService)
-        {
-          QHash<quint64, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(channelId);
-          if(it == dataService.activeSubscriptions.end())
-          {
-            delete tradeData;
-            return;
-          }
-          Entity::Manager* channelEntityManager = it.value();
-          if(channelEntityManager)
-          {
-            channelEntityManager->delegateEntity(*tradeData);
-            EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
-            eDataSubscription->setState(EDataSubscription::State::subscribed);
-            channelEntityManager->updatedEntity(*eDataSubscription);
-          }
-          else
-            delete tradeData;
-        }
-      };
-
-      SetTradesEvent* setTradesEvent = new SetTradesEvent(channelId, tradeData);
-      bool wasEmpty;
-      eventQueue.append(setTradesEvent, &wasEmpty);
-      if(wasEmpty)
-        QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
-      replayedTrades.remove(channelId);
-    }
-  }
-  else
+  SubscriptionData& data = subscriptionData[channelId];
+  if(data.eTradeData)
+    data.eTradeData->addTrade(trade);
+  else // live trade
   {
     class AddTradeEvent : public Event
     {
     public:
-      AddTradeEvent(quint64 channelId, const DataProtocol::Trade& trade) : channelId(channelId), trade(trade) {}
+      AddTradeEvent(quint32 channelId, const EDataTradeData::Trade& trade) : channelId(channelId), trade(trade) {}
     private:
-      quint64 channelId;
-      DataProtocol::Trade trade;
+      quint32 channelId;
+      EDataTradeData::Trade trade;
     private: // Event
       virtual void handle(DataService& dataService)
       {
-        QHash<quint64, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(channelId);
+        QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(channelId);
         if(it == dataService.activeSubscriptions.end())
           return;
         Entity::Manager* channelEntityManager = it.value();
@@ -462,31 +463,31 @@ void DataService::WorkerThread::receivedTrade(quint64 channelId, const DataProto
   }
 }
 
-void DataService::WorkerThread::receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker)
+void DataService::WorkerThread::receivedTicker(quint32 channelId, const meguco_ticker_entity& ticker)
 {
   class AddTickerEvent : public Event
   {
   public:
-    AddTickerEvent(quint64 channelId, const DataProtocol::Ticker& ticker) : channelId(channelId), ticker(ticker) {}
+    AddTickerEvent(quint64 channelId, const meguco_ticker_entity& ticker) : channelId(channelId), ticker(ticker) {}
   private:
     quint64 channelId;
-    DataProtocol::Ticker ticker;
+    meguco_ticker_entity ticker;
   private: // Event
     virtual void handle(DataService& dataService)
     {
-      QHash<quint64, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(channelId);
+      QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(channelId);
       if(it == dataService.activeSubscriptions.end())
         return;
       Entity::Manager* channelEntityManager = it.value();
       EDataTickerData* eDataTickerData = channelEntityManager->getEntity<EDataTickerData>(0);
       if(eDataTickerData)
       {
-        eDataTickerData->setData(ticker);
+        eDataTickerData->setData(ticker.ask, ticker.bid);
         channelEntityManager->updatedEntity(*eDataTickerData);
       }
       else
       {
-        eDataTickerData = new EDataTickerData(ticker);
+        eDataTickerData = new EDataTickerData(ticker.ask, ticker.bid);
         channelEntityManager->delegateEntity(*eDataTickerData);
       }
     }
@@ -496,9 +497,4 @@ void DataService::WorkerThread::receivedTicker(quint64 channelId, const DataProt
   eventQueue.append(new AddTickerEvent(channelId, ticker), &wasEmpty);
   if(wasEmpty)
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
-}
-
-void DataService::WorkerThread::receivedErrorResponse(const QString& message)
-{
-  addMessage(ELogMessage::Type::error, message);
 }

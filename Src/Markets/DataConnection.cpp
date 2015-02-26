@@ -1,129 +1,120 @@
 
 #include "stdafx.h"
 
-bool DataConnection::connect(const QString& server, quint16 port)
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <cerrno>
+#endif
+
+#include <zlimdbclient.h>
+
+static class ZlimdbClient
 {
-  connection.close();
-  recvBuffer2.clear();
-
-  if(!connection.connect(server, port == 0 ? 40123 : port))
+public:
+  ZlimdbClient()
   {
-    error = connection.getLastError();
-    return false;
+    zlimdb_init();
+  }
+  ~ZlimdbClient()
+  {
+    zlimdb_cleanup();
   }
 
-  // request server time
-  {
-    DataProtocol::Header header;
-    header.size = sizeof(header);
-    header.destination = header.source = 0;
-    header.messageType = DataProtocol::timeRequest;
-    if(!connection.send((char*)&header, sizeof(header)))
-    {
-      error = connection.getLastError();
-      return false;
-    }
-    qint64 localRequestTime = QDateTime::currentDateTime().toTime_t() * 1000ULL;
-    char* data;
-    size_t size;
-    if(!receiveMessage(header, data, size))
-      return false;
-    qint64 localResponseTime = QDateTime::currentDateTime().toTime_t() * 1000ULL;
-    if(header.messageType == DataProtocol::errorResponse && size >= sizeof(DataProtocol::ErrorResponse))
-    {
-      DataProtocol::ErrorResponse* errorResponse = (DataProtocol::ErrorResponse*)data;
-      error = DataProtocol::getString(errorResponse->errorMessage);
-      return false;
-    }
-    if(header.messageType != DataProtocol::timeResponse || size < sizeof(DataProtocol::TimeResponse))
-    {
-      error = "Could not request server time.";
-      return false;
-    }
-    DataProtocol::TimeResponse* timeResponse = (DataProtocol::TimeResponse*)data;
-    serverTimeToLocalTime = (localResponseTime - localRequestTime) / 2 + localRequestTime - timeResponse->time;
-  }
+} zlimdbClient;
 
-  recvBuffer2.clear();
+bool DataConnection::connect(const QString& server, quint16 port, const QString& userName, const QString& password, Callback& callback)
+{
+  close();
+
+  zdb = zlimdb_create(zlimdbCallback, this);
+  if(!zdb)
+    return error = getZlimDbError(), false;
+  if(zlimdb_connect(zdb, server.toUtf8().constData(), port, userName.toUtf8().constData(), password.toUtf8().constData()) != 0)
+    return error = getZlimDbError(), false;
+  this->callback = &callback;
   return true;
+}
+
+bool DataConnection::isConnected() const
+{
+  return zlimdb_is_connected(zdb) == 0;
+}
+
+void DataConnection::close()
+{
+  if(zdb)
+  {
+    zlimdb_free(zdb);
+    zdb = 0;
+  }
 }
 
 void DataConnection::interrupt()
 {
-  connection.interrupt();
+  zlimdb_interrupt(zdb);
 }
 
-bool DataConnection::process(Callback& callback)
+bool DataConnection::process()
 {
-  this->callback = &callback;
-
-  if(!connection.recv(recvBuffer2))
-  {
-    error = connection.getLastError();
-    return false;
-  }
-
-  char* buffer = recvBuffer2.data();
-  unsigned int bufferSize = recvBuffer2.size();
-
   for(;;)
+    if(zlimdb_exec(zdb, 60 * 1000) != 0)
+      switch(zlimdb_errno())
+      {
+      case zlimdb_local_error_interrupted:
+        return true;
+      case zlimdb_local_error_timeout:
+        break;
+      default:
+        return error = getZlimDbError(), false;
+      }
+  return true;
+}
+
+QString DataConnection::getZlimDbError()
+{
+  int err = zlimdb_errno();
+  if(err == zlimdb_local_error_system)
   {
-    if(bufferSize >= sizeof(DataProtocol::Header))
+#ifdef _WIN32
+    TCHAR errorMessage[256];
+    DWORD len = FormatMessage(
+          FORMAT_MESSAGE_FROM_SYSTEM |
+          FORMAT_MESSAGE_IGNORE_INSERTS,
+          NULL,
+          GetLastError(),
+          MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+          (LPTSTR) errorMessage,
+          256, NULL );
+    Q_ASSERT(len >= 0 && len <= 256);
+    while(len > 0 && isspace(errorMessage[len - 1]))
+      --len;
+    errorMessage[len] = '\0';
+    return QString(errorMessage);
+#else
+    return QString(strerror(errno)) + ".";
+#endif
+  }
+  else
+    return QString(zlimdb_strerror(err)) + ".";
+}
+
+void DataConnection::zlimdbCallback(const zlimdb_header& message)
+{
+  switch(message.message_type)
+  {
+  case zlimdb_message_add_request:
+    if(message.size >= sizeof(zlimdb_add_request) + sizeof(meguco_trade_entity))
     {
-      DataProtocol::Header* header = (DataProtocol::Header*)buffer;
-      if(header->size < sizeof(DataProtocol::Header))
-      {
-        error = "Received invalid data.";
-        return false;
-      }
-      if(bufferSize >= header->size)
-      {
-        handleMessage((DataProtocol::MessageType)header->messageType, (char*)(header + 1), header->size - sizeof(DataProtocol::Header));
-        buffer += header->size;
-        bufferSize -= header->size;
-        continue;
-      }
+      const zlimdb_add_request* addRequest = (zlimdb_add_request*)&message;
+      const meguco_trade_entity* trade = (const meguco_trade_entity*)((char*)addRequest + sizeof(zlimdb_add_request));
+      callback->receivedTrade(addRequest->table_id, *trade);
     }
     break;
+  default:
+    break;
   }
-  if(buffer > recvBuffer2.data())
-    recvBuffer2.remove(0, buffer - recvBuffer2.data());
-  if(recvBuffer2.size() > 4000)
-  {
-    error = "Received invalid data.";
-    return false;
-  }
-  return true;
-}
-
-bool DataConnection::receiveMessage(DataProtocol::Header& header, char*& data, size_t& size)
-{
-  if(connection.recv((char*)&header, sizeof(header), sizeof(header)) != sizeof(header))
-  {
-    error = connection.getLastError();
-    return false;
-  }
-  if(header.size < sizeof(DataProtocol::Header))
-  {
-    error = "Received invalid data.";
-    return false;
-  }
-  size = header.size - sizeof(header);
-  if(size > 0)
-  {
-    recvBuffer2.resize(size);
-    data = recvBuffer2.data();
-    if(connection.recv(data, size, size) != size)
-    {
-      error = connection.getLastError();
-      return false;
-    }
-  }
-  return true;
-}
-
-void DataConnection::handleMessage(DataProtocol::MessageType messageType, char* data, unsigned int size)
-{
+  /*
   switch(messageType)
   {
   case DataProtocol::MessageType::channelResponse:
@@ -183,97 +174,56 @@ void DataConnection::handleMessage(DataProtocol::MessageType messageType, char* 
   default:
     break;
   }
+  */
 }
 
 bool DataConnection::loadChannelList()
 {
-  DataProtocol::Header header;
-  header.size = sizeof(header);
-  header.destination = header.source = 0;
-  header.messageType = DataProtocol::channelRequest;
-  if(!connection.send((char*)&header, sizeof(header)))
-  {
-    error = connection.getLastError();
-    return false;
-  }
+  if(zlimdb_query(zdb, zlimdb_table_tables, zlimdb_query_type_all, 0) != 0)
+    return error = getZlimDbError(), false;
+  char buffer[0xffff];
+  uint32_t size;
+  while(zlimdb_get_response(zdb, (zlimdb_entity*)buffer, sizeof(buffer), &size) == 0)
+    for(zlimdb_table_entity* table = (zlimdb_table_entity*)buffer, *end = (zlimdb_table_entity*)(buffer + size); table < end; table = (zlimdb_table_entity*)((char*)table + table->entity.size))
+    {
+      QString channelName(QByteArray::fromRawData((char*)table + sizeof(zlimdb_table_entity), table->name_size));
+      if(channelName.startsWith("markets/") && channelName.endsWith("/trades"))
+        callback->receivedChannelInfo(table->entity.id, channelName.mid(8, channelName.length() - (8 + 7)));
+    }
+  if(zlimdb_errno() != 0)
+    return error = getZlimDbError(), false;
   return true;
 }
 
-bool DataConnection::subscribe(const QString& channel, quint64 lastReceivedTradeId)
+bool DataConnection::subscribe(quint32 channelId, quint64 lastReceivedTradeId)
 {
-  char message[sizeof(DataProtocol::Header) + sizeof(DataProtocol::SubscribeRequest)];
-  DataProtocol::Header* header = (DataProtocol::Header*)message;
-  DataProtocol::SubscribeRequest* subscribeRequest = (DataProtocol::SubscribeRequest*)(header + 1);
-  header->size = sizeof(message);
-  header->destination = header->source = 0;
-  header->messageType = DataProtocol::subscribeRequest;
-  QByteArray channelNameData = channel.toUtf8();
-  memcpy(subscribeRequest->channel, channelNameData.constData(), qMin(channelNameData.size() + 1, (int)sizeof(subscribeRequest->channel) - 1));
-  subscribeRequest->channel[sizeof(subscribeRequest->channel) - 1] = '\0';
-  if(lastReceivedTradeId)
+  if(lastReceivedTradeId != 0)
   {
-    subscribeRequest->maxAge = 0;
-    subscribeRequest->sinceId =  lastReceivedTradeId;
+    if(zlimdb_subscribe(zdb, channelId, zlimdb_query_type_since_id, lastReceivedTradeId) != 0)
+      return error = getZlimDbError(), false;
   }
   else
   {
-    subscribeRequest->maxAge = 24ULL * 60ULL * 60ULL * 1000ULL * 7ULL;
-    subscribeRequest->sinceId =  0;
+    int64_t serverTime, tableTime;
+    if(zlimdb_sync(zdb, channelId, &serverTime, &tableTime) != 0)
+      return error = getZlimDbError(), false;
+    if(zlimdb_subscribe(zdb, channelId, zlimdb_query_type_since_time, tableTime - 7ULL * 24ULL * 60ULL * 60ULL * 1000ULL) != 0)
+      return error = getZlimDbError(), false;
   }
-  if(!connection.send(message, sizeof(message)))
-  {
-    error = connection.getLastError();
-    return false;
-  }
+
+  char buffer[0xffff];
+  uint32_t size;
+  while(zlimdb_get_response(zdb, (zlimdb_entity*)buffer, sizeof(buffer), &size) == 0)
+    for(meguco_trade_entity* trade = (meguco_trade_entity*)buffer, *end = (meguco_trade_entity*)(buffer + size); trade < end; trade = (meguco_trade_entity*)((char*)trade + trade->entity.size))
+      callback->receivedTrade(channelId, *trade);
+  if(zlimdb_errno() != 0)
+    return error = getZlimDbError(), false;
   return true;
 }
 
-bool DataConnection::unsubscribe(const QString& channel)
+bool DataConnection::unsubscribe(quint32 channelId)
 {
-  char message[sizeof(DataProtocol::Header) + sizeof(DataProtocol::UnsubscribeRequest)];
-  DataProtocol::Header* header = (DataProtocol::Header*)message;
-  DataProtocol::UnsubscribeRequest* unsubscribeRequest = (DataProtocol::UnsubscribeRequest*)(header + 1);
-  header->size = sizeof(message);
-  header->destination = header->source = 0;
-  header->messageType = DataProtocol::unsubscribeRequest;
-  QByteArray channelNameData = channel.toUtf8();
-  memcpy(unsubscribeRequest->channel, channelNameData.constData(), qMin(channelNameData.size() + 1, (int)sizeof(unsubscribeRequest->channel) - 1));
-  unsubscribeRequest->channel[sizeof(unsubscribeRequest->channel) - 1] = '\0';
-  if(!connection.send(message, sizeof(message)))
-  {
-    error = connection.getLastError();
-    return false;
-  }
-  return true;
-}
-
-bool DataConnection::readTrade(quint64& channelId, DataProtocol::Trade& trade)
-{
-  struct ReadTradeCallback : public Callback
-  {
-    quint64& channelId;
-    DataProtocol::Trade& trade;
-    bool finished;
-
-    ReadTradeCallback(quint64& channelId, DataProtocol::Trade& trade) : channelId(channelId), trade(trade), finished(false) {}
-
-    virtual void receivedChannelInfo(const QString& channelName) {}
-    virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId, quint32 flags) {}
-    virtual void receivedUnsubscribeResponse(const QString& channelName, quint64 channelId) {}
-    virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker) {}
-    virtual void receivedErrorResponse(const QString& message) {}
-
-    virtual void receivedTrade(quint64 channelId, const DataProtocol::Trade& trade)
-    {
-      this->channelId = channelId;
-      this->trade = trade;
-      finished = true;
-    }
-  } callback(channelId, trade);
-  do
-  {
-    if(!process(callback))
-      return false;
-  } while(!callback.finished);
+  if(zlimdb_unsubscribe(zdb, channelId) != 0)
+    return error = getZlimDbError(), false;
   return true;
 }

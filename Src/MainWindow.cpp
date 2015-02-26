@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "Meguco", "MegucoClient"),
+MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "Meguco", "MegucoClientZ"),
   dataService(globalEntityManager), botService(globalEntityManager)
 {
   globalEntityManager.delegateEntity(*new EBotService);
@@ -102,7 +102,9 @@ void MainWindow::startDataService()
 {
   settings.beginGroup("DataServer");
   QString dataServer = settings.value("Address", "127.0.0.1:40123").toString();
-  dataService.start(dataServer);
+  QString userName = settings.value("User").toString();
+  QString password = settings.value("Password").toString();
+  dataService.start(dataServer, userName, password);
   settings.endGroup();
 }
 

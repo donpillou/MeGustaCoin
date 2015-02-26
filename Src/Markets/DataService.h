@@ -9,7 +9,7 @@ public:
   DataService(Entity::Manager& globalEntityManager);
   ~DataService();
 
-  void start(const QString& server);
+  void start(const QString& server, const QString& userName, const QString& password);
   void stop();
 
   void subscribe(const QString& channel, Entity::Manager& entityManager);
@@ -36,13 +36,28 @@ private:
   class WorkerThread : public QThread, public DataConnection::Callback
   {
   public:
-    WorkerThread(DataService& dataService, JobQueue<Event*>& eventQueue, JobQueue<Job*>& jobQueue, const QString& server) :
+    class SubscriptionData
+    {
+    public:
+      QString channelName;
+      EDataTradeData* eTradeData;
+
+    public:
+      SubscriptionData() : eTradeData(0) {}
+      ~SubscriptionData() {delete eTradeData;}
+    };
+
+  public:
+    WorkerThread(DataService& dataService, JobQueue<Event*>& eventQueue, JobQueue<Job*>& jobQueue, const QString& server, const QString& userName, const QString& password) :
       dataService(dataService), eventQueue(eventQueue), jobQueue(jobQueue), canceled(false), 
-      server(server) {}
-    ~WorkerThread() {qDeleteAll(replayedTrades);}
+      server(server), userName(userName), password(password) {}
 
     const QString& getServer() const {return server;}
+    const QString& getUserName() const {return userName;}
+    const QString& getPassword() const {return password;}
     void interrupt();
+
+    void addMessage(ELogMessage::Type type, const QString& message);
 
   public:
     DataService& dataService;
@@ -51,10 +66,11 @@ private:
     DataConnection connection;
     bool canceled;
     QString server;
-    QHash<quint64, EDataTradeData*> replayedTrades;
+    QString userName;
+    QString password;
+    QHash<quint32, SubscriptionData> subscriptionData;
 
   private:
-    void addMessage(ELogMessage::Type type, const QString& message);
     void setState(EDataService::State state);
     void process();
 
@@ -62,12 +78,10 @@ private:
     virtual void run();
 
   private: // DataConnection::Callback
-    virtual void receivedChannelInfo(const QString& channelName);
-    virtual void receivedSubscribeResponse(const QString& channelName, quint64 channelId, quint32 flags);
-    virtual void receivedUnsubscribeResponse(const QString& channelName, quint64 channelId);
-    virtual void receivedTrade(quint64 channelId, const DataProtocol::Trade& trade);
-    virtual void receivedTicker(quint64 channelId, const DataProtocol::Ticker& ticker);
-    virtual void receivedErrorResponse(const QString& message);
+    virtual void receivedChannelInfo(quint32 channelId, const QString& channelName);
+    virtual void receivedSubscribeResponse(quint32 channelId);
+    virtual void receivedTrade(quint32 channelId, const meguco_trade_entity& trade);
+    virtual void receivedTicker(quint32 channelId, const meguco_ticker_entity& ticker);
   };
 
 private:
@@ -76,12 +90,14 @@ private:
 
   JobQueue<Event*> eventQueue;
   JobQueue<Job*> jobQueue;
-  QHash<quint64, Entity::Manager*> activeSubscriptions;
+  QHash<quint32, Entity::Manager*> activeSubscriptions;
   bool isConnected;
   QHash<QString, Entity::Manager*> subscriptions;
 
 private:
   void addLogMessage(ELogMessage::Type type, const QString& message);
+
+  quint32 getChannelId(const QString& channelName);
 
 private slots:
   void handleEvents();

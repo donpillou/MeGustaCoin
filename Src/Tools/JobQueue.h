@@ -51,8 +51,14 @@ public:
     return result;
   }
 
+  bool isEmpty() const
+  {
+      QMutexLocker sync(&jobMutex);
+      return jobs.isEmpty();
+  }
+
 private:
-  QMutex jobMutex;
+  mutable QMutex jobMutex;
   QWaitCondition createdJobCondition;
   QList<T> jobs;
 };

@@ -7,11 +7,12 @@ if(platform == "Linux") {
   cppFlags += "-std=gnu++0x"
 }
 
+buildDir = "Build/$(configuration)/$(target)"
+
 targets = {
 
   MegucoClient = cppApplication + {
-    buildDir = "Build/$(configuration)"
-
+    dependencies += { "libzlimdbclient", "liblz4" }
     defines += { "QT_SHARED", "QT_GUI_LIB", "QT_CORE_LIB", "QT_NO_DEBUG" }
     if(configuration == "Debug") {
         defines -= "QT_NO_DEBUG"
@@ -19,6 +20,9 @@ targets = {
     includePaths = {
       "Src",
       "Ext/QTabFramework"
+      "Ext/lz4"
+      "Ext/libzlimdbclient/include"
+      "Ext/libmegucoprotocol/include"
     }
     root = "Src"
     files = {
@@ -27,6 +31,11 @@ targets = {
       "Ext/QTabFramework/QTabFramework.cpp" = cppSource + {
         folder = "Tools"
       }
+    }
+    libs += { "zlimdbclient", "lz4" }
+    libPaths += {
+      "Build/$(configuration)/libzlimdbclient"
+      "Build/$(configuration)/liblz4"
     }
     
     qtRessourceFiles = "Src/Icons/**.png"
@@ -71,7 +80,7 @@ targets = {
     }
     
     if(tool == "vcxproj") {
-      dependencies = { "libcurl", "QtGui4", "QtCore4", "winmain", "moc", "rcc" }
+      dependencies += { "libcurl", "QtGui4", "QtCore4", "winmain", "moc", "rcc" }
       defines += "CURL_STATICLIB"
       cppFlags += { "/Yu", "/Zc:wchar_t-" }
       linkFlags += { "/SUBSYSTEM:WINDOWS \"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'\"" }
@@ -99,7 +108,22 @@ targets = {
       libs += { "winmain", "QtGui4", "QtCore4", "curl", "ws2_32" }
     }
   }
-  
+
+  include "Ext/libzlimdbclient/libzlimdbclient.mare"
+  libzlimdbclient += {
+    folder = "Libs"
+  }
+
+  liblz4 = cppStaticLibrary + {
+    folder = "Libs"
+    includePaths = { "Ext/lz4" }
+    root = { "Ext/lz4" }
+    files = {
+      "Ext/lz4/lz4.c" = cSource,
+      "Ext/lz4/lz4.h"
+    }
+  }
+
   if(tool == "vcxproj") {
     bootstrap = cppStaticLibrary + {
       buildDir = "Build/$(configuration)/$(target)"

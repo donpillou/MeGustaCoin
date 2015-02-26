@@ -7,15 +7,15 @@ public:
   static const EType eType = EType::dataTickerData;
 
 public:
-  EDataTickerData(const DataProtocol::Ticker& ticker) : Entity(eType, 0) {setData(ticker);}
+  EDataTickerData(double ask, double bid) : Entity(eType, 0), ask(ask), bid(bid) {}
 
   double getAsk() const {return ask;}
   double getBid() const {return bid;}
 
-  void setData(const DataProtocol::Ticker& ticker)
+  void setData(double ask, double bid)
   {
-    this->bid = ticker.bid;
-    this->ask = ticker.ask;
+    this->ask = ask;
+    this->bid = bid;
   }
 
 private:

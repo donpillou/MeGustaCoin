@@ -498,7 +498,10 @@ void BotService::WorkerThread::process()
         return;
       }
       if(!job->execute(*this))
+      {
+        delete job;
         goto error;
+      }
       delete job;
     }
 

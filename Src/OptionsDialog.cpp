@@ -6,6 +6,10 @@ OptionsDialog::OptionsDialog(QWidget* parent, QSettings* settings) : QDialog(par
   setWindowTitle(tr("Options"));
 
   dataServerEdit = new QLineEdit;
+  dataUserEdit = new QLineEdit;
+  dataUserEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
+  dataPasswordEdit = new QLineEdit;
+  dataPasswordEdit->setEchoMode(QLineEdit::Password);
 
   botServerEdit = new QLineEdit;
   botUserEdit = new QLineEdit;
@@ -16,6 +20,10 @@ OptionsDialog::OptionsDialog(QWidget* parent, QSettings* settings) : QDialog(par
   QGridLayout* dataLayout = new QGridLayout;
   dataLayout->addWidget(new QLabel(tr("Address:")), 0, 0);
   dataLayout->addWidget(dataServerEdit, 0, 1);
+  dataLayout->addWidget(new QLabel(tr("User:")), 1, 0);
+  dataLayout->addWidget(dataUserEdit, 1, 1);
+  dataLayout->addWidget(new QLabel(tr("Password:")), 2, 0);
+  dataLayout->addWidget(dataPasswordEdit, 2, 1);
 
   QGridLayout* botLayout = new QGridLayout;
   botLayout->addWidget(new QLabel(tr("Address:")), 0, 0);
@@ -25,7 +33,7 @@ OptionsDialog::OptionsDialog(QWidget* parent, QSettings* settings) : QDialog(par
   botLayout->addWidget(new QLabel(tr("Password:")), 2, 0);
   botLayout->addWidget(botPasswordEdit, 2, 1);
 
-  QGroupBox* dataGroupBox = new QGroupBox(tr("MegucoData Server"));
+  QGroupBox* dataGroupBox = new QGroupBox(tr("ZlimDB Server"));
   dataGroupBox->setLayout(dataLayout);
 
   QGroupBox* botGroupBox = new QGroupBox(tr("MegucoBot Server"));
@@ -45,7 +53,9 @@ OptionsDialog::OptionsDialog(QWidget* parent, QSettings* settings) : QDialog(par
 
   // load form data
   settings->beginGroup("DataServer");
-  dataServerEdit->setText(settings->value("Address", "127.0.0.1:40123").toString());
+  dataServerEdit->setText(settings->value("Address", "127.0.0.1:13211").toString());
+  dataUserEdit->setText(settings->value("User").toString());
+  dataPasswordEdit->setText(settings->value("Password").toString());
   settings->endGroup();
   settings->beginGroup("BotServer");
   botServerEdit->setText(settings->value("Address", "127.0.0.1:40124").toString());
@@ -68,6 +78,8 @@ void OptionsDialog::accept()
   // save form data
   settings->beginGroup("DataServer");
   settings->setValue("Address", dataServerEdit->text());
+  settings->setValue("User", dataUserEdit->text());
+  settings->setValue("Password", dataPasswordEdit->text());
   settings->endGroup();
   settings->beginGroup("BotServer");
   settings->setValue("Address", botServerEdit->text());

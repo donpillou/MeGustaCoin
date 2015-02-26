@@ -7,17 +7,26 @@ public:
   static const EType eType = EType::dataTradeData;
 
 public:
+  struct Trade
+  {
+    quint64 id;
+    quint64 time;
+    double price;
+    double amount;
+  };
+
+public:
   EDataTradeData() : Entity(eType, 0) {}
-  EDataTradeData(const DataProtocol::Trade& trade) : Entity(eType, 0) {data.append(trade);}
+  EDataTradeData(const Trade& trade) : Entity(eType, 0) {data.append(trade);}
 
-  const QList<DataProtocol::Trade>& getData() const {return data;}
-  void addTrade(const DataProtocol::Trade& trade) {data.append(trade);}
+  const QList<Trade>& getData() const {return data;}
+  void addTrade(const Trade& trade) {data.append(trade);}
 
-  void setData(const DataProtocol::Trade& trade)
+  void setData(const Trade& trade)
   {
     if(data.size() != 1)
     {
-      QList<DataProtocol::Trade> data;
+      QList<Trade> data;
       data.append(trade);
       this->data.swap(data);
     }
@@ -26,5 +35,5 @@ public:
   }
 
 private:
-  QList<DataProtocol::Trade> data;
+  QList<Trade> data;
 };

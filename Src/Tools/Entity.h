@@ -194,7 +194,12 @@ public:
 
       ~EntityTable()
       {
-        qDeleteAll(entities);
+        //qDeleteAll(entities);
+        for(QHash<quint32, Entity*>::Iterator i = entities.begin(), end = entities.end(); i != end; ++i)
+        {
+          Entity* e = *i;
+          delete e;
+        }
       }
     };
     QHash<quint32, EntityTable> tables;
