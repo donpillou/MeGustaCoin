@@ -182,9 +182,9 @@ bool DataConnection::loadChannelList()
   if(zlimdb_query(zdb, zlimdb_table_tables, zlimdb_query_type_all, 0) != 0)
     return error = getZlimDbError(), false;
   char buffer[0xffff];
-  uint32_t size;
-  while(zlimdb_get_response(zdb, (zlimdb_entity*)buffer, sizeof(buffer), &size) == 0)
-    for(zlimdb_table_entity* table = (zlimdb_table_entity*)buffer, *end = (zlimdb_table_entity*)(buffer + size); table < end; table = (zlimdb_table_entity*)((char*)table + table->entity.size))
+  uint32_t size = sizeof(buffer);
+  for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
+    for(const zlimdb_table_entity* table; table = (const zlimdb_table_entity*)zlimdb_get_entity(sizeof(zlimdb_table_entity), &data, &size);)
     {
       QString channelName(QByteArray::fromRawData((char*)table + sizeof(zlimdb_table_entity), table->name_size));
       if(channelName.startsWith("markets/") && channelName.endsWith("/trades"))
@@ -212,8 +212,8 @@ bool DataConnection::subscribe(quint32 channelId, quint64 lastReceivedTradeId)
   }
 
   char buffer[0xffff];
-  uint32_t size;
-  while(zlimdb_get_response(zdb, (zlimdb_entity*)buffer, sizeof(buffer), &size) == 0)
+  uint32_t size = sizeof(buffer);
+  for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
     for(meguco_trade_entity* trade = (meguco_trade_entity*)buffer, *end = (meguco_trade_entity*)(buffer + size); trade < end; trade = (meguco_trade_entity*)((char*)trade + trade->entity.size))
       callback->receivedTrade(channelId, *trade);
   if(zlimdb_errno() != 0)
