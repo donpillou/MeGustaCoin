@@ -287,11 +287,12 @@ void DataService::WorkerThread::process()
   if(!connection.connect(addr.size() > 0 ? addr[0] : QString(), addr.size() > 1 ? addr[1].toULong() : 0, userName, password, *this))
     return addMessage(ELogMessage::Type::error, QString("Could not connect to data service: %1").arg(connection.getLastError()));
   addMessage(ELogMessage::Type::information, "Connected to data service.");
-  setState(EDataService::State::connected);
 
   // load channel list
   if(!connection.loadChannelList())
     return addMessage(ELogMessage::Type::error, QString("Could not load channel list: %1").arg(connection.getLastError()));
+
+  setState(EDataService::State::connected);
 
   // loop
   for(;;)
