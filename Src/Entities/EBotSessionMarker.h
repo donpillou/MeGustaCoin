@@ -9,19 +9,19 @@ public:
 public:
   enum class Type
   {
-    buy = BotProtocol::Marker::buy,
-    sell = BotProtocol::Marker::sell,
-    buyAttempt = BotProtocol::Marker::buyAttempt,
-    sellAttempt = BotProtocol::Marker::sellAttempt,
-    goodBuy = BotProtocol::Marker::goodBuy,
-    goodSell = BotProtocol::Marker::goodSell,
+    buy = meguco_user_session_marker_buy,
+    sell = meguco_user_session_marker_sell,
+    buyAttempt = meguco_user_session_marker_buy_attempt,
+    sellAttempt = meguco_user_session_marker_sell_attempt,
+    goodBuy = meguco_user_session_marker_good_buy,
+    goodSell = meguco_user_session_marker_good_sell,
   };
 
 public:
-  EBotSessionMarker(BotProtocol::Marker& data) : Entity(eType, data.entityId)
+  EBotSessionMarker(meguco_user_session_marker_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
-    date = data.date;
+    date = data.entity.time;
   }
 
   Type getType() const {return type;}

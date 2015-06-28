@@ -9,30 +9,39 @@ public:
 public:
   enum class State
   {
-    stopped = BotProtocol::Session::stopped,
-    starting = BotProtocol::Session::starting,
-    running = BotProtocol::Session::running,
-    simulating = BotProtocol::Session::simulating,
+    stopped = meguco_user_session_stopped,
+    starting = meguco_user_session_starting,
+    running = meguco_user_session_running,
+    stopping = meguco_user_session_stopping,
+    //simulating = meguco_user_session_simulating,
+  };
+
+  enum class Mode
+  {
+    live = meguco_user_session_live,
+    simulation = meguco_user_session_simulation,
   };
 
 public:
-  EBotSession(BotProtocol::Session& data) : Entity(eType, data.entityId)
+  EBotSession(const QString& name, meguco_user_session_entity& data) : Entity(eType, data.entity.id), name(name)
   {
-    name = BotProtocol::getString(data.name);
-    botEngineId = data.botEngineId;
-    marketId = data.marketId;
+    botEngineId = data.bot_engine_id;
+    marketId = data.user_market_id;
     state = (State)data.state;
+    mode = (Mode)data.mode;
   }
 
   const QString& getName() const {return name;}
   quint32 getEngineId() const {return botEngineId;}
   quint32 getMarketId() const {return marketId;}
   State getState() const {return state;}
+  Mode getMode() const {return mode;}
 
 private:
   QString name;
   quint32 botEngineId;
   quint32 marketId;
   State state;
+  Mode mode;
 };
 

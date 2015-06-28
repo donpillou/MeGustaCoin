@@ -6,7 +6,7 @@ class MarketsWidget : public QWidget, public Entity::Listener
   Q_OBJECT
 
 public:
-  MarketsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
+  MarketsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService);
   ~MarketsWidget();
 
   void saveState(QSettings& settings);
@@ -14,7 +14,7 @@ public:
 private:
   QTabFramework& tabFramework;
   Entity::Manager& entityManager;
-  BotService& botService;
+  DataService& dataService;
 
   BotMarketModel botMarketModel;
 

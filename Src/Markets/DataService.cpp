@@ -499,3 +499,72 @@ void DataService::WorkerThread::receivedTicker(quint32 channelId, const meguco_t
   if(wasEmpty)
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
 }
+
+void DataService::createMarket(quint32 marketAdapterId, const QString& userName, const QString& key, const QString& secret)
+{
+  class CreateMarketJob : public Job
+  {
+  public:
+    CreateMarketJob(quint32 marketAdapterId, const QString& userName, const QString& key, const QString& secret) : marketAdapterId(marketAdapterId), userName(userName), key(key), secret(secret) {}
+  private:
+    quint32 marketAdapterId;
+    QString userName;
+    QString key;
+    QString secret;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      // todo
+      //WorkerThread::SubscriptionData& data = workerThread.subscriptionData[channelId];
+      //data.channelName = channelName;
+      //if(data.eTradeData)
+      //  delete data.eTradeData;
+      //data.eTradeData = new EDataTradeData;
+      //
+      //if(!workerThread.connection.subscribe(channelId, lastReceivedTradeId))
+      //  return workerThread.addMessage(ELogMessage::Type::error, QString("Could not subscribe to channel %1: %2").arg(channelName, workerThread.connection.getLastError())), false;
+      //
+      return true;
+    }
+  };
+
+
+  // its not that simple, i have to create the table first
+  //QByteArray userNameData = userName.toUtf8(), keyData = key.toUtf8(), secretData = secret.toUtf8();
+  //QByteArray data;
+  //data.resize(sizeof(meguco_user_market_entity) + userNameData.size() + keyData.size() + secretData.size());
+  //meguco_user_market_entity* entity = (meguco_user_market_entity*)data.data();
+  //DataConnection::setEntityHeader(entity->entity, 0, 0, data.size());
+  //entity->bot_market_id = marketAdapterId;
+  //BotProtocol::setString(market.userName, userName);
+  //BotProtocol::setString(market.key, key);
+  //BotProtocol::setString(market.secret, secret);
+  //createEntity(data);
+}
+
+void DataService::removeMarket(quint32 id) {/*todo*/}
+void DataService::selectMarket(quint32 id) {/*todo*/}
+void DataService::refreshMarketOrders() {/*todo*/}
+void DataService::refreshMarketTransactions() {/*todo*/}
+void DataService::refreshMarketBalance() {/*todo*/}
+
+EBotMarketOrderDraft& DataService::createMarketOrderDraft(EBotMarketOrder::Type type, double price) {/*todo*/return *(EBotMarketOrderDraft*)0;}
+void DataService::submitMarketOrderDraft(EBotMarketOrderDraft& draft) {/*todo*/}
+void DataService::cancelMarketOrder(EBotMarketOrder& order) {/*todo*/}
+void DataService::updateMarketOrder(EBotMarketOrder& order, double price, double amount) {/*todo*/}
+void DataService::removeMarketOrderDraft(EBotMarketOrderDraft& draft) {/*todo*/}
+
+void DataService::createSession(const QString& name, quint32 engineId, quint32 marketId) {/*todo*/}
+void DataService::removeSession(quint32 id) {/*todo*/}
+void DataService::stopSession(quint32 id) {/*todo*/}
+void DataService::startSessionSimulation(quint32 id) {/*todo*/}
+void DataService::startSession(quint32 id) {/*todo*/}
+void DataService::selectSession(quint32 id) {/*todo*/}
+
+EBotSessionItemDraft& DataService::createSessionItemDraft(EBotSessionItem::Type type, double flipPrice) {/*todo*/return *(EBotSessionItemDraft*)0;}
+void DataService::submitSessionItemDraft(EBotSessionItemDraft& draft) {/*todo*/}
+void DataService::updateSessionItem(EBotSessionItem& item, double flipPrice) {/*todo*/}
+void DataService::cancelSessionItem(EBotSessionItem& item) {/*todo*/}
+void DataService::removeSessionItemDraft(EBotSessionItemDraft& draft) {/*todo*/}
+
+void DataService::updateSessionProperty(EBotSessionProperty& property, const QString& value) {/*todo*/}

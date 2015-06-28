@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), transactionModel(entityManager)
+TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), transactionModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
 
@@ -74,9 +74,7 @@ void TransactionsWidget::updateToolBarButtons()
 
 void TransactionsWidget::refresh()
 {
-  botService.refreshMarketTransactions();
-  //marketService.loadTransactions();
-  //marketService.loadBalance();
+  dataService.refreshMarketTransactions();
 }
 
 void TransactionsWidget::updateTitle(EBotService& eBotService)

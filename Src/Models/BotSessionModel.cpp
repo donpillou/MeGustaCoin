@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotSessionModel::BotSessionModel(Entity::Manager& entityManager) : entityManager(entityManager),
-  stoppedVar(tr("stopped")), startingVar(tr("starting")), runningVar(tr("running")), simulatingVar(tr("simulating"))
+  stoppedVar(tr("stopped")), startingVar(tr("starting")), runningVar(tr("running")), simulatingVar(tr("simulating")), stoppingVar(tr("stopping"))
 {
   entityManager.registerListener<EBotSession>(*this);
 }
@@ -66,9 +66,9 @@ QVariant BotSessionModel::data(const QModelIndex& index, int role) const
       case EBotSession::State::starting:
         return startingVar;
       case EBotSession::State::running:
-        return runningVar;
-      case EBotSession::State::simulating:
-        return simulatingVar;
+        return eSession->getMode() == EBotSession::Mode::simulation ? simulatingVar : runningVar;
+      case EBotSession::State::stopping:
+        return stoppingVar;
       }
       break;
     }

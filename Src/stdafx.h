@@ -9,8 +9,9 @@
 #include "Tools/Entity.h"
 #include "QTabFramework.h"
 
-#include "Markets/DataProtocol.h"
-#include "Bots/BotProtocol.h"
+#include <megucoprotocol.h>
+
+#include "Markets/DataConnection.h"
 
 #include "Entities/EType.h"
 #include "Entities/EBotSessionOrder.h"
@@ -37,9 +38,6 @@
 #include "Entities/EDataTickerData.h"
 #include "Entities/EDataSubscription.h"
 
-#include "Markets/DataConnection.h"
-
-#include "Bots/BotConnection.h"
 #include "Bots/TradeHandler.h"
 #include "Bots/BotDialog.h"
 
@@ -60,7 +58,6 @@
 #include "Models/TradeModel.h"
 #include "Models/LogModel.h"
 
-#include "Bots/BotService.h"
 #include "Markets/DataService.h"
 
 #include "Widgets/MarketsWidget.h"

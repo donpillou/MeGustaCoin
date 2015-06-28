@@ -6,7 +6,7 @@ class OrdersWidget : public QWidget, public Entity::Listener
   Q_OBJECT
 
 public:
-  OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataService& dataService);
+  OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService);
   ~OrdersWidget();
 
   void saveState(QSettings& settings);
@@ -27,7 +27,6 @@ private slots:
 private:
   QTabFramework& tabFramework;
   Entity::Manager& entityManager;
-  BotService& botService;
   DataService& dataService;
 
   MarketOrderModel orderModel;

@@ -7,11 +7,13 @@ public:
   static const EType eType = EType::botMarketAdapter;
 
 public:
-  EBotMarketAdapter(BotProtocol::MarketAdapter& data) : Entity(eType, data.entityId)
+  EBotMarketAdapter(meguco_bot_market_entity& data) : Entity(eType, data.entity.id)
   {
-    name = BotProtocol::getString(data.name);
-    baseCurrency = BotProtocol::getString(data.currencyBase);
-    commCurrency = BotProtocol::getString(data.currencyComm);
+    name = DataConnection::getString(data.entity, sizeof(data), data.name_size);
+    int x = name.indexOf('/');
+    int y = name.indexOf('/', x + 1);
+    baseCurrency = name.mid(x + 1, x + 1 - y);
+    commCurrency = name.mid(y + 1);
   }
 
   const QString& getName() const {return name;}

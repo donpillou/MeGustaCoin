@@ -26,6 +26,7 @@ private:
   QVariant startingVar;
   QVariant runningVar;
   QVariant simulatingVar;
+  QVariant stoppingVar;
 
 public: // QAbstractItemModel
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;

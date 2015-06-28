@@ -8,15 +8,15 @@ public:
 
   enum class Type
   {
-    buy = BotProtocol::Transaction::buy,
-    sell = BotProtocol::Transaction::sell,
+    buy = meguco_user_market_transaction_buy,
+    sell = meguco_user_market_transaction_sell,
   };
 
 public:
-  EBotMarketTransaction(BotProtocol::Transaction& data) : Entity(eType, data.entityId)
+  EBotMarketTransaction(meguco_user_market_transaction_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
-    date = QDateTime::fromMSecsSinceEpoch(data.date);
+    date = QDateTime::fromMSecsSinceEpoch(data.entity.time);
     price = data.price;
     amount = data.amount;
     total = data.total;

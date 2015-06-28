@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataService& dataService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), dataService(dataService), itemModel(entityManager)
+BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), itemModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
   entityManager.registerListener<EBotSession>(*this);
@@ -106,7 +106,7 @@ void BotItemsWidget::submitItem()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSessionItem* eBotSessionItem = (EBotSessionItem*)index.internalPointer();
     if(eBotSessionItem->getState() == EBotSessionItem::State::draft)
-      botService.submitSessionItemDraft(*(EBotSessionItemDraft*)eBotSessionItem);
+      dataService.submitSessionItemDraft(*(EBotSessionItemDraft*)eBotSessionItem);
   }
 }
 
@@ -146,13 +146,13 @@ void BotItemsWidget::cancelItem()
   while(!itemsToCancel.isEmpty())
   {
     QList<EBotSessionItem*>::Iterator last = --itemsToCancel.end();
-    botService.cancelSessionItem(*(EBotSessionItem*)*last);
+    dataService.cancelSessionItem(*(EBotSessionItem*)*last);
     itemsToCancel.erase(last);
   }
   while(!itemsToRemove.isEmpty())
   {
     QList<EBotSessionItem*>::Iterator last = --itemsToRemove.end();
-    botService.removeSessionItemDraft(*(EBotSessionItemDraft*)*last);
+    dataService.removeSessionItemDraft(*(EBotSessionItemDraft*)*last);
     itemsToRemove.erase(last);
   }
 
@@ -180,7 +180,7 @@ void BotItemsWidget::addSessionItemDraft(EBotSessionItem::Type type)
       price = type == EBotSessionItem::Type::buy ? (eDataTickerData->getBid() + 0.01) : (eDataTickerData->getAsk() - 0.01);
   }
 
-  EBotSessionItemDraft& eBotSessionItemDraft = botService.createSessionItemDraft(type, price);
+  EBotSessionItemDraft& eBotSessionItemDraft = dataService.createSessionItemDraft(type, price);
   QModelIndex amountProxyIndex = itemModel.getDraftAmountIndex(eBotSessionItemDraft);
   QModelIndex amountIndex = proxyModel->mapFromSource(amountProxyIndex);
   itemView->setCurrentIndex(amountIndex);
@@ -220,7 +220,7 @@ void BotItemsWidget::itemDataChanged(const QModelIndex& topLeft, const QModelInd
 void BotItemsWidget::editedItemFlipPrice(const QModelIndex& index, double flipPrice)
 {
   EBotSessionItem* eitem = (EBotSessionItem*)index.internalPointer();
-  botService.updateSessionItem(*eitem, flipPrice);
+  dataService.updateSessionItem(*eitem, flipPrice);
 }
 
 void BotItemsWidget::updateToolBarButtons()

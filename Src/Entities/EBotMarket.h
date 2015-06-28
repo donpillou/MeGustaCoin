@@ -9,15 +9,15 @@ public:
 public:
   enum class State
   {
-    stopped = BotProtocol::Market::stopped,
-    starting = BotProtocol::Market::starting,
-    running = BotProtocol::Market::running,
+    stopped = meguco_user_market_stopped,
+    starting = meguco_user_market_starting,
+    running = meguco_user_market_running,
   };
 
 public:
-  EBotMarket(BotProtocol::Market& data) : Entity(eType, data.entityId)
+  EBotMarket(meguco_user_market_entity& data) : Entity(eType, data.entity.id)
   {
-    marketAdapterId = data.marketAdapterId;
+    marketAdapterId = data.bot_market_id;
     state = (State)data.state;
   }
 

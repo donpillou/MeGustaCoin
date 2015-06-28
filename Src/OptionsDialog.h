@@ -11,9 +11,6 @@ private:
   QLineEdit* dataServerEdit;
   QLineEdit* dataUserEdit;
   QLineEdit* dataPasswordEdit;
-  QLineEdit* botServerEdit;
-  QLineEdit* botUserEdit;
-  QLineEdit* botPasswordEdit;
   QPushButton* okButton;
 
   virtual void showEvent(QShowEvent* event);

@@ -6,7 +6,7 @@ class TransactionsWidget : public QWidget, public Entity::Listener
   Q_OBJECT
 
 public:
-  TransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
+  TransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService);
   ~TransactionsWidget();
 
   void saveState(QSettings& settings);
@@ -20,7 +20,7 @@ private slots:
 private:
   QTabFramework& tabFramework;
   Entity::Manager& entityManager;
-  BotService& botService;
+  DataService& dataService;
 
   MarketTransactionModel transactionModel;
 

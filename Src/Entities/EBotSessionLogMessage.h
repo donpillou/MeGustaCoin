@@ -7,10 +7,10 @@ public:
   static const EType eType = EType::botSessionLogMessage;
 
 public:
-  EBotSessionLogMessage(BotProtocol::SessionLogMessage& data) : Entity(eType, data.entityId)
+  EBotSessionLogMessage(meguco_log_entity& data) : Entity(eType, data.entity.id)
   {
-    date = QDateTime::fromMSecsSinceEpoch(data.date);
-    message = BotProtocol::getString(data.message);
+    date = QDateTime::fromMSecsSinceEpoch(data.entity.time);
+    message = DataConnection::getString(data.entity, sizeof(data), data.message_size);
   }
 
   const QDateTime& getDate() const {return date;}

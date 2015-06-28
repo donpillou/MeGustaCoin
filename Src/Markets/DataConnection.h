@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include <megucoprotocol.h>
-
 typedef struct _zlimdb zlimdb;
 
 class DataConnection
@@ -32,6 +30,26 @@ public:
   bool unsubscribe(quint32 channelId);
 
   const QString& getLastError() {return error;}
+
+  static QString getString(const zlimdb_entity& entity, size_t offset, size_t length)
+  {
+    if(offset + length > entity.size)
+      return QString();
+    return QString::fromUtf8((const char*)&entity + offset, length);
+  }
+
+  static void setEntityHeader(zlimdb_entity& entity, uint64_t id, uint64_t time, uint16_t size)
+  {
+    entity.id = id;
+    entity.time = time;
+    entity.size = size;
+  }
+
+  static void setString(zlimdb_entity& entity, uint16_t& length, size_t offset, const QByteArray& str)
+  {
+    length = str.length();
+    qMemCopy((char*)&entity + offset, str.constData(), str.length());
+  }
 
 private:
   zlimdb* zdb;

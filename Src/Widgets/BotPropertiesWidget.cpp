@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-BotPropertiesWidget::BotPropertiesWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), propertyModel(entityManager)
+BotPropertiesWidget::BotPropertiesWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), propertyModel(entityManager)
 {
   setWindowTitle(tr("Bot Properties"));
 
@@ -61,12 +61,12 @@ void BotPropertiesWidget::saveState(QSettings& settings)
 void BotPropertiesWidget::editedProperty(const QModelIndex& index, const QString& value)
 {
   EBotSessionProperty* eProperty = (EBotSessionProperty*)index.internalPointer();
-  botService.updateSessionProperty(*eProperty, value);
+  dataService.updateSessionProperty(*eProperty, value);
 }
 
 void BotPropertiesWidget::editedProperty(const QModelIndex& index, double value)
 {
   EBotSessionProperty* eProperty = (EBotSessionProperty*)index.internalPointer();
-  botService.updateSessionProperty(*eProperty, QString::number(value));
+  dataService.updateSessionProperty(*eProperty, QString::number(value));
 }
 

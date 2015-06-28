@@ -10,33 +10,33 @@ public:
 
   enum class Type
   {
-    buy = BotProtocol::SessionAsset::buy,
-    sell = BotProtocol::SessionAsset::sell,
+    buy = meguco_user_session_asset_buy,
+    sell = meguco_user_session_asset_sell,
   };
 
   enum class State
   {
-    waitBuy = BotProtocol::SessionAsset::waitBuy,
-    buying = BotProtocol::SessionAsset::buying,
-    waitSell = BotProtocol::SessionAsset::waitSell,
-    selling = BotProtocol::SessionAsset::selling,
+    waitBuy = meguco_user_session_asset_wait_buy,
+    buying = meguco_user_session_asset_buying,
+    waitSell = meguco_user_session_asset_wait_sell,
+    selling = meguco_user_session_asset_selling,
     draft,
   };
 
 public:
-  EBotSessionItem(BotProtocol::SessionAsset& data) : Entity(eType, data.entityId)
+  EBotSessionItem(meguco_user_session_asset_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     state = (State)data.state;
     date = QDateTime::fromMSecsSinceEpoch(data.date);
     price = data.price;
-    investComm = data.investComm;
-    investBase = data.investBase;
-    balanceComm = data.balanceComm;
-    balanceBase = data.balanceBase;
-    profitablePrice = data.profitablePrice;
-    flipPrice = data.flipPrice;
-    orderId = data.orderId;
+    investComm = data.invest_comm;
+    investBase = data.invest_base;
+    balanceComm = data.balance_comm;
+    balanceBase = data.balance_base;
+    profitablePrice = data.profitable_price;
+    flipPrice = data.flip_price;
+    orderId = data.order_id;
   }
   EBotSessionItem(quint32 id, const EBotSessionItemDraft& sessionItem);
 

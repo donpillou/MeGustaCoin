@@ -6,7 +6,7 @@ class BotItemsWidget : public QWidget, public Entity::Listener
   Q_OBJECT
 
 public:
-  BotItemsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataService& dataService);
+  BotItemsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService);
   ~BotItemsWidget();
 
   void saveState(QSettings& settings);
@@ -23,7 +23,6 @@ private slots:
 private:
   QTabFramework& tabFramework;
   Entity::Manager& entityManager;
-  BotService& botService;
   DataService& dataService;
 
   SessionItemModel itemModel;

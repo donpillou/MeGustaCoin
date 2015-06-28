@@ -11,11 +11,6 @@ OptionsDialog::OptionsDialog(QWidget* parent, QSettings* settings) : QDialog(par
   dataPasswordEdit = new QLineEdit;
   dataPasswordEdit->setEchoMode(QLineEdit::Password);
 
-  botServerEdit = new QLineEdit;
-  botUserEdit = new QLineEdit;
-  botUserEdit->setEchoMode(QLineEdit::PasswordEchoOnEdit);
-  botPasswordEdit = new QLineEdit;
-  botPasswordEdit->setEchoMode(QLineEdit::Password);
 
   QGridLayout* dataLayout = new QGridLayout;
   dataLayout->addWidget(new QLabel(tr("Address:")), 0, 0);
@@ -25,19 +20,8 @@ OptionsDialog::OptionsDialog(QWidget* parent, QSettings* settings) : QDialog(par
   dataLayout->addWidget(new QLabel(tr("Password:")), 2, 0);
   dataLayout->addWidget(dataPasswordEdit, 2, 1);
 
-  QGridLayout* botLayout = new QGridLayout;
-  botLayout->addWidget(new QLabel(tr("Address:")), 0, 0);
-  botLayout->addWidget(botServerEdit, 0, 1);
-  botLayout->addWidget(new QLabel(tr("User:")), 1, 0);
-  botLayout->addWidget(botUserEdit, 1, 1);
-  botLayout->addWidget(new QLabel(tr("Password:")), 2, 0);
-  botLayout->addWidget(botPasswordEdit, 2, 1);
-
   QGroupBox* dataGroupBox = new QGroupBox(tr("ZlimDB Server"));
   dataGroupBox->setLayout(dataLayout);
-
-  QGroupBox* botGroupBox = new QGroupBox(tr("MegucoBot Server"));
-  botGroupBox->setLayout(botLayout);
 
   QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
   connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
@@ -46,7 +30,6 @@ OptionsDialog::OptionsDialog(QWidget* parent, QSettings* settings) : QDialog(par
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->addWidget(dataGroupBox);
-  layout->addWidget(botGroupBox);
   layout->addWidget(buttonBox);
 
   setLayout(layout);
@@ -56,11 +39,6 @@ OptionsDialog::OptionsDialog(QWidget* parent, QSettings* settings) : QDialog(par
   dataServerEdit->setText(settings->value("Address", "127.0.0.1:13211").toString());
   dataUserEdit->setText(settings->value("User").toString());
   dataPasswordEdit->setText(settings->value("Password").toString());
-  settings->endGroup();
-  settings->beginGroup("BotServer");
-  botServerEdit->setText(settings->value("Address", "127.0.0.1:40124").toString());
-  botUserEdit->setText(settings->value("User").toString());
-  botPasswordEdit->setText(settings->value("Password").toString());
   settings->endGroup();
 }
 
@@ -80,11 +58,6 @@ void OptionsDialog::accept()
   settings->setValue("Address", dataServerEdit->text());
   settings->setValue("User", dataUserEdit->text());
   settings->setValue("Password", dataPasswordEdit->text());
-  settings->endGroup();
-  settings->beginGroup("BotServer");
-  settings->setValue("Address", botServerEdit->text());
-  settings->setValue("User", botUserEdit->text());
-  settings->setValue("Password", botPasswordEdit->text());
   settings->endGroup();
   settings->sync();
 }

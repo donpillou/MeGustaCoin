@@ -6,7 +6,7 @@ class BotPropertiesWidget : public QWidget
   Q_OBJECT
 
 public:
-  BotPropertiesWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService);
+  BotPropertiesWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService);
 
   void saveState(QSettings& settings);
 
@@ -17,7 +17,7 @@ private slots:
 private:
   QTabFramework& tabFramework;
   Entity::Manager& entityManager;
-  BotService& botService;
+  DataService& dataService;
 
   SessionPropertyModel propertyModel;
 

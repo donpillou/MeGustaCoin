@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), botMarketModel(entityManager), selectedMarketId(0)
+MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), botMarketModel(entityManager), selectedMarketId(0)
 {
   entityManager.registerListener<EBotService>(*this);
 
@@ -74,7 +74,7 @@ void MarketsWidget::addMarket()
   if(marketDialog.exec() != QDialog::Accepted)
     return;
 
-  botService.createMarket(marketDialog.getMarketAdapterId(),  marketDialog.getUserName(), marketDialog.getKey(), marketDialog.getSecret());
+  dataService.createMarket(marketDialog.getMarketAdapterId(),  marketDialog.getUserName(), marketDialog.getKey(), marketDialog.getSecret());
 }
 
 void MarketsWidget::editMarket()
@@ -91,7 +91,7 @@ void MarketsWidget::removeMarket()
   {
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotMarket* eBotMarket = (EBotMarket*)index.internalPointer();
-    botService.removeMarket(eBotMarket->getId());
+    dataService.removeMarket(eBotMarket->getId());
   }
 }
 
@@ -139,7 +139,7 @@ void MarketsWidget::marketSelectionChanged()
 {
   updateSelection();
   if(!selection.isEmpty())
-    botService.selectMarket((*selection.begin())->getId());
+    dataService.selectMarket((*selection.begin())->getId());
 }
 
 void MarketsWidget::marketDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)

@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService, DataService& dataService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), botService(botService), dataService(dataService), orderModel(entityManager)
+OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), orderModel(entityManager)
 {
   entityManager.registerListener<EBotService>(*this);
 
@@ -132,7 +132,7 @@ void OrdersWidget::addOrderDraft(EBotMarketOrder::Type type)
       price = type == EBotMarketOrder::Type::buy ? (eDataTickerData->getBid() + 0.01) : (eDataTickerData->getAsk() - 0.01);
   }
 
-  EBotMarketOrderDraft& eBotMarketOrderDraft = botService.createMarketOrderDraft(type, price);
+  EBotMarketOrderDraft& eBotMarketOrderDraft = dataService.createMarketOrderDraft(type, price);
   QModelIndex amountProxyIndex = orderModel.getDraftAmountIndex(eBotMarketOrderDraft);
   QModelIndex amountIndex = proxyModel->mapFromSource(amountProxyIndex);
   orderView->setCurrentIndex(amountIndex);
@@ -147,7 +147,7 @@ void OrdersWidget::submitOrder()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
     if(eBotMarketOrder->getState() == EBotMarketOrder::State::draft)
-      botService.submitMarketOrderDraft(*(EBotMarketOrderDraft*)eBotMarketOrder);
+      dataService.submitMarketOrderDraft(*(EBotMarketOrderDraft*)eBotMarketOrder);
   }
 }
 
@@ -177,13 +177,13 @@ void OrdersWidget::cancelOrder()
   while(!ordersToCancel.isEmpty())
   {
     QList<EBotMarketOrder*>::Iterator last = --ordersToCancel.end();
-    botService.cancelMarketOrder(*(EBotMarketOrder*)*last);
+    dataService.cancelMarketOrder(*(EBotMarketOrder*)*last);
     ordersToCancel.erase(last);
   }
   while(!ordersToRemove.isEmpty())
   {
     QList<EBotMarketOrder*>::Iterator last = --ordersToRemove.end();
-    botService.removeMarketOrderDraft(*(EBotMarketOrderDraft*)*last);
+    dataService.removeMarketOrderDraft(*(EBotMarketOrderDraft*)*last);
     ordersToRemove.erase(last);
   }
 }
@@ -191,13 +191,13 @@ void OrdersWidget::cancelOrder()
 void OrdersWidget::editedOrderPrice(const QModelIndex& index, double price)
 {
   EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
-  botService.updateMarketOrder(*eBotMarketOrder, price, eBotMarketOrder->getAmount());
+  dataService.updateMarketOrder(*eBotMarketOrder, price, eBotMarketOrder->getAmount());
 }
 
 void OrdersWidget::editedOrderAmount(const QModelIndex& index, double amount)
 {
   EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
-  botService.updateMarketOrder(*eBotMarketOrder, eBotMarketOrder->getPrice(), amount);
+  dataService.updateMarketOrder(*eBotMarketOrder, eBotMarketOrder->getPrice(), amount);
 }
 
 void OrdersWidget::orderSelectionChanged()
@@ -257,8 +257,8 @@ void OrdersWidget::updateToolBarButtons()
 
 void OrdersWidget::refresh()
 {
-  botService.refreshMarketOrders();
-  botService.refreshMarketBalance();
+  dataService.refreshMarketOrders();
+  dataService.refreshMarketBalance();
 }
 
 void OrdersWidget::updateTitle(EBotService& eBotService)

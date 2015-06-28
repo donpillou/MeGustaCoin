@@ -16,6 +16,34 @@ public:
   void unsubscribe(const QString& channel);
   Entity::Manager* getSubscription(const QString& channel);
 
+  void createMarket(quint32 marketAdapterId, const QString& userName, const QString& key, const QString& secret);
+  void removeMarket(quint32 id);
+  void selectMarket(quint32 id);
+  void refreshMarketOrders();
+  void refreshMarketTransactions();
+  void refreshMarketBalance();
+
+  EBotMarketOrderDraft& createMarketOrderDraft(EBotMarketOrder::Type type, double price);
+  void submitMarketOrderDraft(EBotMarketOrderDraft& draft);
+  void cancelMarketOrder(EBotMarketOrder& order);
+  void updateMarketOrder(EBotMarketOrder& order, double price, double amount);
+  void removeMarketOrderDraft(EBotMarketOrderDraft& draft);
+
+  void createSession(const QString& name, quint32 engineId, quint32 marketId);
+  void removeSession(quint32 id);
+  void stopSession(quint32 id);
+  void startSessionSimulation(quint32 id);
+  void startSession(quint32 id);
+  void selectSession(quint32 id);
+
+  EBotSessionItemDraft& createSessionItemDraft(EBotSessionItem::Type type, double flipPrice);
+  void submitSessionItemDraft(EBotSessionItemDraft& draft);
+  void updateSessionItem(EBotSessionItem& item, double flipPrice);
+  void cancelSessionItem(EBotSessionItem& item);
+  void removeSessionItemDraft(EBotSessionItemDraft& draft);
+
+  void updateSessionProperty(EBotSessionProperty& property, const QString& value);
+
 private:
   class WorkerThread;
 

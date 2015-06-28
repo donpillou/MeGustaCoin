@@ -9,24 +9,24 @@ public:
 public:
   enum class Type
   {
-    number = BotProtocol::SessionProperty::number,
-    string = BotProtocol::SessionProperty::string,
+    number = meguco_user_session_property_number,
+    string = meguco_user_session_property_string,
   };
 
   enum Flag
   {
-    none = BotProtocol::SessionProperty::none,
-    readOnly = BotProtocol::SessionProperty::readOnly,
+    none = meguco_user_session_property_none,
+    readOnly = meguco_user_session_property_read_only,
   };
 
 public:
-  EBotSessionProperty(BotProtocol::SessionProperty& data) : Entity(eType, data.entityId)
+  EBotSessionProperty(meguco_user_session_property_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     flags = data.flags;
-    name = BotProtocol::getString(data.name);
-    value = BotProtocol::getString(data.value);
-    unit = BotProtocol::getString(data.unit);
+    name = DataConnection::getString(data.entity, sizeof(data), data.name_size);
+    value = DataConnection::getString(data.entity, sizeof(data) + data.name_size, data.value_size);
+    unit = DataConnection::getString(data.entity, sizeof(data) + data.name_size + data.value_size, data.unit_size);
   }
 
   Type getType() const {return type;}

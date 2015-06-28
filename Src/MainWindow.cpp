@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "Meguco", "MegucoClientZ"),
-  dataService(globalEntityManager), botService(globalEntityManager)
+  dataService(globalEntityManager)
 {
   globalEntityManager.delegateEntity(*new EBotService);
   globalEntityManager.delegateEntity(*new EDataService);
@@ -12,15 +12,15 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
   connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
 
-  marketsWidget = new MarketsWidget(*this, settings, globalEntityManager, botService);
-  ordersWidget = new OrdersWidget(*this, settings, globalEntityManager, botService, dataService);
-  transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, botService);
+  marketsWidget = new MarketsWidget(*this, settings, globalEntityManager, dataService);
+  ordersWidget = new OrdersWidget(*this, settings, globalEntityManager, dataService);
+  transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, dataService);
   //graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
-  botSessionsWidget = new BotSessionsWidget(*this, settings, globalEntityManager, botService);
+  botSessionsWidget = new BotSessionsWidget(*this, settings, globalEntityManager, dataService);
   botTransactionsWidget = new BotTransactionsWidget(*this, settings, globalEntityManager);
-  botItemsWidget = new BotItemsWidget(*this, settings, globalEntityManager, botService, dataService);
+  botItemsWidget = new BotItemsWidget(*this, settings, globalEntityManager, dataService);
   botOrdersWidget = new BotOrdersWidget(*this, settings, globalEntityManager);
-  botPropertiesWidget = new BotPropertiesWidget(*this, settings, globalEntityManager, botService);
+  botPropertiesWidget = new BotPropertiesWidget(*this, settings, globalEntityManager, dataService);
   botLogWidget = new BotLogWidget(*this, settings, globalEntityManager);
   logWidget = new LogWidget(this, settings, globalEntityManager);
 
@@ -82,7 +82,6 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   //restoreState(settings.value("WindowState").toByteArray());
 
   startDataService();
-  startBotService();
   graphService.start();
 }
 
@@ -92,7 +91,6 @@ MainWindow::~MainWindow()
   globalEntityManager.unregisterListener<EBotService>(*this);
 
   dataService.stop();
-  botService.stop();
   graphService.stop();
 
   //qDeleteAll(channelGraphModels);
@@ -105,16 +103,6 @@ void MainWindow::startDataService()
   QString userName = settings.value("User").toString();
   QString password = settings.value("Password").toString();
   dataService.start(dataServer, userName, password);
-  settings.endGroup();
-}
-
-void MainWindow::startBotService()
-{
-  settings.beginGroup("BotServer");
-  QString botServer = settings.value("Address", "127.0.0.1:40124").toString();
-  QString botUser = settings.value("User").toString();
-  QString botPassword = settings.value("Password").toString();
-  botService.start(botServer, botUser, botPassword);
   settings.endGroup();
 }
 
@@ -351,7 +339,6 @@ void MainWindow::showOptions()
     return;
 
   startDataService();
-  startBotService();
 }
 
 void MainWindow::about()

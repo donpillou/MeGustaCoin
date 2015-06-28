@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 
-BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, BotService& botService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  botService(botService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager), selectedSessionId(0)
+BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  dataService(dataService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager), selectedSessionId(0)
 {
   entityManager.registerListener<EBotService>(*this);
 
@@ -84,7 +84,7 @@ void BotSessionsWidget::addBot()
   if(botDialog.exec() != QDialog::Accepted)
     return;
   
-  botService.createSession(botDialog.getName(), botDialog.getEngineId(), botDialog.getMarketId());
+  dataService.createSession(botDialog.getName(), botDialog.getEngineId(), botDialog.getMarketId());
 }
 
 void BotSessionsWidget::cancelBot()
@@ -98,10 +98,10 @@ void BotSessionsWidget::cancelBot()
     {
       if(QMessageBox::question(this, tr("Delete Session"), tr("Do you really want to delete the selected session?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
           return;
-      botService.removeSession(eSession->getId());
+      dataService.removeSession(eSession->getId());
     }
     else
-      botService.stopSession(eSession->getId());
+      dataService.stopSession(eSession->getId());
   }
 }
 
@@ -113,7 +113,7 @@ void BotSessionsWidget::activate()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
     if(eSession->getState() == EBotSession::State::stopped)
-      botService.startSession(eSession->getId());
+      dataService.startSession(eSession->getId());
   }
 }
 
@@ -125,7 +125,7 @@ void BotSessionsWidget::simulate()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
     if(eSession->getState() == EBotSession::State::stopped)
-      botService.startSessionSimulation(eSession->getId());
+      dataService.startSessionSimulation(eSession->getId());
   }
 }
 
@@ -137,7 +137,7 @@ void BotSessionsWidget::optimize()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
     if(eSession->getState() == EBotSession::State::stopped)
-      botService.startSession(eSession->getId());
+      dataService.startSession(eSession->getId());
   }
 }
 
@@ -194,7 +194,7 @@ void BotSessionsWidget::sessionSelectionChanged()
 {
   updateSelection();
   if(!selection.isEmpty())
-    botService.selectSession((*selection.begin())->getId());
+    dataService.selectSession((*selection.begin())->getId());
 }
 
 void BotSessionsWidget::sessionDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)

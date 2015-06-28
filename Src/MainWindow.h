@@ -28,7 +28,6 @@ private:
 
   Entity::Manager globalEntityManager;
   DataService dataService;
-  BotService botService;
   GraphService graphService;
   QString selectedChannelName;
 
@@ -53,7 +52,6 @@ private:
 
 private:
   void startDataService();
-  void startBotService();
   void createChannelData(const QString& channelName, const QString& currencyBase, const QString currencyComm);
   ChannelData* getChannelData(const QString& channelName);
   void updateChannelSubscription(ChannelData& channelData, bool enable);
