@@ -76,6 +76,7 @@ targets = {
         "/usr/include/qt4/QtGui",
         "/usr/include/qt4"
       }
+      cppFlags += "-Wno-parentheses"
     }
     
     if(tool == "vcxproj") {

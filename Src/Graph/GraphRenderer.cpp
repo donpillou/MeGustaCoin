@@ -69,7 +69,7 @@ void GraphRenderer::addTradeData(const QList<EDataTradeData::Trade>& data)
     }
 
     qint64 tradeAge = now - trade.time;
-    if(tradeAge < 24ULL * 60ULL * 60ULL * 1000ULL)
+    if(tradeAge < 24LL * 60LL * 60LL * 1000LL)
     {
       tradeHandler.add(trade, tradeAge);
 
