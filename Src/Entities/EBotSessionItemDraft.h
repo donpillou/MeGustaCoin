@@ -7,7 +7,7 @@ public:
   static const EType eType = EType::botSessionItemDraft;
 
 public:
-  EBotSessionItemDraft(quint32 id, Type type, const QDateTime& date, double flipPrice) : EBotSessionItem(eType, id)
+  EBotSessionItemDraft(quint64 id, Type type, const QDateTime& date, double flipPrice) : EBotSessionItem(eType, id)
   {
     this->type = type;
     this->state = State::draft;

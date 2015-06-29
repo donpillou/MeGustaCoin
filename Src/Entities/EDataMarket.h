@@ -7,7 +7,7 @@ public:
   static const EType eType = EType::dataMarket;
 
 public:
-  EDataMarket(quint32 entityId, const QString& name, const QString& baseCurrency, const QString& commCurrency) : Entity(eType, entityId)
+  EDataMarket(quint64 entityId, const QString& name, const QString& baseCurrency, const QString& commCurrency) : Entity(eType, entityId)
   {
     this->name = name;
     this->baseCurrency = baseCurrency;

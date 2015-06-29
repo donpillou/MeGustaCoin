@@ -47,7 +47,7 @@ public:
 
   static void setString(zlimdb_entity& entity, uint16_t& length, size_t offset, const QByteArray& str)
   {
-    length = str.length();
+    length = (uint16_t)str.length();
     qMemCopy((char*)&entity + offset, str.constData(), str.length());
   }
 

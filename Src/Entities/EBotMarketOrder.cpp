@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-EBotMarketOrder::EBotMarketOrder(quint32 id, const EBotMarketOrderDraft& order) : Entity(eType, id)
+EBotMarketOrder::EBotMarketOrder(quint64 id, const EBotMarketOrderDraft& order) : Entity(eType, id)
 {
   type = order.getType();
   date = order.getDate();

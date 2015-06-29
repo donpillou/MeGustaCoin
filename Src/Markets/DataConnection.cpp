@@ -68,7 +68,6 @@ bool DataConnection::process()
       default:
         return error = getZlimDbError(), false;
       }
-  return true;
 }
 
 QString DataConnection::getZlimDbError()
@@ -86,7 +85,7 @@ QString DataConnection::getZlimDbError()
           MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
           (LPTSTR) errorMessage,
           256, NULL );
-    Q_ASSERT(len >= 0 && len <= 256);
+    Q_ASSERT(len <= 256);
     while(len > 0 && isspace(errorMessage[len - 1]))
       --len;
     errorMessage[len] = '\0';

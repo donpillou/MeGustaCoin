@@ -32,15 +32,15 @@ public:
   }
 
   const QString& getName() const {return name;}
-  quint32 getEngineId() const {return botEngineId;}
-  quint32 getMarketId() const {return marketId;}
+  quint64 getEngineId() const {return botEngineId;}
+  quint64 getMarketId() const {return marketId;}
   State getState() const {return state;}
   Mode getMode() const {return mode;}
 
 private:
   QString name;
-  quint32 botEngineId;
-  quint32 marketId;
+  quint64 botEngineId;
+  quint64 marketId;
   State state;
   Mode mode;
 };

@@ -37,7 +37,7 @@ public:
     fee = qAbs(total - price * amount);
     state = State::open;
   }
-  EBotMarketOrder(quint32 id, const EBotMarketOrderDraft& order);
+  EBotMarketOrder(quint64 id, const EBotMarketOrderDraft& order);
 
   Type getType() const {return type;}
   const QDateTime& getDate() const {return date;}
@@ -61,7 +61,7 @@ public:
   void setState(State state) {this->state = state;}
 
 protected:
-  EBotMarketOrder(EType type, quint32 id) : Entity(type, id) {}
+  EBotMarketOrder(EType type, quint64 id) : Entity(type, id) {}
 
 protected:
   Type type;

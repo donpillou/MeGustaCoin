@@ -20,11 +20,11 @@ public:
   State getState() const {return state;}
   void setState(State state) {this->state = state;}
 
-  quint32 getSelectedSessionId() const {return selectedSessionId;}
-  void setSelectedSessionId(quint32 id) {selectedSessionId = id;}
+  quint64 getSelectedSessionId() const {return selectedSessionId;}
+  void setSelectedSessionId(quint64 id) {selectedSessionId = id;}
 
-  quint32 getSelectedMarketId() const {return selectedMarketId;}
-  void setSelectedMarketId(quint32 id) {selectedMarketId = id;}
+  quint64 getSelectedMarketId() const {return selectedMarketId;}
+  void setSelectedMarketId(quint64 id) {selectedMarketId = id;}
 
   bool getLoadingMarketOrders() const {return loadingMarketOrders;};
   void setLoadingMarketOrders(bool loading) {loadingMarketOrders = loading;}
@@ -54,8 +54,8 @@ public:
 
 private:
   State state;
-  quint32 selectedSessionId;
-  quint32 selectedMarketId;
+  quint64 selectedSessionId;
+  quint64 selectedMarketId;
   bool loadingMarketOrders;
   bool loadingMarketTransactions;
 };

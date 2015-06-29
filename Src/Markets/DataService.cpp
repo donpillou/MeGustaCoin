@@ -500,14 +500,14 @@ void DataService::WorkerThread::receivedTicker(quint32 channelId, const meguco_t
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
 }
 
-void DataService::createMarket(quint32 marketAdapterId, const QString& userName, const QString& key, const QString& secret)
+void DataService::createMarket(quint64 marketAdapterId, const QString& userName, const QString& key, const QString& secret)
 {
   class CreateMarketJob : public Job
   {
   public:
-    CreateMarketJob(quint32 marketAdapterId, const QString& userName, const QString& key, const QString& secret) : marketAdapterId(marketAdapterId), userName(userName), key(key), secret(secret) {}
+    CreateMarketJob(quint64 marketAdapterId, const QString& userName, const QString& key, const QString& secret) : marketAdapterId(marketAdapterId), userName(userName), key(key), secret(secret) {}
   private:
-    quint32 marketAdapterId;
+    quint64 marketAdapterId;
     QString userName;
     QString key;
     QString secret;
@@ -542,8 +542,8 @@ void DataService::createMarket(quint32 marketAdapterId, const QString& userName,
   //createEntity(data);
 }
 
-void DataService::removeMarket(quint32 id) {/*todo*/}
-void DataService::selectMarket(quint32 id) {/*todo*/}
+void DataService::removeMarket(quint64 id) {/*todo*/}
+void DataService::selectMarket(quint64 id) {/*todo*/}
 void DataService::refreshMarketOrders() {/*todo*/}
 void DataService::refreshMarketTransactions() {/*todo*/}
 void DataService::refreshMarketBalance() {/*todo*/}
@@ -554,12 +554,12 @@ void DataService::cancelMarketOrder(EBotMarketOrder& order) {/*todo*/}
 void DataService::updateMarketOrder(EBotMarketOrder& order, double price, double amount) {/*todo*/}
 void DataService::removeMarketOrderDraft(EBotMarketOrderDraft& draft) {/*todo*/}
 
-void DataService::createSession(const QString& name, quint32 engineId, quint32 marketId) {/*todo*/}
-void DataService::removeSession(quint32 id) {/*todo*/}
-void DataService::stopSession(quint32 id) {/*todo*/}
-void DataService::startSessionSimulation(quint32 id) {/*todo*/}
-void DataService::startSession(quint32 id) {/*todo*/}
-void DataService::selectSession(quint32 id) {/*todo*/}
+void DataService::createSession(const QString& name, quint64 engineId, quint64 marketId) {/*todo*/}
+void DataService::removeSession(quint64 id) {/*todo*/}
+void DataService::stopSession(quint64 id) {/*todo*/}
+void DataService::startSessionSimulation(quint64 id) {/*todo*/}
+void DataService::startSession(quint64 id) {/*todo*/}
+void DataService::selectSession(quint64 id) {/*todo*/}
 
 EBotSessionItemDraft& DataService::createSessionItemDraft(EBotSessionItem::Type type, double flipPrice) {/*todo*/return *(EBotSessionItemDraft*)0;}
 void DataService::submitSessionItemDraft(EBotSessionItemDraft& draft) {/*todo*/}

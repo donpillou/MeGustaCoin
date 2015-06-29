@@ -8,7 +8,7 @@ class MarketDialog : public QDialog
 public:
   MarketDialog(QWidget* parent, Entity::Manager& entityManager);
 
-  quint32 getMarketAdapterId() const;
+  quint64 getMarketAdapterId() const;
   QString getUserName() const {return userEdit->text();}
   QString getKey() const {return keyEdit->text();}
   QString getSecret() const {return secretEdit->text();}

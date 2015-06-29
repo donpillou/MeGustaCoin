@@ -21,11 +21,11 @@ public:
     state = (State)data.state;
   }
 
-  quint32 getMarketAdapterId() const {return marketAdapterId;}
+  quint64 getMarketAdapterId() const {return marketAdapterId;}
   State getState() const {return state;}
 
 private:
-  quint32 marketAdapterId;
+  quint64 marketAdapterId;
   State state;
 };
 

@@ -38,7 +38,7 @@ public:
     flipPrice = data.flip_price;
     orderId = data.order_id;
   }
-  EBotSessionItem(quint32 id, const EBotSessionItemDraft& sessionItem);
+  EBotSessionItem(quint64 id, const EBotSessionItemDraft& sessionItem);
 
   Type getType() const {return type;}
   State getState() const {return state;}
@@ -54,10 +54,10 @@ public:
   double getProfitablePrice() const {return profitablePrice;}
   double getFlipPrice() const {return flipPrice;}
   void setFlipPrice(double flipPrice) {this->flipPrice = flipPrice;}
-  quint32 getOrderId() const {return orderId;}
+  quint64 getOrderId() const {return orderId;}
 
 protected:
-  EBotSessionItem(EType type, quint32 id) : Entity(type, id) {}
+  EBotSessionItem(EType type, quint64 id) : Entity(type, id) {}
 
 protected:
   Type type;
@@ -70,5 +70,5 @@ protected:
   double balanceBase; // >= 0
   double profitablePrice;
   double flipPrice;
-  quint32 orderId;
+  quint64 orderId;
 };

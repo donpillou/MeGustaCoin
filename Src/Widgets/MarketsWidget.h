@@ -22,7 +22,7 @@ private:
   QSortFilterProxyModel* proxyModel;
 
   QSet<EBotMarket*> selection;
-  quint32 selectedMarketId;
+  quint64 selectedMarketId;
 
   QAction* addAction;
   QAction* editAction;

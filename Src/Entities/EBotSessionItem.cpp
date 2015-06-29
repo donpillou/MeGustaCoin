@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-EBotSessionItem::EBotSessionItem(quint32 id, const EBotSessionItemDraft& sessionItem) : Entity(eType, id)
+EBotSessionItem::EBotSessionItem(quint64 id, const EBotSessionItemDraft& sessionItem) : Entity(eType, id)
 {
   type = sessionItem.getType();
   state = sessionItem.getState();

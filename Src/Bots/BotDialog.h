@@ -9,8 +9,8 @@ public:
   BotDialog(QWidget* parent, Entity::Manager& entityManager);
 
   QString getName() const {return nameEdit->text();}
-  quint32 getEngineId() const;
-  quint32 getMarketId() const;
+  quint64 getEngineId() const;
+  quint64 getMarketId() const;
   //double getBalanceBase() const {return balanceBaseSpinBox->value();}
   //double getBalanceComm() const {return balanceCommSpinBox->value();}
 

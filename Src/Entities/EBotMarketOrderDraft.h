@@ -7,7 +7,7 @@ public:
   static const EType eType = EType::botMarketOrderDraft;
 
 public:
-  EBotMarketOrderDraft(quint32 id, Type type, const QDateTime& date, double price) : EBotMarketOrder(eType, id)
+  EBotMarketOrderDraft(quint64 id, Type type, const QDateTime& date, double price) : EBotMarketOrder(eType, id)
   {
     this->type = type;
     this->date = date;
@@ -17,7 +17,7 @@ public:
     this->total = 0.;
     this->state = State::draft;
   }
-  EBotMarketOrderDraft(quint32 id, const EBotMarketOrder& order) : EBotMarketOrder(eType, id)
+  EBotMarketOrderDraft(quint64 id, const EBotMarketOrder& order) : EBotMarketOrder(eType, id)
   {
     type = order.getType();
     date = order.getDate();

@@ -50,7 +50,7 @@ MarketDialog::MarketDialog(QWidget* parent, Entity::Manager& entityManager) : QD
   setLayout(layout);
 }
 
-quint32 MarketDialog::getMarketAdapterId() const
+quint64 MarketDialog::getMarketAdapterId() const
 {
   int index = marketComboBox->currentIndex();
   if(index >= 0)

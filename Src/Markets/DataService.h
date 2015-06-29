@@ -16,9 +16,9 @@ public:
   void unsubscribe(const QString& channel);
   Entity::Manager* getSubscription(const QString& channel);
 
-  void createMarket(quint32 marketAdapterId, const QString& userName, const QString& key, const QString& secret);
-  void removeMarket(quint32 id);
-  void selectMarket(quint32 id);
+  void createMarket(quint64 marketAdapterId, const QString& userName, const QString& key, const QString& secret);
+  void removeMarket(quint64 id);
+  void selectMarket(quint64 id);
   void refreshMarketOrders();
   void refreshMarketTransactions();
   void refreshMarketBalance();
@@ -29,12 +29,12 @@ public:
   void updateMarketOrder(EBotMarketOrder& order, double price, double amount);
   void removeMarketOrderDraft(EBotMarketOrderDraft& draft);
 
-  void createSession(const QString& name, quint32 engineId, quint32 marketId);
-  void removeSession(quint32 id);
-  void stopSession(quint32 id);
-  void startSessionSimulation(quint32 id);
-  void startSession(quint32 id);
-  void selectSession(quint32 id);
+  void createSession(const QString& name, quint64 engineId, quint64 marketId);
+  void removeSession(quint64 id);
+  void stopSession(quint64 id);
+  void startSessionSimulation(quint64 id);
+  void startSession(quint64 id);
+  void selectSession(quint64 id);
 
   EBotSessionItemDraft& createSessionItemDraft(EBotSessionItem::Type type, double flipPrice);
   void submitSessionItemDraft(EBotSessionItemDraft& draft);

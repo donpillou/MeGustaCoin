@@ -36,7 +36,7 @@ private:
   QSortFilterProxyModel* proxyModel;
 
   QSet<EBotSession*> selection;
-  quint32 selectedSessionId;
+  quint64 selectedSessionId;
 
   QAction* addAction;
   QAction* optimizeAction;

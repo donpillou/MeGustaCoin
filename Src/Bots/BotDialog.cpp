@@ -62,19 +62,19 @@ BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(
   setLayout(layout);
 }
 
-quint32 BotDialog::getEngineId() const
+quint64 BotDialog::getEngineId() const
 {
   int index = engineComboBox->currentIndex();
   if(index >= 0)
-    return engineComboBox->itemData(index).toUInt();
+    return engineComboBox->itemData(index).toULongLong();
   return 0;
 }
 
-quint32 BotDialog::getMarketId() const
+quint64 BotDialog::getMarketId() const
 {
   int index = marketComboBox->currentIndex();
   if(index >= 0)
-    return marketComboBox->itemData(index).toUInt();
+    return marketComboBox->itemData(index).toULongLong();
   return 0;
 }
 
