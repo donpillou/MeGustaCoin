@@ -18,7 +18,7 @@ public:
   };
 
 public:
-  EBotSessionMarker(meguco_user_session_marker_entity& data) : Entity(eType, data.entity.id)
+  EBotSessionMarker(const meguco_user_session_marker_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     date = data.entity.time;

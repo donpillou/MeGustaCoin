@@ -7,9 +7,9 @@ public:
   static const EType eType = EType::botMarketAdapter;
 
 public:
-  EBotMarketAdapter(meguco_bot_market_entity& data) : Entity(eType, data.entity.id)
+  EBotMarketAdapter(const meguco_bot_market_entity& data) : Entity(eType, data.entity.id)
   {
-    name = DataConnection::getString(data.entity, sizeof(data), data.name_size);
+    DataConnection::getString(data.entity, sizeof(data), data.name_size, name);
     int x = name.indexOf('/');
     int y = name.indexOf('/', x + 1);
     baseCurrency = name.mid(x + 1, x + 1 - y);

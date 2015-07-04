@@ -37,6 +37,22 @@ public:
     return QString();
   }
 
+  quint32 getSelectedSessionId() const {return selectedSessionId;}
+  void setSelectedSessionId(quint32 id) {selectedSessionId = id;}
+
+  quint32 getSelectedBrokerId() const {return selectedBrokerId;}
+  void setSelectedBrokerId(quint32 id) {selectedBrokerId = id;}
+
+  bool getLoadingBrokerOrders() const {return loadingMarketOrders;};
+  void setLoadingBrokerOrders(bool loading) {loadingMarketOrders = loading;}
+
+  bool getLoadingBrokerTransactions() const {return loadingMarketTransactions;}
+  void setLoadingBrokerTransactions(bool loading) {loadingMarketTransactions = loading;}
+
 private:
   State state;
+  quint32 selectedSessionId;
+  quint32 selectedBrokerId;
+  bool loadingMarketOrders;
+  bool loadingMarketTransactions;
 };

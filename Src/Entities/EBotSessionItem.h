@@ -3,7 +3,7 @@
 
 class EBotSessionItemDraft;
 
-class EBotSessionItem : public Entity
+class EBotSessionItem : public Entity // todo: rename SessionAsset
 {
 public:
   static const EType eType = EType::botSessionItem;
@@ -16,19 +16,22 @@ public:
 
   enum class State
   {
+    submitting = meguco_user_session_asset_submitting,
     waitBuy = meguco_user_session_asset_wait_buy,
     buying = meguco_user_session_asset_buying,
     waitSell = meguco_user_session_asset_wait_sell,
     selling = meguco_user_session_asset_selling,
     draft,
+    updating,
+    removing,
   };
 
 public:
-  EBotSessionItem(meguco_user_session_asset_entity& data) : Entity(eType, data.entity.id)
+  EBotSessionItem(const meguco_user_session_asset_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     state = (State)data.state;
-    date = QDateTime::fromMSecsSinceEpoch(data.date);
+    date = QDateTime::fromMSecsSinceEpoch(data.entity.time);
     price = data.price;
     investComm = data.invest_comm;
     investBase = data.invest_base;

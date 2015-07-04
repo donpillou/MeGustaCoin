@@ -7,9 +7,9 @@ public:
   static const EType eType = EType::botEngine;
 
 public:
-  EBotEngine(meguco_bot_engine_entity& data) : Entity(eType, data.entity.id)
+  EBotEngine(const meguco_bot_engine_entity& data) : Entity(eType, data.entity.id)
   {
-    name = DataConnection::getString(data.entity, sizeof(data), data.name_size);
+    DataConnection::getString(data.entity, sizeof(data), data.name_size, name);
   }
 
   const QString& getName() const {return name;}

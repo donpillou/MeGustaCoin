@@ -10,9 +10,9 @@ public:
   enum class State
   {
     stopped = meguco_user_session_stopped,
-    starting = meguco_user_session_starting,
     running = meguco_user_session_running,
-    stopping = meguco_user_session_stopping,
+    starting,
+    stopping,
     //simulating = meguco_user_session_simulating,
   };
 
@@ -23,7 +23,7 @@ public:
   };
 
 public:
-  EBotSession(const QString& name, meguco_user_session_entity& data) : Entity(eType, data.entity.id), name(name)
+  EBotSession(quint32 tableId, const QString& name, const meguco_user_session_entity& data) : Entity(eType, tableId), name(name)
   {
     botEngineId = data.bot_engine_id;
     marketId = data.user_market_id;

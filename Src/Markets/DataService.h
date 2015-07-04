@@ -16,31 +16,32 @@ public:
   void unsubscribe(const QString& channel);
   Entity::Manager* getSubscription(const QString& channel);
 
-  void createMarket(quint64 marketAdapterId, const QString& userName, const QString& key, const QString& secret);
-  void removeMarket(quint64 id);
-  void selectMarket(quint64 id);
-  void refreshMarketOrders();
-  void refreshMarketTransactions();
-  void refreshMarketBalance();
+  void createBroker(quint64 marketId, const QString& userName, const QString& key, const QString& secret);
+  void removeBroker(quint32 brokerId);
+  void selectBroker(quint32 brokerId);
+  void refreshBrokerOrders();
+  void refreshBrokerTransactions();
+  void refreshBrokerBalance();
 
-  EBotMarketOrderDraft& createMarketOrderDraft(EBotMarketOrder::Type type, double price);
-  void submitMarketOrderDraft(EBotMarketOrderDraft& draft);
-  void cancelMarketOrder(EBotMarketOrder& order);
-  void updateMarketOrder(EBotMarketOrder& order, double price, double amount);
-  void removeMarketOrderDraft(EBotMarketOrderDraft& draft);
+  EBotMarketOrderDraft& createBrokerOrderDraft(EBotMarketOrder::Type type, double price);
+  void removeBrokerOrderDraft(EBotMarketOrderDraft &draft);
+  void submitBrokerOrderDraft(EBotMarketOrderDraft& draft);
+  void cancelBrokerOrder(EBotMarketOrder& order);
+  void updateBrokerOrder(EBotMarketOrder& order, double price, double amount);
+  void removeBrokerOrder(EBotMarketOrder& order);
 
   void createSession(const QString& name, quint64 engineId, quint64 marketId);
-  void removeSession(quint64 id);
-  void stopSession(quint64 id);
-  void startSessionSimulation(quint64 id);
-  void startSession(quint64 id);
-  void selectSession(quint64 id);
+  void removeSession(quint32 sessionId);
+  void selectSession(quint32 sessionId);
+  void stopSession(quint32 sessionId);
+  void startSessionSimulation(quint32 sessionId);
+  void startSession(quint32 sessionId);
 
-  EBotSessionItemDraft& createSessionItemDraft(EBotSessionItem::Type type, double flipPrice);
-  void submitSessionItemDraft(EBotSessionItemDraft& draft);
-  void updateSessionItem(EBotSessionItem& item, double flipPrice);
-  void cancelSessionItem(EBotSessionItem& item);
-  void removeSessionItemDraft(EBotSessionItemDraft& draft);
+  EBotSessionItemDraft& createSessionAssetDraft(EBotSessionItem::Type type, double flipPrice);
+  void submitSessionAssetDraft(EBotSessionItemDraft& draft);
+  void updateSessionAsset(EBotSessionItem& asset, double flipPrice);
+  void removeSessionAsset(EBotSessionItem& asset);
+  void removeSessionAssetDraft(EBotSessionItemDraft& draft);
 
   void updateSessionProperty(EBotSessionProperty& property, const QString& value);
 
@@ -86,6 +87,7 @@ private:
     void interrupt();
 
     void addMessage(ELogMessage::Type type, const QString& message);
+    void delegateEntity(Entity* entity);
 
   public:
     DataService& dataService;
@@ -106,10 +108,12 @@ private:
     virtual void run();
 
   private: // DataConnection::Callback
-    virtual void receivedChannelInfo(quint32 channelId, const QString& channelName);
-    virtual void receivedSubscribeResponse(quint32 channelId);
-    virtual void receivedTrade(quint32 channelId, const meguco_trade_entity& trade);
-    virtual void receivedTicker(quint32 channelId, const meguco_ticker_entity& ticker);
+    virtual void receivedMarket(quint32 tableId, const QString& channelName);
+    virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker);
+    virtual void receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session);
+    virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder);
+    virtual void receivedTrade(quint32 tableId, const meguco_trade_entity& trade);
+    virtual void receivedTicker(quint32 tableId, const meguco_ticker_entity& ticker);
   };
 
 private:
@@ -124,6 +128,9 @@ private:
 
 private:
   void addLogMessage(ELogMessage::Type type, const QString& message);
+  void controlBroker(meguco_user_broker_control_code code);
+  void controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size);
+  void controlSession(quint32 sessionId, meguco_user_session_control_code code);
 
   quint32 getChannelId(const QString& channelName);
 

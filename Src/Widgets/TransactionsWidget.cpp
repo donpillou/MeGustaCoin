@@ -74,7 +74,7 @@ void TransactionsWidget::updateToolBarButtons()
 
 void TransactionsWidget::refresh()
 {
-  dataService.refreshMarketTransactions();
+  dataService.refreshBrokerTransactions();
 }
 
 void TransactionsWidget::updateTitle(EBotService& eBotService)

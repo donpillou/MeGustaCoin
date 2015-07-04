@@ -1,6 +1,8 @@
 
 #pragma once
 
+ // todo: remove this entity
+
 class EBotService : public Entity
 {
 public:

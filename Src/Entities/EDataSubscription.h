@@ -10,7 +10,6 @@ public:
   enum class State
   {
     subscribing,
-    loading,
     subscribed,
     unsubscribing,
     unsubscribed,
@@ -35,8 +34,6 @@ public:
     {
     case State::subscribing:
       return QObject::tr("subscribing...");
-    case State::loading:
-      return QObject::tr("loading...");
     case State::subscribed:
       return QString();
     case State::unsubscribing:

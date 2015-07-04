@@ -106,7 +106,7 @@ void BotItemsWidget::submitItem()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSessionItem* eBotSessionItem = (EBotSessionItem*)index.internalPointer();
     if(eBotSessionItem->getState() == EBotSessionItem::State::draft)
-      dataService.submitSessionItemDraft(*(EBotSessionItemDraft*)eBotSessionItem);
+      dataService.submitSessionAssetDraft(*(EBotSessionItemDraft*)eBotSessionItem);
   }
 }
 
@@ -146,13 +146,13 @@ void BotItemsWidget::cancelItem()
   while(!itemsToCancel.isEmpty())
   {
     QList<EBotSessionItem*>::Iterator last = --itemsToCancel.end();
-    dataService.cancelSessionItem(*(EBotSessionItem*)*last);
+    dataService.removeSessionAsset(*(EBotSessionItem*)*last);
     itemsToCancel.erase(last);
   }
   while(!itemsToRemove.isEmpty())
   {
     QList<EBotSessionItem*>::Iterator last = --itemsToRemove.end();
-    dataService.removeSessionItemDraft(*(EBotSessionItemDraft*)*last);
+    dataService.removeSessionAssetDraft(*(EBotSessionItemDraft*)*last);
     itemsToRemove.erase(last);
   }
 
@@ -180,7 +180,7 @@ void BotItemsWidget::addSessionItemDraft(EBotSessionItem::Type type)
       price = type == EBotSessionItem::Type::buy ? (eDataTickerData->getBid() + 0.01) : (eDataTickerData->getAsk() - 0.01);
   }
 
-  EBotSessionItemDraft& eBotSessionItemDraft = dataService.createSessionItemDraft(type, price);
+  EBotSessionItemDraft& eBotSessionItemDraft = dataService.createSessionAssetDraft(type, price);
   QModelIndex amountProxyIndex = itemModel.getDraftAmountIndex(eBotSessionItemDraft);
   QModelIndex amountIndex = proxyModel->mapFromSource(amountProxyIndex);
   itemView->setCurrentIndex(amountIndex);
@@ -220,7 +220,7 @@ void BotItemsWidget::itemDataChanged(const QModelIndex& topLeft, const QModelInd
 void BotItemsWidget::editedItemFlipPrice(const QModelIndex& index, double flipPrice)
 {
   EBotSessionItem* eitem = (EBotSessionItem*)index.internalPointer();
-  dataService.updateSessionItem(*eitem, flipPrice);
+  dataService.updateSessionAsset(*eitem, flipPrice);
 }
 
 void BotItemsWidget::updateToolBarButtons()

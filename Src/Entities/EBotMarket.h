@@ -9,13 +9,13 @@ public:
 public:
   enum class State
   {
-    stopped = meguco_user_market_stopped,
-    starting = meguco_user_market_starting,
-    running = meguco_user_market_running,
+    stopped = meguco_user_broker_stopped,
+    running = meguco_user_broker_running,
+    starting,
   };
 
 public:
-  EBotMarket(meguco_user_market_entity& data) : Entity(eType, data.entity.id)
+  EBotMarket(quint32 tableId, const meguco_user_broker_entity& data) : Entity(eType, tableId)
   {
     marketAdapterId = data.bot_market_id;
     state = (State)data.state;

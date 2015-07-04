@@ -202,21 +202,29 @@ void DataService::WorkerThread::interrupt()
 
 void DataService::WorkerThread::addMessage(ELogMessage::Type type, const QString& message)
 {
-  class LogMessageEvent : public Event
+  ELogMessage* logMessage = new ELogMessage(type, message);
+  delegateEntity(logMessage);
+}
+
+void DataService::WorkerThread::delegateEntity(Entity* entity)
+{
+  class DelegateEntityEvent : public Event
   {
   public:
-    LogMessageEvent(ELogMessage::Type type, const QString& message) : type(type), message(message) {}
+    DelegateEntityEvent(Entity* entity) : entity(entity) {}
+    ~DelegateEntityEvent() {delete entity;}
   private:
-    ELogMessage::Type type;
-    QString message;
+    Entity* entity;
   public: // Event
     virtual void handle(DataService& dataService)
     {
-        dataService.addLogMessage(type, message);
+      dataService.globalEntityManager.delegateEntity(*entity);
+      entity = 0;
     }
   };
+
   bool wasEmpty;
-  eventQueue.append(new LogMessageEvent(type, message), &wasEmpty);
+  eventQueue.append(new DelegateEntityEvent(entity), &wasEmpty);
   if(wasEmpty)
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
 }
@@ -253,6 +261,25 @@ void DataService::WorkerThread::setState(EDataService::State state)
             eDataSubscription->setState(EDataSubscription::State::unsubscribed);
         }
         dataService.activeSubscriptions.clear();
+        globalEntityManager.removeAll<EBotEngine>();
+        globalEntityManager.removeAll<EBotSession>();
+        globalEntityManager.removeAll<EBotMarketAdapter>();
+        globalEntityManager.removeAll<EBotSessionTransaction>();
+        globalEntityManager.removeAll<EBotSessionItem>();
+        globalEntityManager.removeAll<EBotSessionProperty>();
+        globalEntityManager.removeAll<EBotSessionItemDraft>();
+        globalEntityManager.removeAll<EBotSessionOrder>();
+        globalEntityManager.removeAll<EBotSessionLogMessage>();
+        globalEntityManager.removeAll<EBotSessionMarker>();
+        globalEntityManager.removeAll<EBotMarketTransaction>();
+        globalEntityManager.removeAll<EBotMarketOrder>();
+        globalEntityManager.removeAll<EBotMarketOrderDraft>();
+        globalEntityManager.removeAll<EBotMarketBalance>();
+        globalEntityManager.removeAll<EBotMarket>();
+        eDataService->setSelectedBrokerId(0);
+        eDataService->setSelectedSessionId(0);
+        eDataService->setLoadingBrokerOrders(false);
+        eDataService->setLoadingBrokerTransactions(false);
       }
       eDataService->setState(state);
       if(state == EDataService::State::offline)
@@ -288,8 +315,8 @@ void DataService::WorkerThread::process()
     return addMessage(ELogMessage::Type::error, QString("Could not connect to data service: %1").arg(connection.getLastError()));
   addMessage(ELogMessage::Type::information, "Connected to data service.");
 
-  // load channel list
-  if(!connection.loadChannelList())
+  // load channel list, etc.
+  if(!connection.loadTables())
     return addMessage(ELogMessage::Type::error, QString("Could not load channel list: %1").arg(connection.getLastError()));
 
   setState(EDataService::State::connected);
@@ -351,71 +378,27 @@ void DataService::WorkerThread::run()
   }
 }
 
-void DataService::WorkerThread::receivedChannelInfo(quint32 channelId, const QString& channelName)
+void DataService::WorkerThread::receivedMarket(quint32 tableId, const QString& channelName)
 {
-  class ChannelInfoEvent : public Event
-  {
-  public:
-    ChannelInfoEvent(quint64 channelId, const QString& channelName) : channelId(channelId), channelName(channelName) {}
-  private:
-    quint32 channelId;
-    QString channelName;
-  public: // Event
-    virtual void handle(DataService& dataService)
-    {
-      int firstSlash = channelName.indexOf('/');
-      int secondSlash = channelName.indexOf('/', firstSlash + 1);
-      QString baseCurrency = channelName.mid(secondSlash + 1);
-      QString commCurrency = channelName.mid(firstSlash + 1, secondSlash - (firstSlash + 1));
-
-      Entity::Manager& globalEntityManager = dataService.globalEntityManager;
-      EDataMarket* eDataMarket = new EDataMarket(channelId, channelName, baseCurrency, commCurrency);
-      globalEntityManager.delegateEntity(*eDataMarket);
-    }
-  };
-
-  bool wasEmpty;
-  eventQueue.append(new ChannelInfoEvent(channelId, channelName), &wasEmpty);
-  if(wasEmpty)
-    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
-  //information(QString("Found channel %1.").arg(channelName));
+  delegateEntity(new EDataMarket(tableId, channelName));
 }
 
-void DataService::WorkerThread::receivedSubscribeResponse(quint32 channelId)
+void DataService::WorkerThread::receivedBroker(quint32 brokerId,const meguco_user_broker_entity& broker)
 {
-  QHash<quint32, SubscriptionData>::Iterator it =  subscriptionData.find(channelId);
-  if(it == subscriptionData.end())
-    return;
-  SubscriptionData& data = it.value();
-
-  class SubscribeResponseEvent : public Event
-  {
-  public:
-    SubscribeResponseEvent(quint64 channelId, const QString& channelName) : channelId(channelId), channelName(channelName) {}
-  private:
-    quint32 channelId;
-    QString channelName;
-  private: // Event
-    virtual void handle(DataService& dataService)
-    {
-      Entity::Manager* channelEntityManager = dataService.getSubscription(channelName);
-      if(channelEntityManager)
-      {
-        dataService.activeSubscriptions[channelId] = channelEntityManager;
-        EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
-        eDataSubscription->setState(EDataSubscription::State::loading);
-        channelEntityManager->updatedEntity(*eDataSubscription);
-      }
-    }
-  };
-
-  bool wasEmpty;
-  eventQueue.append(new SubscribeResponseEvent(channelId, data.channelName), &wasEmpty);
-  if(wasEmpty)
-    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+  delegateEntity(new EBotMarket(brokerId, broker));
 }
 
-void DataService::WorkerThread::receivedTrade(quint32 channelId, const meguco_trade_entity& tradeData)
+void DataService::WorkerThread::receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session)
+{
+  delegateEntity(new EBotSession(sessionId, name, session));
+}
+
+void DataService::WorkerThread::receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder)
+{
+  // ??
+}
+
+void DataService::WorkerThread::receivedTrade(quint32 tableId, const meguco_trade_entity& tradeData)
 {
   EDataTradeData::Trade trade;
   trade.id = tradeData.entity.id;
@@ -423,7 +406,7 @@ void DataService::WorkerThread::receivedTrade(quint32 channelId, const meguco_tr
   trade.price = tradeData.price;
   trade.amount = tradeData.amount;
 
-  SubscriptionData& data = subscriptionData[channelId];
+  SubscriptionData& data = subscriptionData[tableId];
   if(data.eTradeData)
     data.eTradeData->addTrade(trade);
   else // live trade
@@ -431,14 +414,14 @@ void DataService::WorkerThread::receivedTrade(quint32 channelId, const meguco_tr
     class AddTradeEvent : public Event
     {
     public:
-      AddTradeEvent(quint32 channelId, const EDataTradeData::Trade& trade) : channelId(channelId), trade(trade) {}
+      AddTradeEvent(quint32 tableId, const EDataTradeData::Trade& trade) : tableId(tableId), trade(trade) {}
     private:
-      quint32 channelId;
+      quint32 tableId;
       EDataTradeData::Trade trade;
     private: // Event
       virtual void handle(DataService& dataService)
       {
-        QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(channelId);
+        QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(tableId);
         if(it == dataService.activeSubscriptions.end())
           return;
         Entity::Manager* channelEntityManager = it.value();
@@ -458,25 +441,25 @@ void DataService::WorkerThread::receivedTrade(quint32 channelId, const meguco_tr
     };
 
     bool wasEmpty;
-    eventQueue.append(new AddTradeEvent(channelId, trade), &wasEmpty);
+    eventQueue.append(new AddTradeEvent(tableId, trade), &wasEmpty);
     if(wasEmpty)
       QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
   }
 }
 
-void DataService::WorkerThread::receivedTicker(quint32 channelId, const meguco_ticker_entity& ticker)
+void DataService::WorkerThread::receivedTicker(quint32 tableId, const meguco_ticker_entity& ticker)
 {
   class AddTickerEvent : public Event
   {
   public:
-    AddTickerEvent(quint64 channelId, const meguco_ticker_entity& ticker) : channelId(channelId), ticker(ticker) {}
+    AddTickerEvent(quint64 tableId, const meguco_ticker_entity& ticker) : tableId(tableId), ticker(ticker) {}
   private:
-    quint64 channelId;
+    quint64 tableId;
     meguco_ticker_entity ticker;
   private: // Event
     virtual void handle(DataService& dataService)
     {
-      QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(channelId);
+      QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(tableId);
       if(it == dataService.activeSubscriptions.end())
         return;
       Entity::Manager* channelEntityManager = it.value();
@@ -495,76 +478,495 @@ void DataService::WorkerThread::receivedTicker(quint32 channelId, const meguco_t
   };
 
   bool wasEmpty;
-  eventQueue.append(new AddTickerEvent(channelId, ticker), &wasEmpty);
+  eventQueue.append(new AddTickerEvent(tableId, ticker), &wasEmpty);
   if(wasEmpty)
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
 }
 
-void DataService::createMarket(quint64 marketAdapterId, const QString& userName, const QString& key, const QString& secret)
+void DataService::createBroker(quint64 marketId, const QString& userName, const QString& key, const QString& secret)
 {
-  class CreateMarketJob : public Job
+  class CreateBrokerJob : public Job
   {
   public:
-    CreateMarketJob(quint64 marketAdapterId, const QString& userName, const QString& key, const QString& secret) : marketAdapterId(marketAdapterId), userName(userName), key(key), secret(secret) {}
+    CreateBrokerJob(quint64 marketId, const QString& userName, const QString& key, const QString& secret) : marketId(marketId), userName(userName), key(key), secret(secret) {}
   private:
-    quint64 marketAdapterId;
+    quint64 marketId;
     QString userName;
     QString key;
     QString secret;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      // todo
-      //WorkerThread::SubscriptionData& data = workerThread.subscriptionData[channelId];
-      //data.channelName = channelName;
-      //if(data.eTradeData)
-      //  delete data.eTradeData;
-      //data.eTradeData = new EDataTradeData;
-      //
-      //if(!workerThread.connection.subscribe(channelId, lastReceivedTradeId))
-      //  return workerThread.addMessage(ELogMessage::Type::error, QString("Could not subscribe to channel %1: %2").arg(channelName, workerThread.connection.getLastError())), false;
-      //
+      if(!workerThread.connection.createBroker(marketId, userName, key, secret))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not create broker: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
   };
 
-
-  // its not that simple, i have to create the table first
-  //QByteArray userNameData = userName.toUtf8(), keyData = key.toUtf8(), secretData = secret.toUtf8();
-  //QByteArray data;
-  //data.resize(sizeof(meguco_user_market_entity) + userNameData.size() + keyData.size() + secretData.size());
-  //meguco_user_market_entity* entity = (meguco_user_market_entity*)data.data();
-  //DataConnection::setEntityHeader(entity->entity, 0, 0, data.size());
-  //entity->bot_market_id = marketAdapterId;
-  //BotProtocol::setString(market.userName, userName);
-  //BotProtocol::setString(market.key, key);
-  //BotProtocol::setString(market.secret, secret);
-  //createEntity(data);
+  bool wasEmpty;
+  jobQueue.append(new CreateBrokerJob(marketId, userName, key, secret), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
 }
 
-void DataService::removeMarket(quint64 id) {/*todo*/}
-void DataService::selectMarket(quint64 id) {/*todo*/}
-void DataService::refreshMarketOrders() {/*todo*/}
-void DataService::refreshMarketTransactions() {/*todo*/}
-void DataService::refreshMarketBalance() {/*todo*/}
+void DataService::removeBroker(quint32 brokerId)
+{
+  class RemoveBrokerJob : public Job
+  {
+  public:
+    RemoveBrokerJob(quint32 brokerId) : brokerId(brokerId) {}
+  private:
+    quint32 brokerId;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.removeBroker(brokerId))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove broker: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
 
-EBotMarketOrderDraft& DataService::createMarketOrderDraft(EBotMarketOrder::Type type, double price) {/*todo*/return *(EBotMarketOrderDraft*)0;}
-void DataService::submitMarketOrderDraft(EBotMarketOrderDraft& draft) {/*todo*/}
-void DataService::cancelMarketOrder(EBotMarketOrder& order) {/*todo*/}
-void DataService::updateMarketOrder(EBotMarketOrder& order, double price, double amount) {/*todo*/}
-void DataService::removeMarketOrderDraft(EBotMarketOrderDraft& draft) {/*todo*/}
+  bool wasEmpty;
+  jobQueue.append(new RemoveBrokerJob(brokerId), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
 
-void DataService::createSession(const QString& name, quint64 engineId, quint64 marketId) {/*todo*/}
-void DataService::removeSession(quint64 id) {/*todo*/}
-void DataService::stopSession(quint64 id) {/*todo*/}
-void DataService::startSessionSimulation(quint64 id) {/*todo*/}
-void DataService::startSession(quint64 id) {/*todo*/}
-void DataService::selectSession(quint64 id) {/*todo*/}
+void DataService::selectBroker(quint32 brokerId)
+{
+  class SelectBrokerJob : public Job, public Event
+  {
+  public:
+    SelectBrokerJob(quint32 brokerId) : brokerId(brokerId) {}
+  private:
+    quint32 brokerId;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.selectBroker(brokerId))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not select broker: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      Entity::Manager& globalEntityManager = dataService.globalEntityManager;
+      EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
+      eDataService->setSelectedBrokerId(brokerId);
+      globalEntityManager.updatedEntity(*eDataService);
+    }
+  };
 
-EBotSessionItemDraft& DataService::createSessionItemDraft(EBotSessionItem::Type type, double flipPrice) {/*todo*/return *(EBotSessionItemDraft*)0;}
-void DataService::submitSessionItemDraft(EBotSessionItemDraft& draft) {/*todo*/}
-void DataService::updateSessionItem(EBotSessionItem& item, double flipPrice) {/*todo*/}
-void DataService::cancelSessionItem(EBotSessionItem& item) {/*todo*/}
-void DataService::removeSessionItemDraft(EBotSessionItemDraft& draft) {/*todo*/}
+  bool wasEmpty;
+  jobQueue.append(new SelectBrokerJob(brokerId), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
 
-void DataService::updateSessionProperty(EBotSessionProperty& property, const QString& value) {/*todo*/}
+void DataService::refreshBrokerOrders()
+{
+  controlBroker(meguco_user_broker_control_refresh_orders);
+}
+
+void DataService::refreshBrokerTransactions()
+{
+  controlBroker(meguco_user_broker_control_refresh_transactions);
+}
+
+void DataService::refreshBrokerBalance()
+{
+  controlBroker(meguco_user_broker_control_refresh_balance);
+}
+
+EBotMarketOrderDraft& DataService::createBrokerOrderDraft(EBotMarketOrder::Type type, double price)
+{
+  quint32 id = globalEntityManager.getNewEntityId<EBotMarketOrderDraft>();
+  EBotMarketOrderDraft* eBotMarketOrderDraft = new EBotMarketOrderDraft(id, type, QDateTime::currentDateTime(), price);
+  globalEntityManager.delegateEntity(*eBotMarketOrderDraft);
+  return *eBotMarketOrderDraft;
+}
+
+void DataService::removeBrokerOrderDraft(EBotMarketOrderDraft &draft)
+{
+  globalEntityManager.removeEntity<EBotMarketOrderDraft>(draft.getId());
+}
+
+void DataService::submitBrokerOrderDraft(EBotMarketOrderDraft& draft)
+{
+  if(draft.getState() != EBotMarketOrder::State::draft)
+    return;
+  draft.setState(EBotMarketOrder::State::submitting);
+  globalEntityManager.updatedEntity(draft);
+
+  class SubmitBrokerOrderJob : public Job
+  {
+  public:
+    SubmitBrokerOrderJob(EBotMarketOrder::Type type, double price, double amount) : 
+      type(type), price(price), amount(amount) {}
+  private:
+    EBotMarketOrder::Type type;
+    double price;
+    double amount;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.createBrokerOrder((meguco_user_broker_order_type)type, price, amount))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not create broker order: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new SubmitBrokerOrderJob(draft.getType(), draft.getPrice(), draft.getAmount()), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
+void DataService::cancelBrokerOrder(EBotMarketOrder& order)
+{
+  if(order.getState() != EBotMarketOrder::State::open)
+    return;
+  order.setState(EBotMarketOrder::State::canceling);
+  globalEntityManager.updatedEntity(order);
+
+  controlBrokerOrder(order.getId(), meguco_user_broker_order_control_cancel, 0, 0);
+}
+
+void DataService::updateBrokerOrder(EBotMarketOrder& order, double price, double amount)
+{
+  if(order.getState() != EBotMarketOrder::State::open)
+    return;
+  order.setState(EBotMarketOrder::State::updating);
+  globalEntityManager.updatedEntity(order);
+
+  meguco_user_broker_order_control_update_params params;
+  params.price = price;
+  params.amount = amount;
+  controlBrokerOrder(order.getId(), meguco_user_broker_order_control_update, &params, sizeof(params));
+}
+
+/*private*/ void DataService::controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size)
+{
+  class ControlBrokerOrderJob : public Job
+  {
+  public:
+    ControlBrokerOrderJob(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size) : orderId(orderId), code(code), data((const char*)data, size) {}
+  private:
+    quint64 orderId;
+    meguco_user_broker_order_control_code code;
+    QByteArray data;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.controlBrokerOrder(orderId, code, data.constData(), data.size()))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new ControlBrokerOrderJob(orderId, code, data, size), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
+void DataService::removeBrokerOrder(EBotMarketOrder& order)
+{
+  if(order.getState() != EBotMarketOrder::State::open)
+    return;
+  order.setState(EBotMarketOrder::State::removing);
+  globalEntityManager.updatedEntity(order);
+
+  class RemoveBrokerOrderJob : public Job
+  {
+  public:
+    RemoveBrokerOrderJob(quint64 orderId) : orderId(orderId) {}
+  private:
+    quint64 orderId;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.removeBrokerOrder(orderId))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove broker order: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new RemoveBrokerOrderJob(order.getId()), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
+void DataService::createSession(const QString& name, quint64 engineId, quint64 marketId)
+{
+  class CreateSessionJob : public Job
+  {
+  public:
+    CreateSessionJob(const QString& name, quint64 engineId, quint64 marketId) : name(name), engineId(engineId), marketId(marketId) {}
+  private:
+    QString name;
+    quint64 engineId;
+    quint64 marketId;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.createSession(name, engineId, marketId))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not cancel broker order: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new CreateSessionJob(name, engineId, marketId), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
+void DataService::removeSession(quint32 sessionId)
+{
+  class RemoveSessionJob : public Job
+  {
+  public:
+    RemoveSessionJob(quint32 sessionId) : sessionId(sessionId) {}
+  private:
+    quint32 sessionId;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.removeSession(sessionId))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove session: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new RemoveSessionJob(sessionId), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
+void DataService::stopSession(quint32 sessionId)
+{
+  controlSession(sessionId, meguco_user_session_control_stop);
+}
+
+void DataService::startSessionSimulation(quint32 sessionId)
+{
+  controlSession(sessionId, meguco_user_session_control_start_simulation);
+}
+
+void DataService::startSession(quint32 sessionId)
+{
+  controlSession(sessionId, meguco_user_session_control_start_live);
+}
+
+void DataService::selectSession(quint32 sessionId)
+{
+  class SelectSessionJob : public Job, public Event
+  {
+  public:
+    SelectSessionJob(quint32 sessionId) : sessionId(sessionId) {}
+  private:
+    quint32 sessionId;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.selectSession(sessionId))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not select session: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      Entity::Manager& globalEntityManager = dataService.globalEntityManager;
+      EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
+      eDataService->setSelectedSessionId(sessionId);
+      globalEntityManager.updatedEntity(*eDataService);
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new SelectSessionJob(sessionId), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
+EBotSessionItemDraft& DataService::createSessionAssetDraft(EBotSessionItem::Type type, double flipPrice)
+{
+  quint32 id = globalEntityManager.getNewEntityId<EBotSessionItemDraft>();
+  EBotSessionItemDraft* eBotSessionItemDraft = new EBotSessionItemDraft(id, type, QDateTime::currentDateTime(), flipPrice);
+  globalEntityManager.delegateEntity(*eBotSessionItemDraft);
+  return *eBotSessionItemDraft;
+}
+
+void DataService::submitSessionAssetDraft(EBotSessionItemDraft& draft)
+{
+  if(draft.getState() != EBotSessionItemDraft::State::draft)
+    return;
+  draft.setState(EBotSessionItemDraft::State::submitting);
+  globalEntityManager.updatedEntity(draft);
+
+  class SubmitSessionAssetJob : public Job
+  {
+  public:
+    SubmitSessionAssetJob(EBotSessionItem::Type type, double balanceComm, double balanceBase, double flipPrice) : 
+      type(type), balanceComm(balanceComm), balanceBase(balanceBase), flipPrice(flipPrice) {}
+  private:
+    EBotSessionItem::Type type;
+    double balanceComm;
+    double balanceBase;
+    double flipPrice;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.createSessionAsset((meguco_user_session_asset_type)type, balanceComm, balanceBase, flipPrice))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not create session asset: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new SubmitSessionAssetJob(draft.getType(), draft.getBalanceComm(), draft.getBalanceBase(), draft.getFlipPrice()), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
+void DataService::updateSessionAsset(EBotSessionItem& asset, double flipPrice)
+{
+  if(asset.getState() != EBotSessionItem::State::waitBuy && asset.getState() != EBotSessionItem::State::waitSell)
+    return;
+  asset.setState(EBotSessionItem::State::updating);
+  globalEntityManager.updatedEntity(asset);
+
+  class UpdateSessionAssetJob : public Job
+  {
+  public:
+    UpdateSessionAssetJob(quint64 assetId, double flipPrice) : assetId(assetId), flipPrice(flipPrice) {}
+  private:
+    quint64 assetId;
+    double flipPrice;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.controlSessionAsset(assetId, meguco_user_session_asset_control_update, &flipPrice, sizeof(flipPrice)))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new UpdateSessionAssetJob(asset.getId(), flipPrice), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
+void DataService::removeSessionAsset(EBotSessionItem& asset)
+{
+  if(asset.getState() != EBotSessionItem::State::waitBuy && asset.getState() != EBotSessionItem::State::waitSell)
+    return;
+  asset.setState(EBotSessionItem::State::removing);
+  globalEntityManager.updatedEntity(asset);
+
+  /*todo*/
+  class RemoveSessionAssetJob : public Job
+  {
+  public:
+    RemoveSessionAssetJob(quint64 assetId) : assetId(assetId) {}
+  private:
+    quint64 assetId;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.removeSessionAsset(assetId))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove session asset: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new RemoveSessionAssetJob(asset.getId()), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
+void DataService::removeSessionAssetDraft(EBotSessionItemDraft& draft)
+{
+  globalEntityManager.removeEntity<EBotSessionItemDraft>(draft.getId());
+}
+
+void DataService::updateSessionProperty(EBotSessionProperty& property, const QString& value)
+{
+  class UpdateSessionPropertyJob : public Job
+  {
+  public:
+    UpdateSessionPropertyJob(quint64 propertyId, const QString& value) : propertyId(propertyId), value(value) {}
+  private:
+    quint64 propertyId;
+    QString value;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      QByteArray data;
+      QByteArray valueData = value.toUtf8();
+      data.resize(sizeof(meguco_user_session_property_control_update_params) + valueData.size());
+      meguco_user_session_property_control_update_params* params = (meguco_user_session_property_control_update_params*)(char*)data.data();
+      DataConnection::setString(params, params->value_size, sizeof(*params), valueData);
+      if(!workerThread.connection.controlSessionProperty(propertyId, meguco_user_session_property_control_update, data.constData(), data.size()))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control session property: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new UpdateSessionPropertyJob(property.getId(), value), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
+/*private*/ void DataService::controlBroker(meguco_user_broker_control_code code)
+{
+  class ControlBrokerJob : public Job
+  {
+  public:
+    ControlBrokerJob(meguco_user_broker_control_code code) : code(code) {}
+  private:
+    meguco_user_broker_control_code code;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.controlBroker(code))
+        return false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new ControlBrokerJob(code), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
+/*private*/ void DataService::controlSession(quint32 sessionId, meguco_user_session_control_code code)
+{
+  class ControlSessionJob : public Job
+  {
+  public:
+    ControlSessionJob(quint32 sessionId, meguco_user_session_control_code code) : sessionId(sessionId), code(code) {}
+  private:
+    quint32 sessionId;
+    meguco_user_session_control_code code;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.controlSession(sessionId, code))
+        return false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new ControlSessionJob(sessionId, code), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}

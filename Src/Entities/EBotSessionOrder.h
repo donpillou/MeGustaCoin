@@ -9,12 +9,12 @@ public:
 public:
   enum class Type
   {
-    buy = meguco_user_market_order_buy,
-    sell = meguco_user_market_order_sell,
+    buy = meguco_user_broker_order_buy,
+    sell = meguco_user_broker_order_sell,
   };
 
 public:
-  EBotSessionOrder(meguco_user_market_order_entity& data) : Entity(eType, data.entity.id)
+  EBotSessionOrder(const meguco_user_broker_order_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     date = QDateTime::fromMSecsSinceEpoch(data.entity.time);

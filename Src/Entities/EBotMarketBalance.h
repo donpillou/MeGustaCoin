@@ -7,7 +7,7 @@ public:
   static const EType eType = EType::botMarketBalance;
 
 public:
-  EBotMarketBalance(meguco_user_market_balance_entity& data) : Entity(eType, data.entity.id)
+  EBotMarketBalance(const meguco_user_broker_balance_entity& data) : Entity(eType, data.entity.id)
   {
     reservedUsd = data.reserved_usd;
     reservedBtc = data.reserved_btc;

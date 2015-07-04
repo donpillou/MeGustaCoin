@@ -20,13 +20,13 @@ public:
   };
 
 public:
-  EBotSessionProperty(meguco_user_session_property_entity& data) : Entity(eType, data.entity.id)
+  EBotSessionProperty(const meguco_user_session_property_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     flags = data.flags;
-    name = DataConnection::getString(data.entity, sizeof(data), data.name_size);
-    value = DataConnection::getString(data.entity, sizeof(data) + data.name_size, data.value_size);
-    unit = DataConnection::getString(data.entity, sizeof(data) + data.name_size + data.value_size, data.unit_size);
+    DataConnection::getString(data.entity, sizeof(data), data.name_size, name);
+    DataConnection::getString(data.entity, sizeof(data) + data.name_size, data.value_size, value );
+    DataConnection::getString(data.entity, sizeof(data) + data.name_size + data.value_size, data.unit_size, unit);
   }
 
   Type getType() const {return type;}

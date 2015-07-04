@@ -3,7 +3,7 @@
 
 class EBotMarketOrderDraft;
 
-class EBotMarketOrder : public Entity
+class EBotMarketOrder : public Entity // todo: rename to EBotUserBrokerOrder
 {
 public:
   static const EType eType = EType::botMarketOrder;
@@ -11,23 +11,28 @@ public:
 public:
   enum class Type
   {
-    buy = meguco_user_market_order_buy,
-    sell = meguco_user_market_order_sell,
+    buy = meguco_user_broker_order_buy,
+    sell = meguco_user_broker_order_sell,
   };
 
   enum class State
   {
+    submitting = meguco_user_broker_order_submitting,
+    open  = meguco_user_broker_order_open,
+    //canceling  = meguco_user_broker_order_canceling,
+    canceled  = meguco_user_broker_order_canceled,
+    //updating = meguco_user_broker_order_updating,
+    closed  = meguco_user_broker_order_closed,
+    //removing  = meguco_user_broker_order_removing,
+    error = meguco_user_broker_order_error,
     draft,
-    submitting,
-    updating,
-    open,
     canceling,
-    canceled,
-    closed,
+    updating,
+    removing,
   };
 
 public:
-  EBotMarketOrder(meguco_user_market_order_entity& data) : Entity(eType, data.entity.id)
+  EBotMarketOrder(const meguco_user_broker_order_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     date = QDateTime::fromMSecsSinceEpoch(data.entity.time);
@@ -35,9 +40,27 @@ public:
     amount = data.amount;
     total = data.total;
     fee = qAbs(total - price * amount);
-    state = State::open;
+    state = (State)data.state;
+    //rawId = data.raw_id;
+    //timeout = data.timeout;
   }
+
   EBotMarketOrder(quint64 id, const EBotMarketOrderDraft& order);
+  /*
+  void toEntity(meguco_user_market_order_entity& entity) const
+  {
+    entity.entity.id = id;
+    entity.entity.time = date.toMSecsSinceEpoch();
+    entity.entity.size = sizeof(entity);
+    entity.type = (uint8_t)type;
+    entity.state = (uint8_t)state;
+    entity.price = price;
+    entity.amount = amount;
+    entity.total = total;
+    entity.raw_id = rawId;
+    entity.timeout = timeout;
+  }
+  */
 
   Type getType() const {return type;}
   const QDateTime& getDate() const {return date;}
@@ -71,4 +94,6 @@ protected:
   double fee;
   double total;
   State state;
+  //quint64 rawId;
+  //quint64 timeout;
 };

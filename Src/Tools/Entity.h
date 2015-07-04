@@ -215,5 +215,7 @@ public:
 
 private:
   quint32 type;
+
+protected:
   quint64 id;
 };

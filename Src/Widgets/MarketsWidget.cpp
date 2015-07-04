@@ -74,7 +74,7 @@ void MarketsWidget::addMarket()
   if(marketDialog.exec() != QDialog::Accepted)
     return;
 
-  dataService.createMarket(marketDialog.getMarketAdapterId(),  marketDialog.getUserName(), marketDialog.getKey(), marketDialog.getSecret());
+  dataService.createBroker(marketDialog.getMarketAdapterId(),  marketDialog.getUserName(), marketDialog.getKey(), marketDialog.getSecret());
 }
 
 void MarketsWidget::editMarket()
@@ -91,7 +91,7 @@ void MarketsWidget::removeMarket()
   {
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotMarket* eBotMarket = (EBotMarket*)index.internalPointer();
-    dataService.removeMarket(eBotMarket->getId());
+    dataService.removeBroker(eBotMarket->getId());
   }
 }
 
@@ -139,7 +139,7 @@ void MarketsWidget::marketSelectionChanged()
 {
   updateSelection();
   if(!selection.isEmpty())
-    dataService.selectMarket((*selection.begin())->getId());
+    dataService.selectBroker((*selection.begin())->getId());
 }
 
 void MarketsWidget::marketDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
