@@ -47,7 +47,7 @@ QVariant BotMarketModel::data(const QModelIndex& index, int role) const
     {
     case Column::name:
       {
-        EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+        EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
         return eBotMarketAdapter ? eBotMarketAdapter->getName() : QVariant();
       }
     case Column::state:

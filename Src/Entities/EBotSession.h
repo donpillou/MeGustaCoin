@@ -25,22 +25,22 @@ public:
 public:
   EBotSession(quint32 tableId, const QString& name, const meguco_user_session_entity& data) : Entity(eType, tableId), name(name)
   {
-    botEngineId = data.bot_engine_id;
-    marketId = data.user_market_id;
+    botTypeId = data.bot_type_id;
+    brokerId = data.broker_id;
     state = (State)data.state;
     mode = (Mode)data.mode;
   }
 
   const QString& getName() const {return name;}
-  quint64 getEngineId() const {return botEngineId;}
-  quint64 getMarketId() const {return marketId;}
+  quint64 getBotTypeId() const {return botTypeId;}
+  quint64 getBrokerId() const {return brokerId;}
   State getState() const {return state;}
   Mode getMode() const {return mode;}
 
 private:
   QString name;
-  quint64 botEngineId;
-  quint64 marketId;
+  quint64 botTypeId;
+  quint64 brokerId;
   State state;
   Mode mode;
 };

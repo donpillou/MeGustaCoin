@@ -49,13 +49,13 @@ QVariant BotSessionModel::data(const QModelIndex& index, int role) const
       return eSession->getName();
     case Column::engine:
     {
-      EBotEngine* eEngine = entityManager.getEntity<EBotEngine>(eSession->getEngineId());
+      EBotEngine* eEngine = entityManager.getEntity<EBotEngine>(eSession->getBotTypeId());
       return eEngine ? eEngine->getName() : QVariant();
     }
     case Column::market:
     {
-      EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eSession->getMarketId());
-      EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+      EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eSession->getBrokerId());
+      EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
       return eBotMarketAdapter ? eBotMarketAdapter->getName() : QVariant();
     }
     case Column::state:

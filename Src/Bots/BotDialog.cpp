@@ -53,7 +53,7 @@ BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(
     engineComboBox->addItem(engine->getName(), engine->getId());
   foreach(const EBotMarket* market, markets)
   {
-    EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(market->getMarketAdapterId());
+    EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(market->getBrokerTypeId());
     if(!eBotMarketAdapter)
       continue;
     marketComboBox->addItem(eBotMarketAdapter->getName(), market->getId());

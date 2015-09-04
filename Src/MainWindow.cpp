@@ -159,7 +159,7 @@ void MainWindow::updateWindowTitle()
     EBotService* eBotService = globalEntityManager.getEntity<EBotService>(0);
     EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
     if(eBotMarket)
-      eBotMarketAdapater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+      eBotMarketAdapater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
   }
   if(!eBotMarketBalance || !eBotMarketAdapater)
     setWindowTitle(tr("Meguco Client"));
@@ -169,7 +169,7 @@ void MainWindow::updateWindowTitle()
     EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
     EBotMarketAdapter* eBotMarketAdapater = 0;
     if(eBotMarket)
-      eBotMarketAdapater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+      eBotMarketAdapater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
 
     double usd = eBotMarketBalance->getAvailableUsd() + eBotMarketBalance->getReservedUsd();
     double btc = eBotMarketBalance->getAvailableBtc() + eBotMarketBalance->getReservedBtc();
@@ -407,7 +407,7 @@ void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
         EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
         if(eBotMarket)
         {
-          EBotMarketAdapter* eBotMarketAdpater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+          EBotMarketAdapter* eBotMarketAdpater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
           if(eBotMarketAdpater)
             selectedChannelName = eBotMarketAdpater->getName();
         }

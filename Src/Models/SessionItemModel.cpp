@@ -356,11 +356,11 @@ void SessionItemModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
       if(eBotService && eBotService->getSelectedSessionId() != 0)
       {
         EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
-        if(eBotSession && eBotSession->getMarketId() != 0)
+        if(eBotSession && eBotSession->getBrokerId() != 0)
         {
-          EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotSession->getMarketId());
-          if(eBotMarket && eBotMarket->getMarketAdapterId() != 0)
-            newMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+          EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotSession->getBrokerId());
+          if(eBotMarket && eBotMarket->getBrokerTypeId() != 0)
+            newMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
         }
       }
       if(newMarketAdapter != eBotMarketAdapter)

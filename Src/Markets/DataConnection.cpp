@@ -285,7 +285,7 @@ bool DataConnection::unsubscribe(quint32 tableId)
   return true;
 }
 
-bool DataConnection::createBroker(quint64 marketId, const QString& userName, const QString& key, const QString& secret)
+bool DataConnection::createBroker(quint64 brokerTypeId, const QString& userName, const QString& key, const QString& secret)
 {
   ++lastBrokerId;
   BrokerData& brokerData = this->brokerData[lastBrokerId];
@@ -296,7 +296,7 @@ bool DataConnection::createBroker(quint64 marketId, const QString& userName, con
   meguco_user_broker_entity* broker = (meguco_user_broker_entity*)buffer;
   QByteArray userNameData = userName.toUtf8(), keyData = key.toUtf8(), secretData = secret.toUtf8();
   setEntityHeader(broker->entity, 0, 0, sizeof(*broker) + userNameData.size() + keyData.size() + secretData.size());
-  broker->bot_market_id = marketId;
+  broker->broker_type_id = brokerTypeId;
   setString(broker->entity, broker->user_name_size, sizeof(*broker), userNameData);
   setString(broker->entity, broker->key_size, sizeof(*broker) + userNameData.size(), keyData);
   setString(broker->entity, broker->secret_size, sizeof(*broker) + userNameData.size() + keyData.size(), secretData);
@@ -447,7 +447,7 @@ bool DataConnection::removeBrokerOrder(quint64 orderId)
   return true;
 }
 
-bool DataConnection::createSession(const QString& name, quint64 engineId, quint64 marketId)
+bool DataConnection::createSession(const QString& name, quint64 botTypeId, quint64 brokerId)
 {
   ++lastSessionId;
   SessionData& brokerData = this->sessionData[lastSessionId];
@@ -460,8 +460,8 @@ bool DataConnection::createSession(const QString& name, quint64 engineId, quint6
   QByteArray nameData = name.toUtf8();
   setEntityHeader(session->entity, 0, 0, sizeof(*session));
   setString(session->entity, session->name_size, sizeof(*session), nameData);
-  session->bot_engine_id = engineId;
-  session->user_market_id = marketId;
+  session->bot_type_id = botTypeId;
+  session->broker_id = brokerId;
   session->mode = meguco_user_session_none;
   session->state = meguco_user_session_stopped;
   uint64_t id;

@@ -33,7 +33,7 @@ public:
 
   const QString& getLastError() {return error;}
 
-  bool createBroker(quint64 marketId, const QString& userName, const QString& key, const QString& secret);
+  bool createBroker(quint64 brokerTypeId, const QString& userName, const QString& key, const QString& secret);
   bool removeBroker(quint32 brokerId);
   bool selectBroker(quint32 brokerId);
   bool controlBroker(meguco_user_broker_control_code code);
@@ -42,7 +42,7 @@ public:
   bool controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size);
   bool removeBrokerOrder(quint64 orderId);
 
-  bool createSession(const QString& name, quint64 engineId, quint64 marketId);
+  bool createSession(const QString& name, quint64 botTypeId, quint64 brokerId);
   bool removeSession(quint32 sessionId);
   bool selectSession(quint32 sessionId);
   bool controlSession(quint32 sessionId, meguco_user_session_control_code code);

@@ -164,10 +164,10 @@ void BotItemsWidget::addSessionItemDraft(EBotSessionItem::Type type)
   EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
   if(!eBotSession)
     return;
-  EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotSession->getMarketId());
+  EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotSession->getBrokerId());
   if(!eBotMarket)
     return;
-  EBotMarketAdapter* eBotMarketAdapater = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+  EBotMarketAdapter* eBotMarketAdapater = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
   if(!eBotMarketAdapater)
     return;
   const QString& marketName = eBotMarketAdapater->getName();

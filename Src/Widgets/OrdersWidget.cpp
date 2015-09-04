@@ -119,7 +119,7 @@ void OrdersWidget::addOrderDraft(EBotMarketOrder::Type type)
   EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
   if(!eBotMarket)
     return;
-  EBotMarketAdapter* eBotMarketAdapater = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+  EBotMarketAdapter* eBotMarketAdapater = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
   if(!eBotMarketAdapater)
     return;
   const QString& marketName = eBotMarketAdapater->getName();

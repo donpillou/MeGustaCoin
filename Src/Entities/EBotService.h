@@ -25,7 +25,7 @@ public:
   quint64 getSelectedSessionId() const {return selectedSessionId;}
   void setSelectedSessionId(quint64 id) {selectedSessionId = id;}
 
-  quint64 getSelectedMarketId() const {return selectedMarketId;}
+  quint64 getSelectedMarketId() const {return selectedMarketId;} // todo: rename broker
   void setSelectedMarketId(quint64 id) {selectedMarketId = id;}
 
   bool getLoadingMarketOrders() const {return loadingMarketOrders;};

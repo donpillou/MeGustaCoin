@@ -306,8 +306,8 @@ void MarketOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
       if(eBotService && eBotService->getSelectedMarketId() != 0)
       {
         EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
-        if(eBotMarket && eBotMarket->getMarketAdapterId() != 0)
-          newMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getMarketAdapterId());
+        if(eBotMarket && eBotMarket->getBrokerTypeId() != 0)
+          newMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
       }
       if(newMarketAdapter != eBotMarketAdapter)
       {
