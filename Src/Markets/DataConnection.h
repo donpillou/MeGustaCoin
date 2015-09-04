@@ -13,7 +13,7 @@ public:
     virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker) = 0;
     virtual void receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session) = 0;
     virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder) = 0;
-    virtual void receivedTrade(quint32 tableId, const meguco_trade_entity& trade) = 0;
+    virtual void receivedTrade(quint32 tableId, const meguco_trade_entity& trade, qint64 timeOffset) = 0;
     virtual void receivedTicker(quint32 tableId, const meguco_ticker_entity& ticker) = 0;
   };
 
@@ -90,6 +90,7 @@ private:
       sessionTable,
     } type;
     quint64 nameId;
+    qint64 timeOffset;
   };
 
   class BrokerData

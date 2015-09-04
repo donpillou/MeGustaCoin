@@ -76,6 +76,7 @@ QVariant TradeModel::data(const QModelIndex& index, int role) const
       {
         quint64 timeSinceTrade = QDateTime::currentDateTime().toTime_t() - trade->date / 1000;
         if(timeSinceTrade < 60)
+          //return QString("%1 ms seconds ago").arg(QDateTime::currentMSecsSinceEpoch() - trade->date);
           return QString("a few seconds ago");
         if(timeSinceTrade < 120)
           return QString("1 minute ago");

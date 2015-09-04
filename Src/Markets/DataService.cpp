@@ -398,11 +398,11 @@ void DataService::WorkerThread::receivedBrokerOrder(const meguco_user_broker_ord
   // ??
 }
 
-void DataService::WorkerThread::receivedTrade(quint32 tableId, const meguco_trade_entity& tradeData)
+void DataService::WorkerThread::receivedTrade(quint32 tableId, const meguco_trade_entity& tradeData, qint64 timeOffset)
 {
   EDataTradeData::Trade trade;
   trade.id = tradeData.entity.id;
-  trade.time = tradeData.entity.time;
+  trade.time = tradeData.entity.time + timeOffset;
   trade.price = tradeData.price;
   trade.amount = tradeData.amount;
 

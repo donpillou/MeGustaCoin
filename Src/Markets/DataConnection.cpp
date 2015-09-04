@@ -145,7 +145,7 @@ void DataConnection::addedEntity(uint32_t tableId, const zlimdb_entity& entity)
     {
     case TableInfo::tradesTable:
       if(entity.size >= sizeof(meguco_trade_entity))
-        callback->receivedTrade(tableId, *(const meguco_trade_entity*)&entity);
+        callback->receivedTrade(tableId, *(const meguco_trade_entity*)&entity, tableInfo.timeOffset);
       break;
     case TableInfo::brokerTable:
       if(entity.id == 1 && entity.size >= sizeof(meguco_user_broker_entity))
@@ -246,6 +246,11 @@ bool DataConnection::loadTables()
 
 bool DataConnection::subscribe(quint32 tableId, quint64 lastReceivedTradeId)
 {
+  qint64 serverTime, tableTime, timeOffset;
+  if(zlimdb_sync(zdb, tableId, &serverTime, &tableTime) != 0)
+    return error = getZlimDbError(), false;
+  timeOffset = QDateTime::currentMSecsSinceEpoch() - tableTime;
+
   if(lastReceivedTradeId != 0)
   {
     if(zlimdb_subscribe(zdb, tableId, zlimdb_query_type_since_id, lastReceivedTradeId) != 0)
@@ -253,18 +258,20 @@ bool DataConnection::subscribe(quint32 tableId, quint64 lastReceivedTradeId)
   }
   else
   {
-    int64_t serverTime, tableTime;
-    if(zlimdb_sync(zdb, tableId, &serverTime, &tableTime) != 0)
-      return error = getZlimDbError(), false;
     if(zlimdb_subscribe(zdb, tableId, zlimdb_query_type_since_time, tableTime - 7ULL * 24ULL * 60ULL * 60ULL * 1000ULL) != 0)
       return error = getZlimDbError(), false;
   }
+
+  TableInfo& tableInfo = this->tableInfo[tableId];
+  tableInfo.type = TableInfo::tradesTable;
+  tableInfo.nameId = 0;
+  tableInfo.timeOffset = timeOffset;
 
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   uint32_t size = sizeof(buffer);
   for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
     for(meguco_trade_entity* trade = (meguco_trade_entity*)buffer, *end = (meguco_trade_entity*)(buffer + size); trade < end; trade = (meguco_trade_entity*)((char*)trade + trade->entity.size))
-      callback->receivedTrade(tableId, *trade);
+      callback->receivedTrade(tableId, *trade, timeOffset);
   if(zlimdb_errno() != 0)
     return error = getZlimDbError(), false;
   return true;
@@ -274,6 +281,7 @@ bool DataConnection::unsubscribe(quint32 tableId)
 {
   if(zlimdb_unsubscribe(zdb, tableId) != 0)
     return error = getZlimDbError(), false;
+  tableInfo.remove(tableId);
   return true;
 }
 

@@ -112,7 +112,7 @@ private:
     virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker);
     virtual void receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session);
     virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder);
-    virtual void receivedTrade(quint32 tableId, const meguco_trade_entity& trade);
+    virtual void receivedTrade(quint32 tableId, const meguco_trade_entity& trade, qint64 timeOffset);
     virtual void receivedTicker(quint32 tableId, const meguco_ticker_entity& ticker);
   };
 
