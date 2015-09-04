@@ -7,7 +7,7 @@ public:
   static const EType eType = EType::botMarketAdapter;
 
 public:
-  EBotMarketAdapter(const meguco_bot_market_entity& data) : Entity(eType, data.entity.id)
+  EBotMarketAdapter(const meguco_broker_type_entity& data) : Entity(eType, data.entity.id)
   {
     DataConnection::getString(data.entity, sizeof(data), data.name_size, name);
     int x = name.indexOf('/');
