@@ -12,7 +12,7 @@ SessionItemModel::SessionItemModel(Entity::Manager& entityManager) :
   entityManager.registerListener<EBotSessionItemDraft>(*this);
   entityManager.registerListener<EBotService>(*this);
 
-  eBotMarketAdapter = 0;
+  eBrokerType = 0;
 }
 
 SessionItemModel::~SessionItemModel()
@@ -152,19 +152,19 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     case Column::date:
       return eItem->getDate().toString(dateFormat);
     case Column::investBase:
-      return eBotMarketAdapter->formatPrice(eItem->getInvestBase());
+      return eBrokerType->formatPrice(eItem->getInvestBase());
     case Column::investComm:
-      return eBotMarketAdapter->formatAmount(eItem->getInvestComm());
+      return eBrokerType->formatAmount(eItem->getInvestComm());
     case Column::balanceBase:
-      return eBotMarketAdapter->formatPrice(eItem->getBalanceBase());
+      return eBrokerType->formatPrice(eItem->getBalanceBase());
     case Column::balanceComm:
-      return eBotMarketAdapter->formatAmount(eItem->getBalanceComm());
+      return eBrokerType->formatAmount(eItem->getBalanceComm());
     case Column::price:
-      return eItem->getPrice() == 0 ? QString() : eBotMarketAdapter->formatPrice(eItem->getPrice());
+      return eItem->getPrice() == 0 ? QString() : eBrokerType->formatPrice(eItem->getPrice());
     case Column::profitablePrice:
-      return eItem->getPrice() == 0 ? QString() : eBotMarketAdapter->formatPrice(eItem->getProfitablePrice());
+      return eItem->getPrice() == 0 ? QString() : eBrokerType->formatPrice(eItem->getProfitablePrice());
     case Column::flipPrice:
-      return eBotMarketAdapter->formatPrice(eItem->getFlipPrice());
+      return eBrokerType->formatPrice(eItem->getFlipPrice());
     }
   }
   return QVariant();
@@ -293,19 +293,19 @@ QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, 
       case Column::date:
         return tr("Date");
       case Column::price:
-        return tr("Last Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+        return tr("Last Price %1").arg(eBrokerType ? eBrokerType->getBaseCurrency() : QString());
       case Column::investBase:
-        return tr("Input %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+        return tr("Input %1").arg(eBrokerType ? eBrokerType->getBaseCurrency() : QString());
       case Column::investComm:
-        return tr("Input %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString());
+        return tr("Input %1").arg(eBrokerType ? eBrokerType->getCommCurrency() : QString());
       case Column::balanceBase:
-        return tr("Balance %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+        return tr("Balance %1").arg(eBrokerType ? eBrokerType->getBaseCurrency() : QString());
       case Column::balanceComm:
-        return tr("Balance %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString());
+        return tr("Balance %1").arg(eBrokerType ? eBrokerType->getCommCurrency() : QString());
       case Column::profitablePrice:
-        return tr("Min Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+        return tr("Min Price %1").arg(eBrokerType ? eBrokerType->getBaseCurrency() : QString());
       case Column::flipPrice:
-        return tr("Next Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+        return tr("Next Price %1").arg(eBrokerType ? eBrokerType->getBaseCurrency() : QString());
     }
   }
   return QVariant();
@@ -352,7 +352,7 @@ void SessionItemModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   case EType::botService:
     {
       EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
-      EBotMarketAdapter* newMarketAdapter = 0;
+      EBrokerType* newBrokerType = 0;
       if(eBotService && eBotService->getSelectedSessionId() != 0)
       {
         EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
@@ -360,12 +360,12 @@ void SessionItemModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
         {
           EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotSession->getBrokerId());
           if(eBotMarket && eBotMarket->getBrokerTypeId() != 0)
-            newMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
+            newBrokerType = entityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
         }
       }
-      if(newMarketAdapter != eBotMarketAdapter)
+      if(newBrokerType != eBrokerType)
       {
-        eBotMarketAdapter = newMarketAdapter;
+        eBrokerType = newBrokerType;
         headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
       }
       break;

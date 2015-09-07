@@ -26,7 +26,7 @@
 #include "Entities/EBotMarketOrderDraft.h"
 #include "Entities/EBotMarketTransaction.h"
 #include "Entities/EBotService.h"
-#include "Entities/EBotMarketAdapter.h"
+#include "Entities/EBrokerType.h"
 #include "Entities/EBotMarketBalance.h"
 #include "Entities/ELogMessage.h"
 #include "Entities/EDatabaseService.h"

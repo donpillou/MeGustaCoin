@@ -11,7 +11,7 @@ MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
   entityManager.registerListener<EBotMarketOrderDraft>(*this);
   entityManager.registerListener<EBotService>(*this);
 
-  eBotMarketAdapter = 0;
+  eBrokerType = 0;
 }
 
 MarketOrderModel::~MarketOrderModel()
@@ -108,11 +108,11 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
     case Column::date:
       return eOrder->getDate().toString(dateFormat);
     case Column::amount:
-      return eBotMarketAdapter->formatAmount(eOrder->getAmount());
+      return eBrokerType->formatAmount(eOrder->getAmount());
     case Column::price:
-      return eBotMarketAdapter->formatPrice(eOrder->getPrice());
+      return eBrokerType->formatPrice(eOrder->getPrice());
     case Column::value:
-      return eBotMarketAdapter->formatPrice(eOrder->getAmount() * eOrder->getPrice());
+      return eBrokerType->formatPrice(eOrder->getAmount() * eOrder->getPrice());
     case Column::state:
       switch(eOrder->getState())
       {
@@ -133,7 +133,7 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
       }
       break;
     case Column::total:
-        return eOrder->getType() == EBotMarketOrder::Type::sell ? (QString("+") + eBotMarketAdapter->formatPrice(eOrder->getTotal())) : eBotMarketAdapter->formatPrice(-eOrder->getTotal());
+        return eOrder->getType() == EBotMarketOrder::Type::sell ? (QString("+") + eBrokerType->formatPrice(eOrder->getTotal())) : eBrokerType->formatPrice(-eOrder->getTotal());
     }
   }
   return QVariant();
@@ -247,15 +247,15 @@ QVariant MarketOrderModel::headerData(int section, Qt::Orientation orientation, 
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getCommCurrency() : QString());
+        return tr("Amount %1").arg(eBrokerType ? eBrokerType->getCommCurrency() : QString());
       case Column::price:
-        return tr("Price %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+        return tr("Price %1").arg(eBrokerType ? eBrokerType->getBaseCurrency() : QString());
       case Column::value:
-        return tr("Value %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+        return tr("Value %1").arg(eBrokerType ? eBrokerType->getBaseCurrency() : QString());
       case Column::state:
         return tr("Status");
       case Column::total:
-        return tr("Total %1").arg(eBotMarketAdapter ? eBotMarketAdapter->getBaseCurrency() : QString());
+        return tr("Total %1").arg(eBrokerType ? eBrokerType->getBaseCurrency() : QString());
     }
   }
   return QVariant();
@@ -302,16 +302,16 @@ void MarketOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   case EType::botService:
     {
       EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
-      EBotMarketAdapter* newMarketAdapter = 0;
+      EBrokerType* newBrokerType = 0;
       if(eBotService && eBotService->getSelectedMarketId() != 0)
       {
         EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
         if(eBotMarket && eBotMarket->getBrokerTypeId() != 0)
-          newMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
+          newBrokerType = entityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
       }
-      if(newMarketAdapter != eBotMarketAdapter)
+      if(newBrokerType != eBrokerType)
       {
-        eBotMarketAdapter = newMarketAdapter;
+        eBrokerType = newBrokerType;
         headerDataChanged(Qt::Horizontal, (int)Column::first, (int)Column::last);
       }
       break;

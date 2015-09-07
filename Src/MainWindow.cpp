@@ -153,36 +153,36 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::updateWindowTitle()
 {
   EBotMarketBalance* eBotMarketBalance = globalEntityManager.getEntity<EBotMarketBalance>(0);
-  EBotMarketAdapter* eBotMarketAdapater = 0;
+  EBrokerType* eBrokerType = 0;
   if(eBotMarketBalance)
   {
     EBotService* eBotService = globalEntityManager.getEntity<EBotService>(0);
     EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
     if(eBotMarket)
-      eBotMarketAdapater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
+      eBrokerType = globalEntityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
   }
-  if(!eBotMarketBalance || !eBotMarketAdapater)
+  if(!eBotMarketBalance || !eBrokerType)
     setWindowTitle(tr("Meguco Client"));
   else
   {
     EBotService* eBotService = globalEntityManager.getEntity<EBotService>(0);
     EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
-    EBotMarketAdapter* eBotMarketAdapater = 0;
+    EBrokerType* eBrokerType = 0;
     if(eBotMarket)
-      eBotMarketAdapater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
+      eBrokerType = globalEntityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
 
     double usd = eBotMarketBalance->getAvailableUsd() + eBotMarketBalance->getReservedUsd();
     double btc = eBotMarketBalance->getAvailableBtc() + eBotMarketBalance->getReservedBtc();
     QString title = QString("%1(%2) %3 / %4(%5) %6 - ").arg(
-      eBotMarketAdapater->formatPrice(eBotMarketBalance->getAvailableUsd()), 
-      eBotMarketAdapater->formatPrice(usd), 
-      eBotMarketAdapater->getBaseCurrency(),
-      eBotMarketAdapater->formatAmount(eBotMarketBalance->getAvailableBtc()), 
-      eBotMarketAdapater->formatAmount(btc), 
-      eBotMarketAdapater->getCommCurrency());
-    if(eBotMarketAdapater)
+      eBrokerType->formatPrice(eBotMarketBalance->getAvailableUsd()), 
+      eBrokerType->formatPrice(usd), 
+      eBrokerType->getBaseCurrency(),
+      eBrokerType->formatAmount(eBotMarketBalance->getAvailableBtc()), 
+      eBrokerType->formatAmount(btc), 
+      eBrokerType->getCommCurrency());
+    if(eBrokerType)
     {
-      const QString& marketName = eBotMarketAdapater->getName();
+      const QString& marketName = eBrokerType->getName();
       title += marketName;
       Entity::Manager* channelEntityManager = dataService.getSubscription(marketName);
       if(channelEntityManager)
@@ -407,9 +407,9 @@ void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
         EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
         if(eBotMarket)
         {
-          EBotMarketAdapter* eBotMarketAdpater = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
-          if(eBotMarketAdpater)
-            selectedChannelName = eBotMarketAdpater->getName();
+          EBrokerType* eBrokerType = globalEntityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+          if(eBrokerType)
+            selectedChannelName = eBrokerType->getName();
         }
       }
       if(selectedChannelName != oldSelectedChannelName)

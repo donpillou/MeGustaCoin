@@ -119,10 +119,10 @@ void OrdersWidget::addOrderDraft(EBotMarketOrder::Type type)
   EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
   if(!eBotMarket)
     return;
-  EBotMarketAdapter* eBotMarketAdapater = entityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
-  if(!eBotMarketAdapater)
+  EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+  if(!eBrokerType)
     return;
-  const QString& marketName = eBotMarketAdapater->getName();
+  const QString& marketName = eBrokerType->getName();
   Entity::Manager* channelEntityManager = dataService.getSubscription(marketName);
   double price = 0;
   if(channelEntityManager)

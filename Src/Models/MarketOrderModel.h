@@ -31,7 +31,7 @@ signals:
 
 private:
   Entity::Manager& entityManager;
-  EBotMarketAdapter* eBotMarketAdapter;
+  EBrokerType* eBrokerType;
   QList<EBotMarketOrder*> orders;
   QVariant draftStr;
   QVariant submittingStr;

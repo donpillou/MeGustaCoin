@@ -5,12 +5,12 @@ MarketDialog::MarketDialog(QWidget* parent, Entity::Manager& entityManager) : QD
 {
   setWindowTitle(tr("Add Market"));
 
-  QList<EBotMarketAdapter*> marketAdapters;
-  entityManager.getAllEntities<EBotMarketAdapter>(marketAdapters);
+  QList<EBrokerType*> brokerTypes;
+  entityManager.getAllEntities<EBrokerType>(brokerTypes);
 
   marketComboBox = new QComboBox(this);
-  foreach(const EBotMarketAdapter* marketAdapter, marketAdapters)
-    marketComboBox->addItem(marketAdapter->getName(), marketAdapter->getId());
+  foreach(const EBrokerType* eBrokerType, brokerTypes)
+    marketComboBox->addItem(eBrokerType->getName(), eBrokerType->getId());
 
   userEdit = new QLineEdit;
   connect(userEdit, SIGNAL(textChanged(const QString&)), this, SLOT(textChanged()));

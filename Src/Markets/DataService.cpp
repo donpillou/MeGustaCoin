@@ -263,7 +263,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
         dataService.activeSubscriptions.clear();
         globalEntityManager.removeAll<EBotType>();
         globalEntityManager.removeAll<EBotSession>();
-        globalEntityManager.removeAll<EBotMarketAdapter>();
+        globalEntityManager.removeAll<EBrokerType>();
         globalEntityManager.removeAll<EBotSessionTransaction>();
         globalEntityManager.removeAll<EBotSessionItem>();
         globalEntityManager.removeAll<EBotSessionProperty>();

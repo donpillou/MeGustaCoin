@@ -92,8 +92,8 @@ void GraphModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
           EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotSession->getBrokerId());
           if(eBotMarket && eBotMarket->getBrokerTypeId() != 0)
           {
-            EBotMarketAdapter* eBotMarketAdapter = globalEntityManager.getEntity<EBotMarketAdapter>(eBotMarket->getBrokerTypeId());
-            if(eBotMarketAdapter && eBotMarketAdapter->getName() == channelName)
+            EBrokerType* eBrokerType = globalEntityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+            if(eBrokerType && eBrokerType->getName() == channelName)
               newAddSessionMarkers = true;
           }
         }
