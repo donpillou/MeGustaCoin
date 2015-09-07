@@ -275,7 +275,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
         globalEntityManager.removeAll<EBotMarketOrder>();
         globalEntityManager.removeAll<EBotMarketOrderDraft>();
         globalEntityManager.removeAll<EBotMarketBalance>();
-        globalEntityManager.removeAll<EBotMarket>();
+        globalEntityManager.removeAll<EUserBroker>();
         eDataService->setSelectedBrokerId(0);
         eDataService->setSelectedSessionId(0);
         eDataService->setLoadingBrokerOrders(false);
@@ -385,7 +385,7 @@ void DataService::WorkerThread::receivedMarket(quint32 tableId, const QString& c
 
 void DataService::WorkerThread::receivedBroker(quint32 brokerId,const meguco_user_broker_entity& broker)
 {
-  delegateEntity(new EBotMarket(brokerId, broker));
+  delegateEntity(new EUserBroker(brokerId, broker));
 }
 
 void DataService::WorkerThread::receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session)

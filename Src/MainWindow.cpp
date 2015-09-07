@@ -157,19 +157,19 @@ void MainWindow::updateWindowTitle()
   if(eBotMarketBalance)
   {
     EBotService* eBotService = globalEntityManager.getEntity<EBotService>(0);
-    EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
-    if(eBotMarket)
-      eBrokerType = globalEntityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+    EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eBotService->getSelectedBrokerId());
+    if(eUserBroker)
+      eBrokerType = globalEntityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
   }
   if(!eBotMarketBalance || !eBrokerType)
     setWindowTitle(tr("Meguco Client"));
   else
   {
     EBotService* eBotService = globalEntityManager.getEntity<EBotService>(0);
-    EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
+    EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eBotService->getSelectedBrokerId());
     EBrokerType* eBrokerType = 0;
-    if(eBotMarket)
-      eBrokerType = globalEntityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+    if(eUserBroker)
+      eBrokerType = globalEntityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
 
     double usd = eBotMarketBalance->getAvailableUsd() + eBotMarketBalance->getReservedUsd();
     double btc = eBotMarketBalance->getAvailableBtc() + eBotMarketBalance->getReservedBtc();
@@ -402,12 +402,12 @@ void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
       QString oldSelectedChannelName = selectedChannelName;
       selectedChannelName.clear();
       EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
-      if(eBotService && eBotService->getSelectedMarketId() != 0)
+      if(eBotService && eBotService->getSelectedBrokerId() != 0)
       {
-        EBotMarket* eBotMarket = globalEntityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
-        if(eBotMarket)
+        EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eBotService->getSelectedBrokerId());
+        if(eUserBroker)
         {
-          EBrokerType* eBrokerType = globalEntityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+          EBrokerType* eBrokerType = globalEntityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
           if(eBrokerType)
             selectedChannelName = eBrokerType->getName();
         }

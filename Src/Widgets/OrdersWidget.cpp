@@ -116,10 +116,10 @@ void OrdersWidget::newSellOrder()
 void OrdersWidget::addOrderDraft(EBotMarketOrder::Type type)
 {
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
-  if(!eBotMarket)
+  EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotService->getSelectedBrokerId());
+  if(!eUserBroker)
     return;
-  EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+  EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
   if(!eBrokerType)
     return;
   const QString& marketName = eBrokerType->getName();
@@ -243,8 +243,8 @@ void OrdersWidget::updateToolBarButtons()
 {
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
   bool connected = eBotService->getState() == EBotService::State::connected;
-  bool marketSelected = connected && eBotService->getSelectedMarketId() != 0;
-  bool canCancel = !selection.isEmpty();
+  bool brokerSelected = connected && eBotService->getSelectedBrokerId() != 0;
+  bool canCancel = connected && !selection.isEmpty();
 
   bool draftSelected = false;
   for(QSet<EBotMarketOrder*>::Iterator i = selection.begin(), end = selection.end(); i != end; ++i)
@@ -257,10 +257,10 @@ void OrdersWidget::updateToolBarButtons()
     }
   }
 
-  refreshAction->setEnabled(marketSelected);
-  buyAction->setEnabled(marketSelected);
-  sellAction->setEnabled(marketSelected);
-  submitAction->setEnabled(marketSelected && draftSelected);
+  refreshAction->setEnabled(brokerSelected);
+  buyAction->setEnabled(brokerSelected);
+  sellAction->setEnabled(brokerSelected);
+  submitAction->setEnabled(brokerSelected && draftSelected);
   cancelAction->setEnabled(canCancel);
 }
 

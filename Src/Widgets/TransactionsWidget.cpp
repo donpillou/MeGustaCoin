@@ -67,9 +67,9 @@ void TransactionsWidget::updateToolBarButtons()
 {
   EBotService* eBotService = entityManager.getEntity<EBotService>(0);
   bool connected = eBotService->getState() == EBotService::State::connected;
-  bool marketSelected = eBotService->getSelectedMarketId() != 0;
+  bool brokerSelected = connected && eBotService->getSelectedBrokerId() != 0;
 
-  refreshAction->setEnabled(connected && marketSelected);
+  refreshAction->setEnabled(brokerSelected);
 }
 
 void TransactionsWidget::refresh()

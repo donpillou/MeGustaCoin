@@ -21,7 +21,7 @@ private:
   QTreeView* marketView;
   QSortFilterProxyModel* proxyModel;
 
-  QSet<EBotMarket*> selection;
+  QSet<EUserBroker*> selection;
   quint64 selectedMarketId;
 
   QAction* addAction;

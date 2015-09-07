@@ -54,8 +54,8 @@ QVariant BotSessionModel::data(const QModelIndex& index, int role) const
     }
     case Column::market:
     {
-      EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eSession->getBrokerId());
-      EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+      EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eSession->getBrokerId());
+      EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
       return eBrokerType ? eBrokerType->getName() : QVariant();
     }
     case Column::state:

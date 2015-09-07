@@ -17,7 +17,7 @@ public:
   };
 
 public:
-  EBotService() : Entity(eType, 0), state(State::offline), selectedSessionId(0), selectedMarketId(0), loadingMarketOrders(false), loadingMarketTransactions(false) {}
+  EBotService() : Entity(eType, 0), state(State::offline), selectedSessionId(0), selectedBrokerId(0), loadingMarketOrders(false), loadingMarketTransactions(false) {}
 
   State getState() const {return state;}
   void setState(State state) {this->state = state;}
@@ -25,8 +25,8 @@ public:
   quint64 getSelectedSessionId() const {return selectedSessionId;}
   void setSelectedSessionId(quint64 id) {selectedSessionId = id;}
 
-  quint64 getSelectedMarketId() const {return selectedMarketId;} // todo: rename broker
-  void setSelectedMarketId(quint64 id) {selectedMarketId = id;}
+  quint64 getSelectedBrokerId() const {return selectedBrokerId;}
+  void setSelectedBrokerId(quint64 id) {selectedBrokerId = id;}
 
   bool getLoadingMarketOrders() const {return loadingMarketOrders;};
   void setLoadingMarketOrders(bool loading) {loadingMarketOrders = loading;}
@@ -57,7 +57,7 @@ public:
 private:
   State state;
   quint64 selectedSessionId;
-  quint64 selectedMarketId;
+  quint64 selectedBrokerId;
   bool loadingMarketOrders;
   bool loadingMarketTransactions;
 };

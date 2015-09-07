@@ -188,9 +188,9 @@ void SessionTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntit
         EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
         if(eBotSession && eBotSession->getBrokerId() != 0)
         {
-          EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotSession->getBrokerId());
-          if(eBotMarket && eBotMarket->getBrokerTypeId() != 0)
-            newBrokerType = entityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+          EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotSession->getBrokerId());
+          if(eUserBroker && eUserBroker->getBrokerTypeId() != 0)
+            newBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
         }
       }
       if(newBrokerType != eBrokerType)

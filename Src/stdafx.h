@@ -21,7 +21,7 @@
 #include "Entities/EBotSessionProperty.h"
 #include "Entities/EBotType.h"
 #include "Entities/EBotSession.h"
-#include "Entities/EBotMarket.h"
+#include "Entities/EUserBroker.h"
 #include "Entities/EBotMarketOrder.h"
 #include "Entities/EBotMarketOrderDraft.h"
 #include "Entities/EBotMarketTransaction.h"

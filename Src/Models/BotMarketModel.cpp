@@ -4,18 +4,18 @@
 BotMarketModel::BotMarketModel(Entity::Manager& entityManager) : entityManager(entityManager),
   stoppedVar(tr("stopped")), startingVar(tr("starting")),runningVar(tr("running"))
 {
-  entityManager.registerListener<EBotMarket>(*this);
+  entityManager.registerListener<EUserBroker>(*this);
 }
 
 BotMarketModel::~BotMarketModel()
 {
-  entityManager.unregisterListener<EBotMarket>(*this);
+  entityManager.unregisterListener<EUserBroker>(*this);
 }
 
 QModelIndex BotMarketModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
-    return createIndex(row, column, markets.at(row));
+    return createIndex(row, column, userBrokers.at(row));
   return QModelIndex();
 }
 
@@ -26,7 +26,7 @@ QModelIndex BotMarketModel::parent(const QModelIndex& child) const
 
 int BotMarketModel::rowCount(const QModelIndex& parent) const
 {
-  return parent.isValid() ? 0 : markets.size();
+  return parent.isValid() ? 0 : userBrokers.size();
 }
 
 int BotMarketModel::columnCount(const QModelIndex& parent) const
@@ -36,8 +36,8 @@ int BotMarketModel::columnCount(const QModelIndex& parent) const
 
 QVariant BotMarketModel::data(const QModelIndex& index, int role) const
 {
-  const EBotMarket* eBotMarket = (const EBotMarket*)index.internalPointer();
-  if(!eBotMarket)
+  const EUserBroker* eUserBroker = (const EUserBroker*)index.internalPointer();
+  if(!eUserBroker)
     return QVariant();
 
   switch(role)
@@ -47,17 +47,17 @@ QVariant BotMarketModel::data(const QModelIndex& index, int role) const
     {
     case Column::name:
       {
-        EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+        EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
         return eBrokerType ? eBrokerType->getName() : QVariant();
       }
     case Column::state:
-      switch(eBotMarket->getState())
+      switch(eUserBroker->getState())
       {
-      case EBotMarket::State::stopped:
+      case EUserBroker::State::stopped:
         return stoppedVar;
-      case EBotMarket::State::starting:
+      case EUserBroker::State::starting:
         return startingVar;
-      case EBotMarket::State::running:
+      case EUserBroker::State::running:
         return runningVar;
       }
       break;
@@ -86,12 +86,12 @@ QVariant BotMarketModel::headerData(int section, Qt::Orientation orientation, in
 
 void BotMarketModel::addedEntity(Entity& entity)
 {
-  EBotMarket* eBotMarket = dynamic_cast<EBotMarket*>(&entity);
-  if(eBotMarket)
+  EUserBroker* eUserBroker = dynamic_cast<EUserBroker*>(&entity);
+  if(eUserBroker)
   {
-    int index = markets.size();
+    int index = userBrokers.size();
     beginInsertRows(QModelIndex(), index, index);
-    markets.append(eBotMarket);
+    userBrokers.append(eUserBroker);
     endInsertRows();
     return;
   }
@@ -100,14 +100,14 @@ void BotMarketModel::addedEntity(Entity& entity)
 
 void BotMarketModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EBotMarket* oldeBotMarket = dynamic_cast<EBotMarket*>(&oldEntity);
-  if(oldeBotMarket)
+  EUserBroker* oldUserBroker = dynamic_cast<EUserBroker*>(&oldEntity);
+  if(oldUserBroker)
   {
-    EBotMarket* neweBotMarket = dynamic_cast<EBotMarket*>(&newEntity);
-    int index = markets.indexOf(oldeBotMarket);
-    markets[index] = neweBotMarket;
-    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, oldeBotMarket);
-    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, oldeBotMarket);
+    EUserBroker* newUserBroker = dynamic_cast<EUserBroker*>(&newEntity);
+    int index = userBrokers.indexOf(oldUserBroker);
+    userBrokers[index] = newUserBroker;
+    QModelIndex leftModelIndex = createIndex(index, (int)Column::first, oldUserBroker);
+    QModelIndex rightModelIndex = createIndex(index, (int)Column::last, oldUserBroker);
     emit dataChanged(leftModelIndex, rightModelIndex);
     return;
   }
@@ -116,12 +116,12 @@ void BotMarketModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 
 void BotMarketModel::removedEntity(Entity& entity)
 {
-  EBotMarket* eBotMarket = dynamic_cast<EBotMarket*>(&entity);
-  if(eBotMarket)
+  EUserBroker* eUserBroker = dynamic_cast<EUserBroker*>(&entity);
+  if(eUserBroker)
   {
-    int index = markets.indexOf(eBotMarket);
+    int index = userBrokers.indexOf(eUserBroker);
     beginRemoveRows(QModelIndex(), index, index);
-    markets.removeAt(index);
+    userBrokers.removeAt(index);
     endRemoveRows();
     return;
   }
@@ -133,7 +133,7 @@ void BotMarketModel::removedAll(quint32 type)
   if((EType)type == EType::botMarket)
   {
     emit beginResetModel();
-    markets.clear();
+    userBrokers.clear();
     emit endResetModel();
     return;
   }

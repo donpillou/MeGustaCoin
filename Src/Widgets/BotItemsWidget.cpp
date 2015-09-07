@@ -164,14 +164,14 @@ void BotItemsWidget::addSessionItemDraft(EBotSessionItem::Type type)
   EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
   if(!eBotSession)
     return;
-  EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotSession->getBrokerId());
-  if(!eBotMarket)
+  EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotSession->getBrokerId());
+  if(!eUserBroker)
     return;
-  EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+  EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
   if(!eBrokerType)
     return;
-  const QString& marketName = eBrokerType->getName();
-  Entity::Manager* channelEntityManager = dataService.getSubscription(marketName);
+  const QString& brokerName = eBrokerType->getName();
+  Entity::Manager* channelEntityManager = dataService.getSubscription(brokerName);
   double price = 0;
   if(channelEntityManager)
   {

@@ -90,8 +90,8 @@ void MarketsWidget::removeMarket()
   foreach(const QModelIndex& proxyIndex, selection)
   {
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    EBotMarket* eBotMarket = (EBotMarket*)index.internalPointer();
-    dataService.removeBroker(eBotMarket->getId());
+    EUserBroker* eUserBroker = (EUserBroker*)index.internalPointer();
+    dataService.removeBroker(eUserBroker->getId());
   }
 }
 
@@ -127,8 +127,8 @@ void MarketsWidget::updateSelection()
   if(!modelSelection.isEmpty())
   {
     QModelIndex modelIndex = proxyModel->mapToSource(modelSelection.front());
-    EBotMarket* eBotMarket = (EBotMarket*)modelIndex.internalPointer();
-    selection.insert(eBotMarket);
+    EUserBroker* eUserBroker = (EUserBroker*)modelIndex.internalPointer();
+    selection.insert(eUserBroker);
   }
   if(!selection.isEmpty())
     selectedMarketId = (*selection.begin())->getId();
@@ -147,8 +147,8 @@ void MarketsWidget::marketDataChanged(const QModelIndex& topLeft, const QModelIn
   QModelIndex index = topLeft;
   for(int i = topLeft.row(), end = bottomRight.row();;)
   {
-    EBotMarket* eBotMarket = (EBotMarket*)index.internalPointer();
-    if(selection.contains(eBotMarket))
+    EUserBroker* eUserBroker = (EUserBroker*)index.internalPointer();
+    if(selection.contains(eUserBroker))
     {
       updateSelection();
       break;
@@ -164,8 +164,8 @@ void MarketsWidget::marketDataRemoved(const QModelIndex& parent, int start, int 
   for(int i = start;;)
   {
     QModelIndex index = botMarketModel.index(i, 0, parent);
-    EBotMarket* eBotMarket = (EBotMarket*)index.internalPointer();
-    selection.remove(eBotMarket);
+    EUserBroker* eUserBroker = (EUserBroker*)index.internalPointer();
+    selection.remove(eUserBroker);
     if(i++ == end)
       break;
   }
@@ -183,8 +183,8 @@ void MarketsWidget::marketDataAdded(const QModelIndex& parent, int start, int en
     for(int i = start;;)
     {
       QModelIndex index = botMarketModel.index(i, 0, parent);
-      EBotMarket* eBotMarket = (EBotMarket*)index.internalPointer();
-      if(eBotMarket->getId() == selectedMarketId)
+      EUserBroker* eUserBroker = (EUserBroker*)index.internalPointer();
+      if(eUserBroker->getId() == selectedMarketId)
       {
         QModelIndex proxyIndex = proxyModel->mapFromSource(index);
         QModelIndex proxyIndexEnd = proxyModel->mapFromSource(botMarketModel.index(i, botMarketModel.columnCount(parent) - 1, parent));

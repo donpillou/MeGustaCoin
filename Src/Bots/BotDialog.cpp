@@ -46,17 +46,17 @@ BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(
   layout->addWidget(buttonBox);
 
   QList<EBotType*> botTypes;
-  QList<EBotMarket*> markets;
+  QList<EUserBroker*> userBrokers;
   entityManager.getAllEntities<EBotType>(botTypes);
-  entityManager.getAllEntities<EBotMarket>(markets);
+  entityManager.getAllEntities<EUserBroker>(userBrokers);
   foreach(const EBotType* eBotType, botTypes)
     engineComboBox->addItem(eBotType->getName(), eBotType->getId());
-  foreach(const EBotMarket* market, markets)
+  foreach(const EUserBroker* eUserBroker, userBrokers)
   {
-    EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(market->getBrokerTypeId());
+    EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
     if(!eBrokerType)
       continue;
-    marketComboBox->addItem(eBrokerType->getName(), market->getId());
+    marketComboBox->addItem(eBrokerType->getName(), eUserBroker->getId());
   }
 
   setLayout(layout);

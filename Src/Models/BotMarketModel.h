@@ -18,7 +18,7 @@ public:
 
 private:
   Entity::Manager& entityManager;
-  QList<EBotMarket*> markets;
+  QList<EUserBroker*> userBrokers;
 
   QVariant stoppedVar;
   QVariant startingVar;

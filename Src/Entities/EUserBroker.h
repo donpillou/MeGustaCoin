@@ -1,7 +1,7 @@
 
 #pragma once
 
-class EBotMarket : public Entity // todo: rename EUserBroker
+class EUserBroker : public Entity
 {
 public:
   static const EType eType = EType::botMarket;
@@ -15,7 +15,7 @@ public:
   };
 
 public:
-  EBotMarket(quint32 tableId, const meguco_user_broker_entity& data) : Entity(eType, tableId)
+  EUserBroker(quint32 tableId, const meguco_user_broker_entity& data) : Entity(eType, tableId)
   {
     brokerTypeId = data.broker_type_id;
     state = (State)data.state;

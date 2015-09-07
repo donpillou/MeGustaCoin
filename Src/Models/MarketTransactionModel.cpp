@@ -183,11 +183,11 @@ void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity
     {
       EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
       EBrokerType* newBrokerType = 0;
-      if(eBotService && eBotService->getSelectedMarketId() != 0)
+      if(eBotService && eBotService->getSelectedBrokerId() != 0)
       {
-        EBotMarket* eBotMarket = entityManager.getEntity<EBotMarket>(eBotService->getSelectedMarketId());
-        if(eBotMarket && eBotMarket->getBrokerTypeId() != 0)
-          newBrokerType = entityManager.getEntity<EBrokerType>(eBotMarket->getBrokerTypeId());
+        EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotService->getSelectedBrokerId());
+        if(eUserBroker && eUserBroker->getBrokerTypeId() != 0)
+          newBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
       }
       if(newBrokerType != eBrokerType)
       {
