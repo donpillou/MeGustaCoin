@@ -4,7 +4,7 @@
 class EBrokerType : public Entity
 {
 public:
-  static const EType eType = EType::botMarketAdapter;
+  static const EType eType = EType::brokerType;
 
 public:
   EBrokerType(const meguco_broker_type_entity& data) : Entity(eType, data.entity.id)

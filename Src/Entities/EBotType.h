@@ -4,7 +4,7 @@
 class EBotType : public Entity
 {
 public:
-  static const EType eType = EType::botEngine;
+  static const EType eType = EType::botType;
 
 public:
   EBotType(const meguco_bot_type_entity& data) : Entity(eType, data.entity.id)

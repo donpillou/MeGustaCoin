@@ -130,7 +130,7 @@ void BotMarketModel::removedEntity(Entity& entity)
 
 void BotMarketModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::botMarket)
+  if((EType)type == EType::userBroker)
   {
     emit beginResetModel();
     userBrokers.clear();

@@ -4,7 +4,7 @@
 class EUserBroker : public Entity
 {
 public:
-  static const EType eType = EType::botMarket;
+  static const EType eType = EType::userBroker;
 
 public:
   enum class State
