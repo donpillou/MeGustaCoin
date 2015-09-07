@@ -37,6 +37,9 @@ public:
     return QString();
   }
 
+  QString getMarketOrdersState() const {return loadingMarketOrders ? QObject::tr("loading...") : QString();}
+  QString getMarketTransitionsState() const {return loadingMarketTransactions ? QObject::tr("loading...") : QString();}
+
   quint32 getSelectedSessionId() const {return selectedSessionId;}
   void setSelectedSessionId(quint32 id) {selectedSessionId = id;}
 

@@ -4,7 +4,7 @@
 MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), botMarketModel(entityManager), selectedMarketId(0)
 {
-  entityManager.registerListener<EBotService>(*this);
+  entityManager.registerListener<EDataService>(*this);
 
   setWindowTitle(tr("Markets"));
 
@@ -57,7 +57,7 @@ MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, E
 
 MarketsWidget::~MarketsWidget()
 {
-  entityManager.unregisterListener<EBotService>(*this);
+  entityManager.unregisterListener<EDataService>(*this);
 }
 
 void MarketsWidget::saveState(QSettings& settings)
@@ -95,9 +95,9 @@ void MarketsWidget::removeMarket()
   }
 }
 
-void MarketsWidget::updateTitle(EBotService& eBotService)
+void MarketsWidget::updateTitle(EDataService& eDataService)
 {
-  QString stateStr = eBotService.getStateName();
+  QString stateStr = eDataService.getStateName();
 
   QString title;
   if(stateStr.isEmpty())
@@ -111,8 +111,8 @@ void MarketsWidget::updateTitle(EBotService& eBotService)
 
 void MarketsWidget::updateToolBarButtons()
 {
-  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  bool connected = eBotService->getState() == EBotService::State::connected;
+  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
+  bool connected = eDataService->getState() == EDataService::State::connected;
   bool marketSelected = !selection.isEmpty();
 
   addAction->setEnabled(connected);
@@ -201,8 +201,8 @@ void MarketsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {
-  case EType::botService:
-    updateTitle(*dynamic_cast<EBotService*>(&newEntity));
+  case EType::dataService:
+    updateTitle(*dynamic_cast<EDataService*>(&newEntity));
     updateToolBarButtons();
     break;
   default:

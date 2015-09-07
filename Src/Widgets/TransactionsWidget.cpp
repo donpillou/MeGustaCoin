@@ -4,7 +4,7 @@
 TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), transactionModel(entityManager)
 {
-  entityManager.registerListener<EBotService>(*this);
+  entityManager.registerListener<EDataService>(*this);
 
   setWindowTitle(tr("Transactions"));
 
@@ -53,7 +53,7 @@ TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& s
 
 TransactionsWidget::~TransactionsWidget()
 {
-  entityManager.unregisterListener<EBotService>(*this);
+  entityManager.unregisterListener<EDataService>(*this);
 }
 
 void TransactionsWidget::saveState(QSettings& settings)
@@ -65,9 +65,9 @@ void TransactionsWidget::saveState(QSettings& settings)
 
 void TransactionsWidget::updateToolBarButtons()
 {
-  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  bool connected = eBotService->getState() == EBotService::State::connected;
-  bool brokerSelected = connected && eBotService->getSelectedBrokerId() != 0;
+  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
+  bool connected = eDataService->getState() == EDataService::State::connected;
+  bool brokerSelected = connected && eDataService->getSelectedBrokerId() != 0;
 
   refreshAction->setEnabled(brokerSelected);
 }
@@ -77,12 +77,12 @@ void TransactionsWidget::refresh()
   dataService.refreshBrokerTransactions();
 }
 
-void TransactionsWidget::updateTitle(EBotService& eBotService)
+void TransactionsWidget::updateTitle(EDataService& eDataService)
 {
-  QString stateStr = eBotService.getStateName();
+  QString stateStr = eDataService.getStateName();
   QString title;
   if(stateStr.isEmpty())
-    stateStr = eBotService.getMarketTransitionsState();
+    stateStr = eDataService.getMarketTransitionsState();
   if(stateStr.isEmpty())
     title = tr("Transactions");
   else
@@ -96,8 +96,8 @@ void TransactionsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {
-  case EType::botService:
-    updateTitle(*dynamic_cast<EBotService*>(&newEntity));
+  case EType::dataService:
+    updateTitle(*dynamic_cast<EDataService*>(&newEntity));
     updateToolBarButtons();
     break;
   default:

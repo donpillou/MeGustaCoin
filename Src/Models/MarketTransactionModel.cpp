@@ -8,7 +8,7 @@ MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
   entityManager.registerListener<EBotMarketTransaction>(*this);
-  entityManager.registerListener<EBotService>(*this);
+  entityManager.registerListener<EDataService>(*this);
 
   eBrokerType = 0;
 }
@@ -16,7 +16,7 @@ MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
 MarketTransactionModel::~MarketTransactionModel()
 {
   entityManager.unregisterListener<EBotMarketTransaction>(*this);
-  entityManager.unregisterListener<EBotService>(*this);
+  entityManager.unregisterListener<EDataService>(*this);
 }
 
 QModelIndex MarketTransactionModel::index(int row, int column, const QModelIndex& parent) const
@@ -156,7 +156,7 @@ void MarketTransactionModel::addedEntity(Entity& entity)
       endInsertRows();
       break;
     }
-  case EType::botService:
+  case EType::dataService:
     break;
   default:
     Q_ASSERT(false);
@@ -179,13 +179,13 @@ void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity
       emit dataChanged(leftModelIndex, rightModelIndex);
       break;
     }
-  case EType::botService:
+  case EType::dataService:
     {
-      EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
+      EDataService* eDataService = dynamic_cast<EDataService*>(&newEntity);
       EBrokerType* newBrokerType = 0;
-      if(eBotService && eBotService->getSelectedBrokerId() != 0)
+      if(eDataService && eDataService->getSelectedBrokerId() != 0)
       {
-        EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotService->getSelectedBrokerId());
+        EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eDataService->getSelectedBrokerId());
         if(eUserBroker && eUserBroker->getBrokerTypeId() != 0)
           newBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
       }
@@ -215,7 +215,7 @@ void MarketTransactionModel::removedEntity(Entity& entity)
       endRemoveRows();
       break;
     }
-  case EType::botService:
+  case EType::dataService:
     break;
   default:
     Q_ASSERT(false);
@@ -235,7 +235,7 @@ void MarketTransactionModel::removedAll(quint32 type)
       emit endResetModel();
     }
     break;
-  case EType::botService:
+  case EType::dataService:
     break;
   default:
     Q_ASSERT(false);

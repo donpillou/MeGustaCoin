@@ -45,7 +45,7 @@ private:
   QAction* cancelAction;
 
 private:
-  void updateTitle(EBotService& eBotService);
+  void updateTitle(EDataService& eDataService);
   void updateToolBarButtons();
   void updateSelection();
 

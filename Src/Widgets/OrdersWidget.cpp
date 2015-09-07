@@ -4,7 +4,7 @@
 OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), orderModel(entityManager)
 {
-  entityManager.registerListener<EBotService>(*this);
+  entityManager.registerListener<EDataService>(*this);
 
   setWindowTitle(tr("Orders"));
 
@@ -93,7 +93,7 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
 
 OrdersWidget::~OrdersWidget()
 {
-  entityManager.unregisterListener<EBotService>(*this);
+  entityManager.unregisterListener<EDataService>(*this);
 }
 
 void OrdersWidget::saveState(QSettings& settings)
@@ -115,8 +115,8 @@ void OrdersWidget::newSellOrder()
 
 void OrdersWidget::addOrderDraft(EBotMarketOrder::Type type)
 {
-  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotService->getSelectedBrokerId());
+  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
+  EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eDataService->getSelectedBrokerId());
   if(!eUserBroker)
     return;
   EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
@@ -241,9 +241,9 @@ void OrdersWidget::orderDataChanged(const QModelIndex& topLeft, const QModelInde
 
 void OrdersWidget::updateToolBarButtons()
 {
-  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  bool connected = eBotService->getState() == EBotService::State::connected;
-  bool brokerSelected = connected && eBotService->getSelectedBrokerId() != 0;
+  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
+  bool connected = eDataService->getState() == EDataService::State::connected;
+  bool brokerSelected = connected && eDataService->getSelectedBrokerId() != 0;
   bool canCancel = connected && !selection.isEmpty();
 
   bool draftSelected = false;
@@ -270,12 +270,12 @@ void OrdersWidget::refresh()
   dataService.refreshBrokerBalance();
 }
 
-void OrdersWidget::updateTitle(EBotService& eBotService)
+void OrdersWidget::updateTitle(EDataService& eDataService)
 {
-  QString stateStr = eBotService.getStateName();
+  QString stateStr = eDataService.getStateName();
   QString title;
   if(stateStr.isEmpty())
-    stateStr = eBotService.getMarketOrdersState();
+    stateStr = eDataService.getMarketOrdersState();
   if(stateStr.isEmpty())
     title = tr("Orders");
   else
@@ -289,8 +289,8 @@ void OrdersWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {
-  case EType::botService:
-    updateTitle(*dynamic_cast<EBotService*>(&newEntity));
+  case EType::dataService:
+    updateTitle(*dynamic_cast<EDataService*>(&newEntity));
     updateToolBarButtons();
     break;
   default:

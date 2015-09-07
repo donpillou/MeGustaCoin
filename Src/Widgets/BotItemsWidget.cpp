@@ -4,7 +4,7 @@
 BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), itemModel(entityManager)
 {
-  entityManager.registerListener<EBotService>(*this);
+  entityManager.registerListener<EDataService>(*this);
   entityManager.registerListener<EBotSession>(*this);
 
   setWindowTitle(tr("Bot Assets"));
@@ -77,7 +77,7 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
 
 BotItemsWidget::~BotItemsWidget()
 {
-  entityManager.unregisterListener<EBotService>(*this);
+  entityManager.unregisterListener<EDataService>(*this);
   entityManager.unregisterListener<EBotSession>(*this);
 }
 
@@ -160,8 +160,8 @@ void BotItemsWidget::cancelItem()
 
 void BotItemsWidget::addSessionItemDraft(EBotSessionItem::Type type)
 {
-  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
+  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
+  EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eDataService->getSelectedSessionId());
   if(!eBotSession)
     return;
   EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotSession->getBrokerId());
@@ -225,9 +225,9 @@ void BotItemsWidget::editedItemFlipPrice(const QModelIndex& index, double flipPr
 
 void BotItemsWidget::updateToolBarButtons()
 {
-  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  bool connected = eBotService->getState() == EBotService::State::connected;
-  bool sessionSelected = connected && eBotService->getSelectedSessionId() != 0;
+  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
+  bool connected = eDataService->getState() == EDataService::State::connected;
+  bool sessionSelected = connected && eDataService->getSelectedSessionId() != 0;
   bool canCancel = !selection.isEmpty();
 
   bool draftSelected = false;
@@ -251,14 +251,14 @@ void BotItemsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {
-  case EType::botService:
+  case EType::dataService:
     updateToolBarButtons();
     break;
   case EType::botSession:
     {
-      EBotService* eBotService = entityManager.getEntity<EBotService>(0);
+      EDataService* eDataService = entityManager.getEntity<EDataService>(0);
       EBotSession* eSession = (EBotSession*)&newEntity;
-      if(eSession->getId() == eBotService->getSelectedSessionId())
+      if(eSession->getId() == eDataService->getSelectedSessionId())
         updateToolBarButtons();
     }
     break;

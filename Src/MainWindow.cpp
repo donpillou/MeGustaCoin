@@ -4,10 +4,9 @@
 MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, "Meguco", "MegucoClientZ"),
   dataService(globalEntityManager)
 {
-  globalEntityManager.delegateEntity(*new EBotService);
   globalEntityManager.delegateEntity(*new EDataService);
   globalEntityManager.registerListener<EBotMarketBalance>(*this);
-  globalEntityManager.registerListener<EBotService>(*this);
+  globalEntityManager.registerListener<EDataService>(*this);
 
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
   connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
@@ -88,7 +87,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 MainWindow::~MainWindow()
 {
   globalEntityManager.unregisterListener<EBotMarketBalance>(*this);
-  globalEntityManager.unregisterListener<EBotService>(*this);
+  globalEntityManager.unregisterListener<EDataService>(*this);
 
   dataService.stop();
   graphService.stop();
@@ -156,8 +155,8 @@ void MainWindow::updateWindowTitle()
   EBrokerType* eBrokerType = 0;
   if(eBotMarketBalance)
   {
-    EBotService* eBotService = globalEntityManager.getEntity<EBotService>(0);
-    EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eBotService->getSelectedBrokerId());
+    EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
+    EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eDataService->getSelectedBrokerId());
     if(eUserBroker)
       eBrokerType = globalEntityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
   }
@@ -165,8 +164,8 @@ void MainWindow::updateWindowTitle()
     setWindowTitle(tr("Meguco Client"));
   else
   {
-    EBotService* eBotService = globalEntityManager.getEntity<EBotService>(0);
-    EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eBotService->getSelectedBrokerId());
+    EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
+    EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eDataService->getSelectedBrokerId());
     EBrokerType* eBrokerType = 0;
     if(eUserBroker)
       eBrokerType = globalEntityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
@@ -397,14 +396,14 @@ void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   case EType::dataTickerData:
     updateWindowTitle();
     break;
-  case EType::botService:
+  case EType::dataService:
     {
       QString oldSelectedChannelName = selectedChannelName;
       selectedChannelName.clear();
-      EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
-      if(eBotService && eBotService->getSelectedBrokerId() != 0)
+      EDataService* eDataService = dynamic_cast<EDataService*>(&newEntity);
+      if(eDataService && eDataService->getSelectedBrokerId() != 0)
       {
-        EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eBotService->getSelectedBrokerId());
+        EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eDataService->getSelectedBrokerId());
         if(eUserBroker)
         {
           EBrokerType* eBrokerType = globalEntityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());

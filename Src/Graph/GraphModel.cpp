@@ -8,14 +8,14 @@ GraphModel::GraphModel(const QString& channeName, Entity::Manager& globalEntityM
   graphService.registerGraphModel(*this);
   channelEntityManager.registerListener<EDataTradeData>(*this);
   globalEntityManager.registerListener<EBotSessionMarker>(*this);
-  globalEntityManager.registerListener<EBotService>(*this);
+  globalEntityManager.registerListener<EDataService>(*this);
 }
 
 GraphModel::~GraphModel()
 {
   channelEntityManager.unregisterListener<EDataTradeData>(*this);
   globalEntityManager.unregisterListener<EBotSessionMarker>(*this);
-  globalEntityManager.unregisterListener<EBotService>(*this);
+  globalEntityManager.unregisterListener<EDataService>(*this);
   graphService.unregisterGraphModel(*this);
 }
 
@@ -80,13 +80,13 @@ void GraphModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   case EType::dataTradeData:
     addedEntity(newEntity);
     break;
-  case EType::botService:
+  case EType::dataService:
     {
       bool newAddSessionMarkers = false;
-      EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
-      if(eBotService->getSelectedSessionId() != 0)
+      EDataService* eDataService = dynamic_cast<EDataService*>(&newEntity);
+      if(eDataService->getSelectedSessionId() != 0)
       {
-        EBotSession* eBotSession = globalEntityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
+        EBotSession* eBotSession = globalEntityManager.getEntity<EBotSession>(eDataService->getSelectedSessionId());
         if(eBotSession && eBotSession->getBrokerId() != 0)
         {
           EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eBotSession->getBrokerId());

@@ -13,7 +13,6 @@ enum class EType
   botSessionLogMessage,
   botSessionBalance,
   botSessionProperty,
-  botService,
   botEngine,
   botSession,
   botMarketAdapter,

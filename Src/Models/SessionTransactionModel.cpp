@@ -8,7 +8,7 @@ SessionTransactionModel::SessionTransactionModel(Entity::Manager& entityManager)
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
   entityManager.registerListener<EBotSessionTransaction>(*this);
-  entityManager.registerListener<EBotService>(*this);
+  entityManager.registerListener<EDataService>(*this);
 
   eBrokerType = 0;
 }
@@ -16,7 +16,7 @@ SessionTransactionModel::SessionTransactionModel(Entity::Manager& entityManager)
 SessionTransactionModel::~SessionTransactionModel()
 {
   entityManager.unregisterListener<EBotSessionTransaction>(*this);
-  entityManager.unregisterListener<EBotService>(*this);
+  entityManager.unregisterListener<EDataService>(*this);
 }
 
 QModelIndex SessionTransactionModel::index(int row, int column, const QModelIndex& parent) const
@@ -156,7 +156,7 @@ void SessionTransactionModel::addedEntity(Entity& entity)
       endInsertRows();
       break;
     }
-  case EType::botService:
+  case EType::dataService:
     break;
   default:
     Q_ASSERT(false);
@@ -179,13 +179,13 @@ void SessionTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntit
       emit dataChanged(leftModelIndex, rightModelIndex);
       break;
     }
-  case EType::botService:
+  case EType::dataService:
     {
-      EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
+      EDataService* eDataService = dynamic_cast<EDataService*>(&newEntity);
       EBrokerType* newBrokerType = 0;
-      if(eBotService && eBotService->getSelectedSessionId() != 0)
+      if(eDataService && eDataService->getSelectedSessionId() != 0)
       {
-        EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eBotService->getSelectedSessionId());
+        EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eDataService->getSelectedSessionId());
         if(eBotSession && eBotSession->getBrokerId() != 0)
         {
           EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotSession->getBrokerId());
@@ -219,7 +219,7 @@ void SessionTransactionModel::removedEntity(Entity& entity)
       endRemoveRows();
       break;
     }
-  case EType::botService:
+  case EType::dataService:
     break;
   default:
     Q_ASSERT(false);
@@ -239,7 +239,7 @@ void SessionTransactionModel::removedAll(quint32 type)
       emit endResetModel();
     }
     break;
-  case EType::botService:
+  case EType::dataService:
     break;
   default:
     Q_ASSERT(false);

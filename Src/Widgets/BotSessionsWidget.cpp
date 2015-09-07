@@ -4,7 +4,7 @@
 BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  dataService(dataService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager), selectedSessionId(0)
 {
-  entityManager.registerListener<EBotService>(*this);
+  entityManager.registerListener<EDataService>(*this);
 
   setWindowTitle(tr("Bot Sessions"));
 
@@ -67,7 +67,7 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
 
 BotSessionsWidget::~BotSessionsWidget()
 {
-  entityManager.unregisterListener<EBotService>(*this);
+  entityManager.unregisterListener<EDataService>(*this);
 }
 
 void BotSessionsWidget::saveState(QSettings& settings)
@@ -141,9 +141,9 @@ void BotSessionsWidget::optimize()
   }
 }
 
-void BotSessionsWidget::updateTitle(EBotService& eBotService)
+void BotSessionsWidget::updateTitle(EDataService& eDataService)
 {
-  QString stateStr = eBotService.getStateName();
+  QString stateStr = eDataService.getStateName();
   
   QString title;
   if(stateStr.isEmpty())
@@ -157,8 +157,8 @@ void BotSessionsWidget::updateTitle(EBotService& eBotService)
 
 void BotSessionsWidget::updateToolBarButtons()
 {
-  EBotService* eBotService = entityManager.getEntity<EBotService>(0);
-  bool connected = eBotService->getState() == EBotService::State::connected;
+  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
+  bool connected = eDataService->getState() == EDataService::State::connected;
   addAction->setEnabled(connected);
 
   bool sessionSelected = !selection.isEmpty();
@@ -254,10 +254,10 @@ void BotSessionsWidget::sessionDataAdded(const QModelIndex& parent, int start, i
 
 void BotSessionsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EBotService* eBotService = dynamic_cast<EBotService*>(&newEntity);
-  if(eBotService)
+  EDataService* eDataService = dynamic_cast<EDataService*>(&newEntity);
+  if(eDataService)
   {
-    updateTitle(*eBotService);
+    updateTitle(*eDataService);
     updateToolBarButtons();
     return;
   }
