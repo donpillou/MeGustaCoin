@@ -3,8 +3,6 @@
 
 #include <QtGui>
 
-#include "Tools/SocketConnection.h"
-#include "Tools/Sha256.h"
 #include "Tools/JobQueue.h"
 #include "Tools/Entity.h"
 #include "QTabFramework.h"

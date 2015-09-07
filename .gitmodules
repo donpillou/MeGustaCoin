@@ -1,6 +1,3 @@
-[submodule "Ext/curl"]
-	path = Ext/curl
-	url = https://github.com/bagder/curl.git
 [submodule "Ext/libcppqt"]
 	path = Ext/libcppqt
 	url = https://github.com/donpillou/libcppqt.git
