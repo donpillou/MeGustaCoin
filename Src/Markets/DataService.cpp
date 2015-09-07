@@ -261,7 +261,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
             eDataSubscription->setState(EDataSubscription::State::unsubscribed);
         }
         dataService.activeSubscriptions.clear();
-        globalEntityManager.removeAll<EBotEngine>();
+        globalEntityManager.removeAll<EBotType>();
         globalEntityManager.removeAll<EBotSession>();
         globalEntityManager.removeAll<EBotMarketAdapter>();
         globalEntityManager.removeAll<EBotSessionTransaction>();

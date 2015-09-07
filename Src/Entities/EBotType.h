@@ -1,13 +1,13 @@
 
 #pragma once
 
-class EBotEngine : public Entity // todo: rename to EBotType
+class EBotType : public Entity
 {
 public:
   static const EType eType = EType::botEngine;
 
 public:
-  EBotEngine(const meguco_bot_type_entity& data) : Entity(eType, data.entity.id)
+  EBotType(const meguco_bot_type_entity& data) : Entity(eType, data.entity.id)
   {
     DataConnection::getString(data.entity, sizeof(data), data.name_size, name);
   }

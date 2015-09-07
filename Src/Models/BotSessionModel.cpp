@@ -47,10 +47,10 @@ QVariant BotSessionModel::data(const QModelIndex& index, int role) const
     {
     case Column::name:
       return eSession->getName();
-    case Column::engine:
+    case Column::type:
     {
-      EBotEngine* eEngine = entityManager.getEntity<EBotEngine>(eSession->getBotTypeId());
-      return eEngine ? eEngine->getName() : QVariant();
+      EBotType* eBotType = entityManager.getEntity<EBotType>(eSession->getBotTypeId());
+      return eBotType ? eBotType->getName() : QVariant();
     }
     case Column::market:
     {
@@ -87,8 +87,8 @@ QVariant BotSessionModel::headerData(int section, Qt::Orientation orientation, i
     {
       case Column::name:
         return tr("Name");
-      case Column::engine:
-        return tr("Engine");
+      case Column::type:
+        return tr("Type");
       case Column::market:
         return tr("Market");
       case Column::state:

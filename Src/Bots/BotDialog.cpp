@@ -45,12 +45,12 @@ BotDialog::BotDialog(QWidget* parent, Entity::Manager& entityManager) : QDialog(
   layout->addLayout(contentLayout);
   layout->addWidget(buttonBox);
 
-  QList<EBotEngine*> engines;
+  QList<EBotType*> botTypes;
   QList<EBotMarket*> markets;
-  entityManager.getAllEntities<EBotEngine>(engines);
+  entityManager.getAllEntities<EBotType>(botTypes);
   entityManager.getAllEntities<EBotMarket>(markets);
-  foreach(const EBotEngine* engine, engines)
-    engineComboBox->addItem(engine->getName(), engine->getId());
+  foreach(const EBotType* botType, botTypes)
+    engineComboBox->addItem(botType->getName(), botType->getId());
   foreach(const EBotMarket* market, markets)
   {
     EBotMarketAdapter* eBotMarketAdapter = entityManager.getEntity<EBotMarketAdapter>(market->getBrokerTypeId());

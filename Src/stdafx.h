@@ -19,7 +19,7 @@
 #include "Entities/EBotSessionItemDraft.h"
 #include "Entities/EBotSessionLogMessage.h"
 #include "Entities/EBotSessionProperty.h"
-#include "Entities/EBotEngine.h"
+#include "Entities/EBotType.h"
 #include "Entities/EBotSession.h"
 #include "Entities/EBotMarket.h"
 #include "Entities/EBotMarketOrder.h"
