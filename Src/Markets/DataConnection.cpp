@@ -120,6 +120,10 @@ void DataConnection::zlimdbCallback(const zlimdb_header& message)
         addedEntity(addRequest->table_id, *entity);
     }
     break;
+  case zlimdb_message_update_request:
+    break;
+  case zlimdb_message_remove_request:
+    break;
   default:
     break;
   }
@@ -162,7 +166,37 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
   QString tableName;
   if(!getString(table.entity, sizeof(table), table.name_size, tableName))
     return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
-  if(tableName.startsWith("markets/") && tableName.endsWith("/trades"))
+  if(tableName == "brokers")
+  {
+    if(zlimdb_query(zdb, table.entity.id, zlimdb_query_type_all, 0) != 0)
+      return error = getZlimDbError(), false;
+    char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+    uint32_t size = sizeof(buffer);
+    QString name;
+    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
+      for(const meguco_broker_type_entity* brokerType; brokerType = (const meguco_broker_type_entity*)zlimdb_get_entity(sizeof(meguco_broker_type_entity), &data, &size);)
+      {
+        if(!getString(brokerType->entity, sizeof(*brokerType), brokerType->name_size, name))
+          return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
+        callback->receivedBrokerType(*brokerType, name);
+      }
+  }
+  else if(tableName == "bots")
+  {
+    if(zlimdb_query(zdb, table.entity.id, zlimdb_query_type_all, 0) != 0)
+      return error = getZlimDbError(), false;
+    char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+    uint32_t size = sizeof(buffer);
+    QString name;
+    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
+      for(const meguco_bot_type_entity* botType; botType = (const meguco_bot_type_entity*)zlimdb_get_entity(sizeof(meguco_bot_type_entity), &data, &size);)
+      {
+        if(!getString(botType->entity, sizeof(*botType), botType->name_size, name))
+          return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
+        callback->receivedBotType(*botType, name);
+      }
+  }
+  else if(tableName.startsWith("markets/") && tableName.endsWith("/trades"))
     callback->receivedMarket(table.entity.id, tableName.mid(8, tableName.length() - (8 + 7)));
   else if(tableName.startsWith(brokerPrefix) && tableName.endsWith("/broker"))
   {

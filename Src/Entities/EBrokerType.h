@@ -7,9 +7,8 @@ public:
   static const EType eType = EType::brokerType;
 
 public:
-  EBrokerType(const meguco_broker_type_entity& data) : Entity(eType, data.entity.id)
+  EBrokerType(const meguco_broker_type_entity& data, const QString& name) : Entity(eType, data.entity.id), name(name)
   {
-    DataConnection::getString(data.entity, sizeof(data), data.name_size, name);
     int x = name.indexOf('/');
     int y = name.indexOf('/', x + 1);
     baseCurrency = name.mid(x + 1, x + 1 - y);

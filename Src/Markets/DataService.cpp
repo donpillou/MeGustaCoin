@@ -483,6 +483,16 @@ void DataService::WorkerThread::receivedTicker(quint32 tableId, const meguco_tic
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
 }
 
+void DataService::WorkerThread::receivedBrokerType(const meguco_broker_type_entity& brokerType, const QString& name)
+{
+  delegateEntity(new EBrokerType(brokerType, name));
+}
+
+void DataService::WorkerThread::receivedBotType(const meguco_bot_type_entity& botType, const QString& name)
+{
+  delegateEntity(new EBotType(botType, name));
+}
+
 void DataService::createBroker(quint64 marketId, const QString& userName, const QString& key, const QString& secret)
 {
   class CreateBrokerJob : public Job

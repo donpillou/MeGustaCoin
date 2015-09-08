@@ -15,6 +15,8 @@ public:
     virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder) = 0;
     virtual void receivedTrade(quint32 tableId, const meguco_trade_entity& trade, qint64 timeOffset) = 0;
     virtual void receivedTicker(quint32 tableId, const meguco_ticker_entity& ticker) = 0;
+    virtual void receivedBrokerType(const meguco_broker_type_entity& brokerType, const QString& name) = 0;
+    virtual void receivedBotType(const meguco_bot_type_entity& botType, const QString& name) = 0;
   };
 
   DataConnection() : zdb(0), selectedBrokerId(0), selectedSessionId(0) {}
