@@ -54,28 +54,8 @@ public:
   bool removeSessionAsset(quint64 assetId);
 
   bool controlSessionProperty(quint64 propertyId, meguco_user_session_property_control_code code, const void* data, size_t size);
+
 public:
-  static bool getString(const zlimdb_entity& entity, size_t offset, size_t length, QString& result)
-  {
-    if(offset + length > entity.size)
-      return false;
-    result = QString::fromUtf8((const char*)&entity + offset, length);
-    return true;
-  }
-
-  static void setEntityHeader(zlimdb_entity& entity, uint64_t id, uint64_t time, uint16_t size)
-  {
-    entity.id = id;
-    entity.time = time;
-    entity.size = size;
-  }
-
-  static void setString(zlimdb_entity& entity, uint16_t& length, size_t offset, const QByteArray& str)
-  {
-    length = (uint16_t)str.length();
-    qMemCopy((char*)&entity + offset, str.constData(), str.length());
-  }
-
   static void setString(void* data, uint16_t& length, size_t offset, const QByteArray& str)
   {
     length = (uint16_t)str.length();
@@ -150,4 +130,25 @@ private:
 
 private:
   static void zlimdbCallback(void* user_data, const zlimdb_header* message) {((DataConnection*)user_data)->zlimdbCallback(*message);}
+
+  static bool getString(const zlimdb_entity& entity, size_t offset, size_t length, QString& result)
+  {
+    if(offset + length > entity.size)
+      return false;
+    result = QString::fromUtf8((const char*)&entity + offset, length);
+    return true;
+  }
+
+  static void setEntityHeader(zlimdb_entity& entity, uint64_t id, uint64_t time, uint16_t size)
+  {
+    entity.id = id;
+    entity.time = time;
+    entity.size = size;
+  }
+
+  static void setString(zlimdb_entity& entity, uint16_t& length, size_t offset, const QByteArray& str)
+  {
+    length = (uint16_t)str.length();
+    qMemCopy((char*)&entity + offset, str.constData(), str.length());
+  }
 };
