@@ -16,3 +16,6 @@
 [submodule "Ext/libmegucoprotocol"]
 	path = Ext/libmegucoprotocol
 	url = https://github.com/donpillou/libmegucoprotocol.git
+[submodule "Ext/qt"]
+	path = Ext/qt
+	url = http://code.qt.io/qt/qt.git

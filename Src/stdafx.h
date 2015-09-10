@@ -2,12 +2,11 @@
 #pragma once
 
 #include <QtGui>
+#include <QTabFramework.h>
+#include <megucoprotocol.h>
 
 #include "Tools/JobQueue.h"
 #include "Tools/Entity.h"
-#include "QTabFramework.h"
-
-#include <megucoprotocol.h>
 
 #include "Markets/DataConnection.h"
 
