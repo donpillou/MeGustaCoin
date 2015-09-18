@@ -315,10 +315,6 @@ void DataService::WorkerThread::process()
     return addMessage(ELogMessage::Type::error, QString("Could not connect to data service: %1").arg(connection.getLastError()));
   addMessage(ELogMessage::Type::information, "Connected to data service.");
 
-  // load channel list, etc.
-  if(!connection.loadTables())
-    return addMessage(ELogMessage::Type::error, QString("Could not load channel list: %1").arg(connection.getLastError()));
-
   setState(EDataService::State::connected);
 
   // loop
@@ -391,11 +387,6 @@ void DataService::WorkerThread::receivedBroker(quint32 brokerId,const meguco_use
 void DataService::WorkerThread::receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session)
 {
   delegateEntity(new EBotSession(sessionId, name, session));
-}
-
-void DataService::WorkerThread::receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder)
-{
-  // ??
 }
 
 void DataService::WorkerThread::receivedTrade(quint32 tableId, const meguco_trade_entity& tradeData, qint64 timeOffset)
@@ -491,6 +482,46 @@ void DataService::WorkerThread::receivedBrokerType(const meguco_broker_type_enti
 void DataService::WorkerThread::receivedBotType(const meguco_bot_type_entity& botType, const QString& name)
 {
   delegateEntity(new EBotType(botType, name));
+}
+
+void  DataService::WorkerThread::receivedBrokerBalance(const meguco_user_broker_balance_entity& balance)
+{
+  delegateEntity(new EBotMarketBalance(balance));
+}
+
+void DataService::WorkerThread::receivedBrokerOrder(const meguco_user_broker_order_entity& order)
+{
+  delegateEntity(new EBotMarketOrder(order));
+}
+
+void DataService::WorkerThread::receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction)
+{
+  delegateEntity(new EBotMarketTransaction(transaction));
+}
+
+void DataService::WorkerThread::receivedSessionOrder(meguco_user_broker_order_entity& order)
+{
+  delegateEntity(new EBotSessionOrder(order));
+}
+
+void DataService::WorkerThread::receivedSessionTransaction(meguco_user_broker_transaction_entity& transaction)
+{
+  delegateEntity(new EBotSessionTransaction(transaction));
+}
+
+void DataService::WorkerThread::receivedSessionAsset(meguco_user_session_asset_entity& asset)
+{
+  delegateEntity(new EBotSessionItem(asset));
+}
+
+void DataService::WorkerThread::receivedSessionLog(meguco_log_entity& log, const QString& message)
+{
+  delegateEntity(new EBotSessionLogMessage(log, message));
+}
+
+void DataService::WorkerThread::receivedSessionProperty(meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit)
+{
+  delegateEntity(new EBotSessionProperty(property, name, value, unit));
 }
 
 void DataService::createBroker(quint64 marketId, const QString& userName, const QString& key, const QString& secret)
@@ -878,7 +909,6 @@ void DataService::removeSessionAsset(EBotSessionItem& asset)
   asset.setState(EBotSessionItem::State::removing);
   globalEntityManager.updatedEntity(asset);
 
-  /*todo*/
   class RemoveSessionAssetJob : public Job
   {
   public:

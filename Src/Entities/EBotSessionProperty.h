@@ -20,7 +20,7 @@ public:
   };
 
 public:
-  EBotSessionProperty(const meguco_user_session_property_entity& data, const QString& name, const QString& vlaue, const QString& unit) : Entity(eType, data.entity.id), name(name), value(value), unit(unit)
+  EBotSessionProperty(const meguco_user_session_property_entity& data, const QString& name, const QString& value, const QString& unit) : Entity(eType, data.entity.id), name(name), value(value), unit(unit)
   {
     type = (Type)data.type;
     flags = data.flags;

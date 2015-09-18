@@ -111,11 +111,18 @@ private:
     virtual void receivedMarket(quint32 tableId, const QString& channelName);
     virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker);
     virtual void receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session);
-    virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder);
     virtual void receivedTrade(quint32 tableId, const meguco_trade_entity& trade, qint64 timeOffset);
     virtual void receivedTicker(quint32 tableId, const meguco_ticker_entity& ticker);
     virtual void receivedBrokerType(const meguco_broker_type_entity& brokerType, const QString& name);
     virtual void receivedBotType(const meguco_bot_type_entity& botType, const QString& name);
+    virtual void receivedBrokerBalance(const meguco_user_broker_balance_entity& balance);
+    virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& order);
+    virtual void receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction);
+    virtual void receivedSessionOrder(meguco_user_broker_order_entity& order);
+    virtual void receivedSessionTransaction(meguco_user_broker_transaction_entity& transaction);
+    virtual void receivedSessionAsset(meguco_user_session_asset_entity& asset);
+    virtual void receivedSessionLog(meguco_log_entity& log, const QString& message);
+    virtual void receivedSessionProperty(meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit);
   };
 
 private:

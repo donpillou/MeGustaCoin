@@ -12,11 +12,18 @@ public:
     virtual void receivedMarket(quint32 tableId, const QString& channelName) = 0;
     virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker) = 0;
     virtual void receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session) = 0;
-    virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder) = 0;
     virtual void receivedTrade(quint32 tableId, const meguco_trade_entity& trade, qint64 timeOffset) = 0;
     virtual void receivedTicker(quint32 tableId, const meguco_ticker_entity& ticker) = 0;
     virtual void receivedBrokerType(const meguco_broker_type_entity& brokerType, const QString& name) = 0;
     virtual void receivedBotType(const meguco_bot_type_entity& botType, const QString& name) = 0;
+    virtual void receivedBrokerBalance(const meguco_user_broker_balance_entity& balance) = 0;
+    virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder) = 0; 
+    virtual void receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction) = 0;
+    virtual void receivedSessionOrder(meguco_user_broker_order_entity& order) = 0;
+    virtual void receivedSessionTransaction(meguco_user_broker_transaction_entity& transaction) = 0;
+    virtual void receivedSessionAsset(meguco_user_session_asset_entity& asset) = 0;
+    virtual void receivedSessionLog(meguco_log_entity& log, const QString& message) = 0;
+    virtual void receivedSessionProperty(meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit) = 0;
   };
 
   DataConnection() : zdb(0), selectedBrokerId(0), selectedSessionId(0) {}
@@ -27,8 +34,6 @@ public:
   void close();
   bool process();
   void interrupt();
-
-  bool loadTables();
 
   bool subscribe(quint32 tableId, quint64 lastReceivedTradeId);
   bool unsubscribe(quint32 tableId);
@@ -70,6 +75,14 @@ private:
       tradesTable,
       brokerTable,
       sessionTable,
+      brokerBalanceTable,
+      brokerOrdersTable,
+      brokerTransactionsTable,
+      sessionOrdersTable,
+      sessionTransactionsTable,
+      sessionAssetsTable,
+      sessionLogTable,
+      sessionPropertiesTable,
     } type;
     quint64 nameId;
     qint64 timeOffset;
@@ -123,6 +136,8 @@ private:
 
   //bool removeTable(quint32 id);
   //bool controlEntity(quint32 tableId, quint64 entityId, quint32 code);
+
+  bool subscribe(quint32 tableId, TableInfo::Type type);
 
   void addedEntity(uint32_t tableId, const zlimdb_entity& entity);
 

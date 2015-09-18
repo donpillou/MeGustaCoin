@@ -1,7 +1,7 @@
 
 #pragma once
 
-class EBotMarketBalance : public Entity
+class EBotMarketBalance : public Entity // todo: rename to EBotUserBrokerBalance
 {
 public:
   static const EType eType = EType::botMarketBalance;
