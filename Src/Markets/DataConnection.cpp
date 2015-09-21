@@ -176,6 +176,59 @@ void DataConnection::addedEntity(uint32_t tableId, const zlimdb_entity& entity)
       if(entity.id == 1 && entity.size >= sizeof(meguco_user_broker_entity))
         callback->receivedBroker(tableInfo.nameId, *(const meguco_user_broker_entity*)&entity);
       break;
+    case TableInfo::sessionTable:
+      if(entity.id == 1 && entity.size >= sizeof(meguco_user_session_entity))
+      {
+        const meguco_user_session_entity* session = (const meguco_user_session_entity*)&entity;
+        QString name;
+        if(getString(session->entity, sizeof(*session), session->name_size, name))
+          callback->receivedSession(tableInfo.nameId, name, *session);
+      }
+      break;
+    case TableInfo::brokerBalanceTable:
+      if(entity.size >= sizeof(meguco_user_broker_balance_entity))
+        callback->receivedBrokerBalance(*(const meguco_user_broker_balance_entity*)&entity);
+      break;
+    case TableInfo::brokerOrdersTable:
+      if(entity.size >= sizeof(meguco_user_broker_order_entity))
+        callback->receivedBrokerOrder(*(const meguco_user_broker_order_entity*)&entity);
+      break;
+    case TableInfo::brokerTransactionsTable:
+      if(entity.size >= sizeof(meguco_user_broker_transaction_entity))
+        callback->receivedBrokerTransaction(*(const meguco_user_broker_transaction_entity*)&entity);
+      break;
+    case TableInfo::sessionOrdersTable:
+      if(entity.size >= sizeof(meguco_user_broker_order_entity))
+        callback->receivedSessionOrder(*(const meguco_user_broker_order_entity*)&entity);
+      break;
+    case TableInfo::sessionTransactionsTable:
+      if(entity.size >= sizeof(meguco_user_broker_transaction_entity))
+        callback->receivedSessionTransaction(*(const meguco_user_broker_transaction_entity*)&entity);
+      break;
+    case TableInfo::sessionAssetsTable:
+      if(entity.size >= sizeof(meguco_user_session_asset_entity))
+        callback->receivedSessionAsset(*(const meguco_user_session_asset_entity*)&entity);
+      break;
+    case TableInfo::sessionLogTable:
+      if(entity.size >= sizeof(meguco_log_entity))
+      {
+        const meguco_log_entity* logMessage = (const meguco_log_entity*)&entity;
+        QString message;
+        if(getString(logMessage->entity, sizeof(*logMessage), logMessage->message_size, message))
+          callback->receivedSessionLog(*logMessage, message);
+      }
+      break;
+    case TableInfo::sessionPropertiesTable:
+      if(entity.size >= sizeof(meguco_user_session_property_entity))
+      {
+        const meguco_user_session_property_entity* property = (const meguco_user_session_property_entity*)&entity;
+        QString name, value, unit;
+          if(getString(property->entity, sizeof(*property), property->name_size, name))
+            if(getString(property->entity, sizeof(*property) + property->name_size, property->value_size, value))
+              if(getString(property->entity, sizeof(*property) + property->name_size + property->value_size, property->unit_size, unit))
+                callback->receivedSessionProperty(*property, name, value, unit);
+      }
+      break;
     default:
       break;
     }
@@ -413,8 +466,6 @@ bool DataConnection::subscribe(quint32 tableId, TableInfo::Type type)
   {
   case TableInfo::brokerBalanceTable:
     for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-      // todo: ?? subscribe to these tables when they are added later
-      // todo: ?? add handler for added entities etc.
       for(const meguco_user_broker_balance_entity* balance; balance = (const meguco_user_broker_balance_entity*)zlimdb_get_entity(sizeof(meguco_user_broker_balance_entity), &data, &size);)
         callback->receivedBrokerBalance(*balance);
     break;
