@@ -499,27 +499,27 @@ void DataService::WorkerThread::receivedBrokerTransaction(const meguco_user_brok
   delegateEntity(new EBotMarketTransaction(transaction));
 }
 
-void DataService::WorkerThread::receivedSessionOrder(meguco_user_broker_order_entity& order)
+void DataService::WorkerThread::receivedSessionOrder(const meguco_user_broker_order_entity& order)
 {
   delegateEntity(new EBotSessionOrder(order));
 }
 
-void DataService::WorkerThread::receivedSessionTransaction(meguco_user_broker_transaction_entity& transaction)
+void DataService::WorkerThread::receivedSessionTransaction(const meguco_user_broker_transaction_entity& transaction)
 {
   delegateEntity(new EBotSessionTransaction(transaction));
 }
 
-void DataService::WorkerThread::receivedSessionAsset(meguco_user_session_asset_entity& asset)
+void DataService::WorkerThread::receivedSessionAsset(const meguco_user_session_asset_entity& asset)
 {
   delegateEntity(new EBotSessionItem(asset));
 }
 
-void DataService::WorkerThread::receivedSessionLog(meguco_log_entity& log, const QString& message)
+void DataService::WorkerThread::receivedSessionLog(const meguco_log_entity& log, const QString& message)
 {
   delegateEntity(new EBotSessionLogMessage(log, message));
 }
 
-void DataService::WorkerThread::receivedSessionProperty(meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit)
+void DataService::WorkerThread::receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit)
 {
   delegateEntity(new EBotSessionProperty(property, name, value, unit));
 }

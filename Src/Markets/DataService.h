@@ -118,11 +118,11 @@ private:
     virtual void receivedBrokerBalance(const meguco_user_broker_balance_entity& balance);
     virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& order);
     virtual void receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction);
-    virtual void receivedSessionOrder(meguco_user_broker_order_entity& order);
-    virtual void receivedSessionTransaction(meguco_user_broker_transaction_entity& transaction);
-    virtual void receivedSessionAsset(meguco_user_session_asset_entity& asset);
-    virtual void receivedSessionLog(meguco_log_entity& log, const QString& message);
-    virtual void receivedSessionProperty(meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit);
+    virtual void receivedSessionOrder(const meguco_user_broker_order_entity& order);
+    virtual void receivedSessionTransaction(const meguco_user_broker_transaction_entity& transaction);
+    virtual void receivedSessionAsset(const meguco_user_session_asset_entity& asset);
+    virtual void receivedSessionLog(const meguco_log_entity& log, const QString& message);
+    virtual void receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit);
   };
 
 private:

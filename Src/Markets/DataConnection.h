@@ -19,11 +19,11 @@ public:
     virtual void receivedBrokerBalance(const meguco_user_broker_balance_entity& balance) = 0;
     virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder) = 0; 
     virtual void receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction) = 0;
-    virtual void receivedSessionOrder(meguco_user_broker_order_entity& order) = 0;
-    virtual void receivedSessionTransaction(meguco_user_broker_transaction_entity& transaction) = 0;
-    virtual void receivedSessionAsset(meguco_user_session_asset_entity& asset) = 0;
-    virtual void receivedSessionLog(meguco_log_entity& log, const QString& message) = 0;
-    virtual void receivedSessionProperty(meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit) = 0;
+    virtual void receivedSessionOrder(const meguco_user_broker_order_entity& order) = 0;
+    virtual void receivedSessionTransaction(const meguco_user_broker_transaction_entity& transaction) = 0;
+    virtual void receivedSessionAsset(const meguco_user_session_asset_entity& asset) = 0;
+    virtual void receivedSessionLog(const meguco_log_entity& log, const QString& message) = 0;
+    virtual void receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit) = 0;
   };
 
   DataConnection() : zdb(0), selectedBrokerId(0), selectedSessionId(0) {}
@@ -104,7 +104,6 @@ private:
   {
   public:
     quint32 sessionTableId;
-    quint32 balanceTableId;
     quint32 ordersTableId;
     quint32 transactionsTableId;
     quint32 assetsTableId;
@@ -112,7 +111,7 @@ private:
     quint32 propertiesTableId;
 
   public:
-    SessionData() : sessionTableId(0), balanceTableId(0), ordersTableId(0), transactionsTableId(0), assetsTableId(0), logTableId(0) {}
+    SessionData() : sessionTableId(0), ordersTableId(0), transactionsTableId(0), assetsTableId(0), logTableId(0) {}
   };
 
 private:
