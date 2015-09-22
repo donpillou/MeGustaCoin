@@ -537,7 +537,7 @@ bool DataConnection::selectBroker(quint32 brokerId)
     return true;
   if(this->selectedBrokerId != 0)
   {
-    QHash<quint32, BrokerData>::Iterator it = this->brokerData.find(brokerId);
+    QHash<quint32, BrokerData>::Iterator it = this->brokerData.find(this->selectedBrokerId);
     if(it != this->brokerData.end())
     {
       const BrokerData& brokerData = *it;
@@ -702,7 +702,7 @@ bool DataConnection::selectSession(quint32 sessionId)
     return true;
   if(this->selectedSessionId != 0)
   {
-    QHash<quint32, SessionData>::Iterator it = this->sessionData.find(sessionId);
+    QHash<quint32, SessionData>::Iterator it = this->sessionData.find(this->selectedSessionId);
     if(it != this->sessionData.end())
     {
       const SessionData& sessionData = *it;
