@@ -176,12 +176,12 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
         return false;
       if(eOrder->getState() == EBotMarketOrder::State::draft)
       {
-        EBotMarketBalance* eBotMarketBalance = entityManager.getEntity<EBotMarketBalance>(0);
-        if(eBotMarketBalance)
+        EUserBrokerBalance* eUserBrokerBalance = entityManager.getEntity<EUserBrokerBalance>(0);
+        if(eUserBrokerBalance)
         {
           double total = eOrder->getType() == EBotMarketOrder::Type::buy ?
-            qCeil(eOrder->getAmount() * newPrice * (1. + eBotMarketBalance->getFee()) * 100.) / 100. :
-            qFloor(eOrder->getAmount() * newPrice * (1. - eBotMarketBalance->getFee()) * 100.) / 100.;
+            qCeil(eOrder->getAmount() * newPrice * (1. + eUserBrokerBalance->getFee()) * 100.) / 100. :
+            qFloor(eOrder->getAmount() * newPrice * (1. - eUserBrokerBalance->getFee()) * 100.) / 100.;
           eOrder->setPrice(newPrice, total);
         }
       }
@@ -199,12 +199,12 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
         return false;
       if(eOrder->getState() == EBotMarketOrder::State::draft)
       {
-        EBotMarketBalance* eBotMarketBalance = entityManager.getEntity<EBotMarketBalance>(0);
-        if(eBotMarketBalance)
+        EUserBrokerBalance* eUserBrokerBalance = entityManager.getEntity<EUserBrokerBalance>(0);
+        if(eUserBrokerBalance)
         {
           double total = eOrder->getType() == EBotMarketOrder::Type::buy ?
-            qCeil(newAmount * eOrder->getPrice() * (1. + eBotMarketBalance->getFee()) * 100.) / 100. :
-            qFloor(newAmount * eOrder->getPrice() * (1. - eBotMarketBalance->getFee()) * 100.) / 100.;
+            qCeil(newAmount * eOrder->getPrice() * (1. + eUserBrokerBalance->getFee()) * 100.) / 100. :
+            qFloor(newAmount * eOrder->getPrice() * (1. - eUserBrokerBalance->getFee()) * 100.) / 100.;
           eOrder->setAmount(newAmount, total);
         }
       }

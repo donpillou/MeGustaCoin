@@ -1,13 +1,13 @@
 
 #pragma once
 
-class EBotMarketBalance : public Entity // todo: rename to EBotUserBrokerBalance
+class EUserBrokerBalance : public Entity
 {
 public:
-  static const EType eType = EType::botMarketBalance;
+  static const EType eType = EType::userBrokerBalance;
 
 public:
-  EBotMarketBalance(const meguco_user_broker_balance_entity& data) : Entity(eType, data.entity.id)
+  EUserBrokerBalance(const meguco_user_broker_balance_entity& data) : Entity(eType, data.entity.id)
   {
     reservedUsd = data.reserved_usd;
     reservedBtc = data.reserved_btc;

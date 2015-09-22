@@ -5,7 +5,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   dataService(globalEntityManager)
 {
   globalEntityManager.delegateEntity(*new EDataService);
-  globalEntityManager.registerListener<EBotMarketBalance>(*this);
+  globalEntityManager.registerListener<EUserBrokerBalance>(*this);
   globalEntityManager.registerListener<EDataService>(*this);
 
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
@@ -86,7 +86,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 
 MainWindow::~MainWindow()
 {
-  globalEntityManager.unregisterListener<EBotMarketBalance>(*this);
+  globalEntityManager.unregisterListener<EUserBrokerBalance>(*this);
   globalEntityManager.unregisterListener<EDataService>(*this);
 
   dataService.stop();
@@ -151,16 +151,16 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::updateWindowTitle()
 {
-  EBotMarketBalance* eBotMarketBalance = globalEntityManager.getEntity<EBotMarketBalance>(0);
+  EUserBrokerBalance* eUserBrokerBalance = globalEntityManager.getEntity<EUserBrokerBalance>(0);
   EBrokerType* eBrokerType = 0;
-  if(eBotMarketBalance)
+  if(eUserBrokerBalance)
   {
     EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
     EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eDataService->getSelectedBrokerId());
     if(eUserBroker)
       eBrokerType = globalEntityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
   }
-  if(!eBotMarketBalance || !eBrokerType)
+  if(!eUserBrokerBalance || !eBrokerType)
     setWindowTitle(tr("Meguco Client"));
   else
   {
@@ -170,13 +170,13 @@ void MainWindow::updateWindowTitle()
     if(eUserBroker)
       eBrokerType = globalEntityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
 
-    double usd = eBotMarketBalance->getAvailableUsd() + eBotMarketBalance->getReservedUsd();
-    double btc = eBotMarketBalance->getAvailableBtc() + eBotMarketBalance->getReservedBtc();
+    double usd = eUserBrokerBalance->getAvailableUsd() + eUserBrokerBalance->getReservedUsd();
+    double btc = eUserBrokerBalance->getAvailableBtc() + eUserBrokerBalance->getReservedBtc();
     QString title = QString("%1(%2) %3 / %4(%5) %6 - ").arg(
-      eBrokerType->formatPrice(eBotMarketBalance->getAvailableUsd()), 
+      eBrokerType->formatPrice(eUserBrokerBalance->getAvailableUsd()), 
       eBrokerType->formatPrice(usd), 
       eBrokerType->getBaseCurrency(),
-      eBrokerType->formatAmount(eBotMarketBalance->getAvailableBtc()), 
+      eBrokerType->formatAmount(eUserBrokerBalance->getAvailableBtc()), 
       eBrokerType->formatAmount(btc), 
       eBrokerType->getCommCurrency());
     if(eBrokerType)
@@ -379,7 +379,7 @@ void MainWindow::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botMarketBalance:
+  case EType::userBrokerBalance:
   case EType::dataTickerData:
     updateWindowTitle();
     break;
@@ -392,7 +392,7 @@ void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)newEntity.getType())
   {
-  case EType::botMarketBalance:
+  case EType::userBrokerBalance:
   case EType::dataTickerData:
     updateWindowTitle();
     break;
@@ -443,7 +443,7 @@ void MainWindow::removedAll(quint32 type)
 {
   switch((EType)type)
   {
-  case EType::botMarketBalance:
+  case EType::userBrokerBalance:
   case EType::dataTickerData:
     updateWindowTitle();
     break;
