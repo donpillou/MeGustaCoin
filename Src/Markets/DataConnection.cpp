@@ -37,6 +37,8 @@ bool DataConnection::connect(const QString& server, quint16 port, const QString&
   this->callback = &callback;
 
   // subscribe to tables table
+  TableInfo& tableInfo = this->tableInfo[zlimdb_table_tables];
+  tableInfo.type = TableInfo::tablesTable;
   if(zlimdb_subscribe(zdb, zlimdb_table_tables, zlimdb_query_type_all, 0) != 0)
     return error = getZlimDbError(), false;
   QList<QByteArray> tables;
@@ -144,6 +146,11 @@ void DataConnection::zlimdbCallback(const zlimdb_header& message)
   case zlimdb_message_update_request:
     break;
   case zlimdb_message_remove_request:
+    if(message.size >= sizeof(zlimdb_remove_request))
+    {
+      const zlimdb_remove_request* removeRequest = (zlimdb_remove_request*)&message;
+      removedEntity(removeRequest->table_id, removeRequest->id);
+    }
     break;
   default:
     break;
@@ -152,86 +159,92 @@ void DataConnection::zlimdbCallback(const zlimdb_header& message)
 
 void DataConnection::addedEntity(uint32_t tableId, const zlimdb_entity& entity)
 {
-  if(tableId == zlimdb_table_tables)
+  QHash<quint32, TableInfo>::ConstIterator it = tableInfo.find(tableId);
+  if(it == tableInfo.end())
+    return;
+  const TableInfo& tableInfo = it.value();
+  switch(tableInfo.type)
   {
+  case TableInfo::tablesTable:
     if(entity.size >= sizeof(zlimdb_table_entity))
+      addedTable(*(const zlimdb_table_entity*)&entity);
+    break;
+  case TableInfo::tradesTable:
+    if(entity.size >= sizeof(meguco_trade_entity))
+      callback->receivedTrade(tableId, *(const meguco_trade_entity*)&entity, tableInfo.timeOffset);
+    break;
+  case TableInfo::brokerTable:
+    if(entity.id == 1 && entity.size >= sizeof(meguco_user_broker_entity))
+      callback->receivedBroker(tableInfo.nameId, *(const meguco_user_broker_entity*)&entity);
+    break;
+  case TableInfo::sessionTable:
+    if(entity.id == 1 && entity.size >= sizeof(meguco_user_session_entity))
     {
-      const zlimdb_table_entity& tableEntity = *(const zlimdb_table_entity*)&entity;
-      addedTable(tableEntity);
+      const meguco_user_session_entity* session = (const meguco_user_session_entity*)&entity;
+      QString name;
+      if(getString(session->entity, sizeof(*session), session->name_size, name))
+        callback->receivedSession(tableInfo.nameId, name, *session);
     }
+    break;
+  case TableInfo::brokerBalanceTable:
+    if(entity.size >= sizeof(meguco_user_broker_balance_entity))
+      callback->receivedBrokerBalance(*(const meguco_user_broker_balance_entity*)&entity);
+    break;
+  case TableInfo::brokerOrdersTable:
+    if(entity.size >= sizeof(meguco_user_broker_order_entity))
+      callback->receivedBrokerOrder(*(const meguco_user_broker_order_entity*)&entity);
+    break;
+  case TableInfo::brokerTransactionsTable:
+    if(entity.size >= sizeof(meguco_user_broker_transaction_entity))
+      callback->receivedBrokerTransaction(*(const meguco_user_broker_transaction_entity*)&entity);
+    break;
+  case TableInfo::sessionOrdersTable:
+    if(entity.size >= sizeof(meguco_user_broker_order_entity))
+      callback->receivedSessionOrder(*(const meguco_user_broker_order_entity*)&entity);
+    break;
+  case TableInfo::sessionTransactionsTable:
+    if(entity.size >= sizeof(meguco_user_broker_transaction_entity))
+      callback->receivedSessionTransaction(*(const meguco_user_broker_transaction_entity*)&entity);
+    break;
+  case TableInfo::sessionAssetsTable:
+    if(entity.size >= sizeof(meguco_user_session_asset_entity))
+      callback->receivedSessionAsset(*(const meguco_user_session_asset_entity*)&entity);
+    break;
+  case TableInfo::sessionLogTable:
+    if(entity.size >= sizeof(meguco_log_entity))
+    {
+      const meguco_log_entity* logMessage = (const meguco_log_entity*)&entity;
+      QString message;
+      if(getString(logMessage->entity, sizeof(*logMessage), logMessage->message_size, message))
+        callback->receivedSessionLog(*logMessage, message);
+    }
+    break;
+  case TableInfo::sessionPropertiesTable:
+    if(entity.size >= sizeof(meguco_user_session_property_entity))
+    {
+      const meguco_user_session_property_entity* property = (const meguco_user_session_property_entity*)&entity;
+      QString name, value, unit;
+        if(getString(property->entity, sizeof(*property), property->name_size, name))
+          if(getString(property->entity, sizeof(*property) + property->name_size, property->value_size, value))
+            if(getString(property->entity, sizeof(*property) + property->name_size + property->value_size, property->unit_size, unit))
+              callback->receivedSessionProperty(*property, name, value, unit);
+    }
+    break;
+  default:
+    break;
   }
-  else
+}
+
+void DataConnection::removedEntity(uint32_t tableId, uint64_t entityId)
+{
+  QHash<quint32, TableInfo>::ConstIterator it = tableInfo.find(tableId);
+  if(it == tableInfo.end())
+    return;
+  const TableInfo& tableInfo = it.value();
+  switch(tableInfo.type)
   {
-    QHash<quint32, TableInfo>::ConstIterator it = tableInfo.find(tableId);
-    if(it == tableInfo.end())
-      return;
-    const TableInfo& tableInfo = it.value();
-    switch(tableInfo.type)
-    {
-    case TableInfo::tradesTable:
-      if(entity.size >= sizeof(meguco_trade_entity))
-        callback->receivedTrade(tableId, *(const meguco_trade_entity*)&entity, tableInfo.timeOffset);
-      break;
-    case TableInfo::brokerTable:
-      if(entity.id == 1 && entity.size >= sizeof(meguco_user_broker_entity))
-        callback->receivedBroker(tableInfo.nameId, *(const meguco_user_broker_entity*)&entity);
-      break;
-    case TableInfo::sessionTable:
-      if(entity.id == 1 && entity.size >= sizeof(meguco_user_session_entity))
-      {
-        const meguco_user_session_entity* session = (const meguco_user_session_entity*)&entity;
-        QString name;
-        if(getString(session->entity, sizeof(*session), session->name_size, name))
-          callback->receivedSession(tableInfo.nameId, name, *session);
-      }
-      break;
-    case TableInfo::brokerBalanceTable:
-      if(entity.size >= sizeof(meguco_user_broker_balance_entity))
-        callback->receivedBrokerBalance(*(const meguco_user_broker_balance_entity*)&entity);
-      break;
-    case TableInfo::brokerOrdersTable:
-      if(entity.size >= sizeof(meguco_user_broker_order_entity))
-        callback->receivedBrokerOrder(*(const meguco_user_broker_order_entity*)&entity);
-      break;
-    case TableInfo::brokerTransactionsTable:
-      if(entity.size >= sizeof(meguco_user_broker_transaction_entity))
-        callback->receivedBrokerTransaction(*(const meguco_user_broker_transaction_entity*)&entity);
-      break;
-    case TableInfo::sessionOrdersTable:
-      if(entity.size >= sizeof(meguco_user_broker_order_entity))
-        callback->receivedSessionOrder(*(const meguco_user_broker_order_entity*)&entity);
-      break;
-    case TableInfo::sessionTransactionsTable:
-      if(entity.size >= sizeof(meguco_user_broker_transaction_entity))
-        callback->receivedSessionTransaction(*(const meguco_user_broker_transaction_entity*)&entity);
-      break;
-    case TableInfo::sessionAssetsTable:
-      if(entity.size >= sizeof(meguco_user_session_asset_entity))
-        callback->receivedSessionAsset(*(const meguco_user_session_asset_entity*)&entity);
-      break;
-    case TableInfo::sessionLogTable:
-      if(entity.size >= sizeof(meguco_log_entity))
-      {
-        const meguco_log_entity* logMessage = (const meguco_log_entity*)&entity;
-        QString message;
-        if(getString(logMessage->entity, sizeof(*logMessage), logMessage->message_size, message))
-          callback->receivedSessionLog(*logMessage, message);
-      }
-      break;
-    case TableInfo::sessionPropertiesTable:
-      if(entity.size >= sizeof(meguco_user_session_property_entity))
-      {
-        const meguco_user_session_property_entity* property = (const meguco_user_session_property_entity*)&entity;
-        QString name, value, unit;
-          if(getString(property->entity, sizeof(*property), property->name_size, name))
-            if(getString(property->entity, sizeof(*property) + property->name_size, property->value_size, value))
-              if(getString(property->entity, sizeof(*property) + property->name_size + property->value_size, property->unit_size, unit))
-                callback->receivedSessionProperty(*property, name, value, unit);
-      }
-      break;
-    default:
-      break;
-    }
+  default:
+    break;
   }
 }
 
@@ -373,7 +386,6 @@ bool DataConnection::subscribe(quint32 tableId, quint64 lastReceivedTradeId)
 
   TableInfo& tableInfo = this->tableInfo[tableId];
   tableInfo.type = TableInfo::tradesTable;
-  tableInfo.nameId = 0;
   tableInfo.timeOffset = timeOffset;
 
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
@@ -458,7 +470,6 @@ bool DataConnection::subscribe(quint32 tableId, TableInfo::Type type)
 
   TableInfo& tableInfo = this->tableInfo[tableId];
   tableInfo.type = type;
-  tableInfo.nameId = 0;
 
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   uint32_t size = sizeof(buffer);

@@ -72,6 +72,7 @@ private:
   {
     enum Type
     {
+      tablesTable,
       tradesTable,
       brokerTable,
       sessionTable,
@@ -139,6 +140,7 @@ private:
   bool subscribe(quint32 tableId, TableInfo::Type type);
 
   void addedEntity(uint32_t tableId, const zlimdb_entity& entity);
+  void removedEntity(uint32_t tableId, uint64_t entityId);
 
   bool addedTable(const zlimdb_table_entity& table);
 
