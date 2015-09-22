@@ -229,6 +229,28 @@ void DataService::WorkerThread::delegateEntity(Entity* entity)
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
 }
 
+void DataService::WorkerThread::removeEntity(EType type, quint64 id)
+{
+  class RemoveEntityEvent : public Event
+  {
+  public:
+    RemoveEntityEvent(EType type, quint64 id) : type(type), id(id) {}
+  private:
+    EType type;
+    quint64 id;
+  public: // Event
+    virtual void handle(DataService& dataService)
+    {
+      dataService.globalEntityManager.removeEntity(type, id);
+    }
+  };
+
+  bool wasEmpty;
+  eventQueue.append(new RemoveEntityEvent(type, id), &wasEmpty);
+  if(wasEmpty)
+    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+}
+
 void DataService::WorkerThread::setState(EDataService::State state)
 {
   class SetStateEvent : public Event
@@ -384,9 +406,19 @@ void DataService::WorkerThread::receivedBroker(quint32 brokerId,const meguco_use
   delegateEntity(new EUserBroker(brokerId, broker));
 }
 
+void DataService::WorkerThread::removedBroker(quint32 brokerId)
+{
+  removeEntity(EType::userBroker, brokerId);
+}
+
 void DataService::WorkerThread::receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session)
 {
   delegateEntity(new EBotSession(sessionId, name, session));
+}
+
+void DataService::WorkerThread::removedSession(quint32 sesionId)
+{
+  removeEntity(EType::botSession, sesionId);
 }
 
 void DataService::WorkerThread::receivedTrade(quint32 tableId, const meguco_trade_entity& tradeData, qint64 timeOffset)

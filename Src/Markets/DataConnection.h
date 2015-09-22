@@ -11,7 +11,9 @@ public:
   public:
     virtual void receivedMarket(quint32 tableId, const QString& channelName) = 0;
     virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker) = 0;
+    virtual void removedBroker(quint32 brokerId) = 0;
     virtual void receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session) = 0;
+    virtual void removedSession(quint32 sessionId) = 0;
     virtual void receivedTrade(quint32 tableId, const meguco_trade_entity& trade, qint64 timeOffset) = 0;
     virtual void receivedTicker(quint32 tableId, const meguco_ticker_entity& ticker) = 0;
     virtual void receivedBrokerType(const meguco_broker_type_entity& brokerType, const QString& name) = 0;
@@ -143,6 +145,7 @@ private:
   void removedEntity(uint32_t tableId, uint64_t entityId);
 
   bool addedTable(const zlimdb_table_entity& table);
+  void removedTable(uint32_t tableId);
 
 private:
   static void zlimdbCallback(void* user_data, const zlimdb_header* message) {((DataConnection*)user_data)->zlimdbCallback(*message);}

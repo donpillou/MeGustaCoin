@@ -88,6 +88,7 @@ private:
 
     void addMessage(ELogMessage::Type type, const QString& message);
     void delegateEntity(Entity* entity);
+    void removeEntity(EType type, quint64 id);
 
   public:
     DataService& dataService;
@@ -110,7 +111,9 @@ private:
   private: // DataConnection::Callback
     virtual void receivedMarket(quint32 tableId, const QString& channelName);
     virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker);
+    virtual void removedBroker(quint32 brokerId);
     virtual void receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session);
+    virtual void removedSession(quint32 sessionId);
     virtual void receivedTrade(quint32 tableId, const meguco_trade_entity& trade, qint64 timeOffset);
     virtual void receivedTicker(quint32 tableId, const meguco_ticker_entity& ticker);
     virtual void receivedBrokerType(const meguco_broker_type_entity& brokerType, const QString& name);

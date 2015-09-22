@@ -243,6 +243,9 @@ void DataConnection::removedEntity(uint32_t tableId, uint64_t entityId)
   const TableInfo& tableInfo = it.value();
   switch(tableInfo.type)
   {
+  case TableInfo::tablesTable:
+    removedTable(entityId);
+    break;
   default:
     break;
   }
@@ -361,6 +364,22 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
       sessionData.propertiesTableId = table.entity.id;
   }
   return true;
+}
+
+void DataConnection::removedTable(uint32_t tableId)
+{
+  QHash<quint32, TableInfo>::ConstIterator it = tableInfo.find(tableId);
+  if(it == tableInfo.end())
+    return;
+  const TableInfo& tableInfo = it.value();
+  switch(tableInfo.type)
+  {
+  case TableInfo::brokerTable:
+    callback->removedBroker(tableInfo.nameId);
+    break;
+  default:
+    break;
+  }
 }
 
 bool DataConnection::subscribe(quint32 tableId, quint64 lastReceivedTradeId)
