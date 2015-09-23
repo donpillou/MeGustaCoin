@@ -144,6 +144,13 @@ void DataConnection::zlimdbCallback(const zlimdb_header& message)
     }
     break;
   case zlimdb_message_update_request:
+    if(message.size >= sizeof(zlimdb_update_request) + sizeof(zlimdb_entity))
+    {
+      const zlimdb_update_request* updateRequest = (zlimdb_update_request*)&message;
+      const zlimdb_entity* entity = (const zlimdb_entity*)(updateRequest + 1);
+      if(sizeof(zlimdb_add_request) + entity->size <= message.size)
+        updatedEntity(updateRequest->table_id, *entity);
+    }
     break;
   case zlimdb_message_remove_request:
     if(message.size >= sizeof(zlimdb_remove_request))
@@ -159,16 +166,28 @@ void DataConnection::zlimdbCallback(const zlimdb_header& message)
 
 void DataConnection::addedEntity(uint32_t tableId, const zlimdb_entity& entity)
 {
+  if(tableId == zlimdb_table_tables)
+  {
+    if(entity.size >= sizeof(zlimdb_table_entity))
+      addedTable(*(const zlimdb_table_entity*)&entity);
+  }
+  else
+    receivedEntity(tableId, entity);
+}
+
+void DataConnection::updatedEntity(uint32_t tableId, const zlimdb_entity& entity)
+{
+  receivedEntity(tableId, entity);
+}
+
+void DataConnection::receivedEntity(uint32_t tableId, const zlimdb_entity& entity)
+{
   QHash<quint32, TableInfo>::ConstIterator it = tableInfo.find(tableId);
   if(it == tableInfo.end())
     return;
   const TableInfo& tableInfo = it.value();
   switch(tableInfo.type)
   {
-  case TableInfo::tablesTable:
-    if(entity.size >= sizeof(zlimdb_table_entity))
-      addedTable(*(const zlimdb_table_entity*)&entity);
-    break;
   case TableInfo::tradesTable:
     if(entity.size >= sizeof(meguco_trade_entity))
       callback->receivedTrade(tableId, *(const meguco_trade_entity*)&entity, tableInfo.timeOffset);
