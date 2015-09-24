@@ -27,4 +27,5 @@ enum class EType
   dataTradeData,
   dataTickerData,
   dataSubscription,
+  process,
 };

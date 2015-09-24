@@ -32,6 +32,7 @@
 #include "Entities/EDataTradeData.h"
 #include "Entities/EDataTickerData.h"
 #include "Entities/EDataSubscription.h"
+#include "Entities/EProcess.h"
 
 #include "Bots/TradeHandler.h"
 #include "Bots/BotDialog.h"
@@ -52,6 +53,7 @@
 #include "Models/BotMarketModel.h"
 #include "Models/TradeModel.h"
 #include "Models/LogModel.h"
+#include "Models/ProcessModel.h"
 
 #include "Markets/DataService.h"
 
@@ -67,6 +69,7 @@
 #include "Widgets/TradesWidget.h"
 #include "Widgets/GraphWidget.h"
 #include "Widgets/LogWidget.h"
+#include "Widgets/ProcessesWidget.h"
 
 #include "MarketDialog.h"
 #include "OptionsDialog.h"

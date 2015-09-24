@@ -22,6 +22,7 @@ private:
   BotLogWidget* botLogWidget;
   TransactionsWidget* transactionsWidget;
   LogWidget* logWidget;
+  ProcessesWidget* processesWidget;
 
   QMenu* viewMenu;
 

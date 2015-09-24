@@ -21,12 +21,14 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   botPropertiesWidget = new BotPropertiesWidget(*this, settings, globalEntityManager, dataService);
   botLogWidget = new BotLogWidget(*this, settings, globalEntityManager);
   logWidget = new LogWidget(this, settings, globalEntityManager);
+  processesWidget = new ProcessesWidget(this, settings, globalEntityManager);
 
   setWindowIcon(QIcon(":/Icons/bitcoin_big.png"));
   updateWindowTitle();
   resize(625, 400);
 
   addTab(marketsWidget);
+  addTab(processesWidget, QTabFramework::InsertOnTop, marketsWidget); // todo: insert hidden
   addTab(logWidget, QTabFramework::InsertBottom, marketsWidget);
   addTab(transactionsWidget, QTabFramework::InsertRight, marketsWidget);
   addTab(ordersWidget, QTabFramework::InsertOnTop, transactionsWidget);
@@ -84,8 +86,6 @@ MainWindow::~MainWindow()
 
   dataService.stop();
   graphService.stop();
-
-  //qDeleteAll(channelGraphModels);
 }
 
 void MainWindow::startDataService()
@@ -111,6 +111,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   botPropertiesWidget->saveState(settings);
   botLogWidget->saveState(settings);
   logWidget->saveState(settings);
+  processesWidget->saveState(settings);
 
   QStringList openedLiveTradesWidgets;
   QStringList openedLiveGraphWidgets;
@@ -204,6 +205,7 @@ void MainWindow::updateViewMenu()
   viewMenu->addAction(toggleViewAction(botLogWidget));
   viewMenu->addSeparator();
   viewMenu->addAction(toggleViewAction(logWidget));
+  viewMenu->addAction(toggleViewAction(processesWidget));
   viewMenu->addSeparator();
   QList<EDataMarket*> channels;
   globalEntityManager.getAllEntities<EDataMarket>(channels);
@@ -327,7 +329,7 @@ void MainWindow::showOptions()
 
 void MainWindow::about()
 {
-  QMessageBox::about(this, "About", "Meguco Client - A client for the Meguco Trade Framework<br><a href=\"https://github.com/donpillou/MegucoClient\">https://github.com/donpillou/MegucoClient</a><br><br>Released under the GNU General Public License Version 3<br><br>MeGustaCoin uses the following third-party libraries and components:<br>&nbsp;&nbsp;- Qt (GUI)<br>&nbsp;&nbsp;- libcurl (HTTP/HTTPS)<br>&nbsp;&nbsp;- easywsclient (Websockets)<br>&nbsp;&nbsp;- <a href=\"http://www.famfamfam.com/lab/icons/silk/\">silk icons</a> (by Mark James)<br><br>-- Donald Pillou, 2013-2014");
+  QMessageBox::about(this, "About", "Meguco Client - A client for the Meguco Trade Framework<br><a href=\"https://github.com/donpillou/MegucoClient\">https://github.com/donpillou/MegucoClient</a><br><br>Released under the GNU General Public License Version 3<br><br>MeGustaCoin uses the following third-party libraries and components:<br>&nbsp;&nbsp;- Qt (GUI)<br>&nbsp;&nbsp;- libcurl (HTTP/HTTPS)<br>&nbsp;&nbsp;- easywsclient (Websockets)<br>&nbsp;&nbsp;- <a href=\"http://www.famfamfam.com/lab/icons/silk/\">silk icons</a> (by Mark James)<br><br>-- Donald Pillou, 2013-2015");
 }
 
 void MainWindow::enableTradesUpdates(bool enable)

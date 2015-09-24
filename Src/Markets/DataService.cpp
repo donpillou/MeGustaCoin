@@ -298,6 +298,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
         globalEntityManager.removeAll<EBotMarketOrderDraft>();
         globalEntityManager.removeAll<EUserBrokerBalance>();
         globalEntityManager.removeAll<EUserBroker>();
+        globalEntityManager.removeAll<EProcess>();
         eDataService->setSelectedBrokerId(0);
         eDataService->setSelectedSessionId(0);
         eDataService->setLoadingBrokerOrders(false);
@@ -554,6 +555,16 @@ void DataService::WorkerThread::receivedSessionLog(const meguco_log_entity& log,
 void DataService::WorkerThread::receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit)
 {
   delegateEntity(new EBotSessionProperty(property, name, value, unit));
+}
+
+void DataService::WorkerThread::receivedProcess(const meguco_process_entity& process, const QString& cmd)
+{
+  delegateEntity(new EProcess(process, cmd));
+}
+
+void DataService::WorkerThread::removedProcess(quint64 processId)
+{
+  removeEntity(EType::process, processId);
 }
 
 void DataService::createBroker(quint64 marketId, const QString& userName, const QString& key, const QString& secret)

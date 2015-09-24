@@ -126,6 +126,8 @@ private:
     virtual void receivedSessionAsset(const meguco_user_session_asset_entity& asset);
     virtual void receivedSessionLog(const meguco_log_entity& log, const QString& message);
     virtual void receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit);
+    virtual void receivedProcess(const meguco_process_entity& process, const QString& cmd);
+    virtual void removedProcess(quint64 processId);
   };
 
 private:

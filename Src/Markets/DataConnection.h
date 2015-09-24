@@ -26,6 +26,8 @@ public:
     virtual void receivedSessionAsset(const meguco_user_session_asset_entity& asset) = 0;
     virtual void receivedSessionLog(const meguco_log_entity& log, const QString& message) = 0;
     virtual void receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit) = 0;
+    virtual void receivedProcess(const meguco_process_entity& process, const QString& cmd) = 0;
+    virtual void removedProcess(quint64 processId) = 0;
   };
 
   DataConnection() : zdb(0), selectedBrokerId(0), selectedSessionId(0) {}
@@ -86,6 +88,7 @@ private:
       sessionAssetsTable,
       sessionLogTable,
       sessionPropertiesTable,
+      processesTable,
     } type;
     quint64 nameId;
     qint64 timeOffset;

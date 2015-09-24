@@ -37,10 +37,10 @@ bool DataConnection::connect(const QString& server, quint16 port, const QString&
   this->callback = &callback;
 
   // subscribe to tables table
-  TableInfo& tableInfo = this->tableInfo[zlimdb_table_tables];
-  tableInfo.type = TableInfo::tablesTable;
   if(zlimdb_subscribe(zdb, zlimdb_table_tables, zlimdb_query_type_all, 0) != 0)
     return error = getZlimDbError(), false;
+  TableInfo& tableInfo = this->tableInfo[zlimdb_table_tables];
+  tableInfo.type = TableInfo::tablesTable;
   QList<QByteArray> tables;
   {
     char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
@@ -188,6 +188,15 @@ void DataConnection::receivedEntity(uint32_t tableId, const zlimdb_entity& entit
   const TableInfo& tableInfo = it.value();
   switch(tableInfo.type)
   {
+  case TableInfo::processesTable:
+    if(entity.size >= sizeof(meguco_process_entity))
+    {
+      const meguco_process_entity* process = (const meguco_process_entity*)&entity;
+      QString cmd;
+      if(getString(process->entity, sizeof(*process), process->cmd_size, cmd))
+        callback->receivedProcess(*process, cmd);
+    }
+    break;
   case TableInfo::tradesTable:
     if(entity.size >= sizeof(meguco_trade_entity))
       callback->receivedTrade(tableId, *(const meguco_trade_entity*)&entity, tableInfo.timeOffset);
@@ -265,6 +274,10 @@ void DataConnection::removedEntity(uint32_t tableId, uint64_t entityId)
   case TableInfo::tablesTable:
     removedTable(entityId);
     break;
+  case TableInfo::processesTable:
+    callback->removedProcess(entityId);
+    break;
+  // todo: add handlers for the other entity types
   default:
     break;
   }
@@ -275,7 +288,24 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
   QString tableName;
   if(!getString(table.entity, sizeof(table), table.name_size, tableName))
     return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
-  if(tableName == "brokers")
+  if(tableName == "processes")
+  {
+    if(zlimdb_subscribe(zdb, table.entity.id, zlimdb_query_type_all, 0) != 0)
+      return error = getZlimDbError(), false;
+    TableInfo& tableInfo = this->tableInfo[table.entity.id];
+    tableInfo.type = TableInfo::processesTable;
+    char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+    uint32_t size = sizeof(buffer);
+    QString cmd;
+    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
+      for(const meguco_process_entity* process; process = (const meguco_process_entity*)zlimdb_get_entity(sizeof(meguco_process_entity), &data, &size);)
+      {
+        if(!getString(process->entity, sizeof(*process), process->cmd_size, cmd))
+          return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
+        callback->receivedProcess(*process, cmd);
+      }
+  }
+  else if(tableName == "brokers")
   {
     if(zlimdb_query(zdb, table.entity.id, zlimdb_query_type_all, 0) != 0)
       return error = getZlimDbError(), false;
