@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotPropertiesWidget::BotPropertiesWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), propertyModel(entityManager)
+  QWidget(&tabFramework), dataService(dataService), propertyModel(entityManager)
 {
   setWindowTitle(tr("Bot Properties"));
 

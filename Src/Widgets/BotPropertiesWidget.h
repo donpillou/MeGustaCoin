@@ -15,11 +15,7 @@ private slots:
   void editedProperty(const QModelIndex& index, double value);
 
 private:
-  QTabFramework& tabFramework;
-  Entity::Manager& entityManager;
   DataService& dataService;
-
   SessionPropertyModel propertyModel;
-
   QTreeView* propertyView;
 };

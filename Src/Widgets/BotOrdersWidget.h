@@ -9,10 +9,6 @@ public:
   void saveState(QSettings& settings);
 
 private:
-  QTabFramework& tabFramework;
-  Entity::Manager& entityManager;
-
   SessionOrderModel orderModel;
-
   QTreeView* orderView;
 };

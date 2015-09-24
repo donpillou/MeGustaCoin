@@ -21,7 +21,6 @@ private slots:
   void editedItemFlipPrice(const QModelIndex& index, double price);
 
 private:
-  QTabFramework& tabFramework;
   Entity::Manager& entityManager;
   DataService& dataService;
 

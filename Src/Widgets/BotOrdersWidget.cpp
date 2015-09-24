@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotOrdersWidget::BotOrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  orderModel(entityManager)
+  QWidget(&tabFramework), orderModel(entityManager)
 {
   setWindowTitle(tr("Bot Orders"));
 

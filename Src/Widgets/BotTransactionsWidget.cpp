@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotTransactionsWidget::BotTransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  transactionModel(entityManager)
+  QWidget(&tabFramework), transactionModel(entityManager)
 {
   setWindowTitle(tr("Bot Transactions"));
 

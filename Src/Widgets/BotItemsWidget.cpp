@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), itemModel(entityManager)
+  QWidget(&tabFramework), entityManager(entityManager), dataService(dataService), itemModel(entityManager)
 {
   entityManager.registerListener<EDataService>(*this);
   entityManager.registerListener<EBotSession>(*this);

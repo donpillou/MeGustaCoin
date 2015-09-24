@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotLogWidget::BotLogWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  logModel(entityManager), autoScrollEnabled(false)
+  QWidget(&tabFramework), logModel(entityManager), autoScrollEnabled(false)
 {
   connect(&logModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
 

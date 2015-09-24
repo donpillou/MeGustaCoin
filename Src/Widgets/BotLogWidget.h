@@ -15,8 +15,6 @@ private slots:
   void autoScroll(int, int);
 
 private:
-  QTabFramework& tabFramework;
-  Entity::Manager& entityManager;
   SessionLogModel logModel;
   QTreeView* logView;
   bool autoScrollEnabled;
