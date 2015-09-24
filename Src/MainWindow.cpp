@@ -14,7 +14,6 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   marketsWidget = new MarketsWidget(*this, settings, globalEntityManager, dataService);
   ordersWidget = new OrdersWidget(*this, settings, globalEntityManager, dataService);
   transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, dataService);
-  //graphWidget = new GraphWidget(this, settings, 0, QString(), dataModel.getDataChannels());
   botSessionsWidget = new BotSessionsWidget(*this, settings, globalEntityManager, dataService);
   botTransactionsWidget = new BotTransactionsWidget(*this, settings, globalEntityManager);
   botItemsWidget = new BotItemsWidget(*this, settings, globalEntityManager, dataService);
@@ -31,7 +30,6 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addTab(logWidget, QTabFramework::InsertBottom, marketsWidget);
   addTab(transactionsWidget, QTabFramework::InsertRight, marketsWidget);
   addTab(ordersWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  //addTab(graphWidget);
   addTab(botSessionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botTransactionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
@@ -49,9 +47,6 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 
   viewMenu = menuBar->addMenu(tr("&View"));
   connect(viewMenu, SIGNAL(aboutToShow()), this, SLOT(updateViewMenu()));
-
-  //QMenu* toolsMenu = menuBar->addMenu(tr("&Tools"));
-  //connect(toolsMenu->addAction(tr("&Options...")), SIGNAL(triggered()), this, SLOT(showOptions()));
 
   menu = menuBar->addMenu(tr("&Help"));
   connect(menu->addAction(tr("&About...")), SIGNAL(triggered()), this, SLOT(about()));
@@ -77,8 +72,6 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   }
 
   restoreLayout(settings.value("Layout").toByteArray());
-  //restoreGeometry(settings.value("Geometry").toByteArray());
-  //restoreState(settings.value("WindowState").toByteArray());
 
   startDataService();
   graphService.start();
@@ -110,7 +103,6 @@ void MainWindow::closeEvent(QCloseEvent* event)
   settings.setValue("Layout", saveLayout());
   ordersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
-  //graphWidget->saveState(settings);
   marketsWidget->saveState(settings);
   botSessionsWidget->saveState(settings);
   botTransactionsWidget->saveState(settings);
@@ -200,14 +192,9 @@ void MainWindow::updateViewMenu()
 {
   viewMenu->clear();
 
-  //QAction* action = viewMenu->addAction(tr("&Refresh"));
-  //action->setShortcut(QKeySequence(QKeySequence::Refresh));
-  //connect(action, SIGNAL(triggered()), this, SLOT(refresh()));
-  //viewMenu->addSeparator();
   viewMenu->addAction(toggleViewAction(marketsWidget));
   viewMenu->addAction(toggleViewAction(ordersWidget));
   viewMenu->addAction(toggleViewAction(transactionsWidget));
-  //viewMenu->addAction(toggleViewAction(graphWidget));
   viewMenu->addSeparator();
   viewMenu->addAction(toggleViewAction(botSessionsWidget));
   viewMenu->addAction(toggleViewAction(botTransactionsWidget));
@@ -319,8 +306,6 @@ void MainWindow::createLiveGraphWidget(const QString& channelName)
     return;
   if(channelData->graphWidget)
     return;
-//  GraphModel* channelGraphModel = channelGraphModels[channelName];
-//  Q_ASSERT(channelGraphModel);
 
   channelData->graphWidget = new GraphWidget(*this, settings, channelName, channelName + "_0", *channelData->channelEntityManager, *channelData->graphModel);
   channelData->graphWidget->setObjectName(channelName + "LiveGraph");

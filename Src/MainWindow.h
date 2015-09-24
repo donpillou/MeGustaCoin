@@ -21,7 +21,6 @@ private:
   BotPropertiesWidget* botPropertiesWidget;
   BotLogWidget* botLogWidget;
   TransactionsWidget* transactionsWidget;
-  //GraphWidget* graphWidget;
   LogWidget* logWidget;
 
   QMenu* viewMenu;
@@ -60,12 +59,7 @@ private: // QMainWindow
   virtual void closeEvent(QCloseEvent* event);
 
 private slots:
-  //void login(); // todo: remove
-  //void logout(); // todo: remove
-  //void refresh();
   void updateWindowTitle();
-  //void updateWindowTitleTicker();
-  //void updateFocusPublicDataModel();
   void updateViewMenu();
   void about();
   void showOptions();
