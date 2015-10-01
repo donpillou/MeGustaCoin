@@ -15,7 +15,7 @@ public:
   };
 
 public:
-  EDataService() : Entity(eType, 0), state(State::offline) {}
+  EDataService() : Entity(eType, 0), state(State::offline), selectedSessionId(0), selectedBrokerId(0), loadingMarketOrders(false), loadingMarketTransactions(false) {}
 
   State getState() const {return state;}
   void setState(State state) {this->state = state;}
