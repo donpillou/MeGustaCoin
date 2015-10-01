@@ -60,7 +60,6 @@ targets = {
       "Src/MainWindow.h"
       "Src/MarketDialog.h"
       "Src/Bots/BotDialog.h"
-      "Ext/QTabFramework/QTabFramework.h"
     }
     files += qtFiles
     
