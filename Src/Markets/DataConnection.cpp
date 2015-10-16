@@ -203,7 +203,12 @@ void DataConnection::receivedEntity(uint32_t tableId, const zlimdb_entity& entit
     break;
   case TableInfo::brokerTable:
     if(entity.id == 1 && entity.size >= sizeof(meguco_user_broker_entity))
-      callback->receivedBroker(tableInfo.nameId, *(const meguco_user_broker_entity*)&entity);
+    {
+      const meguco_user_broker_entity* broker = (const meguco_user_broker_entity*)&entity;
+      QString userName;
+      if(getString(broker->entity, sizeof(*broker), broker->user_name_size, userName))
+        callback->receivedBroker(tableInfo.nameId, *broker, userName);
+    }
     break;
   case TableInfo::sessionTable:
     if(entity.id == 1 && entity.size >= sizeof(meguco_user_session_entity))
@@ -358,7 +363,9 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
         {
           if(broker->entity.id != 1)
             continue;
-          callback->receivedBroker(brokerId, *broker);
+          QString userName;
+          if(getString(broker->entity, sizeof(*broker), broker->user_name_size, userName))
+            callback->receivedBroker(brokerId, *broker, userName);
           break;
         }
       if(zlimdb_errno() != 0)

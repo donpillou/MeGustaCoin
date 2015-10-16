@@ -50,6 +50,8 @@ QVariant BotMarketModel::data(const QModelIndex& index, int role) const
         EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
         return eBrokerType ? eBrokerType->getName() : QVariant();
       }
+    case Column::userName:
+      return eUserBroker->getUserName();
     case Column::state:
       switch(eUserBroker->getState())
       {
@@ -77,6 +79,8 @@ QVariant BotMarketModel::headerData(int section, Qt::Orientation orientation, in
     {
     case Column::name:
       return tr("Name");
+    case Column::userName:
+      return tr("User");
     case Column::state:
       return tr("State");
     }

@@ -45,7 +45,8 @@ MarketsWidget::MarketsWidget(QTabFramework& tabFramework, QSettings& settings, E
 
   QHeaderView* headerView = marketView->header();
   headerView->resizeSection(0, 100);
-  headerView->resizeSection(1, 60);
+  headerView->resizeSection(1, 100);
+  headerView->resizeSection(2, 60);
   marketView->sortByColumn(0);
   settings.beginGroup("Markets");
   headerView->restoreState(settings.value("HeaderState").toByteArray());

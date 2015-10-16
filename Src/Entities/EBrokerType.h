@@ -11,7 +11,7 @@ public:
   {
     int x = name.indexOf('/');
     int y = name.indexOf('/', x + 1);
-    baseCurrency = name.mid(x + 1, x + 1 - y);
+    baseCurrency = name.mid(x + 1, y - (x + 1));
     commCurrency = name.mid(y + 1);
   }
 

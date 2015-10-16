@@ -241,6 +241,31 @@ void DataService::WorkerThread::removeEntity(EType type, quint64 id)
   public: // Event
     virtual void handle(DataService& dataService)
     {
+      switch(type)
+      {
+      case EType::userBroker:
+        {
+          EDataService* eDataService = dataService.globalEntityManager.getEntity<EDataService>(0);
+          if(eDataService->getSelectedBrokerId() == id)
+          {
+            eDataService->setSelectedBrokerId(0);
+            dataService.globalEntityManager.updatedEntity(*eDataService);
+          }
+        }
+        break;
+      case EType::botSession:
+        {
+          EDataService* eDataService = dataService.globalEntityManager.getEntity<EDataService>(0);
+          if(eDataService->getSelectedSessionId() == id)
+          {
+            eDataService->setSelectedSessionId(0);
+            dataService.globalEntityManager.updatedEntity(*eDataService);
+          }
+        }
+        break;
+      default:
+        break;
+      }
       dataService.globalEntityManager.removeEntity(type, id);
     }
   };
@@ -402,9 +427,9 @@ void DataService::WorkerThread::receivedMarket(quint32 tableId, const QString& c
   delegateEntity(new EDataMarket(tableId, channelName));
 }
 
-void DataService::WorkerThread::receivedBroker(quint32 brokerId,const meguco_user_broker_entity& broker)
+void DataService::WorkerThread::receivedBroker(quint32 brokerId,const meguco_user_broker_entity& broker, const QString& userName)
 {
-  delegateEntity(new EUserBroker(brokerId, broker));
+  delegateEntity(new EUserBroker(brokerId, broker, userName));
 }
 
 void DataService::WorkerThread::removedBroker(quint32 brokerId)

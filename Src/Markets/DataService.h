@@ -110,7 +110,7 @@ private:
 
   private: // DataConnection::Callback
     virtual void receivedMarket(quint32 tableId, const QString& channelName);
-    virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker);
+    virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker, const QString& userName);
     virtual void removedBroker(quint32 brokerId);
     virtual void receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session);
     virtual void removedSession(quint32 sessionId);

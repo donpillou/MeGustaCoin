@@ -15,7 +15,7 @@ public:
   };
 
 public:
-  EUserBroker(quint32 tableId, const meguco_user_broker_entity& data) : Entity(eType, tableId)
+  EUserBroker(quint32 tableId, const meguco_user_broker_entity& data, const QString& userName) : Entity(eType, tableId), userName(userName)
   {
     brokerTypeId = data.broker_type_id;
     state = (State)data.state;
@@ -23,9 +23,11 @@ public:
 
   quint64 getBrokerTypeId() const {return brokerTypeId;}
   State getState() const {return state;}
+  const QString& getUserName() const {return userName;}
 
 private:
   quint64 brokerTypeId;
   State state;
+  QString userName;
 };
 

@@ -8,6 +8,7 @@ public:
   {
       first,
       name = first,
+      userName,
       state,
       last = state,
   };

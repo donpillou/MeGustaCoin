@@ -1,7 +1,7 @@
 
 #pragma once
 
-typedef struct _zlimdb zlimdb;
+typedef struct _zlimdb_ zlimdb;
 
 class DataConnection
 {
@@ -10,7 +10,7 @@ public:
   {
   public:
     virtual void receivedMarket(quint32 tableId, const QString& channelName) = 0;
-    virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker) = 0;
+    virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker, const QString& userName) = 0;
     virtual void removedBroker(quint32 brokerId) = 0;
     virtual void receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session) = 0;
     virtual void removedSession(quint32 sessionId) = 0;
