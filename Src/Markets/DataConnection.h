@@ -21,6 +21,7 @@ public:
     virtual void receivedBrokerBalance(const meguco_user_broker_balance_entity& balance) = 0;
     virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder) = 0; 
     virtual void receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction) = 0;
+    virtual void receivedBrokerLog(const meguco_log_entity& log, const QString& message) = 0;
     virtual void receivedSessionOrder(const meguco_user_broker_order_entity& order) = 0;
     virtual void receivedSessionTransaction(const meguco_user_broker_transaction_entity& transaction) = 0;
     virtual void receivedSessionAsset(const meguco_user_session_asset_entity& asset) = 0;
@@ -83,6 +84,7 @@ private:
       brokerBalanceTable,
       brokerOrdersTable,
       brokerTransactionsTable,
+      brokerLogTable,
       sessionOrdersTable,
       sessionTransactionsTable,
       sessionAssetsTable,
@@ -101,9 +103,10 @@ private:
     quint32 balanceTableId;
     quint32 ordersTableId;
     quint32 transactionsTableId;
+    quint32 logTableId;
 
   public:
-    BrokerData() : brokerTableId(0), balanceTableId(0), ordersTableId(0), transactionsTableId(0) {}
+    BrokerData() : brokerTableId(0), balanceTableId(0), ordersTableId(0), transactionsTableId(0), logTableId(0) {}
   };
 
   class SessionData
@@ -117,7 +120,7 @@ private:
     quint32 propertiesTableId;
 
   public:
-    SessionData() : sessionTableId(0), ordersTableId(0), transactionsTableId(0), assetsTableId(0), logTableId(0) {}
+    SessionData() : sessionTableId(0), ordersTableId(0), transactionsTableId(0), assetsTableId(0), logTableId(0), propertiesTableId(0) {}
   };
 
 private:
@@ -142,7 +145,7 @@ private:
   //bool removeTable(quint32 id);
   //bool controlEntity(quint32 tableId, quint64 entityId, quint32 code);
 
-  bool subscribe(quint32 tableId, TableInfo::Type type);
+  bool subscribe(quint32 tableId, TableInfo::Type tableType, zlimdb_query_type queryType = zlimdb_query_type_all);
 
   void addedEntity(uint32_t tableId, const zlimdb_entity& entity);
   void updatedEntity(uint32_t tableId, const zlimdb_entity& entity);
@@ -157,7 +160,10 @@ private:
 
   static bool getString(const zlimdb_entity& entity, size_t offset, size_t length, QString& result)
   {
-    if(offset + length > entity.size)
+    if(!length || offset + length > entity.size)
+      return false;
+    char* str = (char*)&entity + offset;
+    if(str[--length])
       return false;
     result = QString::fromUtf8((const char*)&entity + offset, length);
     return true;
@@ -170,9 +176,13 @@ private:
     entity.size = size;
   }
 
-  static void setString(zlimdb_entity& entity, uint16_t& length, size_t offset, const QByteArray& str)
+  static bool copyString(zlimdb_entity& entity, uint16_t& length, const QByteArray& str, size_t maxSize)
   {
-    length = (uint16_t)str.length();
-    qMemCopy((char*)&entity + offset, str.constData(), str.length());
+    length = (uint16_t)str.length() + 1;
+    if((size_t)entity.size + length > maxSize)
+      return false;
+    qMemCopy((char*)&entity + entity.size, str.constData(), str.length());
+    entity.size += length;
+    return true;
   }
 };

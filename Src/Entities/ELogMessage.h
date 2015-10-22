@@ -9,9 +9,9 @@ public:
 public:
   enum class Type
   {
-    information,
-    warning,
-    error,
+    information = meguco_log_info,
+    warning = meguco_log_warning,
+    error = meguco_log_error,
   };
 
 public:

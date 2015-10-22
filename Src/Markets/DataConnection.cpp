@@ -41,23 +41,18 @@ bool DataConnection::connect(const QString& server, quint16 port, const QString&
     return error = getZlimDbError(), false;
   TableInfo& tableInfo = this->tableInfo[zlimdb_table_tables];
   tableInfo.type = TableInfo::tablesTable;
-  QList<QByteArray> tables;
   {
     char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-    uint32_t size = sizeof(buffer);
     QString tableName;
-    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-      for(const zlimdb_table_entity* table; table = (const zlimdb_table_entity*)zlimdb_get_entity(sizeof(zlimdb_table_entity), &data, &size);)
-      {
-        tables.append(QByteArray());
-        tables.back().append((const char*)table, table->entity.size);
-      }
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const zlimdb_table_entity* table = (const zlimdb_table_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(zlimdb_table_entity));
+          table;
+          table = (const zlimdb_table_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer, sizeof(zlimdb_table_entity), &table->entity))
+        if(!addedTable(*table))
+          return false;
     if(zlimdb_errno() != 0)
       return error = getZlimDbError(), false;
   }
-  for(QList<QByteArray>::ConstIterator i = tables.begin(), end = tables.end(); i != end; ++i)
-    if(!addedTable(*(const zlimdb_table_entity*)i->constData()))
-      return false;
   return true;
 }
 
@@ -300,10 +295,11 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
     TableInfo& tableInfo = this->tableInfo[table.entity.id];
     tableInfo.type = TableInfo::processesTable;
     char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-    uint32_t size = sizeof(buffer);
     QString cmd;
-    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-      for(const meguco_process_entity* process; process = (const meguco_process_entity*)zlimdb_get_entity(sizeof(meguco_process_entity), &data, &size);)
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const meguco_process_entity* process = (const meguco_process_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_process_entity));
+          process;
+          process = (const meguco_process_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer, sizeof(meguco_process_entity), &process->entity))
       {
         if(!getString(process->entity, sizeof(*process), process->cmd_size, cmd))
           return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
@@ -315,10 +311,11 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
     if(zlimdb_query(zdb, table.entity.id, zlimdb_query_type_all, 0) != 0)
       return error = getZlimDbError(), false;
     char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-    uint32_t size = sizeof(buffer);
     QString name;
-    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-      for(const meguco_broker_type_entity* brokerType; brokerType = (const meguco_broker_type_entity*)zlimdb_get_entity(sizeof(meguco_broker_type_entity), &data, &size);)
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const meguco_broker_type_entity* brokerType = (const meguco_broker_type_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_broker_type_entity));
+          brokerType;
+          brokerType = (const meguco_broker_type_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer, sizeof(meguco_broker_type_entity), &brokerType->entity))
       {
         if(!getString(brokerType->entity, sizeof(*brokerType), brokerType->name_size, name))
           return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
@@ -330,10 +327,11 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
     if(zlimdb_query(zdb, table.entity.id, zlimdb_query_type_all, 0) != 0)
       return error = getZlimDbError(), false;
     char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-    uint32_t size = sizeof(buffer);
     QString name;
-    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-      for(const meguco_bot_type_entity* botType; botType = (const meguco_bot_type_entity*)zlimdb_get_entity(sizeof(meguco_bot_type_entity), &data, &size);)
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const meguco_bot_type_entity* botType = (const meguco_bot_type_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_bot_type_entity));
+          botType;
+          botType = (const meguco_bot_type_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer, sizeof(meguco_bot_type_entity), &botType->entity))
       {
         if(!getString(botType->entity, sizeof(*botType), botType->name_size, name))
           return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
@@ -357,9 +355,10 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
       if(zlimdb_subscribe(zdb, table.entity.id, zlimdb_query_type_all, 0) != 0)
         return error = getZlimDbError(), false;
       char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-      uint32_t size = sizeof(buffer);
-      for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-        for(const meguco_user_broker_entity* broker; broker = (const meguco_user_broker_entity*)zlimdb_get_entity(sizeof(meguco_user_broker_entity), &data, &size);)
+      while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+        for(const meguco_user_broker_entity* broker = (const meguco_user_broker_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_user_broker_entity));
+            broker;
+            broker = (const meguco_user_broker_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer, sizeof(meguco_user_broker_entity), &broker->entity))
         {
           if(broker->entity.id != 1)
             continue;
@@ -377,6 +376,8 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
       brokerData.ordersTableId = table.entity.id;
     else if(tableName.endsWith("/transactions"))
       brokerData.transactionsTableId = table.entity.id;
+    else if(tableName.endsWith("/log"))
+      brokerData.logTableId = table.entity.id;
   }
   else if(tableName.startsWith(sessionPrefix))
   {
@@ -393,9 +394,10 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
       if(zlimdb_subscribe(zdb, table.entity.id, zlimdb_query_type_all, 0) != 0)
         return error = getZlimDbError(), false;
       char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-      uint32_t size = sizeof(buffer);
-      for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-        for(const meguco_user_session_entity* session; session = (const meguco_user_session_entity*)zlimdb_get_entity(sizeof(meguco_user_session_entity), &data, &size);)
+      while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+        for(const meguco_user_session_entity* session = (const meguco_user_session_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_user_session_entity));
+            session;
+            session = (const meguco_user_session_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer, sizeof(meguco_user_session_entity), &session->entity))
         {
           if(session->entity.id != 1)
             continue;
@@ -464,9 +466,10 @@ bool DataConnection::subscribe(quint32 tableId, quint64 lastReceivedTradeId)
   tableInfo.timeOffset = timeOffset;
 
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-  uint32_t size = sizeof(buffer);
-  for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-    for(const meguco_trade_entity* trade; trade = (const meguco_trade_entity*)zlimdb_get_entity(sizeof(meguco_trade_entity), &data, &size);)
+  while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+    for(const meguco_trade_entity* trade = (const meguco_trade_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_trade_entity));
+        trade;
+        trade = (const meguco_trade_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer, sizeof(meguco_trade_entity), &trade->entity))
       callback->receivedTrade(tableId, *trade, timeOffset);
   if(zlimdb_errno() != 0)
     return error = getZlimDbError(), false;
@@ -491,11 +494,15 @@ bool DataConnection::createBroker(quint64 brokerTypeId, const QString& userName,
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   meguco_user_broker_entity* broker = (meguco_user_broker_entity*)buffer;
   QByteArray userNameData = userName.toUtf8(), keyData = key.toUtf8(), secretData = secret.toUtf8();
-  setEntityHeader(broker->entity, 0, 0, sizeof(*broker) + userNameData.size() + keyData.size() + secretData.size());
+  setEntityHeader(broker->entity, 0, 0, sizeof(meguco_user_broker_entity));
   broker->broker_type_id = brokerTypeId;
-  setString(broker->entity, broker->user_name_size, sizeof(*broker), userNameData);
-  setString(broker->entity, broker->key_size, sizeof(*broker) + userNameData.size(), keyData);
-  setString(broker->entity, broker->secret_size, sizeof(*broker) + userNameData.size() + keyData.size(), secretData);
+  if(!copyString(broker->entity, broker->key_size, keyData, ZLIMDB_MAX_MESSAGE_SIZE) ||
+     !copyString(broker->entity, broker->user_name_size, userNameData, ZLIMDB_MAX_MESSAGE_SIZE) ||
+     !copyString(broker->entity, broker->secret_size, secretData, ZLIMDB_MAX_MESSAGE_SIZE))
+  {
+    zlimdb_seterrno(zlimdb_local_error_invalid_parameter);
+    return error = getZlimDbError(), false;
+  }
   uint64_t id;
   if(zlimdb_add(zdb, brokerData.brokerTableId, &broker->entity, &id))
     return error = getZlimDbError(), false;
@@ -509,12 +516,9 @@ bool DataConnection::createBroker(quint64 brokerTypeId, const QString& userName,
   tableName = QString("%1%2/transactions").arg(brokerPrefix, QString::number(lastBrokerId));
   if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &brokerData.transactionsTableId) != 0)
     return error = getZlimDbError(), false;
-  //tableName = QString("%1%2/assets").arg(brokerPrefix, QString::number(lastBrokerId));
-  //if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &brokerData.assetsTableId) != 0)
-  //  return error = getZlimDbError(), false;
-  //tableName = QString("%1%2/log").arg(brokerPrefix, QString::number(lastBrokerId));
-  //if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &brokerData.logTableId) != 0)
-  //  return error = getZlimDbError(), false;
+  tableName = QString("%1%2/log").arg(brokerPrefix, QString::number(lastBrokerId));
+  if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &brokerData.logTableId) != 0)
+    return error = getZlimDbError(), false;
   return true;
 }
 
@@ -532,59 +536,88 @@ bool DataConnection::removeBroker(quint32 brokerId)
     return error = getZlimDbError(), false;
   if(brokerData.transactionsTableId != 0 && zlimdb_remove_table(zdb, brokerData.transactionsTableId) != 0)
     return error = getZlimDbError(), false;
+  if(brokerData.logTableId != 0 && zlimdb_remove_table(zdb, brokerData.logTableId) != 0)
+    return error = getZlimDbError(), false;
   this->brokerData.erase(it);
   if(selectedBrokerId == brokerId)
     selectedBrokerId = 0;
   return true;
 }
 
-bool DataConnection::subscribe(quint32 tableId, TableInfo::Type type)
+bool DataConnection::subscribe(quint32 tableId, TableInfo::Type tableType, zlimdb_query_type queryType)
 {
-  if(zlimdb_subscribe(zdb, tableId, zlimdb_query_type_all, 0) != 0)
+  if(zlimdb_subscribe(zdb, tableId, queryType, 0) != 0)
     return error = getZlimDbError(), false;
 
   TableInfo& tableInfo = this->tableInfo[tableId];
-  tableInfo.type = type;
+  tableInfo.type = tableType;
 
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-  uint32_t size = sizeof(buffer);
-  switch(type)
+  switch(tableType)
   {
   case TableInfo::brokerBalanceTable:
-    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-      for(const meguco_user_broker_balance_entity* balance; balance = (const meguco_user_broker_balance_entity*)zlimdb_get_entity(sizeof(meguco_user_broker_balance_entity), &data, &size);)
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const meguco_user_broker_balance_entity* balance = (const meguco_user_broker_balance_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_user_broker_balance_entity));
+          balance;
+          balance = (const meguco_user_broker_balance_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer, sizeof(meguco_user_broker_balance_entity), &balance->entity))
         callback->receivedBrokerBalance(*balance);
     break;
   case TableInfo::brokerOrdersTable:
-    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-      for(const meguco_user_broker_order_entity* order; order = (const meguco_user_broker_order_entity*)zlimdb_get_entity(sizeof(meguco_user_broker_order_entity), &data, &size);)
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const meguco_user_broker_order_entity* order = (const meguco_user_broker_order_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_user_broker_order_entity));
+          order;
+          order = (const meguco_user_broker_order_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer,sizeof(meguco_user_broker_order_entity), &order->entity))
         callback->receivedBrokerOrder(*order);
     break;
   case TableInfo::brokerTransactionsTable:
-    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-      for(const meguco_user_broker_transaction_entity* transaction; transaction = (const meguco_user_broker_transaction_entity*)zlimdb_get_entity(sizeof(meguco_user_broker_transaction_entity), &data, &size);)
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const meguco_user_broker_transaction_entity* transaction = (const meguco_user_broker_transaction_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_user_broker_transaction_entity));
+          transaction;
+          transaction = (const meguco_user_broker_transaction_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer, sizeof(meguco_user_broker_transaction_entity), &transaction->entity))
         callback->receivedBrokerTransaction(*transaction);
     break;
+  case TableInfo::brokerLogTable:
+    {
+      QString message;
+      while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+        for(const meguco_log_entity* log = (const meguco_log_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_log_entity));
+            log;
+            log = (const meguco_log_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer,sizeof(meguco_log_entity), &log->entity))
+        {
+          if(!getString(log->entity, sizeof(*log), log->message_size, message))
+            return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
+          callback->receivedBrokerLog(*log, message);
+        }
+    }
+    break;
   case TableInfo::sessionOrdersTable:
-    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-      for(const meguco_user_broker_order_entity* order; order = (const meguco_user_broker_order_entity*)zlimdb_get_entity(sizeof(meguco_user_broker_order_entity), &data, &size);)
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const meguco_user_broker_order_entity* order = (const meguco_user_broker_order_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_user_broker_order_entity));
+          order;
+          order = (const meguco_user_broker_order_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer,sizeof(meguco_user_broker_order_entity), &order->entity))
         callback->receivedSessionOrder(*order);
     break;
   case TableInfo::sessionTransactionsTable:
-    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-      for(const meguco_user_broker_transaction_entity* transaction; transaction = (const meguco_user_broker_transaction_entity*)zlimdb_get_entity(sizeof(meguco_user_broker_transaction_entity), &data, &size);)
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const meguco_user_broker_transaction_entity* transaction = (const meguco_user_broker_transaction_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_user_broker_transaction_entity));
+          transaction;
+          transaction = (const meguco_user_broker_transaction_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer,sizeof(meguco_user_broker_transaction_entity), &transaction->entity))
         callback->receivedSessionTransaction(*transaction);
     break;
   case TableInfo::sessionAssetsTable:
-    for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-      for(const meguco_user_session_asset_entity* asset; asset = (const meguco_user_session_asset_entity*)zlimdb_get_entity(sizeof(meguco_user_session_asset_entity), &data, &size);)
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const meguco_user_session_asset_entity* asset = (const meguco_user_session_asset_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_user_session_asset_entity));
+          asset;
+          asset = (const meguco_user_session_asset_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer,sizeof(meguco_user_session_asset_entity), &asset->entity))
         callback->receivedSessionAsset(*asset);
     break;
   case TableInfo::sessionLogTable:
     {
       QString message;
-      for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-        for(const meguco_log_entity* log; log = (const meguco_log_entity*)zlimdb_get_entity(sizeof(meguco_log_entity), &data, &size);)
+      while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+        for(const meguco_log_entity* log = (const meguco_log_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_log_entity));
+            log;
+            log = (const meguco_log_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer,sizeof(meguco_log_entity), &log->entity))
         {
           if(!getString(log->entity, sizeof(*log), log->message_size, message))
             return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
@@ -595,8 +628,10 @@ bool DataConnection::subscribe(quint32 tableId, TableInfo::Type type)
   case TableInfo::sessionPropertiesTable:
     {
       QString name, value, unit;
-      for(void* data; zlimdb_get_response(zdb, (zlimdb_entity*)(data = buffer), &size) == 0; size = sizeof(buffer))
-        for(const meguco_user_session_property_entity* property; property = (const meguco_user_session_property_entity*)zlimdb_get_entity(sizeof(meguco_user_session_property_entity), &data, &size);)
+      while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+        for(const meguco_user_session_property_entity* property = (const meguco_user_session_property_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_user_session_property_entity));
+            property;
+            property = (const meguco_user_session_property_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer,sizeof(meguco_user_session_property_entity), &property->entity))
         {
           if(!getString(property->entity, sizeof(*property), property->name_size, name))
               return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
@@ -633,6 +668,8 @@ bool DataConnection::selectBroker(quint32 brokerId)
         return false;
       if(brokerData.transactionsTableId != 0 && !unsubscribe(brokerData.transactionsTableId))
         return false;
+      if(brokerData.logTableId != 0 && !unsubscribe(brokerData.logTableId))
+        return false;
     }
   }
   this->selectedBrokerId = 0;
@@ -648,6 +685,8 @@ bool DataConnection::selectBroker(quint32 brokerId)
     if(brokerData.ordersTableId != 0 && !subscribe(brokerData.ordersTableId, TableInfo::brokerOrdersTable))
       return false;
     if(brokerData.transactionsTableId != 0 && !subscribe(brokerData.transactionsTableId, TableInfo::brokerTransactionsTable))
+      return false;
+    if(brokerData.logTableId != 0 && !subscribe(brokerData.logTableId, TableInfo::brokerLogTable, zlimdb_query_type_none))
       return false;
   }
   return true;
@@ -729,8 +768,12 @@ bool DataConnection::createSession(const QString& name, quint64 botTypeId, quint
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   meguco_user_session_entity* session = (meguco_user_session_entity*)buffer;
   QByteArray nameData = name.toUtf8();
-  setEntityHeader(session->entity, 0, 0, sizeof(*session));
-  setString(session->entity, session->name_size, sizeof(*session), nameData);
+  setEntityHeader(session->entity, 0, 0, sizeof(meguco_user_session_entity));
+  if(!copyString(session->entity, session->name_size, nameData, ZLIMDB_MAX_MESSAGE_SIZE))
+  {
+    zlimdb_seterrno(zlimdb_local_error_invalid_parameter);
+    return error = getZlimDbError(), false;
+  }
   session->bot_type_id = botTypeId;
   session->broker_id = brokerId;
   session->mode = meguco_user_session_none;

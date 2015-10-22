@@ -121,6 +121,7 @@ private:
     virtual void receivedBrokerBalance(const meguco_user_broker_balance_entity& balance);
     virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& order);
     virtual void receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction);
+    virtual void receivedBrokerLog(const meguco_log_entity& log, const QString& message);
     virtual void receivedSessionOrder(const meguco_user_broker_order_entity& order);
     virtual void receivedSessionTransaction(const meguco_user_broker_transaction_entity& transaction);
     virtual void receivedSessionAsset(const meguco_user_session_asset_entity& asset);

@@ -557,6 +557,11 @@ void DataService::WorkerThread::receivedBrokerTransaction(const meguco_user_brok
   delegateEntity(new EBotMarketTransaction(transaction));
 }
 
+void DataService::WorkerThread::receivedBrokerLog(const meguco_log_entity& log, const QString& message)
+{
+  delegateEntity(new ELogMessage((ELogMessage::Type)log.type, message));
+}
+
 void DataService::WorkerThread::receivedSessionOrder(const meguco_user_broker_order_entity& order)
 {
   delegateEntity(new EBotSessionOrder(order));
