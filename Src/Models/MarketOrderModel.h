@@ -40,6 +40,7 @@ private:
   QVariant cancelingStr;
   QVariant canceledStr;
   QVariant closedStr;
+  QVariant errorStr;
   QVariant buyStr;
   QVariant sellStr;
   QVariant sellIcon;

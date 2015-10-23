@@ -3,7 +3,7 @@
 
 MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
   entityManager(entityManager),
-  draftStr(tr("draft")), submittingStr(tr("submitting...")), updatingStr(tr("updating...")), openStr(tr("open")), cancelingStr(tr("canceling...")), canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), 
+  draftStr(tr("draft")), submittingStr(tr("submitting...")), updatingStr(tr("updating...")), openStr(tr("open")), cancelingStr(tr("canceling...")), canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), errorStr(tr("error")),
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
@@ -130,6 +130,8 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
         return canceledStr;
       case EBotMarketOrder::State::closed:
         return closedStr;
+      case EBotMarketOrder::State::error:
+        return errorStr;
       }
       break;
     case Column::total:
