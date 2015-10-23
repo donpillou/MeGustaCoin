@@ -496,8 +496,8 @@ bool DataConnection::createBroker(quint64 brokerTypeId, const QString& userName,
   QByteArray userNameData = userName.toUtf8(), keyData = key.toUtf8(), secretData = secret.toUtf8();
   setEntityHeader(broker->entity, 0, 0, sizeof(meguco_user_broker_entity));
   broker->broker_type_id = brokerTypeId;
-  if(!copyString(broker->entity, broker->key_size, keyData, ZLIMDB_MAX_MESSAGE_SIZE) ||
-     !copyString(broker->entity, broker->user_name_size, userNameData, ZLIMDB_MAX_MESSAGE_SIZE) ||
+  if(!copyString(broker->entity, broker->user_name_size, userNameData, ZLIMDB_MAX_MESSAGE_SIZE) ||
+     !copyString(broker->entity, broker->key_size, keyData, ZLIMDB_MAX_MESSAGE_SIZE) ||
      !copyString(broker->entity, broker->secret_size, secretData, ZLIMDB_MAX_MESSAGE_SIZE))
   {
     zlimdb_seterrno(zlimdb_local_error_invalid_parameter);

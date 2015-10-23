@@ -181,7 +181,7 @@ private:
     length = (uint16_t)str.length() + 1;
     if((size_t)entity.size + length > maxSize)
       return false;
-    qMemCopy((char*)&entity + entity.size, str.constData(), str.length());
+    qMemCopy((char*)&entity + entity.size, str.constData(), length);
     entity.size += length;
     return true;
   }
