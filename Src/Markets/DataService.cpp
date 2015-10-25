@@ -447,7 +447,7 @@ void DataService::WorkerThread::removedSession(quint32 sesionId)
   removeEntity(EType::botSession, sesionId);
 }
 
-void DataService::WorkerThread::receivedTrade(quint32 tableId, const meguco_trade_entity& tradeData, qint64 timeOffset)
+void DataService::WorkerThread::receivedMarketTrade(quint32 marketId, const meguco_trade_entity& tradeData, qint64 timeOffset)
 {
   EDataTradeData::Trade trade;
   trade.id = tradeData.entity.id;
@@ -455,7 +455,7 @@ void DataService::WorkerThread::receivedTrade(quint32 tableId, const meguco_trad
   trade.price = tradeData.price;
   trade.amount = tradeData.amount;
 
-  SubscriptionData& data = subscriptionData[tableId];
+  SubscriptionData& data = subscriptionData[marketId];
   if(data.eTradeData)
     data.eTradeData->addTrade(trade);
   else // live trade
@@ -463,14 +463,14 @@ void DataService::WorkerThread::receivedTrade(quint32 tableId, const meguco_trad
     class AddTradeEvent : public Event
     {
     public:
-      AddTradeEvent(quint32 tableId, const EDataTradeData::Trade& trade) : tableId(tableId), trade(trade) {}
+      AddTradeEvent(quint32 marketId, const EDataTradeData::Trade& trade) : marketId(marketId), trade(trade) {}
     private:
-      quint32 tableId;
+      quint32 marketId;
       EDataTradeData::Trade trade;
     private: // Event
       virtual void handle(DataService& dataService)
       {
-        QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(tableId);
+        QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(marketId);
         if(it == dataService.activeSubscriptions.end())
           return;
         Entity::Manager* channelEntityManager = it.value();
@@ -490,25 +490,25 @@ void DataService::WorkerThread::receivedTrade(quint32 tableId, const meguco_trad
     };
 
     bool wasEmpty;
-    eventQueue.append(new AddTradeEvent(tableId, trade), &wasEmpty);
+    eventQueue.append(new AddTradeEvent(marketId, trade), &wasEmpty);
     if(wasEmpty)
       QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
   }
 }
 
-void DataService::WorkerThread::receivedTicker(quint32 tableId, const meguco_ticker_entity& ticker)
+void DataService::WorkerThread::receivedMarketTicker(quint32 marketId, const meguco_ticker_entity& ticker)
 {
   class AddTickerEvent : public Event
   {
   public:
-    AddTickerEvent(quint64 tableId, const meguco_ticker_entity& ticker) : tableId(tableId), ticker(ticker) {}
+    AddTickerEvent(quint64 marketId, const meguco_ticker_entity& ticker) : marketId(marketId), ticker(ticker) {}
   private:
-    quint64 tableId;
+    quint64 marketId;
     meguco_ticker_entity ticker;
   private: // Event
     virtual void handle(DataService& dataService)
     {
-      QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(tableId);
+      QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(marketId);
       if(it == dataService.activeSubscriptions.end())
         return;
       Entity::Manager* channelEntityManager = it.value();
@@ -527,7 +527,7 @@ void DataService::WorkerThread::receivedTicker(quint32 tableId, const meguco_tic
   };
 
   bool wasEmpty;
-  eventQueue.append(new AddTickerEvent(tableId, ticker), &wasEmpty);
+  eventQueue.append(new AddTickerEvent(marketId, ticker), &wasEmpty);
   if(wasEmpty)
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
 }
@@ -547,14 +547,29 @@ void  DataService::WorkerThread::receivedBrokerBalance(const meguco_user_broker_
   delegateEntity(new EUserBrokerBalance(balance));
 }
 
+void DataService::WorkerThread::removedBrokerBalance(quint64 balanceId)
+{
+  removeEntity(EType::userBrokerBalance, balanceId);
+}
+
 void DataService::WorkerThread::receivedBrokerOrder(const meguco_user_broker_order_entity& order)
 {
   delegateEntity(new EBotMarketOrder(order));
 }
 
+void DataService::WorkerThread::removedBrokerOrder(quint64 orderId)
+{
+  removeEntity(EType::botMarketOrder, orderId);
+}
+
 void DataService::WorkerThread::receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction)
 {
   delegateEntity(new EBotMarketTransaction(transaction));
+}
+
+void DataService::WorkerThread::removedBrokerTransaction(quint64 transactionId)
+{
+  removeEntity(EType::botMarketTransaction, transactionId);
 }
 
 void DataService::WorkerThread::receivedBrokerLog(const meguco_log_entity& log, const QString& message)
@@ -567,9 +582,19 @@ void DataService::WorkerThread::receivedSessionOrder(const meguco_user_broker_or
   delegateEntity(new EBotSessionOrder(order));
 }
 
+void DataService::WorkerThread::removedSessionOrder(quint64 orderId)
+{
+  removeEntity(EType::botSessionOrder, orderId);
+}
+
 void DataService::WorkerThread::receivedSessionTransaction(const meguco_user_broker_transaction_entity& transaction)
 {
   delegateEntity(new EBotSessionTransaction(transaction));
+}
+
+void DataService::WorkerThread::removedSessionTransaction(quint64 transactionId)
+{
+  removeEntity(EType::botSessionTransaction, transactionId);
 }
 
 void DataService::WorkerThread::receivedSessionAsset(const meguco_user_session_asset_entity& asset)
@@ -577,14 +602,29 @@ void DataService::WorkerThread::receivedSessionAsset(const meguco_user_session_a
   delegateEntity(new EBotSessionItem(asset));
 }
 
+void DataService::WorkerThread::removedSessionAsset(quint64 assertId)
+{
+  removeEntity(EType::botSessionItem, assertId);
+}
+
 void DataService::WorkerThread::receivedSessionLog(const meguco_log_entity& log, const QString& message)
 {
   delegateEntity(new EBotSessionLogMessage(log, message));
 }
 
+void DataService::WorkerThread::removedSessionLog(quint64 logId)
+{
+  removeEntity(EType::botSessionLogMessage, logId);
+}
+
 void DataService::WorkerThread::receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit)
 {
   delegateEntity(new EBotSessionProperty(property, name, value, unit));
+}
+
+void DataService::WorkerThread::removedSessionProperty(quint64 propertyId)
+{
+  removeEntity(EType::botSessionProperty, propertyId);
 }
 
 void DataService::WorkerThread::receivedProcess(const meguco_process_entity& process, const QString& cmd)

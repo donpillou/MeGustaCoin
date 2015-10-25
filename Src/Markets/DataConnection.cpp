@@ -71,6 +71,8 @@ void DataConnection::close()
   tableInfo.clear();
   lastBrokerId = 0;
   lastSessionId = 0;
+  marketData.clear();
+  marketDataById.clear();
   brokerData.clear();
   sessionData.clear();
   selectedBrokerId = 0;
@@ -192,9 +194,9 @@ void DataConnection::receivedEntity(uint32_t tableId, const zlimdb_entity& entit
         callback->receivedProcess(*process, cmd);
     }
     break;
-  case TableInfo::tradesTable:
+  case TableInfo::marketTradesTable:
     if(entity.size >= sizeof(meguco_trade_entity))
-      callback->receivedTrade(tableId, *(const meguco_trade_entity*)&entity, tableInfo.timeOffset);
+      callback->receivedMarketTrade(tableInfo.nameId, *(const meguco_trade_entity*)&entity, tableInfo.timeOffset);
     break;
   case TableInfo::brokerTable:
     if(entity.id == 1 && entity.size >= sizeof(meguco_user_broker_entity))
@@ -277,7 +279,38 @@ void DataConnection::removedEntity(uint32_t tableId, uint64_t entityId)
   case TableInfo::processesTable:
     callback->removedProcess(entityId);
     break;
-  // todo: add handlers for the other entity types
+  case TableInfo::marketTradesTable:
+  case TableInfo::brokerTable:
+  case TableInfo::sessionTable:
+    // not removeable
+    break;
+  case TableInfo::brokerBalanceTable:
+    callback->removedBrokerBalance(entityId);
+    break;
+  case TableInfo::brokerOrdersTable:
+    callback->removedBrokerOrder(entityId);
+    break;
+  case TableInfo::brokerTransactionsTable:
+    callback->removedBrokerTransaction(entityId);
+    break;
+  case TableInfo::brokerLogTable:
+    callback->removedBrokerLog(entityId);
+    break;
+  case TableInfo::sessionOrdersTable:
+    callback->removedSessionOrder(entityId);
+    break;
+  case TableInfo::sessionTransactionsTable:
+    callback->removedSessionTransaction(entityId);
+    break;
+  case TableInfo::sessionAssetsTable:
+    callback->removedSessionAsset(entityId);
+    break;
+  case TableInfo::sessionPropertiesTable:
+    callback->removedSessionProperty(entityId);
+    break;
+  case TableInfo::sessionLogTable:
+    callback->removedSessionLog(entityId);
+    break;
   default:
     break;
   }
@@ -338,8 +371,19 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
         callback->receivedBotType(*botType, name);
       }
   }
-  else if(tableName.startsWith("markets/") && tableName.endsWith("/trades"))
-    callback->receivedMarket(table.entity.id, tableName.mid(8, tableName.length() - (8 + 7)));
+  else if(tableName.startsWith("markets/"))
+  {
+    QString marketId = tableName.mid(8, tableName.lastIndexOf('/') - 8);
+    MarketData& marketData = this->marketData[marketId];
+    if(tableName.endsWith("/trades"))
+    {
+      marketData.tradesTableId = table.entity.id;
+      marketDataById[table.entity.id] = &marketData;
+      callback->receivedMarket(table.entity.id, marketId);
+    }
+    else if(tableName.endsWith("/ticker"))
+      marketData.tickerTableId = table.entity.id;
+  }
   else if(tableName.startsWith(brokerPrefix))
   {
     quint64 brokerId = tableName.mid(brokerPrefix.length(), tableName.lastIndexOf('/') - brokerPrefix.length()).toULongLong();
@@ -381,7 +425,7 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
   }
   else if(tableName.startsWith(sessionPrefix))
   {
-    quint64 sessionId = tableName.mid(sessionPrefix.length(), tableName.lastIndexOf('/') - sessionPrefix.length()).toULongLong();
+    quint32 sessionId = tableName.mid(sessionPrefix.length(), tableName.lastIndexOf('/') - sessionPrefix.length()).toUInt();
     if(sessionId > lastSessionId)
       lastSessionId = sessionId;
     SessionData& sessionData = this->sessionData[sessionId];
@@ -440,37 +484,38 @@ void DataConnection::removedTable(uint32_t tableId)
   }
 }
 
-bool DataConnection::subscribe(quint32 tableId, quint64 lastReceivedTradeId)
+bool DataConnection::subscribe(quint32 marketId, quint64 lastReceivedTradeId)
 {
   qint64 tableTime, timeOffset;
   {
     qint64 serverTime;
-    if(zlimdb_sync(zdb, tableId, &serverTime, &tableTime) != 0)
+    if(zlimdb_sync(zdb, marketId, &serverTime, &tableTime) != 0)
       return error = getZlimDbError(), false;
     timeOffset = QDateTime::currentMSecsSinceEpoch() - tableTime;
   }
 
   if(lastReceivedTradeId != 0)
   {
-    if(zlimdb_subscribe(zdb, tableId, zlimdb_query_type_since_id, lastReceivedTradeId) != 0)
+    if(zlimdb_subscribe(zdb, marketId, zlimdb_query_type_since_id, lastReceivedTradeId) != 0)
       return error = getZlimDbError(), false;
   }
   else
   {
-    if(zlimdb_subscribe(zdb, tableId, zlimdb_query_type_since_time, tableTime - 7ULL * 24ULL * 60ULL * 60ULL * 1000ULL) != 0)
+    if(zlimdb_subscribe(zdb, marketId, zlimdb_query_type_since_time, tableTime - 7ULL * 24ULL * 60ULL * 60ULL * 1000ULL) != 0)
       return error = getZlimDbError(), false;
   }
 
-  TableInfo& tableInfo = this->tableInfo[tableId];
-  tableInfo.type = TableInfo::tradesTable;
+  TableInfo& tableInfo = this->tableInfo[marketId];
+  tableInfo.type = TableInfo::marketTradesTable;
   tableInfo.timeOffset = timeOffset;
+  tableInfo.nameId = marketId;
 
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
     for(const meguco_trade_entity* trade = (const meguco_trade_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_trade_entity));
         trade;
         trade = (const meguco_trade_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer, sizeof(meguco_trade_entity), &trade->entity))
-      callback->receivedTrade(tableId, *trade, timeOffset);
+      callback->receivedMarketTrade(marketId, *trade, timeOffset);
   if(zlimdb_errno() != 0)
     return error = getZlimDbError(), false;
   return true;

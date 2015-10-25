@@ -9,24 +9,38 @@ public:
   class Callback
   {
   public:
-    virtual void receivedMarket(quint32 tableId, const QString& channelName) = 0;
+    virtual void receivedBrokerType(const meguco_broker_type_entity& brokerType, const QString& name) = 0;
+    virtual void receivedBotType(const meguco_bot_type_entity& botType, const QString& name) = 0;
+
+    virtual void receivedMarket(quint32 marketId, const QString& channelName) = 0;
     virtual void receivedBroker(quint32 brokerId, const meguco_user_broker_entity& broker, const QString& userName) = 0;
     virtual void removedBroker(quint32 brokerId) = 0;
     virtual void receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session) = 0;
     virtual void removedSession(quint32 sessionId) = 0;
-    virtual void receivedTrade(quint32 tableId, const meguco_trade_entity& trade, qint64 timeOffset) = 0;
-    virtual void receivedTicker(quint32 tableId, const meguco_ticker_entity& ticker) = 0;
-    virtual void receivedBrokerType(const meguco_broker_type_entity& brokerType, const QString& name) = 0;
-    virtual void receivedBotType(const meguco_bot_type_entity& botType, const QString& name) = 0;
+
+    virtual void receivedMarketTrade(quint32 marketId, const meguco_trade_entity& trade, qint64 timeOffset) = 0;
+    virtual void receivedMarketTicker(quint32 marketId, const meguco_ticker_entity& ticker) = 0;
+
     virtual void receivedBrokerBalance(const meguco_user_broker_balance_entity& balance) = 0;
+    virtual void removedBrokerBalance(quint64 balanceId) = 0;
     virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder) = 0; 
+    virtual void removedBrokerOrder(quint64 orderId) = 0;
     virtual void receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction) = 0;
+    virtual void removedBrokerTransaction(quint64 transactionId) = 0;
     virtual void receivedBrokerLog(const meguco_log_entity& log, const QString& message) = 0;
+    virtual void removedBrokerLog(quint64 logId) = 0;
+
     virtual void receivedSessionOrder(const meguco_user_broker_order_entity& order) = 0;
+    virtual void removedSessionOrder(quint64 orderId) = 0;
     virtual void receivedSessionTransaction(const meguco_user_broker_transaction_entity& transaction) = 0;
+    virtual void removedSessionTransaction(quint64 transactionId) = 0;
     virtual void receivedSessionAsset(const meguco_user_session_asset_entity& asset) = 0;
+    virtual void removedSessionAsset(quint64 assertId) = 0;
     virtual void receivedSessionLog(const meguco_log_entity& log, const QString& message) = 0;
+    virtual void removedSessionLog(quint64 logId) = 0;
     virtual void receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit) = 0;
+    virtual void removedSessionProperty(quint64 propertyId) = 0;
+
     virtual void receivedProcess(const meguco_process_entity& process, const QString& cmd) = 0;
     virtual void removedProcess(quint64 processId) = 0;
   };
@@ -40,8 +54,8 @@ public:
   bool process();
   void interrupt();
 
-  bool subscribe(quint32 tableId, quint64 lastReceivedTradeId);
-  bool unsubscribe(quint32 tableId);
+  bool subscribe(quint32 marketId, quint64 lastReceivedTradeId);
+  bool unsubscribe(quint32 marketId);
 
   const QString& getLastError() {return error;}
 
@@ -78,7 +92,7 @@ private:
     enum Type
     {
       tablesTable,
-      tradesTable,
+      marketTradesTable,
       brokerTable,
       sessionTable,
       brokerBalanceTable,
@@ -92,8 +106,18 @@ private:
       sessionPropertiesTable,
       processesTable,
     } type;
-    quint64 nameId;
+    quint32 nameId;
     qint64 timeOffset;
+  };
+
+  class MarketData
+  {
+  public:
+    quint32 tradesTableId;
+    quint32 tickerTableId;
+
+  public:
+    MarketData() : tradesTableId(0), tickerTableId(0) {}
   };
 
   class BrokerData
@@ -132,6 +156,8 @@ private:
   QString sessionPrefix;
   quint32 lastBrokerId;
   quint32 lastSessionId;
+  QHash<QString, MarketData> marketData;
+  QHash<quint32, MarketData*> marketDataById;
   QHash<quint32, BrokerData> brokerData;
   QHash<quint32, SessionData> sessionData;
   quint32 selectedBrokerId;
