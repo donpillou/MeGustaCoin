@@ -50,27 +50,31 @@ void DataService::subscribe(const QString& channelName, Entity::Manager& channel
   class SubscriptionJob : public Job, public Event
   {
   public:
-    SubscriptionJob(const QString& channelName, quint32 channelId, quint64 lastReceivedTradeId) : channelName(channelName), channelId(channelId), lastReceivedTradeId(lastReceivedTradeId), eTradeData(0) {}
+    SubscriptionJob(const QString& channelName, quint32 channelId, quint64 lastReceivedTradeId) : channelName(channelName), channelId(channelId), lastReceivedTradeId(lastReceivedTradeId), eTradeData(0), eTickerData(0) {}
     ~SubscriptionJob() {delete eTradeData;}
   private:
     QString channelName;
     quint32 channelId;
     quint64 lastReceivedTradeId;
     EDataTradeData* eTradeData;
+    EDataTickerData* eTickerData;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
       WorkerThread::SubscriptionData& data = workerThread.subscriptionData[channelId];
       data.channelName = channelName;
-      if(data.eTradeData)
-        delete data.eTradeData;
+      delete data.eTradeData;
       data.eTradeData = new EDataTradeData;
+      delete data.eTickerData;
+      data.eTickerData = 0;
 
       if(!workerThread.connection.subscribeMarket(channelId, lastReceivedTradeId))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not subscribe to channel %1: %2").arg(channelName, workerThread.connection.getLastError())), false;
       
       eTradeData = data.eTradeData;
       data.eTradeData = 0;
+      eTickerData = data.eTickerData;
+      data.eTickerData = 0;
       return true;
     }
   private: // Event
@@ -81,6 +85,11 @@ void DataService::subscribe(const QString& channelName, Entity::Manager& channel
       {
         channelEntityManager->delegateEntity(*eTradeData);
         eTradeData = 0;
+        if(eTickerData)
+        {
+          channelEntityManager->delegateEntity(*eTickerData);
+          eTickerData = 0;
+        }
         dataService.activeSubscriptions[channelId] = channelEntityManager;
         EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
         eDataSubscription->setState(EDataSubscription::State::subscribed);
@@ -498,38 +507,47 @@ void DataService::WorkerThread::receivedMarketTrade(quint32 marketId, const megu
 
 void DataService::WorkerThread::receivedMarketTicker(quint32 marketId, const meguco_ticker_entity& ticker)
 {
-  class AddTickerEvent : public Event
+  SubscriptionData& data = subscriptionData[marketId];
+  if(data.eTradeData)
   {
-  public:
-    AddTickerEvent(quint64 marketId, const meguco_ticker_entity& ticker) : marketId(marketId), ticker(ticker) {}
-  private:
-    quint64 marketId;
-    meguco_ticker_entity ticker;
-  private: // Event
-    virtual void handle(DataService& dataService)
+    delete data.eTickerData;
+    data.eTickerData = new EDataTickerData(ticker.ask, ticker.bid);
+  }
+  else
+  {
+    class AddTickerEvent : public Event
     {
-      QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(marketId);
-      if(it == dataService.activeSubscriptions.end())
-        return;
-      Entity::Manager* channelEntityManager = it.value();
-      EDataTickerData* eDataTickerData = channelEntityManager->getEntity<EDataTickerData>(0);
-      if(eDataTickerData)
+    public:
+      AddTickerEvent(quint64 marketId, const meguco_ticker_entity& ticker) : marketId(marketId), ticker(ticker) {}
+    private:
+      quint64 marketId;
+      meguco_ticker_entity ticker;
+    private: // Event
+      virtual void handle(DataService& dataService)
       {
-        eDataTickerData->setData(ticker.ask, ticker.bid);
-        channelEntityManager->updatedEntity(*eDataTickerData);
+        QHash<quint32, Entity::Manager*>::ConstIterator it = dataService.activeSubscriptions.find(marketId);
+        if(it == dataService.activeSubscriptions.end())
+          return;
+        Entity::Manager* channelEntityManager = it.value();
+        EDataTickerData* eDataTickerData = channelEntityManager->getEntity<EDataTickerData>(0);
+        if(eDataTickerData)
+        {
+          eDataTickerData->setData(ticker.ask, ticker.bid);
+          channelEntityManager->updatedEntity(*eDataTickerData);
+        }
+        else
+        {
+          eDataTickerData = new EDataTickerData(ticker.ask, ticker.bid);
+          channelEntityManager->delegateEntity(*eDataTickerData);
+        }
       }
-      else
-      {
-        eDataTickerData = new EDataTickerData(ticker.ask, ticker.bid);
-        channelEntityManager->delegateEntity(*eDataTickerData);
-      }
-    }
-  };
+    };
 
-  bool wasEmpty;
-  eventQueue.append(new AddTickerEvent(marketId, ticker), &wasEmpty);
-  if(wasEmpty)
-    QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+    bool wasEmpty;
+    eventQueue.append(new AddTickerEvent(marketId, ticker), &wasEmpty);
+    if(wasEmpty)
+      QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
+  }
 }
 
 void DataService::WorkerThread::receivedBrokerType(const meguco_broker_type_entity& brokerType, const QString& name)

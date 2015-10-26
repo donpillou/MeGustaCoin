@@ -70,10 +70,11 @@ private:
     public:
       QString channelName;
       EDataTradeData* eTradeData;
+      EDataTickerData* eTickerData;
 
     public:
-      SubscriptionData() : eTradeData(0) {}
-      ~SubscriptionData() {delete eTradeData;}
+      SubscriptionData() : eTradeData(0), eTickerData(0) {}
+      ~SubscriptionData() {delete eTradeData; delete eTickerData;}
     };
 
   public:

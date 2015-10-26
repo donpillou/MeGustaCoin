@@ -527,7 +527,7 @@ bool DataConnection::subscribeMarket(quint32 marketId, quint64 lastReceivedTrade
 
   if(marketData.tickerTableId != 0)
   {
-    if(zlimdb_subscribe(zdb, marketData.tradesTableId, zlimdb_query_type_last, 0) != 0)
+    if(zlimdb_subscribe(zdb, marketData.tickerTableId, zlimdb_query_type_since_last, 0) != 0)
       return error = getZlimDbError(), false;
     while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
       for(const meguco_ticker_entity* ticker = (const meguco_ticker_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_ticker_entity));
@@ -773,7 +773,7 @@ bool DataConnection::selectBroker(quint32 brokerId)
       return false;
     if(brokerData.transactionsTableId != 0 && !subscribe(brokerData.transactionsTableId, TableInfo::brokerTransactionsTable))
       return false;
-    if(brokerData.logTableId != 0 && !subscribe(brokerData.logTableId, TableInfo::brokerLogTable, zlimdb_query_type_none))
+    if(brokerData.logTableId != 0 && !subscribe(brokerData.logTableId, TableInfo::brokerLogTable, zlimdb_query_type_since_next))
       return false;
   }
   return true;
