@@ -54,8 +54,8 @@ public:
   bool process();
   void interrupt();
 
-  bool subscribe(quint32 marketId, quint64 lastReceivedTradeId);
-  bool unsubscribe(quint32 marketId);
+  bool subscribeMarket(quint32 marketId, quint64 lastReceivedTradeId);
+  bool unsubscribeMarket(quint32 marketId);
 
   const QString& getLastError() {return error;}
 
@@ -172,6 +172,7 @@ private:
   //bool controlEntity(quint32 tableId, quint64 entityId, quint32 code);
 
   bool subscribe(quint32 tableId, TableInfo::Type tableType, zlimdb_query_type queryType = zlimdb_query_type_all);
+  bool unsubscribe(quint32 tableId);
 
   void addedEntity(uint32_t tableId, const zlimdb_entity& entity);
   void updatedEntity(uint32_t tableId, const zlimdb_entity& entity);

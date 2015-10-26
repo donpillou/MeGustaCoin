@@ -66,7 +66,7 @@ void DataService::subscribe(const QString& channelName, Entity::Manager& channel
         delete data.eTradeData;
       data.eTradeData = new EDataTradeData;
 
-      if(!workerThread.connection.subscribe(channelId, lastReceivedTradeId))
+      if(!workerThread.connection.subscribeMarket(channelId, lastReceivedTradeId))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not subscribe to channel %1: %2").arg(channelName, workerThread.connection.getLastError())), false;
       
       eTradeData = data.eTradeData;
@@ -133,7 +133,7 @@ void DataService::unsubscribe(const QString& channelName)
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.unsubscribe(channelId))
+      if(!workerThread.connection.unsubscribeMarket(channelId))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not unsubscribe from channel %1: %2").arg(channelName, workerThread.connection.getLastError())), false;
       return true;
     }

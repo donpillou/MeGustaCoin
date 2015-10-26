@@ -484,28 +484,34 @@ void DataConnection::removedTable(uint32_t tableId)
   }
 }
 
-bool DataConnection::subscribe(quint32 marketId, quint64 lastReceivedTradeId)
+bool DataConnection::subscribeMarket(quint32 marketId, quint64 lastReceivedTradeId)
 {
   qint64 tableTime, timeOffset;
   {
     qint64 serverTime;
+    qint64 now = QDateTime::currentMSecsSinceEpoch();
     if(zlimdb_sync(zdb, marketId, &serverTime, &tableTime) != 0)
       return error = getZlimDbError(), false;
-    timeOffset = QDateTime::currentMSecsSinceEpoch() - tableTime;
+    timeOffset = now - tableTime;
   }
+
+  QHash<quint32, MarketData*>::ConstIterator it = marketDataById.find(marketId);
+  if(it == marketDataById.end())
+    return error = "Unkown market id", false;
+  MarketData& marketData = *it.value();
 
   if(lastReceivedTradeId != 0)
   {
-    if(zlimdb_subscribe(zdb, marketId, zlimdb_query_type_since_id, lastReceivedTradeId) != 0)
+    if(zlimdb_subscribe(zdb, marketData.tradesTableId, zlimdb_query_type_since_id, lastReceivedTradeId) != 0)
       return error = getZlimDbError(), false;
   }
   else
   {
-    if(zlimdb_subscribe(zdb, marketId, zlimdb_query_type_since_time, tableTime - 7ULL * 24ULL * 60ULL * 60ULL * 1000ULL) != 0)
+    if(zlimdb_subscribe(zdb, marketData.tradesTableId, zlimdb_query_type_since_time, tableTime - 7ULL * 24ULL * 60ULL * 60ULL * 1000ULL) != 0)
       return error = getZlimDbError(), false;
   }
 
-  TableInfo& tableInfo = this->tableInfo[marketId];
+  TableInfo& tableInfo = this->tableInfo[marketData.tradesTableId];
   tableInfo.type = TableInfo::marketTradesTable;
   tableInfo.timeOffset = timeOffset;
   tableInfo.nameId = marketId;
@@ -518,14 +524,42 @@ bool DataConnection::subscribe(quint32 marketId, quint64 lastReceivedTradeId)
       callback->receivedMarketTrade(marketId, *trade, timeOffset);
   if(zlimdb_errno() != 0)
     return error = getZlimDbError(), false;
+
+  if(marketData.tickerTableId != 0)
+  {
+    if(zlimdb_subscribe(zdb, marketData.tradesTableId, zlimdb_query_type_last, 0) != 0)
+      return error = getZlimDbError(), false;
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const meguco_ticker_entity* ticker = (const meguco_ticker_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_ticker_entity));
+          ticker;
+          ticker = (const meguco_ticker_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer, sizeof(meguco_ticker_entity), &ticker->entity))
+        callback->receivedMarketTicker(marketId, *ticker);
+    if(zlimdb_errno() != 0)
+      return error = getZlimDbError(), false;
+  }
+
   return true;
 }
 
-bool DataConnection::unsubscribe(quint32 tableId)
+bool DataConnection::unsubscribeMarket(quint32 marketId)
 {
-  if(zlimdb_unsubscribe(zdb, tableId) != 0)
-    return error = getZlimDbError(), false;
-  tableInfo.remove(tableId);
+  QHash<quint32, MarketData*>::ConstIterator it = marketDataById.find(marketId);
+  if(it == marketDataById.end())
+    return error = "Unkown market id", false;
+  MarketData& marketData = *it.value();
+
+  if(marketData.tradesTableId != 0)
+  {
+    if(zlimdb_unsubscribe(zdb, marketData.tradesTableId) != 0)
+      return error = getZlimDbError(), false;
+    tableInfo.remove(marketData.tradesTableId);
+  }
+  if(marketData.tickerTableId != 0)
+  {
+    if(zlimdb_unsubscribe(zdb, marketData.tickerTableId) != 0)
+      return error = getZlimDbError(), false;
+    tableInfo.remove(marketData.tickerTableId);
+  }
   return true;
 }
 
@@ -694,6 +728,14 @@ bool DataConnection::subscribe(quint32 tableId, TableInfo::Type tableType, zlimd
   }
   if(zlimdb_errno() != 0)
     return error = getZlimDbError(), false;
+  return true;
+}
+
+bool DataConnection::unsubscribe(quint32 tableId)
+{
+  if(zlimdb_unsubscribe(zdb, tableId) != 0)
+    return error = getZlimDbError(), false;
+  tableInfo.remove(tableId);
   return true;
 }
 
