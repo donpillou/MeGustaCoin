@@ -7,7 +7,7 @@ public:
   static const EType eType = EType::userBrokerBalance;
 
 public:
-  EUserBrokerBalance(const meguco_user_broker_balance_entity& data) : Entity(eType, data.entity.id)
+  EUserBrokerBalance(const meguco_user_broker_balance_entity& data) : Entity(eType, 0)
   {
     reservedUsd = data.reserved_usd;
     reservedBtc = data.reserved_btc;
