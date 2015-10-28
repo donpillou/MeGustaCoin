@@ -770,26 +770,39 @@ void DataService::submitBrokerOrderDraft(EBotMarketOrderDraft& draft)
   draft.setState(EBotMarketOrder::State::submitting);
   globalEntityManager.updatedEntity(draft);
 
-  class SubmitBrokerOrderJob : public Job
+  class SubmitBrokerOrderJob : public Job, public Event
   {
   public:
-    SubmitBrokerOrderJob(EBotMarketOrder::Type type, double price, double amount) : 
-      type(type), price(price), amount(amount) {}
+    SubmitBrokerOrderJob(quint64 draftId, EBotMarketOrder::Type type, double price, double amount) : 
+      draftId(draftId), type(type), price(price), amount(amount), orderId(0) {}
   private:
+    quint64 draftId;
     EBotMarketOrder::Type type;
     double price;
     double amount;
+    quint64 orderId;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.createBrokerOrder((meguco_user_broker_order_type)type, price, amount))
+      if(!workerThread.connection.createBrokerOrder((meguco_user_broker_order_type)type, price, amount, orderId))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not create broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
+    }
+    virtual void handle(DataService& dataService)
+    {
+      if(!orderId)
+        return;
+      EBotMarketOrderDraft* draft = dataService.globalEntityManager.getEntity<EBotMarketOrderDraft>(draftId);
+      if(draft)
+      {
+        EBotMarketOrder* order = new EBotMarketOrder(orderId, *draft);
+        dataService.globalEntityManager.delegateEntity(*order, *draft);
+      }
     }
   };
 
   bool wasEmpty;
-  jobQueue.append(new SubmitBrokerOrderJob(draft.getType(), draft.getPrice(), draft.getAmount()), &wasEmpty);
+  jobQueue.append(new SubmitBrokerOrderJob(draft.getId(), draft.getType(), draft.getPrice(), draft.getAmount()), &wasEmpty);
   if(wasEmpty && thread)
     thread->interrupt();
 }

@@ -228,6 +228,15 @@ void DataConnection::receivedEntity(uint32_t tableId, const zlimdb_entity& entit
     if(entity.size >= sizeof(meguco_user_broker_transaction_entity))
       callback->receivedBrokerTransaction(*(const meguco_user_broker_transaction_entity*)&entity);
     break;
+  case TableInfo::brokerLogTable:
+    if(entity.size >= sizeof(meguco_log_entity))
+    {
+      const meguco_log_entity* logMessage = (const meguco_log_entity*)&entity;
+      QString message;
+      if(getString(logMessage->entity, sizeof(*logMessage), logMessage->message_size, message))
+        callback->receivedBrokerLog(*(const meguco_log_entity*)&entity, message);
+    }
+    break;
   case TableInfo::sessionOrdersTable:
     if(entity.size >= sizeof(meguco_user_broker_order_entity))
       callback->receivedSessionOrder(*(const meguco_user_broker_order_entity*)&entity);
@@ -792,7 +801,7 @@ bool DataConnection::controlBroker(meguco_user_broker_control_code code)
   return true;
 }
 
-bool DataConnection::createBrokerOrder(meguco_user_broker_order_type type, double price, double amount)
+bool DataConnection::createBrokerOrder(meguco_user_broker_order_type type, double price, double amount, quint64& orderId)
 {
   QHash<quint32, BrokerData>::ConstIterator it = brokerData.find(this->selectedBrokerId);
   if(it == brokerData.end())
@@ -812,8 +821,7 @@ bool DataConnection::createBrokerOrder(meguco_user_broker_order_type type, doubl
   order.timeout = 0;
   order.raw_id = 0;
 
-  quint64 id;
-  if(zlimdb_add(zdb, brokerData.ordersTableId, &order.entity, &id) != 0)
+  if(zlimdb_add(zdb, brokerData.ordersTableId, &order.entity, &orderId) != 0)
     return error = getZlimDbError(), false;
   return true;
 }

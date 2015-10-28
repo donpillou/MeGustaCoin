@@ -64,7 +64,7 @@ public:
   bool selectBroker(quint32 brokerId);
   bool controlBroker(meguco_user_broker_control_code code);
 
-  bool createBrokerOrder(meguco_user_broker_order_type type, double price, double amount);
+  bool createBrokerOrder(meguco_user_broker_order_type type, double price, double amount, quint64& orderId);
   bool controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size);
   bool removeBrokerOrder(quint64 orderId);
 
