@@ -320,7 +320,7 @@ void BotService::submitSessionItemDraft(EBotSessionItemDraft& draft)
   sessionAsset.type = (quint8)draft.getType();;
   sessionAsset.price = draft.getPrice();
   sessionAsset.investComm = draft.getInvestComm();
-  sessionAsset.investBase = draft.getInvestComm();
+  sessionAsset.investBase = draft.getInvestBase();
   sessionAsset.balanceComm = draft.getBalanceComm();
   sessionAsset.balanceBase = draft.getBalanceBase();
   sessionAsset.profitablePrice = draft.getProfitablePrice();
