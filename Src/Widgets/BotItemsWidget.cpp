@@ -42,6 +42,7 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
   itemView->setSortingEnabled(true);
   itemView->setRootIsDecorated(false);
   itemView->setAlternatingRowColors(true);
+  itemView->setItemDelegateForColumn((int)SessionItemModel::Column::balanceComm, new DecimalDelegate(8, this));
   itemView->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::DoubleClicked);
   itemView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
