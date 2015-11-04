@@ -70,7 +70,7 @@ QVariant SessionPropertyModel::data(const QModelIndex& index, int role) const
     case Column::value:
       {
         const QString& unit = eProperty->getUnit();
-        QString value = eProperty->getType() == EBotSessionProperty::Type::number ? QLocale::system().toString(fabs(eProperty->getValue().toDouble()), 'g', 8) : eProperty->getValue();
+        QString value = eProperty->getType() == EBotSessionProperty::Type::number ? QLocale::system().toString(eProperty->getValue().toDouble(), 'g', 8) : eProperty->getValue();
         return unit.isEmpty() ? value : tr("%1 %2").arg(value, unit);
       }
     }
