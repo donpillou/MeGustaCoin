@@ -37,7 +37,7 @@ bool DataConnection::connect(const QString& server, quint16 port, const QString&
   this->callback = &callback;
 
   // subscribe to tables table
-  if(zlimdb_subscribe(zdb, zlimdb_table_tables, zlimdb_query_type_all, 0) != 0)
+  if(zlimdb_subscribe(zdb, zlimdb_table_tables, zlimdb_query_type_all, 0, zlimdb_subscribe_flag_none) != 0)
     return error = getZlimDbError(), false;
   TableInfo& tableInfo = this->tableInfo[zlimdb_table_tables];
   tableInfo.type = TableInfo::tablesTable;
@@ -69,8 +69,9 @@ void DataConnection::close()
     zdb = 0;
   }
   tableInfo.clear();
-  lastBrokerId = 0;
-  lastSessionId = 0;
+  userTableId = 0;
+  //lastBrokerId = 0;
+  //lastSessionId = 0;
   marketData.clear();
   marketDataById.clear();
   brokerData.clear();
@@ -332,7 +333,7 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
     return zlimdb_seterrno(zlimdb_local_error_invalid_message_data), error = getZlimDbError(), false;
   if(tableName == "processes")
   {
-    if(zlimdb_subscribe(zdb, table.entity.id, zlimdb_query_type_all, 0) != 0)
+    if(zlimdb_subscribe(zdb, table.entity.id, zlimdb_query_type_all, 0, zlimdb_subscribe_flag_none) != 0)
       return error = getZlimDbError(), false;
     TableInfo& tableInfo = this->tableInfo[table.entity.id];
     tableInfo.type = TableInfo::processesTable;
@@ -393,11 +394,13 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
     else if(tableName.endsWith("/ticker"))
       marketData.tickerTableId = table.entity.id;
   }
+  else if(tableName.startsWith("users/") && tableName.endsWith("/user"))
+    userTableId = table.entity.id;
   else if(tableName.startsWith(brokerPrefix))
   {
     quint64 brokerId = tableName.mid(brokerPrefix.length(), tableName.lastIndexOf('/') - brokerPrefix.length()).toULongLong();
-    if(brokerId > lastBrokerId)
-      lastBrokerId = brokerId;
+    //if(brokerId > lastBrokerId)
+    //  lastBrokerId = brokerId;
     BrokerData& brokerData = this->brokerData[brokerId];
     if(tableName.endsWith("/broker"))
     {
@@ -405,7 +408,7 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
       TableInfo& tableInfo = this->tableInfo[table.entity.id];
       tableInfo.type = TableInfo::brokerTable;
       tableInfo.nameId = brokerId;
-      if(zlimdb_subscribe(zdb, table.entity.id, zlimdb_query_type_all, 0) != 0)
+      if(zlimdb_subscribe(zdb, table.entity.id, zlimdb_query_type_all, 0, zlimdb_subscribe_flag_none) != 0)
         return error = getZlimDbError(), false;
       char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
       while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
@@ -435,8 +438,8 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
   else if(tableName.startsWith(sessionPrefix))
   {
     quint32 sessionId = tableName.mid(sessionPrefix.length(), tableName.lastIndexOf('/') - sessionPrefix.length()).toUInt();
-    if(sessionId > lastSessionId)
-      lastSessionId = sessionId;
+    //if(sessionId > lastSessionId)
+    //  lastSessionId = sessionId;
     SessionData& sessionData = this->sessionData[sessionId];
     if(tableName.endsWith("/session"))
     {
@@ -444,7 +447,7 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
       TableInfo& tableInfo = this->tableInfo[table.entity.id];
       tableInfo.type = TableInfo::sessionTable;
       tableInfo.nameId = sessionId;
-      if(zlimdb_subscribe(zdb, table.entity.id, zlimdb_query_type_all, 0) != 0)
+      if(zlimdb_subscribe(zdb, table.entity.id, zlimdb_query_type_all, 0, zlimdb_subscribe_flag_none) != 0)
         return error = getZlimDbError(), false;
       char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
       while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
@@ -511,12 +514,12 @@ bool DataConnection::subscribeMarket(quint32 marketId, quint64 lastReceivedTrade
 
   if(lastReceivedTradeId != 0)
   {
-    if(zlimdb_subscribe(zdb, marketData.tradesTableId, zlimdb_query_type_since_id, lastReceivedTradeId) != 0)
+    if(zlimdb_subscribe(zdb, marketData.tradesTableId, zlimdb_query_type_since_id, lastReceivedTradeId, zlimdb_subscribe_flag_none) != 0)
       return error = getZlimDbError(), false;
   }
   else
   {
-    if(zlimdb_subscribe(zdb, marketData.tradesTableId, zlimdb_query_type_since_time, tableTime - 7ULL * 24ULL * 60ULL * 60ULL * 1000ULL) != 0)
+    if(zlimdb_subscribe(zdb, marketData.tradesTableId, zlimdb_query_type_since_time, tableTime - 7ULL * 24ULL * 60ULL * 60ULL * 1000ULL, zlimdb_subscribe_flag_none) != 0)
       return error = getZlimDbError(), false;
   }
 
@@ -536,7 +539,7 @@ bool DataConnection::subscribeMarket(quint32 marketId, quint64 lastReceivedTrade
 
   if(marketData.tickerTableId != 0)
   {
-    if(zlimdb_subscribe(zdb, marketData.tickerTableId, zlimdb_query_type_since_last, 0) != 0)
+    if(zlimdb_subscribe(zdb, marketData.tickerTableId, zlimdb_query_type_since_last, 0, zlimdb_subscribe_flag_none) != 0)
       return error = getZlimDbError(), false;
     while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
       for(const meguco_ticker_entity* ticker = (const meguco_ticker_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_ticker_entity));
@@ -574,11 +577,8 @@ bool DataConnection::unsubscribeMarket(quint32 marketId)
 
 bool DataConnection::createBroker(quint64 brokerTypeId, const QString& userName, const QString& key, const QString& secret)
 {
-  ++lastBrokerId;
-  BrokerData& brokerData = this->brokerData[lastBrokerId];
-  QString tableName = QString("%1%2/broker").arg(brokerPrefix, QString::number(lastBrokerId));
-  if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &brokerData.brokerTableId) != 0)
-    return error = getZlimDbError(), false;
+  if(!userTableId)
+    return error = "Unknown user table id", false;
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   meguco_user_broker_entity* broker = (meguco_user_broker_entity*)buffer;
   QByteArray userNameData = userName.toUtf8(), keyData = key.toUtf8(), secretData = secret.toUtf8();
@@ -591,20 +591,31 @@ bool DataConnection::createBroker(quint64 brokerTypeId, const QString& userName,
     zlimdb_seterrno(zlimdb_local_error_invalid_parameter);
     return error = getZlimDbError(), false;
   }
-  uint64_t id;
-  if(zlimdb_add(zdb, brokerData.brokerTableId, &broker->entity, &id))
-    return error = getZlimDbError(), false;
 
-  tableName = QString("%1%2/balance").arg(brokerPrefix, QString::number(lastBrokerId));
+  if(zlimdb_control(zdb, userTableId, 0, meguco_user_control_create_broker, &broker->entity, broker->entity.size, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
+    return error = getZlimDbError(), false;
+  uint64_t* response = (uint64_t*)zlimdb_get_response_data((zlimdb_header*)buffer, sizeof(uint64_t));
+  if(!response)
+  {
+    zlimdb_seterrno(zlimdb_local_error_invalid_response);
+    return error = getZlimDbError(), false;
+  }
+  uint64_t brokerId = *response;
+
+  BrokerData& brokerData = this->brokerData[brokerId];
+  QString tableName = QString("%1%2/broker").arg(brokerPrefix, QString::number(brokerId));
+  if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &brokerData.brokerTableId) != 0)
+    return error = getZlimDbError(), false;
+  tableName = QString("%1%2/balance").arg(brokerPrefix, QString::number(brokerId));
   if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &brokerData.balanceTableId) != 0)
     return error = getZlimDbError(), false;
-  tableName = QString("%1%2/orders").arg(brokerPrefix, QString::number(lastBrokerId));
+  tableName = QString("%1%2/orders").arg(brokerPrefix, QString::number(brokerId));
   if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &brokerData.ordersTableId) != 0)
     return error = getZlimDbError(), false;
-  tableName = QString("%1%2/transactions").arg(brokerPrefix, QString::number(lastBrokerId));
+  tableName = QString("%1%2/transactions").arg(brokerPrefix, QString::number(brokerId));
   if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &brokerData.transactionsTableId) != 0)
     return error = getZlimDbError(), false;
-  tableName = QString("%1%2/log").arg(brokerPrefix, QString::number(lastBrokerId));
+  tableName = QString("%1%2/log").arg(brokerPrefix, QString::number(brokerId));
   if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &brokerData.logTableId) != 0)
     return error = getZlimDbError(), false;
   return true;
@@ -615,16 +626,10 @@ bool DataConnection::removeBroker(quint32 brokerId)
   QHash<quint32, BrokerData>::Iterator it = this->brokerData.find(brokerId);
   if(it == this->brokerData.end())
     return error = "Unknown broker id", false;
-  const BrokerData& brokerData = *it;
-  if(brokerData.brokerTableId != 0 && zlimdb_remove_table(zdb, brokerData.brokerTableId) != 0)
-    return error = getZlimDbError(), false;
-  if(brokerData.balanceTableId != 0 && zlimdb_remove_table(zdb, brokerData.balanceTableId) != 0)
-    return error = getZlimDbError(), false;
-  if(brokerData.ordersTableId != 0 && zlimdb_remove_table(zdb, brokerData.ordersTableId) != 0)
-    return error = getZlimDbError(), false;
-  if(brokerData.transactionsTableId != 0 && zlimdb_remove_table(zdb, brokerData.transactionsTableId) != 0)
-    return error = getZlimDbError(), false;
-  if(brokerData.logTableId != 0 && zlimdb_remove_table(zdb, brokerData.logTableId) != 0)
+  if(!userTableId)
+    return error = "Unknown user table id", false;
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, userTableId, brokerId, meguco_user_control_remove_broker, 0, 0, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
     return error = getZlimDbError(), false;
   this->brokerData.erase(it);
   if(selectedBrokerId == brokerId)
@@ -634,7 +639,7 @@ bool DataConnection::removeBroker(quint32 brokerId)
 
 bool DataConnection::subscribe(quint32 tableId, TableInfo::Type tableType, zlimdb_query_type queryType)
 {
-  if(zlimdb_subscribe(zdb, tableId, queryType, 0) != 0)
+  if(zlimdb_subscribe(zdb, tableId, queryType, 0, zlimdb_subscribe_flag_none) != 0)
     return error = getZlimDbError(), false;
 
   TableInfo& tableInfo = this->tableInfo[tableId];
@@ -796,7 +801,8 @@ bool DataConnection::controlBroker(meguco_user_broker_control_code code)
   const BrokerData& brokerData = *it;
   if(!brokerData.brokerTableId)
     return error = "Unknown broker table id", false;
-  if(zlimdb_control(zdb, brokerData.brokerTableId, 1, code, 0, 0) != 0)
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, brokerData.brokerTableId, 1, code, 0, 0, (zlimdb_header*)buffer, sizeof(buffer)) != 0)
       return error = getZlimDbError(), false;
   return true;
 }
@@ -807,8 +813,8 @@ bool DataConnection::createBrokerOrder(meguco_user_broker_order_type type, doubl
   if(it == brokerData.end())
     return error = "Unknown broker id", false;
   const BrokerData& brokerData = *it;
-  if(!brokerData.ordersTableId)
-    return error = "Unknown broker orders table id", false;
+  if(!brokerData.brokerTableId)
+    return error = "Unknown broker table id", false;
 
   meguco_user_broker_order_entity order;
   setEntityHeader(order.entity, 0, 0, sizeof(order));
@@ -821,8 +827,16 @@ bool DataConnection::createBrokerOrder(meguco_user_broker_order_type type, doubl
   order.timeout = 0;
   order.raw_id = 0;
 
-  if(zlimdb_add(zdb, brokerData.ordersTableId, &order.entity, &orderId) != 0)
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, brokerData.brokerTableId, 0, meguco_user_broker_control_create_order, &order.entity, order.entity.size, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
     return error = getZlimDbError(), false;
+  uint64_t* response = (uint64_t*)zlimdb_get_response_data((zlimdb_header*)buffer, sizeof(uint64_t));
+  if(!response)
+  {
+    zlimdb_seterrno(zlimdb_local_error_invalid_response);
+    return error = getZlimDbError(), false;
+  }
+  orderId = *response;
   return true;
 }
 
@@ -834,7 +848,8 @@ bool DataConnection::controlBrokerOrder(quint64 orderId, meguco_user_broker_orde
   const BrokerData& brokerData = *it;
   if(!brokerData.ordersTableId)
     return error = "Unknown broker orders table id", false;
-  if(zlimdb_control(zdb, brokerData.ordersTableId, orderId, code, data, size) != 0)
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, brokerData.ordersTableId, orderId, code, data, size, (zlimdb_header*)buffer, sizeof(buffer)) != 0)
     return error = getZlimDbError(), false;
   return true;
 }
@@ -845,21 +860,18 @@ bool DataConnection::removeBrokerOrder(quint64 orderId)
   if(it == brokerData.end())
     return error = "Unknown broker id", false;
   const BrokerData& brokerData = *it;
-  if(!brokerData.ordersTableId)
-    return error = "Unknown broker orders table id", false;
-  if(zlimdb_remove(zdb, brokerData.ordersTableId, orderId) != 0)
+  if(!brokerData.brokerTableId)
+    return error = "Unknown broker table id", false;
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, brokerData.brokerTableId, orderId, meguco_user_broker_control_remove_order, 0, 0, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
     return error = getZlimDbError(), false;
   return true;
 }
 
 bool DataConnection::createSession(const QString& name, quint64 botTypeId, quint64 brokerId)
 {
-  ++lastSessionId;
-  SessionData& sessionData = this->sessionData[lastSessionId];
-  QString tableName = QString("%1%2/session").arg(sessionPrefix, QString::number(lastSessionId));
-  quint32 tableId;
-  if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &tableId) != 0)
-    return error = getZlimDbError(), false;
+  if(!userTableId)
+    return error = "Unknown user table id", false;
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   meguco_user_session_entity* session = (meguco_user_session_entity*)buffer;
   QByteArray nameData = name.toUtf8();
@@ -873,26 +885,31 @@ bool DataConnection::createSession(const QString& name, quint64 botTypeId, quint
   session->broker_id = brokerId;
   session->mode = meguco_user_session_none;
   session->state = meguco_user_session_stopped;
-  uint64_t id;
-  if(zlimdb_add(zdb, tableId, &session->entity, &id))
+  if(zlimdb_control(zdb, userTableId, 0, meguco_user_control_create_session, &session->entity, session->entity.size, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
     return error = getZlimDbError(), false;
-
-  tableName = QString("%1%2/orders").arg(brokerPrefix, QString::number(lastBrokerId));
+  uint64_t* response = (uint64_t*)zlimdb_get_response_data((zlimdb_header*)buffer, sizeof(uint64_t));
+  if(!response)
+  {
+    zlimdb_seterrno(zlimdb_local_error_invalid_response);
+    return error = getZlimDbError(), false;
+  }
+  uint64_t sessionId = *response;
+  SessionData& sessionData = this->sessionData[sessionId];
+  QString tableName = QString("%1%2/orders").arg(brokerPrefix, QString::number(sessionId));
   if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &sessionData.ordersTableId) != 0)
     return error = getZlimDbError(), false;
-  tableName = QString("%1%2/transactions").arg(brokerPrefix, QString::number(lastBrokerId));
+  tableName = QString("%1%2/transactions").arg(brokerPrefix, QString::number(sessionId));
   if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &sessionData.transactionsTableId) != 0)
     return error = getZlimDbError(), false;
-  tableName = QString("%1%2/assets").arg(brokerPrefix, QString::number(lastBrokerId));
+  tableName = QString("%1%2/assets").arg(brokerPrefix, QString::number(sessionId));
   if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &sessionData.assetsTableId) != 0)
     return error = getZlimDbError(), false;
-  tableName = QString("%1%2/log").arg(brokerPrefix, QString::number(lastBrokerId));
+  tableName = QString("%1%2/log").arg(brokerPrefix, QString::number(sessionId));
   if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &sessionData.logTableId) != 0)
     return error = getZlimDbError(), false;
-  tableName = QString("%1%2/properties").arg(brokerPrefix, QString::number(lastBrokerId));
+  tableName = QString("%1%2/properties").arg(brokerPrefix, QString::number(sessionId));
   if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &sessionData.propertiesTableId) != 0)
     return error = getZlimDbError(), false;
-
   return true;
 }
 
@@ -901,18 +918,10 @@ bool DataConnection::removeSession(quint32 sessionId)
   QHash<quint32, SessionData>::Iterator it = this->sessionData.find(sessionId);
   if(it == this->sessionData.end())
     return error = "Unknown session id", false;
-  const SessionData& sessionData = *it;
-  if(sessionData.sessionTableId != 0 && zlimdb_remove_table(zdb, sessionData.sessionTableId) != 0)
-    return error = getZlimDbError(), false;
-  if(sessionData.ordersTableId != 0 && zlimdb_remove_table(zdb, sessionData.ordersTableId) != 0)
-    return error = getZlimDbError(), false;
-  if(sessionData.transactionsTableId != 0 && zlimdb_remove_table(zdb, sessionData.transactionsTableId) != 0)
-    return error = getZlimDbError(), false;
-  if(sessionData.assetsTableId != 0 && zlimdb_remove_table(zdb, sessionData.assetsTableId) != 0)
-    return error = getZlimDbError(), false;
-  if(sessionData.logTableId != 0 && zlimdb_remove_table(zdb, sessionData.logTableId) != 0)
-    return error = getZlimDbError(), false;
-  if(sessionData.propertiesTableId != 0 && zlimdb_remove_table(zdb, sessionData.propertiesTableId) != 0)
+  if(!userTableId)
+    return error = "Unknown user table id", false;
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, userTableId, sessionId, meguco_user_control_remove_session, 0, 0, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
     return error = getZlimDbError(), false;
   this->sessionData.erase(it);
   if(selectedSessionId == sessionId)
@@ -972,7 +981,8 @@ bool DataConnection::controlSession(quint32 sessionId, meguco_user_session_contr
   const SessionData& sessionData = *it;
   if(!sessionData.sessionTableId)
     return error = "Unknown session table id", false;
-  if(zlimdb_control(zdb, sessionData.sessionTableId, 1, code, 0, 0) != 0)
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, sessionData.sessionTableId, 1, code, 0, 0, (zlimdb_header*)buffer, sizeof(buffer)) != 0)
       return error = getZlimDbError(), false;
   return true;
 }
@@ -983,8 +993,8 @@ bool DataConnection::createSessionAsset(meguco_user_session_asset_type type, dou
   if(it == sessionData.end())
     return error = "Unknown session id", false;
   const SessionData& sessionData = *it;
-  if(!sessionData.assetsTableId)
-    return error = "Unknown session assets table id", false;
+  if(!sessionData.sessionTableId)
+    return error = "Unknown session table id", false;
 
   meguco_user_session_asset_entity asset;
   setEntityHeader(asset.entity, 0, 0, sizeof(asset));
@@ -1007,10 +1017,17 @@ bool DataConnection::createSessionAsset(meguco_user_session_asset_type type, dou
   asset.flip_price = flipPrice;
   asset.order_id = 0;
 
-  quint64 id;
-  if(zlimdb_add(zdb, sessionData.assetsTableId, &asset.entity, &id) != 0)
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, sessionData.sessionTableId, 0, meguco_user_session_control_create_asset, &asset.entity, asset.entity.size, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
     return error = getZlimDbError(), false;
+  uint64_t* response = (uint64_t*)zlimdb_get_response_data((zlimdb_header*)buffer, sizeof(uint64_t));
+  if(!response)
+  {
+    zlimdb_seterrno(zlimdb_local_error_invalid_response);
+    return error = getZlimDbError(), false;
+  }
   return true;
+
 }
 
 bool DataConnection::controlSessionAsset(quint64 assetId, meguco_user_session_asset_control_code code, const void* data, size_t size)
@@ -1021,7 +1038,8 @@ bool DataConnection::controlSessionAsset(quint64 assetId, meguco_user_session_as
   const SessionData& sessionData = *it;
   if(!sessionData.assetsTableId)
     return error = "Unknown session assets table id", false;
-  if(zlimdb_control(zdb, sessionData.assetsTableId, assetId, code, data, size) != 0)
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, sessionData.assetsTableId, assetId, code, data, size, (zlimdb_header*)buffer, sizeof(buffer)) != 0)
     return error = getZlimDbError(), false;
   return true;
 }
@@ -1032,9 +1050,10 @@ bool DataConnection::removeSessionAsset(quint64 assetId)
   if(it == sessionData.end())
     return error = "Unknown session id", false;
   const SessionData& sessionData = *it;
-  if(!sessionData.assetsTableId)
-    return error = "Unknown session assets table id", false;
-  if(zlimdb_remove(zdb, sessionData.assetsTableId, assetId) != 0)
+  if(!sessionData.sessionTableId)
+    return error = "Unknown session table id", false;
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, sessionData.sessionTableId, assetId, meguco_user_session_control_remove_asset, 0, 0, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
     return error = getZlimDbError(), false;
   return true;
 }
@@ -1047,7 +1066,8 @@ bool DataConnection::controlSessionProperty(quint64 propertyId, meguco_user_sess
   const SessionData& sessionData = *it;
   if(!sessionData.propertiesTableId)
     return error = "Unknown session properties table id", false;
-  if(zlimdb_control(zdb, sessionData.propertiesTableId, propertyId, code, data, size) != 0)
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, sessionData.propertiesTableId, propertyId, code, data, size, (zlimdb_header*)buffer, sizeof(buffer)) != 0)
     return error = getZlimDbError(), false;
   return true;
 }

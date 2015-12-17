@@ -65,10 +65,10 @@ QVariant BotSessionModel::data(const QModelIndex& index, int role) const
         return stoppedVar;
       case EBotSession::State::starting:
         return startingVar;
-      case EBotSession::State::running:
-        return eSession->getMode() == EBotSession::Mode::simulation ? simulatingVar : runningVar;
       case EBotSession::State::stopping:
         return stoppingVar;
+      case EBotSession::State::running:
+        return eSession->getMode() == EBotSession::Mode::simulation ? simulatingVar : runningVar;
       }
       break;
     }

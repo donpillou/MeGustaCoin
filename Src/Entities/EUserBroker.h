@@ -10,8 +10,9 @@ public:
   enum class State
   {
     stopped = meguco_user_broker_stopped,
+    starting = meguco_user_broker_starting,
+    stopping = meguco_user_broker_stopping,
     running = meguco_user_broker_running,
-    starting,
   };
 
 public:

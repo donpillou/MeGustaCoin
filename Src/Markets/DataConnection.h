@@ -45,7 +45,7 @@ public:
     virtual void removedProcess(quint64 processId) = 0;
   };
 
-  DataConnection() : zdb(0), selectedBrokerId(0), selectedSessionId(0) {}
+  DataConnection() : zdb(0), userTableId(0), selectedBrokerId(0), selectedSessionId(0) {}
   ~DataConnection() {close();}
 
   bool connect(const QString& server, quint16 port, const QString& userName, const QString& password, Callback& callback);
@@ -80,7 +80,7 @@ public:
   bool controlSessionProperty(quint64 propertyId, meguco_user_session_property_control_code code, const void* data, size_t size);
 
 public:
-  static void setString(void* data, uint16_t& length, size_t offset, const QByteArray& str)
+  static void setString(void* data, uint16_t& length, size_t offset, const QByteArray& str) // todo: remove this
   {
     length = (uint16_t)str.length();
     qMemCopy((char*)data + offset, str.constData(), str.length());
@@ -152,10 +152,11 @@ private:
   QString error;
   Callback* callback;
   QHash<quint32, TableInfo> tableInfo;
+  quint32 userTableId;
   QString brokerPrefix;
   QString sessionPrefix;
-  quint32 lastBrokerId;
-  quint32 lastSessionId;
+  //quint32 lastBrokerId;
+  //quint32 lastSessionId;
   QHash<QString, MarketData> marketData;
   QHash<quint32, MarketData*> marketDataById;
   QHash<quint32, BrokerData> brokerData;

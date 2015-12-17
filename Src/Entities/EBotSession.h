@@ -10,10 +10,9 @@ public:
   enum class State
   {
     stopped = meguco_user_session_stopped,
+    starting = meguco_user_session_starting,
+    stopping = meguco_user_session_stopping,
     running = meguco_user_session_running,
-    starting,
-    stopping,
-    //simulating = meguco_user_session_simulating,
   };
 
   enum class Mode

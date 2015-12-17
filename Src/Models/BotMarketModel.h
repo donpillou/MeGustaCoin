@@ -23,6 +23,7 @@ private:
 
   QVariant stoppedVar;
   QVariant startingVar;
+  QVariant stoppingVar;
   QVariant runningVar;
 
 public: // QAbstractItemModel
