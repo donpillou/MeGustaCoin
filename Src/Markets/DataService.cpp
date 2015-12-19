@@ -1120,7 +1120,7 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
     virtual bool execute(WorkerThread& workerThread)
     {
       if(!workerThread.connection.controlBroker(code))
-        return false;
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
   };
@@ -1144,7 +1144,7 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
     virtual bool execute(WorkerThread& workerThread)
     {
       if(!workerThread.connection.controlSession(sessionId, code))
-        return false;
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control session: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
   };
