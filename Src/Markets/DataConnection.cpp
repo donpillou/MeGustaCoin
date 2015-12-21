@@ -124,8 +124,10 @@ QString DataConnection::getZlimDbError()
     return QString(strerror(errno)) + ".";
 #endif
   }
-  else
+  else if(err != zlimdb_local_error_none)
     return QString(zlimdb_strerror(err)) + ".";
+  else
+    return QString();
 }
 
 void DataConnection::zlimdbCallback(const zlimdb_header& message)

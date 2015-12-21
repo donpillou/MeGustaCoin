@@ -844,7 +844,11 @@ void DataService::updateBrokerOrder(EBotMarketOrder& order, double price, double
     virtual bool execute(WorkerThread& workerThread)
     {
       if(!workerThread.connection.controlBrokerOrder(orderId, code, data.constData(), data.size()))
-        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError())), false;
+      {
+        if(!workerThread.connection.getLastError().isEmpty())
+          workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError()));
+        return false;
+      }
       return true;
     }
   };
@@ -1120,7 +1124,11 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
     virtual bool execute(WorkerThread& workerThread)
     {
       if(!workerThread.connection.controlBroker(code))
-        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker: %1").arg(workerThread.connection.getLastError())), false;
+      {
+        if(!workerThread.connection.getLastError().isEmpty())
+          workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker: %1").arg(workerThread.connection.getLastError()));
+        return false;
+      }
       return true;
     }
   };
@@ -1144,7 +1152,11 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
     virtual bool execute(WorkerThread& workerThread)
     {
       if(!workerThread.connection.controlSession(sessionId, code))
-        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control session: %1").arg(workerThread.connection.getLastError())), false;
+      {
+        if(!workerThread.connection.getLastError().isEmpty())
+          workerThread.addMessage(ELogMessage::Type::error, QString("Could not control session: %1").arg(workerThread.connection.getLastError()));
+        return false;
+      }
       return true;
     }
   };
