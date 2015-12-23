@@ -272,7 +272,9 @@ void DataService::WorkerThread::removeEntity(EType type, quint64 id)
           }
         }
         break;
+        // todo: handle other entity types
       default:
+        Q_ASSERT(false);
         break;
       }
       dataService.globalEntityManager.removeEntity(type, id);
@@ -737,17 +739,88 @@ void DataService::selectBroker(quint32 brokerId)
 
 void DataService::refreshBrokerOrders()
 {
-  controlBroker(meguco_user_broker_control_refresh_orders);
+  EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
+  eDataService->setLoadingBrokerOrders(true);
+  globalEntityManager.updatedEntity(*eDataService);
+
+  class RefreshBrokerOrdersJob : public Job, public Event
+  {
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_orders))
+        if(!workerThread.connection.getLastError().isEmpty())
+          workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker orders: %1").arg(workerThread.connection.getLastError()));
+      return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      // unset loading state
+      EDataService* eDataService = dataService.globalEntityManager.getEntity<EDataService>(0);
+      eDataService->setLoadingBrokerOrders(false);
+      dataService.globalEntityManager.updatedEntity(*eDataService);
+
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new RefreshBrokerOrdersJob(), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
 }
 
 void DataService::refreshBrokerTransactions()
 {
-  controlBroker(meguco_user_broker_control_refresh_transactions);
+  EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
+  eDataService->setLoadingBrokerTransactions(true);
+  globalEntityManager.updatedEntity(*eDataService);
+
+  class RefreshBrokerTransactionsJob : public Job, public Event
+  {
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if (!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_transactions))
+        if (!workerThread.connection.getLastError().isEmpty())
+          workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker transactions: %1").arg(workerThread.connection.getLastError()));
+      return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      // unset loading state
+      EDataService* eDataService = dataService.globalEntityManager.getEntity<EDataService>(0);
+      eDataService->setLoadingBrokerTransactions(false);
+      dataService.globalEntityManager.updatedEntity(*eDataService);
+
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new RefreshBrokerTransactionsJob(), &wasEmpty);
+  if (wasEmpty && thread)
+    thread->interrupt();
 }
 
 void DataService::refreshBrokerBalance()
 {
-  controlBroker(meguco_user_broker_control_refresh_balance);
+  class RefreshBrokerBalanceJob : public Job
+  {
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_balance))
+        if(!workerThread.connection.getLastError().isEmpty())
+          workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker balance: %1").arg(workerThread.connection.getLastError()));
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new RefreshBrokerBalanceJob(), &wasEmpty);
+  if (wasEmpty && thread)
+    thread->interrupt();
 }
 
 EBotMarketOrderDraft& DataService::createBrokerOrderDraft(EBotMarketOrder::Type type, double price)
@@ -790,7 +863,7 @@ void DataService::submitBrokerOrderDraft(EBotMarketOrderDraft& draft)
     }
     virtual void handle(DataService& dataService)
     {
-      if(!orderId)
+      if(!orderId) // todo: this is impossible
         return;
       EBotMarketOrderDraft* draft = dataService.globalEntityManager.getEntity<EBotMarketOrderDraft>(draftId);
       if(draft)
@@ -814,7 +887,29 @@ void DataService::cancelBrokerOrder(EBotMarketOrder& order)
   order.setState(EBotMarketOrder::State::canceling);
   globalEntityManager.updatedEntity(order);
 
-  controlBrokerOrder(order.getId(), meguco_user_broker_order_control_cancel, 0, 0);
+  class CancelBrokerOrderJob : public Job
+  {
+  public:
+    CancelBrokerOrderJob(quint64 orderId) : orderId(orderId) {}
+  private:
+    quint64 orderId;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.controlBrokerOrder(orderId, meguco_user_broker_order_control_cancel))
+      {
+        if(!workerThread.connection.getLastError().isEmpty())
+          workerThread.addMessage(ELogMessage::Type::error, QString("Could not cancel broker order: %1").arg(workerThread.connection.getLastError()));
+        return false;
+      }
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new CancelBrokerOrderJob(order.getId()), &wasEmpty);
+  if (wasEmpty && thread)
+    thread->interrupt();
 }
 
 void DataService::updateBrokerOrder(EBotMarketOrder& order, double price, double amount)
@@ -824,13 +919,34 @@ void DataService::updateBrokerOrder(EBotMarketOrder& order, double price, double
   order.setState(EBotMarketOrder::State::updating);
   globalEntityManager.updatedEntity(order);
 
-  meguco_user_broker_order_control_update_params params;
-  params.price = price;
-  params.amount = amount;
-  controlBrokerOrder(order.getId(), meguco_user_broker_order_control_update, &params, sizeof(params));
+  class UpdateBrokerOrderJob : public Job
+  {
+  public:
+    UpdateBrokerOrderJob(quint64 orderId, double price, double amount) : orderId(orderId), price(price), amount(amount) {}
+  private:
+    quint64 orderId;
+    double price;
+    double amount;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      if(!workerThread.connection.updateBrokerOrder(orderId, price, amount))
+      {
+        if(!workerThread.connection.getLastError().isEmpty())
+          workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError()));
+        return false;
+      }
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new UpdateBrokerOrderJob(order.getId(), price, amount), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
 }
 
-/*private*/ void DataService::controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size)
+/*private*//* void DataService::controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size)
 {
   class ControlBrokerOrderJob : public Job
   {
@@ -858,7 +974,7 @@ void DataService::updateBrokerOrder(EBotMarketOrder& order, double price, double
   if(wasEmpty && thread)
     thread->interrupt();
 }
-
+*/
 void DataService::removeBrokerOrder(EBotMarketOrder& order)
 {
   if(order.getState() != EBotMarketOrder::State::open)
@@ -875,7 +991,7 @@ void DataService::removeBrokerOrder(EBotMarketOrder& order)
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.removeBrokerOrder(orderId))
+      if(!workerThread.connection.controlBrokerOrder(orderId, meguco_user_broker_order_control_remove))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -937,6 +1053,7 @@ void DataService::removeSession(quint32 sessionId)
 
 void DataService::stopSession(quint32 sessionId)
 {
+
   controlSession(sessionId, meguco_user_session_control_stop);
 }
 
@@ -1038,7 +1155,7 @@ void DataService::updateSessionAsset(EBotSessionItem& asset, double flipPrice)
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.controlSessionAsset(assetId, meguco_user_session_asset_control_update, &flipPrice, sizeof(flipPrice)))
+      if(!workerThread.connection.updateSessionAsset(assetId, flipPrice))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -1066,7 +1183,7 @@ void DataService::removeSessionAsset(EBotSessionItem& asset)
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.removeSessionAsset(assetId))
+      if(!workerThread.connection.controlSessionAsset(assetId, meguco_user_session_asset_control_remove))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove session asset: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -1095,12 +1212,8 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      QByteArray data;
       QByteArray valueData = value.toUtf8();
-      data.resize(sizeof(meguco_user_session_property_control_update_params) + valueData.size());
-      meguco_user_session_property_control_update_params* params = (meguco_user_session_property_control_update_params*)(char*)data.data();
-      DataConnection::setString(params, params->value_size, sizeof(*params), valueData);
-      if(!workerThread.connection.controlSessionProperty(propertyId, meguco_user_session_property_control_update, data.constData(), data.size()))
+      if(!workerThread.connection.updateSessionProperty(propertyId, value))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control session property: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -1112,7 +1225,7 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
     thread->interrupt();
 }
 
-/*private*/ void DataService::controlBroker(meguco_user_broker_control_code code)
+/*private*//* void DataService::controlBroker(meguco_user_broker_control_code code)
 {
   class ControlBrokerJob : public Job
   {
@@ -1138,7 +1251,7 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
   if(wasEmpty && thread)
     thread->interrupt();
 }
-
+*/
 /*private*/ void DataService::controlSession(quint32 sessionId, meguco_user_session_control_code code)
 {
   class ControlSessionJob : public Job

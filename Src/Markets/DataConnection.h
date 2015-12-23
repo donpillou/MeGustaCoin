@@ -65,26 +65,21 @@ public:
   bool controlBroker(meguco_user_broker_control_code code);
 
   bool createBrokerOrder(meguco_user_broker_order_type type, double price, double amount, quint64& orderId);
-  bool controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size);
-  bool removeBrokerOrder(quint64 orderId);
+  bool updateBrokerOrder(quint64 orderId, double price, double amount);
+  //bool controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size);
+  bool controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code controlCode);
 
   bool createSession(const QString& name, quint64 botTypeId, quint64 brokerId);
   bool removeSession(quint32 sessionId);
   bool selectSession(quint32 sessionId);
-  bool controlSession(quint32 sessionId, meguco_user_session_control_code code);
+  bool controlSession(quint32 sessionId, meguco_user_session_control_code controlCode);
 
   bool createSessionAsset(meguco_user_session_asset_type type, double balanceComm, double balanceBase, double flipPrice);
-  bool controlSessionAsset(quint64 assetId, meguco_user_session_asset_control_code code, const void* data, size_t size);
-  bool removeSessionAsset(quint64 assetId);
+  //bool removeSessionAsset(quint64 assetId);
+  bool updateSessionAsset(quint64 assetId, double flipPrice);
+  bool controlSessionAsset(quint64 assetId, meguco_user_session_asset_control_code controlCode);
 
-  bool controlSessionProperty(quint64 propertyId, meguco_user_session_property_control_code code, const void* data, size_t size);
-
-public:
-  static void setString(void* data, uint16_t& length, size_t offset, const QByteArray& str) // todo: remove this
-  {
-    length = (uint16_t)str.length();
-    qMemCopy((char*)data + offset, str.constData(), str.length());
-  }
+  bool updateSessionProperty(quint64 propertyId, const QString& value);
 
 private:
   struct TableInfo
@@ -204,13 +199,23 @@ private:
     entity.size = size;
   }
 
-  static bool copyString(zlimdb_entity& entity, uint16_t& length, const QByteArray& str, size_t maxSize)
+  static bool copyString(const QByteArray& str, zlimdb_entity& entity, uint16_t& length, size_t maxSize)
   {
     length = (uint16_t)str.length() + 1;
     if((size_t)entity.size + length > maxSize)
       return false;
     qMemCopy((char*)&entity + entity.size, str.constData(), length);
     entity.size += length;
+    return true;
+  }
+
+  static bool copyString(const QByteArray& str, void* data, size_t& size, uint16_t& length, size_t maxSize)
+  {
+    length = (uint16_t)str.length() + 1;
+    if(size + length > maxSize)
+      return false;
+    qMemCopy((char*)data + size, str.constData(), length);
+    size += length;
     return true;
   }
 };
