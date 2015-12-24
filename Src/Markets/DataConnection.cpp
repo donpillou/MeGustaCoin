@@ -70,8 +70,6 @@ void DataConnection::close()
   }
   tableInfo.clear();
   userTableId = 0;
-  //lastBrokerId = 0;
-  //lastSessionId = 0;
   marketData.clear();
   marketDataById.clear();
   brokerData.clear();
@@ -291,7 +289,7 @@ void DataConnection::removedEntity(uint32_t tableId, uint64_t entityId)
   case TableInfo::marketTradesTable:
   case TableInfo::brokerTable:
   case TableInfo::sessionTable:
-    // not removeable
+    // not removable
     break;
   case TableInfo::brokerBalanceTable:
     callback->removedBrokerBalance(entityId);
@@ -398,8 +396,6 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
   else if(tableName.startsWith(brokerPrefix))
   {
     quint64 brokerId = tableName.mid(brokerPrefix.length(), tableName.lastIndexOf('/') - brokerPrefix.length()).toULongLong();
-    //if(brokerId > lastBrokerId)
-    //  lastBrokerId = brokerId;
     BrokerData& brokerData = this->brokerData[brokerId];
     if(tableName.endsWith("/broker"))
     {
@@ -437,8 +433,6 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
   else if(tableName.startsWith(sessionPrefix))
   {
     quint32 sessionId = tableName.mid(sessionPrefix.length(), tableName.lastIndexOf('/') - sessionPrefix.length()).toUInt();
-    //if(sessionId > lastSessionId)
-    //  lastSessionId = sessionId;
     SessionData& sessionData = this->sessionData[sessionId];
     if(tableName.endsWith("/session"))
     {
@@ -508,7 +502,7 @@ bool DataConnection::subscribeMarket(quint32 marketId, quint64 lastReceivedTrade
 
   QHash<quint32, MarketData*>::ConstIterator it = marketDataById.find(marketId);
   if(it == marketDataById.end())
-    return error = "Unkown market id", false;
+    return error = "Unknown market id", false;
   MarketData& marketData = *it.value();
 
   if(lastReceivedTradeId != 0)
@@ -556,7 +550,7 @@ bool DataConnection::unsubscribeMarket(quint32 marketId)
 {
   QHash<quint32, MarketData*>::ConstIterator it = marketDataById.find(marketId);
   if(it == marketDataById.end())
-    return error = "Unkown market id", false;
+    return error = "Unknown market id", false;
   MarketData& marketData = *it.value();
 
   if(marketData.tradesTableId != 0)
@@ -1090,21 +1084,6 @@ bool DataConnection::controlSessionAsset(quint64 assetId, meguco_user_session_as
   return result = true, true;
 }
 
-/*
-bool DataConnection::removeSessionAsset(quint64 assetId)
-{
-  QHash<quint32, SessionData>::ConstIterator it = sessionData.find(this->selectedSessionId);
-  if(it == sessionData.end())
-    return error = "Unknown session id", false;
-  const SessionData& sessionData = *it;
-  if(!sessionData.sessionTableId)
-    return error = "Unknown session table id", false;
-  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-  if(zlimdb_control(zdb, sessionData.sessionTableId, assetId, meguco_user_session_control_remove_asset, 0, 0, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
-    return error = getZlimDbError(), false;
-  return true;
-}
-*/
 bool DataConnection::updateSessionProperty(quint64 propertyId, const QString& value)
 {
   QHash<quint32, SessionData>::ConstIterator it = sessionData.find(this->selectedSessionId);

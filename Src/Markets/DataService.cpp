@@ -939,35 +939,6 @@ void DataService::updateBrokerOrder(EBotMarketOrder& order, double price, double
     thread->interrupt();
 }
 
-/*private*//* void DataService::controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size)
-{
-  class ControlBrokerOrderJob : public Job
-  {
-  public:
-    ControlBrokerOrderJob(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size) : orderId(orderId), code(code), data((const char*)data, size) {}
-  private:
-    quint64 orderId;
-    meguco_user_broker_order_control_code code;
-    QByteArray data;
-  private: // Job
-    virtual bool execute(WorkerThread& workerThread)
-    {
-      if(!workerThread.connection.controlBrokerOrder(orderId, code, data.constData(), data.size()))
-      {
-        if(!workerThread.connection.getLastError().isEmpty())
-          workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError()));
-        return false;
-      }
-      return true;
-    }
-  };
-
-  bool wasEmpty;
-  jobQueue.append(new ControlBrokerOrderJob(orderId, code, data, size), &wasEmpty);
-  if(wasEmpty && thread)
-    thread->interrupt();
-}
-*/
 void DataService::removeBrokerOrder(EBotMarketOrder& order)
 {
   if(order.getState() != EBotMarketOrder::State::open)
@@ -1222,33 +1193,6 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
     thread->interrupt();
 }
 
-/*private*//* void DataService::controlBroker(meguco_user_broker_control_code code)
-{
-  class ControlBrokerJob : public Job
-  {
-  public:
-    ControlBrokerJob(meguco_user_broker_control_code code) : code(code) {}
-  private:
-    meguco_user_broker_control_code code;
-  private: // Job
-    virtual bool execute(WorkerThread& workerThread)
-    {
-      if(!workerThread.connection.controlBroker(code))
-      {
-        if(!workerThread.connection.getLastError().isEmpty())
-          workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker: %1").arg(workerThread.connection.getLastError()));
-        return false;
-      }
-      return true;
-    }
-  };
-
-  bool wasEmpty;
-  jobQueue.append(new ControlBrokerJob(code), &wasEmpty);
-  if(wasEmpty && thread)
-    thread->interrupt();
-}
-*/
 /*private*/ void DataService::controlSession(quint32 sessionId, meguco_user_session_control_code code)
 {
   class ControlSessionJob : public Job

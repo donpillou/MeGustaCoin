@@ -66,7 +66,6 @@ public:
 
   bool createBrokerOrder(meguco_user_broker_order_type type, double price, double amount, quint64& orderId);
   bool updateBrokerOrder(quint64 orderId, double price, double amount, bool& result);
-  //bool controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size);
   bool controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code controlCode, bool& result);
 
   bool createSession(const QString& name, quint64 botTypeId, quint64 brokerId);
@@ -75,7 +74,6 @@ public:
   bool controlSession(quint32 sessionId, meguco_user_session_control_code controlCode);
 
   bool createSessionAsset(meguco_user_session_asset_type type, double balanceComm, double balanceBase, double flipPrice, quint64& assetId);
-  //bool removeSessionAsset(quint64 assetId);
   bool updateSessionAsset(quint64 assetId, double flipPrice, bool& result);
   bool controlSessionAsset(quint64 assetId, meguco_user_session_asset_control_code controlCode, bool& result);
 
