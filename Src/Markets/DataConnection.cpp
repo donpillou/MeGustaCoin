@@ -124,10 +124,7 @@ QString DataConnection::getZlimDbError()
     return QString(strerror(errno)) + ".";
 #endif
   }
-  else if(err != zlimdb_local_error_none)
-    return QString(zlimdb_strerror(err)) + ".";
-  else
-    return QString();
+  return QString(zlimdb_strerror(err)) + ".";
 }
 
 void DataConnection::zlimdbCallback(const zlimdb_header& message)
@@ -795,7 +792,7 @@ bool DataConnection::selectBroker(quint32 brokerId)
   return true;
 }
 
-bool DataConnection::controlBroker(meguco_user_broker_control_code controlCode)
+bool DataConnection::controlBroker(meguco_user_broker_control_code controlCode, bool& result)
 {
   QHash<quint32, BrokerData>::Iterator it = this->brokerData.find(this->selectedBrokerId);
   if(it == this->brokerData.end())
@@ -805,8 +802,12 @@ bool DataConnection::controlBroker(meguco_user_broker_control_code controlCode)
     return error = "Unknown broker table id", false;
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   if(zlimdb_control(zdb, brokerData.brokerTableId, 1, controlCode, 0, 0, (zlimdb_header*)buffer, sizeof(buffer)) != 0)
-      return error = getZlimDbError(), false;
-  return true;
+  {
+    if(zlimdb_errno() == 0)
+      return result = false, true;
+    return error = getZlimDbError(), false;
+  }
+  return result = true, true;
 }
 
 bool DataConnection::createBrokerOrder(meguco_user_broker_order_type type, double price, double amount, quint64& orderId)
@@ -830,8 +831,12 @@ bool DataConnection::createBrokerOrder(meguco_user_broker_order_type type, doubl
   order.raw_id = 0;
 
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-  if(zlimdb_control(zdb, brokerData.brokerTableId, 0, meguco_user_broker_control_create_order, &order.entity, order.entity.size, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
+  if(zlimdb_control(zdb, brokerData.brokerTableId, 0, meguco_user_broker_control_create_order, &order.entity, order.entity.size, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) != 0)
+  {
+    if(zlimdb_errno() == 0)
+      return orderId = 0, true;
     return error = getZlimDbError(), false;
+  }
   uint64_t* response = (uint64_t*)zlimdb_get_response_data((zlimdb_header*)buffer, sizeof(uint64_t));
   if(!response)
   {
@@ -842,7 +847,7 @@ bool DataConnection::createBrokerOrder(meguco_user_broker_order_type type, doubl
   return true;
 }
 
-bool DataConnection::updateBrokerOrder(quint64 orderId, double price, double amount)
+bool DataConnection::updateBrokerOrder(quint64 orderId, double price, double amount, bool& result)
 {
   QHash<quint32, BrokerData>::ConstIterator it = brokerData.find(this->selectedBrokerId);
   if(it == brokerData.end())
@@ -856,11 +861,15 @@ bool DataConnection::updateBrokerOrder(quint64 orderId, double price, double amo
   params.amount = amount;
   params.total = 0.;
   if(zlimdb_control(zdb, brokerData.ordersTableId, orderId, meguco_user_broker_order_control_update, &params, sizeof(meguco_user_broker_order_control_update_params), (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) != 0)
+  {
+    if(zlimdb_errno() == 0)
+      return result = false, true;
     return error = getZlimDbError(), false;
-  return true;
+  }
+  return result = true, true;
 }
 
-bool DataConnection::controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code controlCode)
+bool DataConnection::controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code controlCode, bool& result)
 {
   QHash<quint32, BrokerData>::ConstIterator it = brokerData.find(this->selectedBrokerId);
   if(it == brokerData.end())
@@ -870,8 +879,12 @@ bool DataConnection::controlBrokerOrder(quint64 orderId, meguco_user_broker_orde
     return error = "Unknown broker orders table id", false;
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   if(zlimdb_control(zdb, brokerData.ordersTableId, orderId, controlCode, 0, 0, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
+  {
+    if(zlimdb_errno() == 0)
+      return result = false, true;
     return error = getZlimDbError(), false;
-  return true;
+  }
+  return result = true, true;
 }
 
 bool DataConnection::createSession(const QString& name, quint64 botTypeId, quint64 brokerId)
@@ -993,7 +1006,7 @@ bool DataConnection::controlSession(quint32 sessionId, meguco_user_session_contr
   return true;
 }
 
-bool DataConnection::createSessionAsset(meguco_user_session_asset_type type, double balanceComm, double balanceBase, double flipPrice)
+bool DataConnection::createSessionAsset(meguco_user_session_asset_type type, double balanceComm, double balanceBase, double flipPrice, quint64& assetId)
 {
   QHash<quint32, SessionData>::ConstIterator it = sessionData.find(this->selectedSessionId);
   if(it == sessionData.end())
@@ -1024,19 +1037,22 @@ bool DataConnection::createSessionAsset(meguco_user_session_asset_type type, dou
   asset.order_id = 0;
 
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-  if(zlimdb_control(zdb, sessionData.sessionTableId, 0, meguco_user_session_control_create_asset, &asset.entity, asset.entity.size, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
+  if(zlimdb_control(zdb, sessionData.sessionTableId, 0, meguco_user_session_control_create_asset, &asset.entity, asset.entity.size, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) != 0)
+  {
+    if(zlimdb_errno() == 0)
+      return assetId = 0, true;
     return error = getZlimDbError(), false;
+  }
   uint64_t* response = (uint64_t*)zlimdb_get_response_data((zlimdb_header*)buffer, sizeof(uint64_t));
   if(!response)
   {
     zlimdb_seterrno(zlimdb_local_error_invalid_response);
     return error = getZlimDbError(), false;
   }
-  return true;
-
+  return assetId = *response, true;
 }
 
-bool DataConnection::updateSessionAsset(quint64 assetId, double flipPrice)
+bool DataConnection::updateSessionAsset(quint64 assetId, double flipPrice, bool& result)
 {
   QHash<quint32, SessionData>::ConstIterator it = sessionData.find(this->selectedSessionId);
   if(it == sessionData.end())
@@ -1048,11 +1064,15 @@ bool DataConnection::updateSessionAsset(quint64 assetId, double flipPrice)
   meguco_user_session_asset_control_update_params params;
   params.flip_price = flipPrice;
   if(zlimdb_control(zdb, sessionData.assetsTableId, assetId, meguco_user_session_asset_control_update, &params, sizeof(meguco_user_session_asset_control_update_params), (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) != 0)
+  {
+    if(zlimdb_errno() == 0)
+      return result = false, true;
     return error = getZlimDbError(), false;
-  return true;
+  }
+  return result = true, true;
 }
 
-bool DataConnection::controlSessionAsset(quint64 assetId, meguco_user_session_asset_control_code controlCode)
+bool DataConnection::controlSessionAsset(quint64 assetId, meguco_user_session_asset_control_code controlCode, bool& result)
 {
   QHash<quint32, SessionData>::ConstIterator it = sessionData.find(this->selectedSessionId);
   if(it == sessionData.end())
@@ -1062,8 +1082,12 @@ bool DataConnection::controlSessionAsset(quint64 assetId, meguco_user_session_as
     return error = "Unknown session assets table id", false;
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   if(zlimdb_control(zdb, sessionData.assetsTableId, assetId, controlCode, 0, 0, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) != 0)
+  {
+    if(zlimdb_errno() == 0)
+      return result = false, true;
     return error = getZlimDbError(), false;
-  return true;
+  }
+  return result = true, true;
 }
 
 /*

@@ -748,9 +748,9 @@ void DataService::refreshBrokerOrders()
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_orders))
-        if(!workerThread.connection.getLastError().isEmpty())
-          workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker orders: %1").arg(workerThread.connection.getLastError()));
+      bool controlResult;
+      if(!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_orders, controlResult))
+          return workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker orders: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
   private: // Event
@@ -760,7 +760,6 @@ void DataService::refreshBrokerOrders()
       EDataService* eDataService = dataService.globalEntityManager.getEntity<EDataService>(0);
       eDataService->setLoadingBrokerOrders(false);
       dataService.globalEntityManager.updatedEntity(*eDataService);
-
     }
   };
 
@@ -781,9 +780,9 @@ void DataService::refreshBrokerTransactions()
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if (!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_transactions))
-        if (!workerThread.connection.getLastError().isEmpty())
-          workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker transactions: %1").arg(workerThread.connection.getLastError()));
+      bool controlResult;
+      if(!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_transactions, controlResult))
+          return workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker transactions: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
   private: // Event
@@ -810,9 +809,9 @@ void DataService::refreshBrokerBalance()
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_balance))
-        if(!workerThread.connection.getLastError().isEmpty())
-          workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker balance: %1").arg(workerThread.connection.getLastError()));
+      bool controlResult;
+      if(!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_balance, controlResult))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker balance: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
   };
@@ -896,12 +895,9 @@ void DataService::cancelBrokerOrder(EBotMarketOrder& order)
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.controlBrokerOrder(orderId, meguco_user_broker_order_control_cancel))
-      {
-        if(!workerThread.connection.getLastError().isEmpty())
-          workerThread.addMessage(ELogMessage::Type::error, QString("Could not cancel broker order: %1").arg(workerThread.connection.getLastError()));
-        return false;
-      }
+      bool controlResult;
+      if(!workerThread.connection.controlBrokerOrder(orderId, meguco_user_broker_order_control_cancel, controlResult))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not cancel broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
   };
@@ -930,12 +926,9 @@ void DataService::updateBrokerOrder(EBotMarketOrder& order, double price, double
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.updateBrokerOrder(orderId, price, amount))
-      {
-        if(!workerThread.connection.getLastError().isEmpty())
-          workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError()));
-        return false;
-      }
+      bool controlResult;
+      if(!workerThread.connection.updateBrokerOrder(orderId, price, amount, controlResult))
+        workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
   };
@@ -991,7 +984,8 @@ void DataService::removeBrokerOrder(EBotMarketOrder& order)
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.controlBrokerOrder(orderId, meguco_user_broker_order_control_remove))
+      bool controlResult;
+      if(!workerThread.connection.controlBrokerOrder(orderId, meguco_user_broker_order_control_remove, controlResult))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -1126,7 +1120,8 @@ void DataService::submitSessionAssetDraft(EBotSessionItemDraft& draft)
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.createSessionAsset((meguco_user_session_asset_type)type, balanceComm, balanceBase, flipPrice))
+      quint64 assetId;
+      if(!workerThread.connection.createSessionAsset((meguco_user_session_asset_type)type, balanceComm, balanceBase, flipPrice, assetId))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not create session asset: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -1155,7 +1150,8 @@ void DataService::updateSessionAsset(EBotSessionItem& asset, double flipPrice)
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.updateSessionAsset(assetId, flipPrice))
+      bool controlResult;
+      if(!workerThread.connection.updateSessionAsset(assetId, flipPrice, controlResult))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -1183,7 +1179,8 @@ void DataService::removeSessionAsset(EBotSessionItem& asset)
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.controlSessionAsset(assetId, meguco_user_session_asset_control_remove))
+      bool controlResult;
+      if(!workerThread.connection.controlSessionAsset(assetId, meguco_user_session_asset_control_remove, controlResult))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove session asset: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
