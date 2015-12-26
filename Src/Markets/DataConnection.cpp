@@ -986,7 +986,7 @@ bool DataConnection::selectSession(quint32 sessionId)
   return true;
 }
 
-bool DataConnection::controlSession(quint32 sessionId, meguco_user_session_control_code controlCode)
+bool DataConnection::controlSession(quint32 sessionId, meguco_user_session_control_code controlCode, bool& result)
 {
   QHash<quint32, SessionData>::Iterator it = this->sessionData.find(this->selectedSessionId);
   if(it == this->sessionData.end())
@@ -996,8 +996,12 @@ bool DataConnection::controlSession(quint32 sessionId, meguco_user_session_contr
     return error = "Unknown session table id", false;
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   if(zlimdb_control(zdb, sessionData.sessionTableId, 1, controlCode, 0, 0, (zlimdb_header*)buffer, sizeof(buffer)) != 0)
-      return error = getZlimDbError(), false;
-  return true;
+  {
+    if(zlimdb_errno() == 0)
+      return result = false, true;
+    return error = getZlimDbError(), false;
+  }
+  return result = true, true;
 }
 
 bool DataConnection::createSessionAsset(meguco_user_session_asset_type type, double balanceComm, double balanceBase, double flipPrice, quint64& assetId)

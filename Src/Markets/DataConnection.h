@@ -71,7 +71,7 @@ public:
   bool createSession(const QString& name, quint64 botTypeId, quint64 brokerId);
   bool removeSession(quint32 sessionId);
   bool selectSession(quint32 sessionId);
-  bool controlSession(quint32 sessionId, meguco_user_session_control_code controlCode);
+  bool controlSession(quint32 sessionId, meguco_user_session_control_code controlCode, bool& result);
 
   bool createSessionAsset(meguco_user_session_asset_type type, double balanceComm, double balanceBase, double flipPrice, quint64& assetId);
   bool updateSessionAsset(quint64 assetId, double flipPrice, bool& result);

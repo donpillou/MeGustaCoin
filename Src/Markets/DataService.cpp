@@ -1180,7 +1180,6 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      QByteArray valueData = value.toUtf8();
       if(!workerThread.connection.updateSessionProperty(propertyId, value))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control session property: %1").arg(workerThread.connection.getLastError())), false;
       return true;
@@ -1205,12 +1204,9 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      if(!workerThread.connection.controlSession(sessionId, code))
-      {
-        if(!workerThread.connection.getLastError().isEmpty())
-          workerThread.addMessage(ELogMessage::Type::error, QString("Could not control session: %1").arg(workerThread.connection.getLastError()));
-        return false;
-      }
+      bool controlResult;
+      if(!workerThread.connection.controlSession(sessionId, code, controlResult))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control session: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
   };
