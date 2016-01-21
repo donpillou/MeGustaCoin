@@ -17,6 +17,7 @@ public:
 
   enum class Mode
   {
+    none = meguco_user_session_none,
     live = meguco_user_session_live,
     simulation = meguco_user_session_simulation,
   };
