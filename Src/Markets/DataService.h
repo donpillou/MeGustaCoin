@@ -34,8 +34,7 @@ public:
   void removeSession(quint32 sessionId);
   void selectSession(quint32 sessionId);
   void stopSession(quint32 sessionId);
-  void startSessionSimulation(quint32 sessionId);
-  void startSession(quint32 sessionId);
+  void startSession(quint32 sessionId, meguco_user_session_mode mode);
 
   EBotSessionItemDraft& createSessionAssetDraft(EBotSessionItem::Type type, double flipPrice);
   void submitSessionAssetDraft(EBotSessionItemDraft& draft);
@@ -160,7 +159,7 @@ private:
   void addLogMessage(ELogMessage::Type type, const QString& message);
   //void controlBroker(meguco_user_broker_control_code code);
   //void controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size);
-  void controlSession(quint32 sessionId, meguco_user_session_control_code code); // ??
+  //void controlSession(quint32 sessionId, meguco_user_session_control_code code); // todo: ??
 
   quint32 getChannelId(const QString& channelName);
 

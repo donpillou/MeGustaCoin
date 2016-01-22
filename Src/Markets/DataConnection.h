@@ -59,23 +59,25 @@ public:
 
   const QString& getLastError() {return error;}
 
+  bool controlUser(quint64 entityId, meguco_user_control_code code, const void* args, size_t argsSize, bool& result);
+
   bool createBroker(quint64 brokerTypeId, const QString& userName, const QString& key, const QString& secret);
   bool removeBroker(quint32 brokerId);
   bool selectBroker(quint32 brokerId);
-  bool controlBroker(meguco_user_broker_control_code code, bool& result);
+  bool controlBroker(quint64 entityId, meguco_user_broker_control_code code, bool& result);
 
   bool createBrokerOrder(meguco_user_broker_order_type type, double price, double amount, quint64& orderId);
   bool updateBrokerOrder(quint64 orderId, double price, double amount, bool& result);
-  bool controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code controlCode, bool& result);
+  //bool controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code controlCode, bool& result);
 
   bool createSession(const QString& name, quint64 botTypeId, quint64 brokerId);
   bool removeSession(quint32 sessionId);
   bool selectSession(quint32 sessionId);
-  bool controlSession(quint32 sessionId, meguco_user_session_control_code controlCode, bool& result);
+  bool controlSession2(quint64 entityId, meguco_user_session_control_code controlCode, bool& result); // todo: rename to controlSession
 
   bool createSessionAsset(meguco_user_session_asset_type type, double balanceComm, double balanceBase, double flipPrice, quint64& assetId);
   bool updateSessionAsset(quint64 assetId, double flipPrice, bool& result);
-  bool controlSessionAsset(quint64 assetId, meguco_user_session_asset_control_code controlCode, bool& result);
+  //bool controlSessionAsset(quint64 assetId, meguco_user_session_asset_control_code controlCode, bool& result);
 
   bool updateSessionProperty(quint64 propertyId, const QString& value);
 
@@ -146,8 +148,9 @@ private:
   Callback* callback;
   QHash<quint32, TableInfo> tableInfo;
   quint32 userTableId;
-  QString brokerPrefix;
-  QString sessionPrefix;
+  QString userTablesPrefix;
+  QString brokerTablesPrefix;
+  QString sessionTablesPrefix;
   //quint32 lastBrokerId;
   //quint32 lastSessionId;
   QHash<QString, MarketData> marketData;

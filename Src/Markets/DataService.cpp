@@ -749,7 +749,7 @@ void DataService::refreshBrokerOrders()
     virtual bool execute(WorkerThread& workerThread)
     {
       bool controlResult;
-      if(!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_orders, controlResult))
+      if(!workerThread.connection.controlBroker(0, meguco_user_broker_control_refresh_orders, controlResult))
           return workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker orders: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -781,7 +781,7 @@ void DataService::refreshBrokerTransactions()
     virtual bool execute(WorkerThread& workerThread)
     {
       bool controlResult;
-      if(!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_transactions, controlResult))
+      if(!workerThread.connection.controlBroker(0, meguco_user_broker_control_refresh_transactions, controlResult))
           return workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker transactions: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -810,7 +810,7 @@ void DataService::refreshBrokerBalance()
     virtual bool execute(WorkerThread& workerThread)
     {
       bool controlResult;
-      if(!workerThread.connection.controlBroker(meguco_user_broker_control_refresh_balance, controlResult))
+      if(!workerThread.connection.controlBroker(0, meguco_user_broker_control_refresh_balance, controlResult))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not refresh broker balance: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -896,7 +896,7 @@ void DataService::cancelBrokerOrder(EBotMarketOrder& order)
     virtual bool execute(WorkerThread& workerThread)
     {
       bool controlResult;
-      if(!workerThread.connection.controlBrokerOrder(orderId, meguco_user_broker_order_control_cancel, controlResult))
+      if(!workerThread.connection.controlBroker(orderId, meguco_user_broker_control_cancel_order, controlResult))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not cancel broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -956,7 +956,7 @@ void DataService::removeBrokerOrder(EBotMarketOrder& order)
     virtual bool execute(WorkerThread& workerThread)
     {
       bool controlResult;
-      if(!workerThread.connection.controlBrokerOrder(orderId, meguco_user_broker_order_control_remove, controlResult))
+      if(!workerThread.connection.controlBroker(orderId, meguco_user_broker_control_remove_order, controlResult))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -1018,18 +1018,55 @@ void DataService::removeSession(quint32 sessionId)
 
 void DataService::stopSession(quint32 sessionId)
 {
+  // todo: check session state... set state to stopping
 
-  controlSession(sessionId, meguco_user_session_control_stop);
+  class StopSessionJob : public Job
+  {
+  public:
+    StopSessionJob(quint32 sessionId) : sessionId(sessionId) {}
+  private:
+    quint32 sessionId;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      bool controlResult;
+      if(!workerThread.connection.controlUser(sessionId, meguco_user_control_stop_session, 0, 0, controlResult))
+          return workerThread.addMessage(ELogMessage::Type::error, QString("Could not stop session: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new StopSessionJob(sessionId), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
 }
 
-void DataService::startSessionSimulation(quint32 sessionId)
+void DataService::startSession(quint32 sessionId, meguco_user_session_mode mode)
 {
-  controlSession(sessionId, meguco_user_session_control_start_simulation);
-}
+  // todo: check session state... set state to starting
 
-void DataService::startSession(quint32 sessionId)
-{
-  controlSession(sessionId, meguco_user_session_control_start_live);
+  class StartSessionJob : public Job
+  {
+  public:
+    StartSessionJob(quint32 sessionId, meguco_user_session_mode mode) : sessionId(sessionId), mode(mode) {}
+  private:
+    quint32 sessionId;
+    uint8_t mode;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      bool controlResult;
+      if(!workerThread.connection.controlUser(sessionId, meguco_user_control_start_session, &mode, sizeof(uint8_t), controlResult))
+          return workerThread.addMessage(ELogMessage::Type::error, QString("Could not start session: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new StartSessionJob(sessionId, mode), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
 }
 
 void DataService::selectSession(quint32 sessionId)
@@ -1151,7 +1188,7 @@ void DataService::removeSessionAsset(EBotSessionItem& asset)
     virtual bool execute(WorkerThread& workerThread)
     {
       bool controlResult;
-      if(!workerThread.connection.controlSessionAsset(assetId, meguco_user_session_asset_control_remove, controlResult))
+      if(!workerThread.connection.controlSession2(assetId, meguco_user_session_control_remove_asset, controlResult))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove session asset: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
@@ -1192,14 +1229,15 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
     thread->interrupt();
 }
 
-/*private*/ void DataService::controlSession(quint32 sessionId, meguco_user_session_control_code code)
+#if 0
+/*private*/ void DataService::controlSession2(quint64 entityId, meguco_user_session_control_code code)
 {
   class ControlSessionJob : public Job
   {
   public:
-    ControlSessionJob(quint32 sessionId, meguco_user_session_control_code code) : sessionId(sessionId), code(code) {}
+    ControlSessionJob(quint64 entityId, meguco_user_session_control_code code) : entityId(entityId), code(code) {}
   private:
-    quint32 sessionId;
+    quint64 entityId;
     meguco_user_session_control_code code;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
@@ -1212,7 +1250,8 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
   };
 
   bool wasEmpty;
-  jobQueue.append(new ControlSessionJob(sessionId, code), &wasEmpty);
+  jobQueue.append(new ControlSessionJob(entityId, code), &wasEmpty);
   if(wasEmpty && thread)
     thread->interrupt();
 }
+#endif

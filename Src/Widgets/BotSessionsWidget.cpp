@@ -113,7 +113,7 @@ void BotSessionsWidget::activate()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
     if(eSession->getState() == EBotSession::State::stopped)
-      dataService.startSession(eSession->getId());
+      dataService.startSession(eSession->getId(), meguco_user_session_live);
   }
 }
 
@@ -125,20 +125,20 @@ void BotSessionsWidget::simulate()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EBotSession* eSession = (EBotSession*)index.internalPointer();
     if(eSession->getState() == EBotSession::State::stopped)
-      dataService.startSessionSimulation(eSession->getId());
+      dataService.startSession(eSession->getId(), meguco_user_session_simulation);
   }
 }
 
 void BotSessionsWidget::optimize()
 {
-  QModelIndexList selection = sessionView->selectionModel()->selectedRows();
-  foreach(const QModelIndex& proxyIndex, selection)
-  {
-    QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    EBotSession* eSession = (EBotSession*)index.internalPointer();
-    if(eSession->getState() == EBotSession::State::stopped)
-      dataService.startSession(eSession->getId());
-  }
+  //QModelIndexList selection = sessionView->selectionModel()->selectedRows();
+  //foreach(const QModelIndex& proxyIndex, selection)
+  //{
+  //  QModelIndex index = proxyModel->mapToSource(proxyIndex);
+  //  EBotSession* eSession = (EBotSession*)index.internalPointer();
+  //  if(eSession->getState() == EBotSession::State::stopped)
+  //    dataService.startSession(eSession->getId());
+  //}
 }
 
 void BotSessionsWidget::updateTitle(EDataService& eDataService)
