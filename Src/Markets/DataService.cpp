@@ -1188,7 +1188,7 @@ void DataService::removeSessionAsset(EBotSessionItem& asset)
     virtual bool execute(WorkerThread& workerThread)
     {
       bool controlResult;
-      if(!workerThread.connection.controlSession2(assetId, meguco_user_session_control_remove_asset, controlResult))
+      if(!workerThread.connection.controlSession(assetId, meguco_user_session_control_remove_asset, controlResult))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove session asset: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }

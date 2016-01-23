@@ -897,25 +897,7 @@ bool DataConnection::updateBrokerOrder(quint64 orderId, double price, double amo
   }
   return result = true, true;
 }
-/*
-bool DataConnection::controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code controlCode, bool& result)
-{
-  QHash<quint32, BrokerData>::ConstIterator it = brokerData.find(this->selectedBrokerId);
-  if(it == brokerData.end())
-    return error = "Unknown broker id", false;
-  const BrokerData& brokerData = *it;
-  if(!brokerData.ordersTableId)
-    return error = "Unknown broker orders table id", false;
-  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-  if(zlimdb_control(zdb, brokerData.ordersTableId, orderId, controlCode, 0, 0, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
-  {
-    if(zlimdb_errno() == 0)
-      return result = false, true;
-    return error = getZlimDbError(), false;
-  }
-  return result = true, true;
-}
-*/
+
 bool DataConnection::createSession(const QString& name, quint64 botTypeId, quint64 brokerId)
 {
   if(!userTableId)
@@ -1021,7 +1003,7 @@ bool DataConnection::selectSession(quint32 sessionId)
   return true;
 }
 
-bool DataConnection::controlSession2(quint64 entityId, meguco_user_session_control_code controlCode, bool& result)
+bool DataConnection::controlSession(quint64 entityId, meguco_user_session_control_code controlCode, bool& result)
 {
   QHash<quint32, SessionData>::Iterator it = this->sessionData.find(this->selectedSessionId);
   if(it == this->sessionData.end())
@@ -1104,25 +1086,7 @@ bool DataConnection::updateSessionAsset(quint64 assetId, double flipPrice, bool&
   }
   return result = true, true;
 }
-/*
-bool DataConnection::controlSessionAsset(quint64 assetId, meguco_user_session_asset_control_code controlCode, bool& result)
-{
-  QHash<quint32, SessionData>::ConstIterator it = sessionData.find(this->selectedSessionId);
-  if(it == sessionData.end())
-    return error = "Unknown session id", false;
-  const SessionData& sessionData = *it;
-  if(!sessionData.assetsTableId)
-    return error = "Unknown session assets table id", false;
-  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
-  if(zlimdb_control(zdb, sessionData.assetsTableId, assetId, controlCode, 0, 0, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) != 0)
-  {
-    if(zlimdb_errno() == 0)
-      return result = false, true;
-    return error = getZlimDbError(), false;
-  }
-  return result = true, true;
-}
-*/
+
 bool DataConnection::updateSessionProperty(quint64 propertyId, const QString& value)
 {
   QHash<quint32, SessionData>::ConstIterator it = sessionData.find(this->selectedSessionId);

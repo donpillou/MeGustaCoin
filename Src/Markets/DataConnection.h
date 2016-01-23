@@ -68,16 +68,14 @@ public:
 
   bool createBrokerOrder(meguco_user_broker_order_type type, double price, double amount, quint64& orderId);
   bool updateBrokerOrder(quint64 orderId, double price, double amount, bool& result);
-  //bool controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code controlCode, bool& result);
 
   bool createSession(const QString& name, quint64 botTypeId, quint64 brokerId);
   bool removeSession(quint32 sessionId);
   bool selectSession(quint32 sessionId);
-  bool controlSession2(quint64 entityId, meguco_user_session_control_code controlCode, bool& result); // todo: rename to controlSession
+  bool controlSession(quint64 entityId, meguco_user_session_control_code controlCode, bool& result); // todo: rename to controlSession
 
   bool createSessionAsset(meguco_user_session_asset_type type, double balanceComm, double balanceBase, double flipPrice, quint64& assetId);
   bool updateSessionAsset(quint64 assetId, double flipPrice, bool& result);
-  //bool controlSessionAsset(quint64 assetId, meguco_user_session_asset_control_code controlCode, bool& result);
 
   bool updateSessionProperty(quint64 propertyId, const QString& value);
 
@@ -151,8 +149,6 @@ private:
   QString userTablesPrefix;
   QString brokerTablesPrefix;
   QString sessionTablesPrefix;
-  //quint32 lastBrokerId;
-  //quint32 lastSessionId;
   QHash<QString, MarketData> marketData;
   QHash<quint32, MarketData*> marketDataById;
   QHash<quint32, BrokerData> brokerData;
@@ -164,9 +160,6 @@ private:
   QString getZlimDbError();
 
   void zlimdbCallback(const zlimdb_header& message);
-
-  //bool removeTable(quint32 id);
-  //bool controlEntity(quint32 tableId, quint64 entityId, quint32 code);
 
   bool subscribe(quint32 tableId, TableInfo::Type tableType, zlimdb_query_type queryType = zlimdb_query_type_all);
   bool unsubscribe(quint32 tableId);
