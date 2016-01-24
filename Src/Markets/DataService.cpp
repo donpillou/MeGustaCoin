@@ -272,6 +272,9 @@ void DataService::WorkerThread::removeEntity(EType type, quint64 id)
           }
         }
         break;
+      case EType::process:
+        dataService.globalEntityManager.removeEntity<EProcess>(id);
+        break;
         // todo: handle other entity types
       default:
         Q_ASSERT(false);
