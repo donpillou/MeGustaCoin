@@ -505,6 +505,9 @@ void DataConnection::removedTable(uint32_t tableId)
   case TableInfo::brokerTable:
     callback->removedBroker(tableInfo.nameId);
     break;
+  case TableInfo::sessionTable:
+    callback->removedSession(tableInfo.nameId);
+    break;
   default:
     break;
   }
