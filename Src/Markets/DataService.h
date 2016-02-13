@@ -133,7 +133,7 @@ private:
     virtual void clearBrokerTransactions();
     virtual void receivedBrokerLog(const meguco_log_entity& log, const QString& message);
     virtual void removedBrokerLog(quint64 logId) {}
-    virtual void clearBrokerLog();
+    virtual void clearBrokerLog() {}
 
     virtual void receivedSessionOrder(const meguco_user_broker_order_entity& order);
     virtual void removedSessionOrder(quint64 orderId);

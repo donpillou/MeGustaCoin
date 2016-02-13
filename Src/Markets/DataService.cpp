@@ -632,11 +632,6 @@ void DataService::WorkerThread::receivedBrokerLog(const meguco_log_entity& log, 
   delegateEntity(new ELogMessage((ELogMessage::Type)log.type, message));
 }
 
-void DataService::WorkerThread::clearBrokerLog()
-{
-  clearEntities(EType::logMessage);
-}
-
 void DataService::WorkerThread::receivedSessionOrder(const meguco_user_broker_order_entity& order)
 {
   delegateEntity(new EBotSessionOrder(order));
