@@ -1,40 +1,40 @@
 
 #include "stdafx.h"
 
-SessionPropertyModel::SessionPropertyModel(Entity::Manager& entityManager) :
+UserSessionPropertiesModel::UserSessionPropertiesModel(Entity::Manager& entityManager) :
   entityManager(entityManager)
 {
   entityManager.registerListener<EUserSessionProperty>(*this);
 }
 
-SessionPropertyModel::~SessionPropertyModel()
+UserSessionPropertiesModel::~UserSessionPropertiesModel()
 {
   entityManager.unregisterListener<EUserSessionProperty>(*this);
 }
 
-QModelIndex SessionPropertyModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex UserSessionPropertiesModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
     return createIndex(row, column, properties.at(row));
   return QModelIndex();
 }
 
-QModelIndex SessionPropertyModel::parent(const QModelIndex& child) const
+QModelIndex UserSessionPropertiesModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int SessionPropertyModel::rowCount(const QModelIndex& parent) const
+int UserSessionPropertiesModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : properties.size();
 }
 
-int SessionPropertyModel::columnCount(const QModelIndex& parent) const
+int UserSessionPropertiesModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant SessionPropertyModel::data(const QModelIndex& index, int role) const
+QVariant UserSessionPropertiesModel::data(const QModelIndex& index, int role) const
 {
   const EUserSessionProperty* eProperty = (const EUserSessionProperty*)index.internalPointer();
   if(!eProperty)
@@ -78,7 +78,7 @@ QVariant SessionPropertyModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-Qt::ItemFlags SessionPropertyModel::flags(const QModelIndex &index) const
+Qt::ItemFlags UserSessionPropertiesModel::flags(const QModelIndex &index) const
 {
   const EUserSessionProperty* eProperty = (const EUserSessionProperty*)index.internalPointer();
   if(!eProperty)
@@ -99,7 +99,7 @@ Qt::ItemFlags SessionPropertyModel::flags(const QModelIndex &index) const
   return flags;
 }
 
-bool SessionPropertyModel::setData(const QModelIndex & index, const QVariant & value, int role)
+bool UserSessionPropertiesModel::setData(const QModelIndex & index, const QVariant & value, int role)
 {
   if (role != Qt::EditRole)
     return false;
@@ -134,7 +134,7 @@ bool SessionPropertyModel::setData(const QModelIndex & index, const QVariant & v
   return false;
 }
 
-QVariant SessionPropertyModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant UserSessionPropertiesModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -160,7 +160,7 @@ QVariant SessionPropertyModel::headerData(int section, Qt::Orientation orientati
   return QVariant();
 }
 
-void SessionPropertyModel::addedEntity(Entity& entity)
+void UserSessionPropertiesModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -179,7 +179,7 @@ void SessionPropertyModel::addedEntity(Entity& entity)
   }
 }
 
-void SessionPropertyModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserSessionPropertiesModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
@@ -200,7 +200,7 @@ void SessionPropertyModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   }
 }
 
-void SessionPropertyModel::removedEntity(Entity& entity)
+void UserSessionPropertiesModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -219,7 +219,7 @@ void SessionPropertyModel::removedEntity(Entity& entity)
   }
 }
 
-void SessionPropertyModel::removedAll(quint32 type)
+void UserSessionPropertiesModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {

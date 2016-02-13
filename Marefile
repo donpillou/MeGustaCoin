@@ -55,7 +55,7 @@ targets = {
       "Src/Widgets/TradesWidget.h"
       "Src/Models/UserBrokerOrdersModel.h"
       "Src/Models/UserSessionAssetsModel.h"
-      "Src/Models/SessionPropertyModel.h"
+      "Src/Models/UserSessionPropertiesModel.h"
       "Src/Markets/DataService.h"
       "Src/MainWindow.h"
       "Src/MarketDialog.h"

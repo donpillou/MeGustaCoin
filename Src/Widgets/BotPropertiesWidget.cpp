@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotPropertiesWidget::BotPropertiesWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
-  QWidget(&tabFramework), dataService(dataService), propertyModel(entityManager)
+  QWidget(&tabFramework), dataService(dataService), propertiesModel(entityManager)
 {
   setWindowTitle(tr("Bot Properties"));
 
@@ -10,7 +10,7 @@ BotPropertiesWidget::BotPropertiesWidget(QTabFramework& tabFramework, QSettings&
   propertyView->setUniformRowHeights(true);
   QSortFilterProxyModel* propertyProxyModel = new QSortFilterProxyModel(this);
   propertyProxyModel->setDynamicSortFilter(true);
-  propertyProxyModel->setSourceModel(&propertyModel);
+  propertyProxyModel->setSourceModel(&propertiesModel);
   propertyView->setModel(propertyProxyModel);
   propertyView->setSortingEnabled(true);
   propertyView->setRootIsDecorated(false);
@@ -29,12 +29,12 @@ BotPropertiesWidget::BotPropertiesWidget(QTabFramework& tabFramework, QSettings&
       return widget;
     }
   };
-  propertyView->setItemDelegateForColumn((int)SessionPropertyModel::Column::value, new PropertyDelegate(this));
+  propertyView->setItemDelegateForColumn((int)UserSessionPropertiesModel::Column::value, new PropertyDelegate(this));
   propertyView->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::DoubleClicked);
   //itemView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-  connect(&propertyModel, SIGNAL(editedProperty(const QModelIndex&, double)), this, SLOT(editedProperty(const QModelIndex&, double)));
-  connect(&propertyModel, SIGNAL(editedProperty(const QModelIndex&, const QString&)), this, SLOT(editedProperty(const QModelIndex&, const QString&)));
+  connect(&propertiesModel, SIGNAL(editedProperty(const QModelIndex&, double)), this, SLOT(editedProperty(const QModelIndex&, double)));
+  connect(&propertiesModel, SIGNAL(editedProperty(const QModelIndex&, const QString&)), this, SLOT(editedProperty(const QModelIndex&, const QString&)));
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);

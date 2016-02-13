@@ -16,6 +16,6 @@ private slots:
 
 private:
   DataService& dataService;
-  SessionPropertyModel propertyModel;
+  UserSessionPropertiesModel propertiesModel;
   QTreeView* propertyView;
 };

@@ -1,7 +1,7 @@
 
 #pragma once
 
-class SessionPropertyModel : public QAbstractItemModel, public Entity::Listener
+class UserSessionPropertiesModel : public QAbstractItemModel, public Entity::Listener
 {
   Q_OBJECT
 
@@ -15,8 +15,8 @@ public:
   };
 
 public:
-  SessionPropertyModel(Entity::Manager& entityManager);
-  ~SessionPropertyModel();
+  UserSessionPropertiesModel(Entity::Manager& entityManager);
+  ~UserSessionPropertiesModel();
 
 signals:
   void editedProperty(const QModelIndex& index, const QString& value);
