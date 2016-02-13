@@ -1295,29 +1295,3 @@ void DataService::updateSessionProperty(EBotSessionProperty& property, const QSt
     thread->interrupt();
 }
 
-#if 0
-/*private*/ void DataService::controlSession2(quint64 entityId, meguco_user_session_control_code code)
-{
-  class ControlSessionJob : public Job
-  {
-  public:
-    ControlSessionJob(quint64 entityId, meguco_user_session_control_code code) : entityId(entityId), code(code) {}
-  private:
-    quint64 entityId;
-    meguco_user_session_control_code code;
-  private: // Job
-    virtual bool execute(WorkerThread& workerThread)
-    {
-      bool controlResult;
-      if(!workerThread.connection.controlSession(sessionId, code, controlResult))
-        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control session: %1").arg(workerThread.connection.getLastError())), false;
-      return true;
-    }
-  };
-
-  bool wasEmpty;
-  jobQueue.append(new ControlSessionJob(entityId, code), &wasEmpty);
-  if(wasEmpty && thread)
-    thread->interrupt();
-}
-#endif
