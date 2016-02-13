@@ -30,7 +30,7 @@ private:
   QAction* refreshAction;
 
 private:
-  void updateTitle(EDataService& eDataService);
+  void updateTitle(EConnection& eDataService);
 
 private: // Entity::Listener
   virtual void updatedEntitiy(Entity& oldEntity, Entity& newEntity);

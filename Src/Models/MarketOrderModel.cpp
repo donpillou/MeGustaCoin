@@ -9,7 +9,7 @@ MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
 {
   entityManager.registerListener<EUserBrokerOrder>(*this);
   entityManager.registerListener<EUserBrokerOrderDraft>(*this);
-  entityManager.registerListener<EDataService>(*this);
+  entityManager.registerListener<EConnection>(*this);
 
   eBrokerType = 0;
 }
@@ -18,7 +18,7 @@ MarketOrderModel::~MarketOrderModel()
 {
   entityManager.unregisterListener<EUserBrokerOrder>(*this);
   entityManager.unregisterListener<EUserBrokerOrderDraft>(*this);
-  entityManager.unregisterListener<EDataService>(*this);
+  entityManager.unregisterListener<EConnection>(*this);
 }
 
 QModelIndex MarketOrderModel::getDraftAmountIndex(EUserBrokerOrderDraft& draft)
@@ -277,7 +277,7 @@ void MarketOrderModel::addedEntity(Entity& entity)
       endInsertRows();
       break;
     }
-  case EType::dataService:
+  case EType::connection:
     break;
   default:
     Q_ASSERT(false);
@@ -301,9 +301,9 @@ void MarketOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
       emit dataChanged(leftModelIndex, rightModelIndex);
       break;
     }
-  case EType::dataService:
+  case EType::connection:
     {
-      EDataService* eDataService = dynamic_cast<EDataService*>(&newEntity);
+      EConnection* eDataService = dynamic_cast<EConnection*>(&newEntity);
       EBrokerType* newBrokerType = 0;
       if(eDataService && eDataService->getSelectedBrokerId() != 0)
       {
@@ -343,7 +343,7 @@ void MarketOrderModel::removedEntity(Entity& entity)
       endRemoveRows();
       break;
     }
-  case EType::dataService:
+  case EType::connection:
     break;
   default:
     Q_ASSERT(false);
@@ -364,7 +364,7 @@ void MarketOrderModel::removedAll(quint32 type)
       emit endResetModel();
     }
     break;
-  case EType::dataService:
+  case EType::connection:
     break;
   default:
     Q_ASSERT(false);

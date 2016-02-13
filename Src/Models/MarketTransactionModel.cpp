@@ -8,7 +8,7 @@ MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
   entityManager.registerListener<EUserBrokerTransaction>(*this);
-  entityManager.registerListener<EDataService>(*this);
+  entityManager.registerListener<EConnection>(*this);
 
   eBrokerType = 0;
 }
@@ -16,7 +16,7 @@ MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
 MarketTransactionModel::~MarketTransactionModel()
 {
   entityManager.unregisterListener<EUserBrokerTransaction>(*this);
-  entityManager.unregisterListener<EDataService>(*this);
+  entityManager.unregisterListener<EConnection>(*this);
 }
 
 QModelIndex MarketTransactionModel::index(int row, int column, const QModelIndex& parent) const
@@ -156,7 +156,7 @@ void MarketTransactionModel::addedEntity(Entity& entity)
       endInsertRows();
       break;
     }
-  case EType::dataService:
+  case EType::connection:
     break;
   default:
     Q_ASSERT(false);
@@ -179,9 +179,9 @@ void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity
       emit dataChanged(leftModelIndex, rightModelIndex);
       break;
     }
-  case EType::dataService:
+  case EType::connection:
     {
-      EDataService* eDataService = dynamic_cast<EDataService*>(&newEntity);
+      EConnection* eDataService = dynamic_cast<EConnection*>(&newEntity);
       EBrokerType* newBrokerType = 0;
       if(eDataService && eDataService->getSelectedBrokerId() != 0)
       {
@@ -215,7 +215,7 @@ void MarketTransactionModel::removedEntity(Entity& entity)
       endRemoveRows();
       break;
     }
-  case EType::dataService:
+  case EType::connection:
     break;
   default:
     Q_ASSERT(false);
@@ -235,7 +235,7 @@ void MarketTransactionModel::removedAll(quint32 type)
       emit endResetModel();
     }
     break;
-  case EType::dataService:
+  case EType::connection:
     break;
   default:
     Q_ASSERT(false);

@@ -27,7 +27,7 @@
 #include "Entities/EBrokerType.h"
 #include "Entities/EUserBrokerBalance.h"
 #include "Entities/ELogMessage.h"
-#include "Entities/EDataService.h"
+#include "Entities/EConnection.h"
 #include "Entities/EMarket.h"
 #include "Entities/EDataTradeData.h"
 #include "Entities/EDataTickerData.h"

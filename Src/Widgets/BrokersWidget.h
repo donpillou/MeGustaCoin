@@ -39,7 +39,7 @@ private slots:
   void marketDataAdded(const QModelIndex& parent, int start, int end);
 
 private:
-  void updateTitle(EDataService& eDataService);
+  void updateTitle(EConnection& eDataService);
   void updateToolBarButtons();
   void updateSelection();
 

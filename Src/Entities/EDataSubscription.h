@@ -4,7 +4,7 @@
 class EDataSubscription : public Entity
 {
 public:
-  static const EType eType = EType::dataSubscription;
+  static const EType eType = EType::marketSubscription;
 
 public:
   enum class State

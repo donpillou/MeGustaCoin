@@ -4,7 +4,7 @@
 OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), orderModel(entityManager)
 {
-  entityManager.registerListener<EDataService>(*this);
+  entityManager.registerListener<EConnection>(*this);
 
   setWindowTitle(tr("Orders"));
 
@@ -93,7 +93,7 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
 
 OrdersWidget::~OrdersWidget()
 {
-  entityManager.unregisterListener<EDataService>(*this);
+  entityManager.unregisterListener<EConnection>(*this);
 }
 
 void OrdersWidget::saveState(QSettings& settings)
@@ -115,7 +115,7 @@ void OrdersWidget::newSellOrder()
 
 void OrdersWidget::addOrderDraft(EUserBrokerOrder::Type type)
 {
-  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
+  EConnection* eDataService = entityManager.getEntity<EConnection>(0);
   EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eDataService->getSelectedBrokerId());
   if(!eUserBroker)
     return;
@@ -241,8 +241,8 @@ void OrdersWidget::orderDataChanged(const QModelIndex& topLeft, const QModelInde
 
 void OrdersWidget::updateToolBarButtons()
 {
-  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
-  bool connected = eDataService->getState() == EDataService::State::connected;
+  EConnection* eDataService = entityManager.getEntity<EConnection>(0);
+  bool connected = eDataService->getState() == EConnection::State::connected;
   bool brokerSelected = connected && eDataService->getSelectedBrokerId() != 0;
   bool canCancel = connected && !selection.isEmpty();
 
@@ -270,7 +270,7 @@ void OrdersWidget::refresh()
   dataService.refreshBrokerBalance();
 }
 
-void OrdersWidget::updateTitle(EDataService& eDataService)
+void OrdersWidget::updateTitle(EConnection& eDataService)
 {
   QString stateStr = eDataService.getStateName();
   QString title;
@@ -289,8 +289,8 @@ void OrdersWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {
-  case EType::dataService:
-    updateTitle(*dynamic_cast<EDataService*>(&newEntity));
+  case EType::connection:
+    updateTitle(*dynamic_cast<EConnection*>(&newEntity));
     updateToolBarButtons();
     break;
   default:

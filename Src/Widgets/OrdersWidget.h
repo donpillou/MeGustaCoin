@@ -45,7 +45,7 @@ private:
   void addOrderDraft(EUserBrokerOrder::Type type);
 
 private:
-  void updateTitle(EDataService& eDataService);
+  void updateTitle(EConnection& eDataService);
   void updateToolBarButtons();
 
 private: // Entity::Listener

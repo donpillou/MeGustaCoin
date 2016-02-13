@@ -4,7 +4,7 @@
 class EDataTickerData : public Entity
 {
 public:
-  static const EType eType = EType::dataTickerData;
+  static const EType eType = EType::marketTickerData;
 
 public:
   EDataTickerData(double ask, double bid) : Entity(eType, 0), ask(ask), bid(bid) {}

@@ -4,7 +4,7 @@
 BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), entityManager(entityManager), dataService(dataService), itemModel(entityManager)
 {
-  entityManager.registerListener<EDataService>(*this);
+  entityManager.registerListener<EConnection>(*this);
   entityManager.registerListener<EUserSession>(*this);
 
   setWindowTitle(tr("Bot Assets"));
@@ -77,7 +77,7 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
 
 BotItemsWidget::~BotItemsWidget()
 {
-  entityManager.unregisterListener<EDataService>(*this);
+  entityManager.unregisterListener<EConnection>(*this);
   entityManager.unregisterListener<EUserSession>(*this);
 }
 
@@ -160,7 +160,7 @@ void BotItemsWidget::cancelItem()
 
 void BotItemsWidget::addSessionItemDraft(EUserSessionAsset::Type type)
 {
-  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
+  EConnection* eDataService = entityManager.getEntity<EConnection>(0);
   EUserSession* eSession = entityManager.getEntity<EUserSession>(eDataService->getSelectedSessionId());
   if(!eSession)
     return;
@@ -225,8 +225,8 @@ void BotItemsWidget::editedItemFlipPrice(const QModelIndex& index, double flipPr
 
 void BotItemsWidget::updateToolBarButtons()
 {
-  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
-  bool connected = eDataService->getState() == EDataService::State::connected;
+  EConnection* eDataService = entityManager.getEntity<EConnection>(0);
+  bool connected = eDataService->getState() == EConnection::State::connected;
   bool sessionSelected = connected && eDataService->getSelectedSessionId() != 0;
   bool canCancel = !selection.isEmpty();
 
@@ -251,12 +251,12 @@ void BotItemsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {
-  case EType::dataService:
+  case EType::connection:
     updateToolBarButtons();
     break;
   case EType::userSession:
     {
-      EDataService* eDataService = entityManager.getEntity<EDataService>(0);
+      EConnection* eDataService = entityManager.getEntity<EConnection>(0);
       EUserSession* eSession = (EUserSession*)&newEntity;
       if(eSession->getId() == eDataService->getSelectedSessionId())
         updateToolBarButtons();

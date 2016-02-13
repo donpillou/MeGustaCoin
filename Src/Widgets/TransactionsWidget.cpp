@@ -4,7 +4,7 @@
 TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), transactionModel(entityManager)
 {
-  entityManager.registerListener<EDataService>(*this);
+  entityManager.registerListener<EConnection>(*this);
 
   setWindowTitle(tr("Transactions"));
 
@@ -53,7 +53,7 @@ TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& s
 
 TransactionsWidget::~TransactionsWidget()
 {
-  entityManager.unregisterListener<EDataService>(*this);
+  entityManager.unregisterListener<EConnection>(*this);
 }
 
 void TransactionsWidget::saveState(QSettings& settings)
@@ -65,8 +65,8 @@ void TransactionsWidget::saveState(QSettings& settings)
 
 void TransactionsWidget::updateToolBarButtons()
 {
-  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
-  bool connected = eDataService->getState() == EDataService::State::connected;
+  EConnection* eDataService = entityManager.getEntity<EConnection>(0);
+  bool connected = eDataService->getState() == EConnection::State::connected;
   bool brokerSelected = connected && eDataService->getSelectedBrokerId() != 0;
 
   refreshAction->setEnabled(brokerSelected);
@@ -77,7 +77,7 @@ void TransactionsWidget::refresh()
   dataService.refreshBrokerTransactions();
 }
 
-void TransactionsWidget::updateTitle(EDataService& eDataService)
+void TransactionsWidget::updateTitle(EConnection& eDataService)
 {
   QString stateStr = eDataService.getStateName();
   QString title;
@@ -96,8 +96,8 @@ void TransactionsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {
-  case EType::dataService:
-    updateTitle(*dynamic_cast<EDataService*>(&newEntity));
+  case EType::connection:
+    updateTitle(*dynamic_cast<EConnection*>(&newEntity));
     updateToolBarButtons();
     break;
   default:

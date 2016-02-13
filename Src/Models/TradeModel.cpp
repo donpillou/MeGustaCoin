@@ -196,7 +196,7 @@ void TradeModel::removedEntity(Entity& entity)
 
 void TradeModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::dataTradeData)
+  if((EType)type == EType::marketTradeData)
   {
     beginResetModel();
     qDeleteAll(trades);

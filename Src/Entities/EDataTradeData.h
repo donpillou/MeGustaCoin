@@ -4,7 +4,7 @@
 class EDataTradeData : public Entity
 {
 public:
-  static const EType eType = EType::dataTradeData;
+  static const EType eType = EType::marketTradeData;
 
 public:
   struct Trade

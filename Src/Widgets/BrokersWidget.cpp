@@ -4,7 +4,7 @@
 BrokersWidget::BrokersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), userBrokersModel(entityManager), selectedBrokerId(0)
 {
-  entityManager.registerListener<EDataService>(*this);
+  entityManager.registerListener<EConnection>(*this);
 
   setWindowTitle(tr("Brokers"));
 
@@ -58,7 +58,7 @@ BrokersWidget::BrokersWidget(QTabFramework& tabFramework, QSettings& settings, E
 
 BrokersWidget::~BrokersWidget()
 {
-  entityManager.unregisterListener<EDataService>(*this);
+  entityManager.unregisterListener<EConnection>(*this);
 }
 
 void BrokersWidget::saveState(QSettings& settings)
@@ -96,7 +96,7 @@ void BrokersWidget::removeMarket()
   }
 }
 
-void BrokersWidget::updateTitle(EDataService& eDataService)
+void BrokersWidget::updateTitle(EConnection& eDataService)
 {
   QString stateStr = eDataService.getStateName();
 
@@ -112,8 +112,8 @@ void BrokersWidget::updateTitle(EDataService& eDataService)
 
 void BrokersWidget::updateToolBarButtons()
 {
-  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
-  bool connected = eDataService->getState() == EDataService::State::connected;
+  EConnection* eDataService = entityManager.getEntity<EConnection>(0);
+  bool connected = eDataService->getState() == EConnection::State::connected;
   bool marketSelected = !selection.isEmpty();
 
   addAction->setEnabled(connected);
@@ -202,8 +202,8 @@ void BrokersWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {
-  case EType::dataService:
-    updateTitle(*dynamic_cast<EDataService*>(&newEntity));
+  case EType::connection:
+    updateTitle(*dynamic_cast<EConnection*>(&newEntity));
     updateToolBarButtons();
     break;
   default:

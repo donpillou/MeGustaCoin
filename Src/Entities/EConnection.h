@@ -1,10 +1,10 @@
 
 #pragma once
 
-class EDataService : public Entity
+class EConnection : public Entity
 {
 public:
-  static const EType eType = EType::dataService;
+  static const EType eType = EType::connection;
 
 public:
   enum class State
@@ -15,7 +15,7 @@ public:
   };
 
 public:
-  EDataService() : Entity(eType, 0), state(State::offline), selectedSessionId(0), selectedBrokerId(0), loadingMarketOrders(false), loadingMarketTransactions(false) {}
+  EConnection() : Entity(eType, 0), state(State::offline), selectedSessionId(0), selectedBrokerId(0), loadingMarketOrders(false), loadingMarketTransactions(false) {}
 
   State getState() const {return state;}
   void setState(State state) {this->state = state;}

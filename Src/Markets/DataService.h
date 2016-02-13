@@ -103,7 +103,7 @@ private:
     QHash<quint32, SubscriptionData> subscriptionData;
 
   private:
-    void setState(EDataService::State state);
+    void setState(EConnection::State state);
     void process();
 
   private: // QThread

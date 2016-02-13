@@ -10,7 +10,7 @@ SessionItemModel::SessionItemModel(Entity::Manager& entityManager) :
 {
   entityManager.registerListener<EUserSessionAsset>(*this);
   entityManager.registerListener<EUserSessionAssetDraft>(*this);
-  entityManager.registerListener<EDataService>(*this);
+  entityManager.registerListener<EConnection>(*this);
 
   eBrokerType = 0;
 }
@@ -19,7 +19,7 @@ SessionItemModel::~SessionItemModel()
 {
   entityManager.unregisterListener<EUserSessionAsset>(*this);
   entityManager.unregisterListener<EUserSessionAssetDraft>(*this);
-  entityManager.unregisterListener<EDataService>(*this);
+  entityManager.unregisterListener<EConnection>(*this);
 }
 
 QModelIndex SessionItemModel::getDraftAmountIndex(EUserSessionAssetDraft& draft)
@@ -325,7 +325,7 @@ void SessionItemModel::addedEntity(Entity& entity)
       endInsertRows();
       break;
     }
-  case EType::dataService:
+  case EType::connection:
     break;
   default:
     Q_ASSERT(false);
@@ -349,9 +349,9 @@ void SessionItemModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
       emit dataChanged(leftModelIndex, rightModelIndex);
       break;
     }
-  case EType::dataService:
+  case EType::connection:
     {
-      EDataService* eDataService = dynamic_cast<EDataService*>(&newEntity);
+      EConnection* eDataService = dynamic_cast<EConnection*>(&newEntity);
       EBrokerType* newBrokerType = 0;
       if(eDataService && eDataService->getSelectedSessionId() != 0)
       {
@@ -395,7 +395,7 @@ void SessionItemModel::removedEntity(Entity& entity)
       endRemoveRows();
       break;
     }
-  case EType::dataService:
+  case EType::connection:
     break;
   default:
     Q_ASSERT(false);
@@ -416,7 +416,7 @@ void SessionItemModel::removedAll(quint32 type)
       emit endResetModel();
     }
     break;;
-  case EType::dataService:
+  case EType::connection:
     break;
   default:
     Q_ASSERT(false);

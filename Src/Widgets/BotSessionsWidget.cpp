@@ -4,7 +4,7 @@
 BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  dataService(dataService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager), selectedSessionId(0)
 {
-  entityManager.registerListener<EDataService>(*this);
+  entityManager.registerListener<EConnection>(*this);
 
   setWindowTitle(tr("Bot Sessions"));
 
@@ -67,7 +67,7 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
 
 BotSessionsWidget::~BotSessionsWidget()
 {
-  entityManager.unregisterListener<EDataService>(*this);
+  entityManager.unregisterListener<EConnection>(*this);
 }
 
 void BotSessionsWidget::saveState(QSettings& settings)
@@ -141,7 +141,7 @@ void BotSessionsWidget::optimize()
   //}
 }
 
-void BotSessionsWidget::updateTitle(EDataService& eDataService)
+void BotSessionsWidget::updateTitle(EConnection& eDataService)
 {
   QString stateStr = eDataService.getStateName();
   
@@ -157,8 +157,8 @@ void BotSessionsWidget::updateTitle(EDataService& eDataService)
 
 void BotSessionsWidget::updateToolBarButtons()
 {
-  EDataService* eDataService = entityManager.getEntity<EDataService>(0);
-  bool connected = eDataService->getState() == EDataService::State::connected;
+  EConnection* eDataService = entityManager.getEntity<EConnection>(0);
+  bool connected = eDataService->getState() == EConnection::State::connected;
   addAction->setEnabled(connected);
 
   bool sessionSelected = !selection.isEmpty();
@@ -254,7 +254,7 @@ void BotSessionsWidget::sessionDataAdded(const QModelIndex& parent, int start, i
 
 void BotSessionsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EDataService* eDataService = dynamic_cast<EDataService*>(&newEntity);
+  EConnection* eDataService = dynamic_cast<EConnection*>(&newEntity);
   if(eDataService)
   {
     updateTitle(*eDataService);

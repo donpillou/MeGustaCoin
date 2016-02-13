@@ -8,14 +8,14 @@ GraphModel::GraphModel(const QString& channeName, Entity::Manager& globalEntityM
   graphService.registerGraphModel(*this);
   channelEntityManager.registerListener<EDataTradeData>(*this);
   globalEntityManager.registerListener<EUserSessionMarker>(*this);
-  globalEntityManager.registerListener<EDataService>(*this);
+  globalEntityManager.registerListener<EConnection>(*this);
 }
 
 GraphModel::~GraphModel()
 {
   channelEntityManager.unregisterListener<EDataTradeData>(*this);
   globalEntityManager.unregisterListener<EUserSessionMarker>(*this);
-  globalEntityManager.unregisterListener<EDataService>(*this);
+  globalEntityManager.unregisterListener<EConnection>(*this);
   graphService.unregisterGraphModel(*this);
 }
 
@@ -77,13 +77,13 @@ void GraphModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)newEntity.getType())
   {
-  case EType::dataTradeData:
+  case EType::marketTradeData:
     addedEntity(newEntity);
     break;
-  case EType::dataService:
+  case EType::connection:
     {
       bool newAddSessionMarkers = false;
-      EDataService* eDataService = dynamic_cast<EDataService*>(&newEntity);
+      EConnection* eDataService = dynamic_cast<EConnection*>(&newEntity);
       if(eDataService->getSelectedSessionId() != 0)
       {
         EUserSession* eSession = globalEntityManager.getEntity<EUserSession>(eDataService->getSelectedSessionId());

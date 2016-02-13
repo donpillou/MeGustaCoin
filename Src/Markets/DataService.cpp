@@ -254,7 +254,7 @@ void DataService::WorkerThread::removeEntity(EType type, quint64 id)
       {
       case EType::userBroker:
         {
-          EDataService* eDataService = dataService.globalEntityManager.getEntity<EDataService>(0);
+          EConnection* eDataService = dataService.globalEntityManager.getEntity<EConnection>(0);
           if(eDataService->getSelectedBrokerId() == id)
           {
             eDataService->setSelectedBrokerId(0);
@@ -264,7 +264,7 @@ void DataService::WorkerThread::removeEntity(EType type, quint64 id)
         break;
       case EType::userSession:
         {
-          EDataService* eDataService = dataService.globalEntityManager.getEntity<EDataService>(0);
+          EConnection* eDataService = dataService.globalEntityManager.getEntity<EConnection>(0);
           if(eDataService->getSelectedSessionId() == id)
           {
             eDataService->setSelectedSessionId(0);
@@ -306,20 +306,20 @@ void DataService::WorkerThread::clearEntities(EType type)
     QTimer::singleShot(0, &dataService, SLOT(handleEvents()));
 }
 
-void DataService::WorkerThread::setState(EDataService::State state)
+void DataService::WorkerThread::setState(EConnection::State state)
 {
   class SetStateEvent : public Event
   {
   public:
-    SetStateEvent(EDataService::State state) : state(state) {}
+    SetStateEvent(EConnection::State state) : state(state) {}
   private:
-    EDataService::State state;
+    EConnection::State state;
   private: // Event
     virtual void handle(DataService& dataService)
     {
       Entity::Manager& globalEntityManager = dataService.globalEntityManager;
-      EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
-      if(state == EDataService::State::connected)
+      EConnection* eDataService = globalEntityManager.getEntity<EConnection>(0);
+      if(state == EConnection::State::connected)
       {
         dataService.isConnected = true;
         QHash<QString, Entity::Manager*> subscriptions;
@@ -327,7 +327,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
         for(QHash<QString, Entity::Manager*>::Iterator i = subscriptions.begin(), end = subscriptions.end(); i != end; ++i)
           dataService.subscribe(i.key(), *i.value());
       }
-      else if(state == EDataService::State::offline)
+      else if(state == EConnection::State::offline)
       {
         dataService.isConnected = false;
         for(QHash<quint32, Entity::Manager*>::ConstIterator i = dataService.activeSubscriptions.begin(), end = dataService.activeSubscriptions.end(); i != end; ++i)
@@ -360,7 +360,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
         eDataService->setLoadingBrokerTransactions(false);
       }
       eDataService->setState(state);
-      if(state == EDataService::State::offline)
+      if(state == EConnection::State::offline)
         globalEntityManager.removeAll<EMarket>();
       globalEntityManager.updatedEntity(*eDataService);
     }
@@ -393,7 +393,7 @@ void DataService::WorkerThread::process()
     return addMessage(ELogMessage::Type::error, QString("Could not connect to data service: %1").arg(connection.getLastError()));
   addMessage(ELogMessage::Type::information, "Connected to data service.");
 
-  setState(EDataService::State::connected);
+  setState(EConnection::State::connected);
 
   // loop
   for(;;)
@@ -440,9 +440,9 @@ void DataService::WorkerThread::run()
 {
   while(!canceled)
   {
-    setState(EDataService::State::connecting);
+    setState(EConnection::State::connecting);
     process();
-    setState(EDataService::State::offline);
+    setState(EConnection::State::offline);
 
     subscriptionData.clear();
 
@@ -786,7 +786,7 @@ void DataService::selectBroker(quint32 brokerId)
     virtual void handle(DataService& dataService)
     {
       Entity::Manager& globalEntityManager = dataService.globalEntityManager;
-      EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
+      EConnection* eDataService = globalEntityManager.getEntity<EConnection>(0);
       eDataService->setSelectedBrokerId(brokerId);
       globalEntityManager.updatedEntity(*eDataService);
     }
@@ -800,7 +800,7 @@ void DataService::selectBroker(quint32 brokerId)
 
 void DataService::refreshBrokerOrders()
 {
-  EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
+  EConnection* eDataService = globalEntityManager.getEntity<EConnection>(0);
   eDataService->setLoadingBrokerOrders(true);
   globalEntityManager.updatedEntity(*eDataService);
 
@@ -818,7 +818,7 @@ void DataService::refreshBrokerOrders()
     virtual void handle(DataService& dataService)
     {
       // unset loading state
-      EDataService* eDataService = dataService.globalEntityManager.getEntity<EDataService>(0);
+      EConnection* eDataService = dataService.globalEntityManager.getEntity<EConnection>(0);
       eDataService->setLoadingBrokerOrders(false);
       dataService.globalEntityManager.updatedEntity(*eDataService);
     }
@@ -832,7 +832,7 @@ void DataService::refreshBrokerOrders()
 
 void DataService::refreshBrokerTransactions()
 {
-  EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
+  EConnection* eDataService = globalEntityManager.getEntity<EConnection>(0);
   eDataService->setLoadingBrokerTransactions(true);
   globalEntityManager.updatedEntity(*eDataService);
 
@@ -850,7 +850,7 @@ void DataService::refreshBrokerTransactions()
     virtual void handle(DataService& dataService)
     {
       // unset loading state
-      EDataService* eDataService = dataService.globalEntityManager.getEntity<EDataService>(0);
+      EConnection* eDataService = dataService.globalEntityManager.getEntity<EConnection>(0);
       eDataService->setLoadingBrokerTransactions(false);
       dataService.globalEntityManager.updatedEntity(*eDataService);
 
@@ -1149,7 +1149,7 @@ void DataService::selectSession(quint32 sessionId)
     virtual void handle(DataService& dataService)
     {
       Entity::Manager& globalEntityManager = dataService.globalEntityManager;
-      EDataService* eDataService = globalEntityManager.getEntity<EDataService>(0);
+      EConnection* eDataService = globalEntityManager.getEntity<EConnection>(0);
       eDataService->setSelectedSessionId(sessionId);
       globalEntityManager.updatedEntity(*eDataService);
     }

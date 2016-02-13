@@ -4,7 +4,7 @@
 class EMarket : public Entity
 {
 public:
-  static const EType eType = EType::dataMarket;
+  static const EType eType = EType::market;
 
 public:
   EMarket(quint64 entityId, const QString& name) : Entity(eType, entityId)
