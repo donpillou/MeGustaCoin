@@ -9,6 +9,6 @@ public:
   void saveState(QSettings& settings);
 
 private:
-  ProcessModel processModel;
+  ProcessesModel processesModel;
   QTreeView* processView;
 };

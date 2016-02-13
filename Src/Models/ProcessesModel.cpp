@@ -1,40 +1,40 @@
 
 #include "stdafx.h"
 
-ProcessModel::ProcessModel(Entity::Manager& entityManager) :
+ProcessesModel::ProcessesModel(Entity::Manager& entityManager) :
   entityManager(entityManager)
 {
   entityManager.registerListener<EProcess>(*this);
 }
 
-ProcessModel::~ProcessModel()
+ProcessesModel::~ProcessesModel()
 {
   entityManager.unregisterListener<EProcess>(*this);
 }
 
-QModelIndex ProcessModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex ProcessesModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
     return createIndex(row, column, processes.at(row));
   return QModelIndex();
 }
 
-QModelIndex ProcessModel::parent(const QModelIndex& child) const
+QModelIndex ProcessesModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int ProcessModel::rowCount(const QModelIndex& parent) const
+int ProcessesModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : processes.size();
 }
 
-int ProcessModel::columnCount(const QModelIndex& parent) const
+int ProcessesModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant ProcessModel::data(const QModelIndex& index, int role) const
+QVariant ProcessesModel::data(const QModelIndex& index, int role) const
 {
   const EProcess* eProcess= (const EProcess*)index.internalPointer();
   if(!eProcess)
@@ -50,7 +50,7 @@ QVariant ProcessModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-QVariant ProcessModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ProcessesModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -64,7 +64,7 @@ QVariant ProcessModel::headerData(int section, Qt::Orientation orientation, int 
   return QVariant();
 }
 
-void ProcessModel::addedEntity(Entity& entity)
+void ProcessesModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -83,7 +83,7 @@ void ProcessModel::addedEntity(Entity& entity)
   }
 }
 
-void ProcessModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void ProcessesModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
@@ -104,7 +104,7 @@ void ProcessModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   }
 }
 
-void ProcessModel::removedEntity(Entity& entity)
+void ProcessesModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -123,7 +123,7 @@ void ProcessModel::removedEntity(Entity& entity)
   }
 }
 
-void ProcessModel::removedAll(quint32 type)
+void ProcessesModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {

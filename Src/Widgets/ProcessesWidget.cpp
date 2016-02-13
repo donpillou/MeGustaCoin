@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 ProcessesWidget::ProcessesWidget(QWidget* parent, QSettings& settings, Entity::Manager& entityManager) : QWidget(parent),
-  processModel(entityManager)
+  processesModel(entityManager)
 {
   setWindowTitle(tr("Processes"));
 
@@ -10,7 +10,7 @@ ProcessesWidget::ProcessesWidget(QWidget* parent, QSettings& settings, Entity::M
   processView->setUniformRowHeights(true);
   QSortFilterProxyModel* proxyModel = new QSortFilterProxyModel(this);
   proxyModel->setDynamicSortFilter(true);
-  proxyModel->setSourceModel(&processModel);
+  proxyModel->setSourceModel(&processesModel);
   processView->setSortingEnabled(true);
   processView->setModel(proxyModel);
   processView->setRootIsDecorated(false);

@@ -53,7 +53,7 @@
 #include "Models/UserBrokersModel.h"
 #include "Models/TradeModel.h"
 #include "Models/LogModel.h"
-#include "Models/ProcessModel.h"
+#include "Models/ProcessesModel.h"
 
 #include "Markets/DataService.h"
 

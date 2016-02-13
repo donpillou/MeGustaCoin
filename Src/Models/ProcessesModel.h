@@ -1,7 +1,7 @@
 
 #pragma once
 
-class ProcessModel : public QAbstractItemModel, public Entity::Listener
+class ProcessesModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
   enum class Column
@@ -12,8 +12,8 @@ public:
   };
 
 public:
-  ProcessModel(Entity::Manager& entityManager);
-  ~ProcessModel();
+  ProcessesModel(Entity::Manager& entityManager);
+  ~ProcessesModel();
 
 private:
   Entity::Manager& entityManager;
