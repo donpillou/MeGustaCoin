@@ -24,7 +24,7 @@ public:
 private:
   Entity::Manager& entityManager;
   EBrokerType* eBrokerType;
-  QList<EBotSessionTransaction*> transactions;
+  QList<EUserSessionTransaction*> transactions;
   QVariant buyStr;
   QVariant sellStr;
   QVariant sellIcon;
@@ -54,8 +54,8 @@ public:
 private: // QSortFilterProxyModel
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
-    const EBotSessionTransaction* leftTransaction = (const EBotSessionTransaction*)left.internalPointer();
-    const EBotSessionTransaction* rightTransaction = (const EBotSessionTransaction*)right.internalPointer();
+    const EUserSessionTransaction* leftTransaction = (const EUserSessionTransaction*)left.internalPointer();
+    const EUserSessionTransaction* rightTransaction = (const EUserSessionTransaction*)right.internalPointer();
     switch((SessionTransactionModel::Column)left.column())
     {
     case SessionTransactionModel::Column::date:

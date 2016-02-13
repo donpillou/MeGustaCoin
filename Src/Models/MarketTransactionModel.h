@@ -54,8 +54,8 @@ public:
 private: // QSortFilterProxyModel
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
-    const EBotSessionTransaction* leftTransaction = (const EBotSessionTransaction*)left.internalPointer();
-    const EBotSessionTransaction* rightTransaction = (const EBotSessionTransaction*)right.internalPointer();
+    const EUserBrokerTransaction* leftTransaction = (const EUserBrokerTransaction*)left.internalPointer();
+    const EUserBrokerTransaction* rightTransaction = (const EUserBrokerTransaction*)right.internalPointer();
     switch((MarketTransactionModel::Column)left.column())
     {
     case MarketTransactionModel::Column::date:

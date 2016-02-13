@@ -7,7 +7,7 @@ SessionTransactionModel::SessionTransactionModel(Entity::Manager& entityManager)
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<EBotSessionTransaction>(*this);
+  entityManager.registerListener<EUserSessionTransaction>(*this);
   entityManager.registerListener<EDataService>(*this);
 
   eBrokerType = 0;
@@ -15,7 +15,7 @@ SessionTransactionModel::SessionTransactionModel(Entity::Manager& entityManager)
 
 SessionTransactionModel::~SessionTransactionModel()
 {
-  entityManager.unregisterListener<EBotSessionTransaction>(*this);
+  entityManager.unregisterListener<EUserSessionTransaction>(*this);
   entityManager.unregisterListener<EDataService>(*this);
 }
 
@@ -43,7 +43,7 @@ int SessionTransactionModel::columnCount(const QModelIndex& parent) const
 
 QVariant SessionTransactionModel::data(const QModelIndex& index, int role) const
 {
-  const EBotSessionTransaction* eTransaction = (const EBotSessionTransaction*)index.internalPointer();
+  const EUserSessionTransaction* eTransaction = (const EUserSessionTransaction*)index.internalPointer();
   if(!eTransaction)
     return QVariant();
 
@@ -65,9 +65,9 @@ QVariant SessionTransactionModel::data(const QModelIndex& index, int role) const
     if((Column)index.column() == Column::type)
       switch(eTransaction->getType())
       {
-      case EBotSessionTransaction::Type::sell:
+      case EUserSessionTransaction::Type::sell:
         return sellIcon;
-      case EBotSessionTransaction::Type::buy:
+      case EUserSessionTransaction::Type::buy:
         return buyIcon;
       default:
         break;
@@ -79,9 +79,9 @@ QVariant SessionTransactionModel::data(const QModelIndex& index, int role) const
     case Column::type:
       switch(eTransaction->getType())
       {
-      case EBotSessionTransaction::Type::buy:
+      case EUserSessionTransaction::Type::buy:
         return buyStr;
-      case EBotSessionTransaction::Type::sell:
+      case EUserSessionTransaction::Type::sell:
         return sellStr;
       default:
         break;
@@ -97,7 +97,7 @@ QVariant SessionTransactionModel::data(const QModelIndex& index, int role) const
     case Column::fee:
       return eBrokerType->formatPrice(eTransaction->getFee());
     case Column::total:
-      return eTransaction->getType() == EBotSessionTransaction::Type::sell ? (QString("+") + eBrokerType->formatPrice(eTransaction->getTotal())) : eBrokerType->formatPrice(-eTransaction->getTotal());
+      return eTransaction->getType() == EUserSessionTransaction::Type::sell ? (QString("+") + eBrokerType->formatPrice(eTransaction->getTotal())) : eBrokerType->formatPrice(-eTransaction->getTotal());
     }
   }
   return QVariant();
@@ -149,7 +149,7 @@ void SessionTransactionModel::addedEntity(Entity& entity)
   {
   case EType::userSessionTransaction:
     {
-      EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
+      EUserSessionTransaction* eTransaction = dynamic_cast<EUserSessionTransaction*>(&entity);
       int index = transactions.size();
       beginInsertRows(QModelIndex(), index, index);
       transactions.append(eTransaction);
@@ -170,8 +170,8 @@ void SessionTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntit
   {
   case EType::userSessionTransaction:
     {
-      EBotSessionTransaction* oldEBotSessionTransaction = dynamic_cast<EBotSessionTransaction*>(&oldEntity);
-      EBotSessionTransaction* newEBotSessionTransaction = dynamic_cast<EBotSessionTransaction*>(&newEntity);
+      EUserSessionTransaction* oldEBotSessionTransaction = dynamic_cast<EUserSessionTransaction*>(&oldEntity);
+      EUserSessionTransaction* newEBotSessionTransaction = dynamic_cast<EUserSessionTransaction*>(&newEntity);
       int index = transactions.indexOf(oldEBotSessionTransaction);
       transactions[index] = newEBotSessionTransaction; 
       QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionTransaction);
@@ -212,7 +212,7 @@ void SessionTransactionModel::removedEntity(Entity& entity)
   {
   case EType::userSessionTransaction:
     {
-      EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
+      EUserSessionTransaction* eTransaction = dynamic_cast<EUserSessionTransaction*>(&entity);
       int index = transactions.indexOf(eTransaction);
       beginRemoveRows(QModelIndex(), index, index);
       transactions.removeAt(index);

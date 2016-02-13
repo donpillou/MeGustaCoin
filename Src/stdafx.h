@@ -13,7 +13,7 @@
 #include "Entities/EType.h"
 #include "Entities/EUserSessionOrder.h"
 #include "Entities/EUserSessionMarker.h"
-#include "Entities/EBotSessionTransaction.h"
+#include "Entities/EUserSessionTransaction.h"
 #include "Entities/EUserSessionAsset.h"
 #include "Entities/EUserSessionAssetDraft.h"
 #include "Entities/EUserSessionLogMessage.h"
