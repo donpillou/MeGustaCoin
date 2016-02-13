@@ -91,8 +91,8 @@ void DataService::subscribe(const QString& channelName, Entity::Manager& channel
           eTickerData = 0;
         }
         dataService.activeSubscriptions[channelId] = channelEntityManager;
-        EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
-        eDataSubscription->setState(EDataSubscription::State::subscribed);
+        EMarketSubscription* eDataSubscription = channelEntityManager->getEntity<EMarketSubscription>(0);
+        eDataSubscription->setState(EMarketSubscription::State::subscribed);
         channelEntityManager->updatedEntity(*eDataSubscription);
         EMarket* eMarket = dataService.globalEntityManager.getEntity<EMarket>(channelId);
         dataService.addLogMessage(ELogMessage::Type::information, QString("Subscribed to channel %1.").arg(eMarket->getName()));
@@ -118,9 +118,9 @@ void DataService::subscribe(const QString& channelName, Entity::Manager& channel
     if(wasEmpty && thread)
       thread->interrupt();
   }
-  EDataSubscription* eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
-  eDataSubscription->setState(EDataSubscription::State::subscribing);
-  channelEntityManager.updatedEntity(*eDataSubscription);
+  EMarketSubscription* eSubscription = channelEntityManager.getEntity<EMarketSubscription>(0);
+  eSubscription->setState(EMarketSubscription::State::subscribing);
+  channelEntityManager.updatedEntity(*eSubscription);
 }
 
 void DataService::unsubscribe(const QString& channelName)
@@ -154,8 +154,8 @@ void DataService::unsubscribe(const QString& channelName)
         return;
       Entity::Manager* channelEntityManager = it.value();
       dataService.activeSubscriptions.erase(it);
-      EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
-      eDataSubscription->setState(EDataSubscription::State::unsubscribed);
+      EMarketSubscription* eSubscription = channelEntityManager->getEntity<EMarketSubscription>(0);
+      eSubscription->setState(EMarketSubscription::State::unsubscribed);
       dataService.addLogMessage(ELogMessage::Type::information, QString("Unsubscribed from channel %1.").arg(channelName));
     }
   };
@@ -333,9 +333,9 @@ void DataService::WorkerThread::setState(EConnection::State state)
         for(QHash<quint32, Entity::Manager*>::ConstIterator i = dataService.activeSubscriptions.begin(), end = dataService.activeSubscriptions.end(); i != end; ++i)
         {
           Entity::Manager* channelEntityManager = i.value();
-          EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
+          EMarketSubscription* eDataSubscription = channelEntityManager->getEntity<EMarketSubscription>(0);
           if(eDataSubscription)
-            eDataSubscription->setState(EDataSubscription::State::unsubscribed);
+            eDataSubscription->setState(EMarketSubscription::State::unsubscribed);
         }
         dataService.activeSubscriptions.clear();
         globalEntityManager.removeAll<EBotType>();

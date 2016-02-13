@@ -1,7 +1,7 @@
 
 #pragma once
 
-class EDataSubscription : public Entity
+class EMarketSubscription : public Entity
 {
 public:
   static const EType eType = EType::marketSubscription;
@@ -16,7 +16,7 @@ public:
   };
 
 public:
-  EDataSubscription(const QString& baseCurrency, const QString& commCurrency) : Entity(eType, 0)
+  EMarketSubscription(const QString& baseCurrency, const QString& commCurrency) : Entity(eType, 0)
   {
     this->state = State::unsubscribed;
     this->baseCurrency = baseCurrency;

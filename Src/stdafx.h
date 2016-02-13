@@ -31,7 +31,7 @@
 #include "Entities/EMarket.h"
 #include "Entities/EDataTradeData.h"
 #include "Entities/EDataTickerData.h"
-#include "Entities/EDataSubscription.h"
+#include "Entities/EMarketSubscription.h"
 #include "Entities/EProcess.h"
 
 #include "Bots/TradeHandler.h"

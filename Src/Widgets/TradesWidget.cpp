@@ -5,7 +5,7 @@ TradesWidget::TradesWidget(QTabFramework& tabFramework, QSettings& settings, con
   QWidget(&tabFramework), tabFramework(tabFramework),
   channelName(channelName), channelEntityManager(channelEntityManager), tradeModel(channelEntityManager)
 {
-  channelEntityManager.registerListener<EDataSubscription>(*this);
+  channelEntityManager.registerListener<EMarketSubscription>(*this);
 
   connect(&tradeModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)), this, SLOT(rowsAboutToBeRemoved(const QModelIndex&, int, int)));
 
@@ -36,7 +36,7 @@ TradesWidget::TradesWidget(QTabFramework& tabFramework, QSettings& settings, con
 
 TradesWidget::~TradesWidget()
 {
-  channelEntityManager.unregisterListener<EDataSubscription>(*this);
+  channelEntityManager.unregisterListener<EMarketSubscription>(*this);
 }
 
 void TradesWidget::saveState(QSettings& settings)
@@ -50,7 +50,7 @@ void TradesWidget::saveState(QSettings& settings)
 
 void TradesWidget::updateTitle()
 {
-  EDataSubscription* eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
+  EMarketSubscription* eDataSubscription = channelEntityManager.getEntity<EMarketSubscription>(0);
   QString stateStr = eDataSubscription->getStateName();
 
   QString title;
@@ -80,7 +80,7 @@ void TradesWidget::rowsAboutToBeRemoved(const QModelIndex& parent, int start, in
 
 void TradesWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EDataSubscription* eDataSubscription = dynamic_cast<EDataSubscription*>(&newEntity);
+  EMarketSubscription* eDataSubscription = dynamic_cast<EMarketSubscription*>(&newEntity);
   if(eDataSubscription)
   {
     updateTitle();

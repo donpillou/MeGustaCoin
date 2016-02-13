@@ -6,8 +6,8 @@ TradeModel::TradeModel(Entity::Manager& channelEntityManager) :
   upIcon(QIcon(":/Icons/arrow_diag.png")), downIcon(QIcon(":/Icons/arrow_diag_red.png")), neutralIcon(QIcon(":/Icons/bullet_grey.png"))
 {
   channelEntityManager.registerListener<EDataTradeData>(*this);
-  eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
-  Q_ASSERT(eDataSubscription);
+  eSubscription = channelEntityManager.getEntity<EMarketSubscription>(0);
+  Q_ASSERT(eSubscription);
 }
 
 TradeModel::~TradeModel()
@@ -83,9 +83,9 @@ QVariant TradeModel::data(const QModelIndex& index, int role) const
         return QString("%1 minutes ago").arg(timeSinceTrade / 60);
       }
     case Column::amount:
-      return eDataSubscription->formatAmount(trade->amount);
+      return eSubscription->formatAmount(trade->amount);
     case Column::price:
-      return eDataSubscription->formatPrice(trade->price);
+      return eSubscription->formatPrice(trade->price);
     }
   }
   return QVariant();
@@ -112,9 +112,9 @@ QVariant TradeModel::headerData(int section, Qt::Orientation orientation, int ro
       case Column::date:
         return tr("Date");
       case Column::amount:
-        return tr("Amount %1").arg(eDataSubscription->getCommCurrency());
+        return tr("Amount %1").arg(eSubscription->getCommCurrency());
       case Column::price:
-        return tr("Price %1").arg(eDataSubscription->getBaseCurrency());
+        return tr("Price %1").arg(eSubscription->getBaseCurrency());
     }
   }
   return QVariant();

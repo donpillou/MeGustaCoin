@@ -4,7 +4,7 @@
 GraphWidget::GraphWidget(QTabFramework& tabFramework, QSettings& settings, const QString& channelName, const QString& settingsSection, Entity::Manager& channelEntityManager, GraphModel& graphModel) :
   QWidget(&tabFramework), tabFramework(tabFramework), channelName(channelName), settingsSection(settingsSection), channelEntityManager(channelEntityManager), graphModel(graphModel)
 {
-  channelEntityManager.registerListener<EDataSubscription>(*this);
+  channelEntityManager.registerListener<EMarketSubscription>(*this);
 
   QToolBar* toolBar = new QToolBar(this);
   toolBar->setStyleSheet("QToolBar { border: 0px }");
@@ -139,7 +139,7 @@ GraphWidget::GraphWidget(QTabFramework& tabFramework, QSettings& settings, const
 
 GraphWidget::~GraphWidget()
 {
-  channelEntityManager.unregisterListener<EDataSubscription>(*this);
+  channelEntityManager.unregisterListener<EMarketSubscription>(*this);
 }
 
 void GraphWidget::saveState(QSettings& settings)
@@ -215,7 +215,7 @@ void GraphWidget::updateDataMenu()
 
 void GraphWidget::updateTitle()
 {
-  EDataSubscription* eDataSubscription = channelEntityManager.getEntity<EDataSubscription>(0);
+  EMarketSubscription* eDataSubscription = channelEntityManager.getEntity<EMarketSubscription>(0);
   QString stateStr = eDataSubscription->getStateName();
 
   QString title;
@@ -242,7 +242,7 @@ void GraphWidget::hideEvent(QHideEvent* event)
 
 void GraphWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EDataSubscription* eDataSubscription = dynamic_cast<EDataSubscription*>(&newEntity);
+  EMarketSubscription* eDataSubscription = dynamic_cast<EMarketSubscription*>(&newEntity);
   if(eDataSubscription)
   {
     updateTitle();

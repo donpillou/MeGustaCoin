@@ -119,20 +119,20 @@ void MainWindow::closeEvent(QCloseEvent* event)
   {
     const QString& channelName = i.key();
     ChannelData& channelData = i.value();
-    EDataSubscription* eDataSubscription = channelData.channelEntityManager->getEntity<EDataSubscription>(0);
-    if(!eDataSubscription)
+    EMarketSubscription* eSubscription = channelData.channelEntityManager->getEntity<EMarketSubscription>(0);
+    if(!eSubscription)
       continue;
     if(channelData.tradesWidget)
     {
       channelData.tradesWidget->saveState(settings);
       if(isVisible(channelData.tradesWidget))
-        openedLiveTradesWidgets.append(channelName + "\n" + eDataSubscription->getBaseCurrency() + "\n" + eDataSubscription->getCommCurrency());
+        openedLiveTradesWidgets.append(channelName + "\n" + eSubscription->getBaseCurrency() + "\n" + eSubscription->getCommCurrency());
     }
     if(channelData.graphWidget)
     {
       channelData.graphWidget->saveState(settings);
       if(isVisible(channelData.graphWidget))
-        openedLiveGraphWidgets.append(channelName + "\n" + eDataSubscription->getBaseCurrency() + "\n" + eDataSubscription->getCommCurrency());
+        openedLiveGraphWidgets.append(channelName + "\n" + eSubscription->getBaseCurrency() + "\n" + eSubscription->getCommCurrency());
     }
   }
 
@@ -179,7 +179,7 @@ void MainWindow::updateWindowTitle()
       Entity::Manager* channelEntityManager = dataService.getSubscription(marketName);
       if(channelEntityManager)
       {
-        EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
+        EMarketSubscription* eDataSubscription = channelEntityManager->getEntity<EMarketSubscription>(0);
         EDataTickerData* eDataTickerData = channelEntityManager->getEntity<EDataTickerData>(0);
         if(eDataSubscription && eDataTickerData)
           title += QString(" - %1 bid / %2 ask").arg(eDataSubscription->formatPrice(eDataTickerData->getBid()), eDataSubscription->formatPrice(eDataTickerData->getAsk()));
@@ -245,7 +245,7 @@ void MainWindow::createChannelData(const QString& channelName, const QString& cu
   ChannelData& channelData = *channelDataMap.insert(channelName, ChannelData());
   channelData.channelEntityManager = new Entity::Manager();
   channelData.graphModel = new GraphModel(channelName, globalEntityManager, *channelData.channelEntityManager, graphService);
-  channelData.channelEntityManager->delegateEntity(*new EDataSubscription(currencyBase, currencyComm));
+  channelData.channelEntityManager->delegateEntity(*new EMarketSubscription(currencyBase, currencyComm));
 }
 
 MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
@@ -265,7 +265,7 @@ MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
     ChannelData& channelData = *channelDataMap.insert(channelName, ChannelData());
     channelData.channelEntityManager = new Entity::Manager();
     channelData.graphModel = new GraphModel(channelName, globalEntityManager, *channelData.channelEntityManager, graphService);
-    channelData.channelEntityManager->delegateEntity(*new EDataSubscription(eDataMarket->getBaseCurrency(), eDataMarket->getCommCurrency()));
+    channelData.channelEntityManager->delegateEntity(*new EMarketSubscription(eDataMarket->getBaseCurrency(), eDataMarket->getCommCurrency()));
 
     return &channelData;
   }

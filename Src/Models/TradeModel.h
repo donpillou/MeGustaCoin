@@ -42,7 +42,7 @@ private:
 
 private:
   Entity::Manager& channelEntityManager;
-  EDataSubscription* eDataSubscription;
+  EMarketSubscription* eSubscription;
   QList<Trade*> trades;
   QVariant upIcon;
   QVariant downIcon;
