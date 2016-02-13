@@ -147,7 +147,7 @@ void SessionTransactionModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botSessionTransaction:
+  case EType::userSessionTransaction:
     {
       EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
       int index = transactions.size();
@@ -168,7 +168,7 @@ void SessionTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntit
 {
   switch((EType)oldEntity.getType())
   {
-  case EType::botSessionTransaction:
+  case EType::userSessionTransaction:
     {
       EBotSessionTransaction* oldEBotSessionTransaction = dynamic_cast<EBotSessionTransaction*>(&oldEntity);
       EBotSessionTransaction* newEBotSessionTransaction = dynamic_cast<EBotSessionTransaction*>(&newEntity);
@@ -185,10 +185,10 @@ void SessionTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntit
       EBrokerType* newBrokerType = 0;
       if(eDataService && eDataService->getSelectedSessionId() != 0)
       {
-        EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eDataService->getSelectedSessionId());
-        if(eBotSession && eBotSession->getBrokerId() != 0)
+        EUserSession* eSession = entityManager.getEntity<EUserSession>(eDataService->getSelectedSessionId());
+        if(eSession && eSession->getBrokerId() != 0)
         {
-          EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotSession->getBrokerId());
+          EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eSession->getBrokerId());
           if(eUserBroker && eUserBroker->getBrokerTypeId() != 0)
             newBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
         }
@@ -210,7 +210,7 @@ void SessionTransactionModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botSessionTransaction:
+  case EType::userSessionTransaction:
     {
       EBotSessionTransaction* eTransaction = dynamic_cast<EBotSessionTransaction*>(&entity);
       int index = transactions.indexOf(eTransaction);
@@ -231,7 +231,7 @@ void SessionTransactionModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {
-  case EType::botSessionTransaction:
+  case EType::userSessionTransaction:
     if(!transactions.isEmpty())
     {
       emit beginResetModel();

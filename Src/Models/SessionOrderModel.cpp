@@ -142,7 +142,7 @@ void SessionOrderModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botSessionOrder:
+  case EType::userSessionOrder:
     {
       EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
       int index = orders.size();
@@ -163,7 +163,7 @@ void SessionOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
-  case EType::botSessionOrder:
+  case EType::userSessionOrder:
     {
       EBotSessionOrder* oldEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&oldEntity);
       EBotSessionOrder* newEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&newEntity);
@@ -180,10 +180,10 @@ void SessionOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
       EBrokerType* newBrokerType = 0;
       if(eDataService && eDataService->getSelectedSessionId() != 0)
       {
-        EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eDataService->getSelectedSessionId());
-        if(eBotSession && eBotSession->getBrokerId() != 0)
+        EUserSession* eSession = entityManager.getEntity<EUserSession>(eDataService->getSelectedSessionId());
+        if(eSession && eSession->getBrokerId() != 0)
         {
-          EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotSession->getBrokerId());
+          EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eSession->getBrokerId());
           if(eUserBroker && eUserBroker->getBrokerTypeId() != 0)
             newBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
         }
@@ -205,7 +205,7 @@ void SessionOrderModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botSessionOrder:
+  case EType::userSessionOrder:
     {
       EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
       int index = orders.indexOf(eOrder);
@@ -226,7 +226,7 @@ void SessionOrderModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {
-  case EType::botSessionOrder:
+  case EType::userSessionOrder:
     if(!orders.isEmpty())
     {
       emit beginResetModel();

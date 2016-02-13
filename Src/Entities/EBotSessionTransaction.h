@@ -4,7 +4,7 @@
 class EBotSessionTransaction : public Entity
 {
 public:
-  static const EType eType = EType::botSessionTransaction;
+  static const EType eType = EType::userSessionTransaction;
 
   enum class Type
   {

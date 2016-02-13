@@ -315,8 +315,8 @@ void SessionItemModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botSessionItem:
-  case EType::botSessionItemDraft:
+  case EType::userSessionItem:
+  case EType::userSessionItemDraft:
     {
       EBotSessionItem* eItem = dynamic_cast<EBotSessionItem*>(&entity);
       int index = items.size();
@@ -337,8 +337,8 @@ void SessionItemModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
-  case EType::botSessionItem:
-  case EType::botSessionItemDraft:
+  case EType::userSessionItem:
+  case EType::userSessionItemDraft:
     {
       EBotSessionItem* oldEBotSessionItem = dynamic_cast<EBotSessionItem*>(&oldEntity);
       EBotSessionItem* newEBotSessionItem = dynamic_cast<EBotSessionItem*>(&newEntity);
@@ -355,10 +355,10 @@ void SessionItemModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
       EBrokerType* newBrokerType = 0;
       if(eDataService && eDataService->getSelectedSessionId() != 0)
       {
-        EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eDataService->getSelectedSessionId());
-        if(eBotSession && eBotSession->getBrokerId() != 0)
+        EUserSession* eSession = entityManager.getEntity<EUserSession>(eDataService->getSelectedSessionId());
+        if(eSession && eSession->getBrokerId() != 0)
         {
-          EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotSession->getBrokerId());
+          EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eSession->getBrokerId());
           if(eUserBroker && eUserBroker->getBrokerTypeId() != 0)
             newBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
         }
@@ -385,8 +385,8 @@ void SessionItemModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botSessionItem:
-  case EType::botSessionItemDraft:
+  case EType::userSessionItem:
+  case EType::userSessionItemDraft:
     {
       EBotSessionItem* eItem = dynamic_cast<EBotSessionItem*>(&entity);
       int index = items.indexOf(eItem);
@@ -407,8 +407,8 @@ void SessionItemModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {
-  case EType::botSessionItem:
-  case EType::botSessionItemDraft:
+  case EType::userSessionItem:
+  case EType::userSessionItemDraft:
     if(!items.isEmpty())
     {
       emit beginResetModel();

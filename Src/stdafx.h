@@ -19,7 +19,7 @@
 #include "Entities/EBotSessionLogMessage.h"
 #include "Entities/EBotSessionProperty.h"
 #include "Entities/EBotType.h"
-#include "Entities/EBotSession.h"
+#include "Entities/EUserSession.h"
 #include "Entities/EUserBroker.h"
 #include "Entities/EUserBrokerOrder.h"
 #include "Entities/EUserBrokerOrderDraft.h"

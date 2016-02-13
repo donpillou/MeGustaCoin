@@ -5,7 +5,7 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
   QWidget(&tabFramework), entityManager(entityManager), dataService(dataService), itemModel(entityManager)
 {
   entityManager.registerListener<EDataService>(*this);
-  entityManager.registerListener<EBotSession>(*this);
+  entityManager.registerListener<EUserSession>(*this);
 
   setWindowTitle(tr("Bot Assets"));
 
@@ -78,7 +78,7 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
 BotItemsWidget::~BotItemsWidget()
 {
   entityManager.unregisterListener<EDataService>(*this);
-  entityManager.unregisterListener<EBotSession>(*this);
+  entityManager.unregisterListener<EUserSession>(*this);
 }
 
 void BotItemsWidget::saveState(QSettings& settings)
@@ -161,10 +161,10 @@ void BotItemsWidget::cancelItem()
 void BotItemsWidget::addSessionItemDraft(EBotSessionItem::Type type)
 {
   EDataService* eDataService = entityManager.getEntity<EDataService>(0);
-  EBotSession* eBotSession = entityManager.getEntity<EBotSession>(eDataService->getSelectedSessionId());
-  if(!eBotSession)
+  EUserSession* eSession = entityManager.getEntity<EUserSession>(eDataService->getSelectedSessionId());
+  if(!eSession)
     return;
-  EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eBotSession->getBrokerId());
+  EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eSession->getBrokerId());
   if(!eUserBroker)
     return;
   EBrokerType* eBrokerType = entityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
@@ -254,10 +254,10 @@ void BotItemsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   case EType::dataService:
     updateToolBarButtons();
     break;
-  case EType::botSession:
+  case EType::userSession:
     {
       EDataService* eDataService = entityManager.getEntity<EDataService>(0);
-      EBotSession* eSession = (EBotSession*)&newEntity;
+      EUserSession* eSession = (EUserSession*)&newEntity;
       if(eSession->getId() == eDataService->getSelectedSessionId())
         updateToolBarButtons();
     }

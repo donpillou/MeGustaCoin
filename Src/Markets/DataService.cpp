@@ -262,7 +262,7 @@ void DataService::WorkerThread::removeEntity(EType type, quint64 id)
           }
         }
         break;
-      case EType::botSession:
+      case EType::userSession:
         {
           EDataService* eDataService = dataService.globalEntityManager.getEntity<EDataService>(0);
           if(eDataService->getSelectedSessionId() == id)
@@ -339,7 +339,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
         }
         dataService.activeSubscriptions.clear();
         globalEntityManager.removeAll<EBotType>();
-        globalEntityManager.removeAll<EBotSession>();
+        globalEntityManager.removeAll<EUserSession>();
         globalEntityManager.removeAll<EBrokerType>();
         globalEntityManager.removeAll<EBotSessionTransaction>();
         globalEntityManager.removeAll<EBotSessionItem>();
@@ -469,12 +469,12 @@ void DataService::WorkerThread::removedBroker(quint32 brokerId)
 
 void DataService::WorkerThread::receivedSession(quint32 sessionId, const QString& name, const meguco_user_session_entity& session)
 {
-  delegateEntity(new EBotSession(sessionId, name, session));
+  delegateEntity(new EUserSession(sessionId, name, session));
 }
 
 void DataService::WorkerThread::removedSession(quint32 sesionId)
 {
-  removeEntity(EType::botSession, sesionId);
+  removeEntity(EType::userSession, sesionId);
 }
 
 void DataService::WorkerThread::receivedMarketTrade(quint32 marketId, const meguco_trade_entity& tradeData, qint64 timeOffset)
@@ -639,12 +639,12 @@ void DataService::WorkerThread::receivedSessionOrder(const meguco_user_broker_or
 
 void DataService::WorkerThread::removedSessionOrder(quint64 orderId)
 {
-  removeEntity(EType::botSessionOrder, orderId);
+  removeEntity(EType::userSessionOrder, orderId);
 }
 
 void DataService::WorkerThread::clearSessionOrders()
 {
-  clearEntities(EType::botSessionOrder);
+  clearEntities(EType::userSessionOrder);
 }
 
 void DataService::WorkerThread::receivedSessionTransaction(const meguco_user_broker_transaction_entity& transaction)
@@ -654,12 +654,12 @@ void DataService::WorkerThread::receivedSessionTransaction(const meguco_user_bro
 
 void DataService::WorkerThread::removedSessionTransaction(quint64 transactionId)
 {
-  removeEntity(EType::botSessionTransaction, transactionId);
+  removeEntity(EType::userSessionTransaction, transactionId);
 }
 
 void DataService::WorkerThread::clearSessionTransactions()
 {
-  clearEntities(EType::botSessionTransaction);
+  clearEntities(EType::userSessionTransaction);
 }
 
 void DataService::WorkerThread::receivedSessionAsset(const meguco_user_session_asset_entity& asset)
@@ -669,13 +669,13 @@ void DataService::WorkerThread::receivedSessionAsset(const meguco_user_session_a
 
 void DataService::WorkerThread::removedSessionAsset(quint64 assertId)
 {
-  removeEntity(EType::botSessionItem, assertId);
+  removeEntity(EType::userSessionItem, assertId);
 }
 
 void DataService::WorkerThread::clearSessionAssets()
 {
-  clearEntities(EType::botSessionItem);
-  clearEntities(EType::botSessionItemDraft);
+  clearEntities(EType::userSessionItem);
+  clearEntities(EType::userSessionItemDraft);
 }
 
 void DataService::WorkerThread::receivedSessionLog(const meguco_log_entity& log, const QString& message)
@@ -685,12 +685,12 @@ void DataService::WorkerThread::receivedSessionLog(const meguco_log_entity& log,
 
 void DataService::WorkerThread::removedSessionLog(quint64 logId)
 {
-  removeEntity(EType::botSessionLogMessage, logId);
+  removeEntity(EType::userSessionLogMessage, logId);
 }
 
 void DataService::WorkerThread::clearSessionLog()
 {
-  clearEntities(EType::botSessionLogMessage);
+  clearEntities(EType::userSessionLogMessage);
 }
 
 void DataService::WorkerThread::receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit)
@@ -700,12 +700,12 @@ void DataService::WorkerThread::receivedSessionProperty(const meguco_user_sessio
 
 void DataService::WorkerThread::removedSessionProperty(quint64 propertyId)
 {
-  removeEntity(EType::botSessionProperty, propertyId);
+  removeEntity(EType::userSessionProperty, propertyId);
 }
 
 void DataService::WorkerThread::clearSessionProperties()
 {
-  clearEntities(EType::botSessionProperty);
+  clearEntities(EType::userSessionProperty);
 }
 
 void DataService::WorkerThread::receivedProcess(const meguco_process_entity& process, const QString& cmd)

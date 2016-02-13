@@ -35,7 +35,7 @@ private:
   QTreeView* sessionView;
   QSortFilterProxyModel* proxyModel;
 
-  QSet<EBotSession*> selection;
+  QSet<EUserSession*> selection;
   quint64 selectedSessionId;
 
   QAction* addAction;

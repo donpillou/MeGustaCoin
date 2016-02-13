@@ -4,7 +4,7 @@
 class EBotSessionMarker : public Entity
 {
 public:
-  static const EType eType = EType::botSessionMarker;
+  static const EType eType = EType::userSessionMarker;
 
 public:
   enum class Type

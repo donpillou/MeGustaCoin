@@ -106,7 +106,7 @@ void SessionLogModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 
 void SessionLogModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::botSessionLogMessage)
+  if((EType)type == EType::userSessionLogMessage)
   {
     emit beginResetModel();
     qDeleteAll(messages);

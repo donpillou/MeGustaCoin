@@ -20,7 +20,7 @@ public:
 
 private:
   Entity::Manager& entityManager;
-  QList<EBotSession*> sessions;
+  QList<EUserSession*> sessions;
 
   QVariant stoppedVar;
   QVariant startingVar;

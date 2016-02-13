@@ -4,7 +4,7 @@
 class EBotSessionProperty : public Entity
 {
 public:
-  static const EType eType = EType::botSessionProperty;
+  static const EType eType = EType::userSessionProperty;
 
 public:
   enum class Type

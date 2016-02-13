@@ -93,8 +93,8 @@ void BotSessionsWidget::cancelBot()
   foreach(const QModelIndex& proxyIndex, selection)
   {
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    EBotSession* eSession = (EBotSession*)index.internalPointer();
-    if(eSession->getState() == EBotSession::State::stopped)
+    EUserSession* eSession = (EUserSession*)index.internalPointer();
+    if(eSession->getState() == EUserSession::State::stopped)
     {
       if(QMessageBox::question(this, tr("Delete Session"), tr("Do you really want to delete the selected session?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
           return;
@@ -111,8 +111,8 @@ void BotSessionsWidget::activate()
   foreach(const QModelIndex& proxyIndex, selection)
   {
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    EBotSession* eSession = (EBotSession*)index.internalPointer();
-    if(eSession->getState() == EBotSession::State::stopped)
+    EUserSession* eSession = (EUserSession*)index.internalPointer();
+    if(eSession->getState() == EUserSession::State::stopped)
       dataService.startSession(eSession->getId(), meguco_user_session_live);
   }
 }
@@ -123,8 +123,8 @@ void BotSessionsWidget::simulate()
   foreach(const QModelIndex& proxyIndex, selection)
   {
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    EBotSession* eSession = (EBotSession*)index.internalPointer();
-    if(eSession->getState() == EBotSession::State::stopped)
+    EUserSession* eSession = (EUserSession*)index.internalPointer();
+    if(eSession->getState() == EUserSession::State::stopped)
       dataService.startSession(eSession->getId(), meguco_user_session_simulation);
   }
 }
@@ -165,8 +165,8 @@ void BotSessionsWidget::updateToolBarButtons()
   bool sessionStopped = false;
   if(sessionSelected)
   {
-    EBotSession* eSession = *selection.begin();
-    sessionStopped = eSession->getState() == EBotSession::State::stopped;
+    EUserSession* eSession = *selection.begin();
+    sessionStopped = eSession->getState() == EUserSession::State::stopped;
   }
 
   //optimizeAction->setEnabled(connected && sessionSelected && sessionStopped));
@@ -182,7 +182,7 @@ void BotSessionsWidget::updateSelection()
   if(!modelSelection.isEmpty())
   {
     QModelIndex modelIndex = proxyModel->mapToSource(modelSelection.front());
-    EBotSession* eSession = (EBotSession*)modelIndex.internalPointer();
+    EUserSession* eSession = (EUserSession*)modelIndex.internalPointer();
     selection.insert(eSession);
   }
   if(!selection.isEmpty())
@@ -202,7 +202,7 @@ void BotSessionsWidget::sessionDataChanged(const QModelIndex& topLeft, const QMo
   QModelIndex index = topLeft;
   for(int i = topLeft.row(), end = bottomRight.row();;)
   {
-    EBotSession* eBotSession = (EBotSession*)index.internalPointer();
+    EUserSession* eBotSession = (EUserSession*)index.internalPointer();
     if(selection.contains(eBotSession))
     {
       updateSelection();
@@ -219,7 +219,7 @@ void BotSessionsWidget::sessionDataRemoved(const QModelIndex& parent, int start,
   for(int i = start;;)
   {
     QModelIndex index = botSessionModel.index(i, 0, parent);
-    EBotSession* eBotSession = (EBotSession*)index.internalPointer();
+    EUserSession* eBotSession = (EUserSession*)index.internalPointer();
     selection.remove(eBotSession);
     if(i++ == end)
       break;
@@ -238,8 +238,8 @@ void BotSessionsWidget::sessionDataAdded(const QModelIndex& parent, int start, i
     for(int i = start;;)
     {
       QModelIndex index = botSessionModel.index(i, 0, parent);
-      EBotSession* eBotSession = (EBotSession*)index.internalPointer();
-      if(eBotSession->getId() == selectedSessionId)
+      EUserSession* eSession = (EUserSession*)index.internalPointer();
+      if(eSession->getId() == selectedSessionId)
       {
         QModelIndex proxyIndex = proxyModel->mapFromSource(index);
         QModelIndex proxyIndexEnd = proxyModel->mapFromSource(botSessionModel.index(i, botSessionModel.columnCount(parent) - 1, parent));

@@ -4,12 +4,12 @@
 BotSessionModel::BotSessionModel(Entity::Manager& entityManager) : entityManager(entityManager),
   stoppedVar(tr("stopped")), startingVar(tr("starting")), runningVar(tr("running")), simulatingVar(tr("simulating")), stoppingVar(tr("stopping"))
 {
-  entityManager.registerListener<EBotSession>(*this);
+  entityManager.registerListener<EUserSession>(*this);
 }
 
 BotSessionModel::~BotSessionModel()
 {
-  entityManager.unregisterListener<EBotSession>(*this);
+  entityManager.unregisterListener<EUserSession>(*this);
 }
 
 QModelIndex BotSessionModel::index(int row, int column, const QModelIndex& parent) const
@@ -36,7 +36,7 @@ int BotSessionModel::columnCount(const QModelIndex& parent) const
 
 QVariant BotSessionModel::data(const QModelIndex& index, int role) const
 {
-  const EBotSession* eSession = (const EBotSession*)index.internalPointer();
+  const EUserSession* eSession = (const EUserSession*)index.internalPointer();
   if(!eSession)
     return QVariant();
 
@@ -61,14 +61,14 @@ QVariant BotSessionModel::data(const QModelIndex& index, int role) const
     case Column::state:
       switch(eSession->getState())
       {
-      case EBotSession::State::stopped:
+      case EUserSession::State::stopped:
         return stoppedVar;
-      case EBotSession::State::starting:
+      case EUserSession::State::starting:
         return startingVar;
-      case EBotSession::State::stopping:
+      case EUserSession::State::stopping:
         return stoppingVar;
-      case EBotSession::State::running:
-        return eSession->getMode() == EBotSession::Mode::simulation ? simulatingVar : runningVar;
+      case EUserSession::State::running:
+        return eSession->getMode() == EUserSession::Mode::simulation ? simulatingVar : runningVar;
       }
       break;
     }
@@ -100,7 +100,7 @@ QVariant BotSessionModel::headerData(int section, Qt::Orientation orientation, i
 
 void BotSessionModel::addedEntity(Entity& entity)
 {
-  EBotSession* eSession = dynamic_cast<EBotSession*>(&entity);
+  EUserSession* eSession = dynamic_cast<EUserSession*>(&entity);
   if(eSession)
   {
     int index = sessions.size();
@@ -114,10 +114,10 @@ void BotSessionModel::addedEntity(Entity& entity)
 
 void BotSessionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
-  EBotSession* oldESession = dynamic_cast<EBotSession*>(&oldEntity);
+  EUserSession* oldESession = dynamic_cast<EUserSession*>(&oldEntity);
   if(oldESession)
   {
-    EBotSession* newESession = dynamic_cast<EBotSession*>(&newEntity);
+    EUserSession* newESession = dynamic_cast<EUserSession*>(&newEntity);
     int index = sessions.indexOf(oldESession);
     sessions[index] = newESession;
     QModelIndex leftModelIndex = createIndex(index, (int)Column::first, oldESession);
@@ -130,7 +130,7 @@ void BotSessionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 
 void BotSessionModel::removedEntity(Entity& entity)
 {
-  EBotSession* eSession = dynamic_cast<EBotSession*>(&entity);
+  EUserSession* eSession = dynamic_cast<EUserSession*>(&entity);
   if(eSession)
   {
     int index = sessions.indexOf(eSession);
@@ -144,7 +144,7 @@ void BotSessionModel::removedEntity(Entity& entity)
 
 void BotSessionModel::removedAll(quint32 type)
 {
-  if((EType)type == EType::botSession)
+  if((EType)type == EType::userSession)
   {
     emit beginResetModel();
     sessions.clear();

@@ -4,7 +4,7 @@
 class EBotSessionLogMessage : public Entity
 {
 public:
-  static const EType eType = EType::botSessionLogMessage;
+  static const EType eType = EType::userSessionLogMessage;
 
 public:
   EBotSessionLogMessage(const meguco_log_entity& data, const QString& message) : Entity(eType, data.entity.id), message(message)

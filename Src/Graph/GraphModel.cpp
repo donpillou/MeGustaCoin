@@ -86,10 +86,10 @@ void GraphModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
       EDataService* eDataService = dynamic_cast<EDataService*>(&newEntity);
       if(eDataService->getSelectedSessionId() != 0)
       {
-        EBotSession* eBotSession = globalEntityManager.getEntity<EBotSession>(eDataService->getSelectedSessionId());
-        if(eBotSession && eBotSession->getBrokerId() != 0)
+        EUserSession* eSession = globalEntityManager.getEntity<EUserSession>(eDataService->getSelectedSessionId());
+        if(eSession && eSession->getBrokerId() != 0)
         {
-          EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eBotSession->getBrokerId());
+          EUserBroker* eUserBroker = globalEntityManager.getEntity<EUserBroker>(eSession->getBrokerId());
           if(eUserBroker && eUserBroker->getBrokerTypeId() != 0)
           {
             EBrokerType* eBrokerType = globalEntityManager.getEntity<EBrokerType>(eUserBroker->getBrokerTypeId());
@@ -122,7 +122,7 @@ void GraphModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {
-  case EType::botSessionMarker:
+  case EType::userSessionMarker:
     if(addSessionMarkers)
       graphService.clearSessionMarker(*this);
     break;

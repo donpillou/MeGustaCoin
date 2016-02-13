@@ -164,7 +164,7 @@ void SessionPropertyModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botSessionProperty:
+  case EType::userSessionProperty:
     {
       EBotSessionProperty* eProperty = dynamic_cast<EBotSessionProperty*>(&entity);
       int index = properties.size();
@@ -183,7 +183,7 @@ void SessionPropertyModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
-  case EType::botSessionProperty:
+  case EType::userSessionProperty:
     {
       EBotSessionProperty* oldEBotSessionProperty = dynamic_cast<EBotSessionProperty*>(&oldEntity);
       EBotSessionProperty* newEBotSessionProperty = dynamic_cast<EBotSessionProperty*>(&newEntity);
@@ -204,7 +204,7 @@ void SessionPropertyModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botSessionProperty:
+  case EType::userSessionProperty:
     {
       EBotSessionProperty* eProperty = dynamic_cast<EBotSessionProperty*>(&entity);
       int index = properties.indexOf(eProperty);
@@ -223,7 +223,7 @@ void SessionPropertyModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {
-  case EType::botSessionProperty:
+  case EType::userSessionProperty:
     if(!properties.isEmpty())
     {
       emit beginResetModel();

@@ -1,10 +1,10 @@
 
 #pragma once
 
-class EBotSession : public Entity
+class EUserSession : public Entity
 {
 public:
-  static const EType eType = EType::botSession;
+  static const EType eType = EType::userSession;
 
 public:
   enum class State
@@ -23,7 +23,7 @@ public:
   };
 
 public:
-  EBotSession(quint32 tableId, const QString& name, const meguco_user_session_entity& data) : Entity(eType, tableId), name(name)
+  EUserSession(quint32 tableId, const QString& name, const meguco_user_session_entity& data) : Entity(eType, tableId), name(name)
   {
     botTypeId = data.bot_type_id;
     brokerId = data.broker_id;

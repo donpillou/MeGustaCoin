@@ -4,7 +4,7 @@
 class EBotSessionItemDraft : public EBotSessionItem
 {
 public:
-  static const EType eType = EType::botSessionItemDraft;
+  static const EType eType = EType::userSessionItemDraft;
 
 public:
   EBotSessionItemDraft(quint64 id, Type type, const QDateTime& date, double flipPrice) : EBotSessionItem(eType, id)

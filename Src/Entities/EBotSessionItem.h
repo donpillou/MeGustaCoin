@@ -6,7 +6,7 @@ class EBotSessionItemDraft;
 class EBotSessionItem : public Entity // todo: rename SessionAsset
 {
 public:
-  static const EType eType = EType::botSessionItem;
+  static const EType eType = EType::userSessionItem;
 
   enum class Type
   {
