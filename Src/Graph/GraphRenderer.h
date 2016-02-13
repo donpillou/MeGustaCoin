@@ -37,7 +37,7 @@ public:
   unsigned int getEnabledData() const {return enabledData;}
   const QString& getChannelName() const {return channelName;}
 
-  void addTradeData(const QList<EDataTradeData::Trade>& data);
+  void addTradeData(const QList<EMarketTradeData::Trade>& data);
   void addSessionMarker(const EUserSessionMarker& marker);
   void clearSessionMarker();
 

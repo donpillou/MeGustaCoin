@@ -162,15 +162,15 @@ void GraphService::setEnabledData(GraphModel& graphModel, unsigned int data)
   jobQueue.append(new SetEnabledDataJob(graphModel, data), 0);
 }
 
-void GraphService::addTradeData(GraphModel& graphModel, const QList<EDataTradeData::Trade>& data)
+void GraphService::addTradeData(GraphModel& graphModel, const QList<EMarketTradeData::Trade>& data)
 {
   class AddTradeDataJob : public Job
   {
   public:
-    AddTradeDataJob(GraphModel& graphModel, const QList<EDataTradeData::Trade>& data) : graphModel(graphModel), data(data) {}
+    AddTradeDataJob(GraphModel& graphModel, const QList<EMarketTradeData::Trade>& data) : graphModel(graphModel), data(data) {}
   private:
     GraphModel& graphModel;
-    QList<EDataTradeData::Trade> data;
+    QList<EMarketTradeData::Trade> data;
   public: // Job
     virtual void execute(WorkerThread& workerThread)
     {

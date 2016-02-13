@@ -56,7 +56,7 @@ void DataService::subscribe(const QString& channelName, Entity::Manager& channel
     QString channelName;
     quint32 channelId;
     quint64 lastReceivedTradeId;
-    EDataTradeData* eTradeData;
+    EMarketTradeData* eTradeData;
     EMarketTickerData* eTickerData;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
@@ -64,7 +64,7 @@ void DataService::subscribe(const QString& channelName, Entity::Manager& channel
       WorkerThread::SubscriptionData& data = workerThread.subscriptionData[channelId];
       data.channelName = channelName;
       delete data.eTradeData;
-      data.eTradeData = new EDataTradeData;
+      data.eTradeData = new EMarketTradeData;
       delete data.eTickerData;
       data.eTickerData = 0;
 
@@ -105,11 +105,11 @@ void DataService::subscribe(const QString& channelName, Entity::Manager& channel
   quint32 channelId = getChannelId(channelName);
   if(channelId)
   {
-    EDataTradeData* eDataTradeData = channelEntityManager.getEntity<EDataTradeData>(0);
+    EMarketTradeData* eDataTradeData = channelEntityManager.getEntity<EMarketTradeData>(0);
     quint64 lastReceivedTradeId = 0;
     if(eDataTradeData)
     {
-      const QList<EDataTradeData::Trade>& data = eDataTradeData->getData();
+      const QList<EMarketTradeData::Trade>& data = eDataTradeData->getData();
       if(!data.isEmpty())
         lastReceivedTradeId = data.back().id;
     }
@@ -479,7 +479,7 @@ void DataService::WorkerThread::removedSession(quint32 sesionId)
 
 void DataService::WorkerThread::receivedMarketTrade(quint32 marketId, const meguco_trade_entity& tradeData, qint64 timeOffset)
 {
-  EDataTradeData::Trade trade;
+  EMarketTradeData::Trade trade;
   trade.id = tradeData.entity.id;
   trade.time = tradeData.entity.time + timeOffset;
   trade.price = tradeData.price;
@@ -493,10 +493,10 @@ void DataService::WorkerThread::receivedMarketTrade(quint32 marketId, const megu
     class AddTradeEvent : public Event
     {
     public:
-      AddTradeEvent(quint32 marketId, const EDataTradeData::Trade& trade) : marketId(marketId), trade(trade) {}
+      AddTradeEvent(quint32 marketId, const EMarketTradeData::Trade& trade) : marketId(marketId), trade(trade) {}
     private:
       quint32 marketId;
-      EDataTradeData::Trade trade;
+      EMarketTradeData::Trade trade;
     private: // Event
       virtual void handle(DataService& dataService)
       {
@@ -505,7 +505,7 @@ void DataService::WorkerThread::receivedMarketTrade(quint32 marketId, const megu
           return;
         Entity::Manager* channelEntityManager = it.value();
 
-        EDataTradeData* eDataTradeData = channelEntityManager->getEntity<EDataTradeData>(0);
+        EMarketTradeData* eDataTradeData = channelEntityManager->getEntity<EMarketTradeData>(0);
         if(eDataTradeData)
         {
           eDataTradeData->setData(trade);
@@ -513,7 +513,7 @@ void DataService::WorkerThread::receivedMarketTrade(quint32 marketId, const megu
         }
         else
         {
-          eDataTradeData = new EDataTradeData(trade);
+          eDataTradeData = new EMarketTradeData(trade);
           channelEntityManager->delegateEntity(*eDataTradeData);
         }
       }

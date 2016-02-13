@@ -29,7 +29,7 @@
 #include "Entities/ELogMessage.h"
 #include "Entities/EConnection.h"
 #include "Entities/EMarket.h"
-#include "Entities/EDataTradeData.h"
+#include "Entities/EMarketTradeData.h"
 #include "Entities/EMarketTickerData.h"
 #include "Entities/EMarketSubscription.h"
 #include "Entities/EProcess.h"

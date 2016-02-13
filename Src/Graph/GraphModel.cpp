@@ -6,14 +6,14 @@ GraphModel::GraphModel(const QString& channeName, Entity::Manager& globalEntityM
   maxAge(60 * 60), enabledData(GraphRenderer::trades | GraphRenderer::expRegressionLines), addSessionMarkers(false)
 {
   graphService.registerGraphModel(*this);
-  channelEntityManager.registerListener<EDataTradeData>(*this);
+  channelEntityManager.registerListener<EMarketTradeData>(*this);
   globalEntityManager.registerListener<EUserSessionMarker>(*this);
   globalEntityManager.registerListener<EConnection>(*this);
 }
 
 GraphModel::~GraphModel()
 {
-  channelEntityManager.unregisterListener<EDataTradeData>(*this);
+  channelEntityManager.unregisterListener<EMarketTradeData>(*this);
   globalEntityManager.unregisterListener<EUserSessionMarker>(*this);
   globalEntityManager.unregisterListener<EConnection>(*this);
   graphService.unregisterGraphModel(*this);
@@ -53,10 +53,10 @@ void GraphModel::setEnabledData(unsigned int data)
 
 void GraphModel::addedEntity(Entity& entity)
 {
-  EDataTradeData* eDataTradeData = dynamic_cast<EDataTradeData*>(&entity);
+  EMarketTradeData* eDataTradeData = dynamic_cast<EMarketTradeData*>(&entity);
   if(eDataTradeData)
   {
-    const QList<EDataTradeData::Trade>& data = eDataTradeData->getData(); 
+    const QList<EMarketTradeData::Trade>& data = eDataTradeData->getData(); 
     if(!data.isEmpty())
     {
       graphService.addTradeData(*this, data);

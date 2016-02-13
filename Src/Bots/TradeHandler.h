@@ -51,7 +51,7 @@ public:
 
   Values values;
 
-  void add(const EDataTradeData::Trade& trade, quint64 tradeAge)
+  void add(const EMarketTradeData::Trade& trade, quint64 tradeAge)
   {
     static const quint64 depths[] = {1 * 60, 3 * 60, 5 * 60, 10 * 60, 15 * 60, 20 * 60, 30 * 60, 1 * 60 * 60, 2 * 60 * 60, 4 * 60 * 60, 6 * 60 * 60, 12 * 60 * 60, 24 * 60 * 60};
 

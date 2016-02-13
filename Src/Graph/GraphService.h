@@ -20,7 +20,7 @@ public:
   void setMaxAge(GraphModel& graphModel, int maxAge);
   void setEnabledData(GraphModel& graphModel, unsigned int data);
 
-  void addTradeData(GraphModel& graphModel, const QList<EDataTradeData::Trade>& data);
+  void addTradeData(GraphModel& graphModel, const QList<EMarketTradeData::Trade>& data);
   void addSessionMarker(GraphModel& graphModel, const EUserSessionMarker& marker);
   void clearSessionMarker(GraphModel& graphModel);
 

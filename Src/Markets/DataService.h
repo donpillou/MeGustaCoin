@@ -68,7 +68,7 @@ private:
     {
     public:
       QString channelName;
-      EDataTradeData* eTradeData;
+      EMarketTradeData* eTradeData;
       EMarketTickerData* eTickerData;
 
     public:

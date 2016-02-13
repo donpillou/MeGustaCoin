@@ -5,14 +5,14 @@ TradeModel::TradeModel(Entity::Manager& channelEntityManager) :
   channelEntityManager(channelEntityManager),
   upIcon(QIcon(":/Icons/arrow_diag.png")), downIcon(QIcon(":/Icons/arrow_diag_red.png")), neutralIcon(QIcon(":/Icons/bullet_grey.png"))
 {
-  channelEntityManager.registerListener<EDataTradeData>(*this);
+  channelEntityManager.registerListener<EMarketTradeData>(*this);
   eSubscription = channelEntityManager.getEntity<EMarketSubscription>(0);
   Q_ASSERT(eSubscription);
 }
 
 TradeModel::~TradeModel()
 {
-  channelEntityManager.unregisterListener<EDataTradeData>(*this);
+  channelEntityManager.unregisterListener<EMarketTradeData>(*this);
 
   qDeleteAll(trades);
 }
@@ -122,10 +122,10 @@ QVariant TradeModel::headerData(int section, Qt::Orientation orientation, int ro
 
 void TradeModel::addedEntity(Entity& entity)
 {
-  EDataTradeData* eDataTradeData = dynamic_cast<EDataTradeData*>(&entity);
+  EMarketTradeData* eDataTradeData = dynamic_cast<EMarketTradeData*>(&entity);
   if(eDataTradeData)
   {
-    const QList<EDataTradeData::Trade>& data = eDataTradeData->getData();
+    const QList<EMarketTradeData::Trade>& data = eDataTradeData->getData();
 
     const int totalMaxTrades = 500;
 
@@ -148,7 +148,7 @@ void TradeModel::addedEntity(Entity& entity)
   
     for(int i = data.size() - tradesToInsert, end = data.size(); i < end; ++i)
     {
-      const EDataTradeData::Trade& tradeData = data[i];
+      const EMarketTradeData::Trade& tradeData = data[i];
       Trade* trade = new Trade;
       trade->date = tradeData.time;
       trade->price = tradeData.price;

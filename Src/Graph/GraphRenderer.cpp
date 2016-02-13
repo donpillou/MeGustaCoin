@@ -39,14 +39,14 @@ void GraphRenderer::setEnabledData(unsigned int data)
   upToDate = false;
 }
 
-void GraphRenderer::addTradeData(const QList<EDataTradeData::Trade>& data)
+void GraphRenderer::addTradeData(const QList<EMarketTradeData::Trade>& data)
 {
   qint64 now = data.back().time;
 
   // add trades to trade handler
-  for(QList<EDataTradeData::Trade>::ConstIterator i = data.begin(), end = data.end(); i != end; ++i)
+  for(QList<EMarketTradeData::Trade>::ConstIterator i = data.begin(), end = data.end(); i != end; ++i)
   {
-    const EDataTradeData::Trade& trade = *i;
+    const EMarketTradeData::Trade& trade = *i;
 
     quint64 time = trade.time / 1000;
     if(tradeSamples.isEmpty() || tradeSamples.last().time != time)

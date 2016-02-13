@@ -1,7 +1,7 @@
 
 #pragma once
 
-class EDataTradeData : public Entity
+class EMarketTradeData : public Entity
 {
 public:
   static const EType eType = EType::marketTradeData;
@@ -16,8 +16,8 @@ public:
   };
 
 public:
-  EDataTradeData() : Entity(eType, 0) {}
-  EDataTradeData(const Trade& trade) : Entity(eType, 0) {data.append(trade);}
+  EMarketTradeData() : Entity(eType, 0) {}
+  EMarketTradeData(const Trade& trade) : Entity(eType, 0) {data.append(trade);}
 
   const QList<Trade>& getData() const {return data;}
   void addTrade(const Trade& trade) {data.append(trade);}
