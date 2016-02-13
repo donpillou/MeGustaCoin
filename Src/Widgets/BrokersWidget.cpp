@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BrokersWidget::BrokersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), botMarketModel(entityManager), selectedBrokerId(0)
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), userBrokersModel(entityManager), selectedBrokerId(0)
 {
   entityManager.registerListener<EDataService>(*this);
 
@@ -25,16 +25,16 @@ BrokersWidget::BrokersWidget(QTabFramework& tabFramework, QSettings& settings, E
   marketView->setUniformRowHeights(true);
   proxyModel = new QSortFilterProxyModel(this);
   proxyModel->setDynamicSortFilter(true);
-  proxyModel->setSourceModel(&botMarketModel);
+  proxyModel->setSourceModel(&userBrokersModel);
   marketView->setModel(proxyModel);
   marketView->setSortingEnabled(true);
   marketView->setRootIsDecorated(false);
   marketView->setAlternatingRowColors(true);
   connect(marketView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(marketSelectionChanged()));
-  connect(&botMarketModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(marketDataChanged(const QModelIndex&, const QModelIndex&)));
-  connect(&botMarketModel, SIGNAL(rowsRemoved(const QModelIndex&, int, int)), this, SLOT(marketDataRemoved(const QModelIndex&, int, int)));
-  connect(&botMarketModel, SIGNAL(modelReset()), this, SLOT(marketDataReset()));
-  connect(&botMarketModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(marketDataAdded(const QModelIndex&, int, int)));
+  connect(&userBrokersModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(marketDataChanged(const QModelIndex&, const QModelIndex&)));
+  connect(&userBrokersModel, SIGNAL(rowsRemoved(const QModelIndex&, int, int)), this, SLOT(marketDataRemoved(const QModelIndex&, int, int)));
+  connect(&userBrokersModel, SIGNAL(modelReset()), this, SLOT(marketDataReset()));
+  connect(&userBrokersModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(marketDataAdded(const QModelIndex&, int, int)));
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);
@@ -164,7 +164,7 @@ void BrokersWidget::marketDataRemoved(const QModelIndex& parent, int start, int 
 {
   for(int i = start;;)
   {
-    QModelIndex index = botMarketModel.index(i, 0, parent);
+    QModelIndex index = userBrokersModel.index(i, 0, parent);
     EUserBroker* eUserBroker = (EUserBroker*)index.internalPointer();
     selection.remove(eUserBroker);
     if(i++ == end)
@@ -183,12 +183,12 @@ void BrokersWidget::marketDataAdded(const QModelIndex& parent, int start, int en
   {
     for(int i = start;;)
     {
-      QModelIndex index = botMarketModel.index(i, 0, parent);
+      QModelIndex index = userBrokersModel.index(i, 0, parent);
       EUserBroker* eUserBroker = (EUserBroker*)index.internalPointer();
       if(eUserBroker->getId() == selectedBrokerId)
       {
         QModelIndex proxyIndex = proxyModel->mapFromSource(index);
-        QModelIndex proxyIndexEnd = proxyModel->mapFromSource(botMarketModel.index(i, botMarketModel.columnCount(parent) - 1, parent));
+        QModelIndex proxyIndexEnd = proxyModel->mapFromSource(userBrokersModel.index(i, userBrokersModel.columnCount(parent) - 1, parent));
         marketView->selectionModel()->select(QItemSelection(proxyIndex, proxyIndexEnd), QItemSelectionModel::Select);
         break;
       }

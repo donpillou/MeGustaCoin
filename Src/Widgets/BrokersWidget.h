@@ -16,7 +16,7 @@ private:
   Entity::Manager& entityManager;
   DataService& dataService;
 
-  BotMarketModel botMarketModel;
+  UserBrokersModel userBrokersModel;
 
   QTreeView* marketView;
   QSortFilterProxyModel* proxyModel;

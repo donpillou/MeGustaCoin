@@ -1,40 +1,40 @@
 
 #include "stdafx.h"
 
-BotMarketModel::BotMarketModel(Entity::Manager& entityManager) : entityManager(entityManager),
+UserBrokersModel::UserBrokersModel(Entity::Manager& entityManager) : entityManager(entityManager),
   stoppedVar(tr("stopped")), startingVar(tr("starting")), stoppingVar(tr("stopping")), runningVar(tr("running"))
 {
   entityManager.registerListener<EUserBroker>(*this);
 }
 
-BotMarketModel::~BotMarketModel()
+UserBrokersModel::~UserBrokersModel()
 {
   entityManager.unregisterListener<EUserBroker>(*this);
 }
 
-QModelIndex BotMarketModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex UserBrokersModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
     return createIndex(row, column, userBrokers.at(row));
   return QModelIndex();
 }
 
-QModelIndex BotMarketModel::parent(const QModelIndex& child) const
+QModelIndex UserBrokersModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int BotMarketModel::rowCount(const QModelIndex& parent) const
+int UserBrokersModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : userBrokers.size();
 }
 
-int BotMarketModel::columnCount(const QModelIndex& parent) const
+int UserBrokersModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant BotMarketModel::data(const QModelIndex& index, int role) const
+QVariant UserBrokersModel::data(const QModelIndex& index, int role) const
 {
   const EUserBroker* eUserBroker = (const EUserBroker*)index.internalPointer();
   if(!eUserBroker)
@@ -70,7 +70,7 @@ QVariant BotMarketModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-QVariant BotMarketModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant UserBrokersModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -90,7 +90,7 @@ QVariant BotMarketModel::headerData(int section, Qt::Orientation orientation, in
   return QVariant();
 }
 
-void BotMarketModel::addedEntity(Entity& entity)
+void UserBrokersModel::addedEntity(Entity& entity)
 {
   EUserBroker* eUserBroker = dynamic_cast<EUserBroker*>(&entity);
   if(eUserBroker)
@@ -104,7 +104,7 @@ void BotMarketModel::addedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void BotMarketModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserBrokersModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   EUserBroker* oldUserBroker = dynamic_cast<EUserBroker*>(&oldEntity);
   if(oldUserBroker)
@@ -120,7 +120,7 @@ void BotMarketModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   Q_ASSERT(false);
 }
 
-void BotMarketModel::removedEntity(Entity& entity)
+void UserBrokersModel::removedEntity(Entity& entity)
 {
   EUserBroker* eUserBroker = dynamic_cast<EUserBroker*>(&entity);
   if(eUserBroker)
@@ -134,7 +134,7 @@ void BotMarketModel::removedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void BotMarketModel::removedAll(quint32 type)
+void UserBrokersModel::removedAll(quint32 type)
 {
   if((EType)type == EType::userBroker)
   {

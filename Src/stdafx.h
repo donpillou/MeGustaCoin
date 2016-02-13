@@ -50,7 +50,7 @@
 #include "Models/MarketOrderModel.h"
 #include "Models/MarketTransactionModel.h"
 #include "Models/BotSessionModel.h"
-#include "Models/BotMarketModel.h"
+#include "Models/UserBrokersModel.h"
 #include "Models/TradeModel.h"
 #include "Models/LogModel.h"
 #include "Models/ProcessModel.h"
