@@ -51,7 +51,7 @@
 #include "Models/UserBrokerTransactionsModel.h"
 #include "Models/UserSessionsModel.h"
 #include "Models/UserBrokersModel.h"
-#include "Models/TradeModel.h"
+#include "Models/MarketTradesModel.h"
 #include "Models/LogModel.h"
 #include "Models/ProcessesModel.h"
 

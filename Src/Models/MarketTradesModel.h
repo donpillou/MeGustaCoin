@@ -1,7 +1,7 @@
 
 #pragma once
 
-class TradeModel : public QAbstractItemModel, public Entity::Listener
+class MarketTradesModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
   enum class Column
@@ -14,8 +14,8 @@ public:
   };
 
 public:
-  TradeModel(Entity::Manager& channelEntityManager);
-  ~TradeModel();
+  MarketTradesModel(Entity::Manager& channelEntityManager);
+  ~MarketTradesModel();
 
 //  void reset();
 //

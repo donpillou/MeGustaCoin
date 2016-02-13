@@ -3,15 +3,15 @@
 
 TradesWidget::TradesWidget(QTabFramework& tabFramework, QSettings& settings, const QString& channelName, Entity::Manager& channelEntityManager) :
   QWidget(&tabFramework), tabFramework(tabFramework),
-  channelName(channelName), channelEntityManager(channelEntityManager), tradeModel(channelEntityManager)
+  channelName(channelName), channelEntityManager(channelEntityManager), tradesModel(channelEntityManager)
 {
   channelEntityManager.registerListener<EMarketSubscription>(*this);
 
-  connect(&tradeModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)), this, SLOT(rowsAboutToBeRemoved(const QModelIndex&, int, int)));
+  connect(&tradesModel, SIGNAL(rowsAboutToBeRemoved(const QModelIndex&, int, int)), this, SLOT(rowsAboutToBeRemoved(const QModelIndex&, int, int)));
 
   tradeView = new QTreeView(this);
   tradeView->setUniformRowHeights(true);
-  tradeView->setModel(&tradeModel);
+  tradeView->setModel(&tradesModel);
   tradeView->setRootIsDecorated(false);
   tradeView->setAlternatingRowColors(true);
 

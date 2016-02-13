@@ -17,7 +17,7 @@ private:
   QTabFramework& tabFramework;
   QString channelName;
   Entity::Manager& channelEntityManager;
-  TradeModel tradeModel;
+  MarketTradesModel tradesModel;
   QTreeView* tradeView;
 
 private slots:

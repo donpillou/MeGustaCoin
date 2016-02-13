@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-TradeModel::TradeModel(Entity::Manager& channelEntityManager) :
+MarketTradesModel::MarketTradesModel(Entity::Manager& channelEntityManager) :
   channelEntityManager(channelEntityManager),
   upIcon(QIcon(":/Icons/arrow_diag.png")), downIcon(QIcon(":/Icons/arrow_diag_red.png")), neutralIcon(QIcon(":/Icons/bullet_grey.png"))
 {
@@ -10,36 +10,36 @@ TradeModel::TradeModel(Entity::Manager& channelEntityManager) :
   Q_ASSERT(eSubscription);
 }
 
-TradeModel::~TradeModel()
+MarketTradesModel::~MarketTradesModel()
 {
   channelEntityManager.unregisterListener<EMarketTradeData>(*this);
 
   qDeleteAll(trades);
 }
 
-QModelIndex TradeModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex MarketTradesModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
     return createIndex(row, column, trades.at(row));
   return QModelIndex();
 }
 
-QModelIndex TradeModel::parent(const QModelIndex& child) const
+QModelIndex MarketTradesModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int TradeModel::rowCount(const QModelIndex& parent) const
+int MarketTradesModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : trades.size();
 }
 
-int TradeModel::columnCount(const QModelIndex& parent) const
+int MarketTradesModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant TradeModel::data(const QModelIndex& index, int role) const
+QVariant MarketTradesModel::data(const QModelIndex& index, int role) const
 {
   const Trade* trade = (const Trade*)index.internalPointer();
   if(!trade)
@@ -91,7 +91,7 @@ QVariant TradeModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-QVariant TradeModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant MarketTradesModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -120,7 +120,7 @@ QVariant TradeModel::headerData(int section, Qt::Orientation orientation, int ro
   return QVariant();
 }
 
-void TradeModel::addedEntity(Entity& entity)
+void MarketTradesModel::addedEntity(Entity& entity)
 {
   EMarketTradeData* eDataTradeData = dynamic_cast<EMarketTradeData*>(&entity);
   if(eDataTradeData)
@@ -185,16 +185,16 @@ void TradeModel::addedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void TradeModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void MarketTradesModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   addedEntity(newEntity);
 }
 
-void TradeModel::removedEntity(Entity& entity)
+void MarketTradesModel::removedEntity(Entity& entity)
 {
 }
 
-void TradeModel::removedAll(quint32 type)
+void MarketTradesModel::removedAll(quint32 type)
 {
   if((EType)type == EType::marketTradeData)
   {
