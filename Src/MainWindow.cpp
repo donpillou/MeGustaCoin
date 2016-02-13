@@ -11,7 +11,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
   connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
 
-  marketsWidget = new MarketsWidget(*this, settings, globalEntityManager, dataService);
+  brokersWidget = new BrokersWidget(*this, settings, globalEntityManager, dataService);
   ordersWidget = new OrdersWidget(*this, settings, globalEntityManager, dataService);
   transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, dataService);
   botSessionsWidget = new BotSessionsWidget(*this, settings, globalEntityManager, dataService);
@@ -27,10 +27,10 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   updateWindowTitle();
   resize(625, 400);
 
-  addTab(marketsWidget);
-  addTab(processesWidget, QTabFramework::InsertOnTop, marketsWidget); // todo: insert hidden
-  addTab(logWidget, QTabFramework::InsertBottom, marketsWidget);
-  addTab(transactionsWidget, QTabFramework::InsertRight, marketsWidget);
+  addTab(brokersWidget);
+  addTab(processesWidget, QTabFramework::InsertOnTop, brokersWidget); // todo: insert hidden
+  addTab(logWidget, QTabFramework::InsertBottom, brokersWidget);
+  addTab(transactionsWidget, QTabFramework::InsertRight, brokersWidget);
   addTab(ordersWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botSessionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botTransactionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
@@ -103,7 +103,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   settings.setValue("Layout", saveLayout());
   ordersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
-  marketsWidget->saveState(settings);
+  brokersWidget->saveState(settings);
   botSessionsWidget->saveState(settings);
   botTransactionsWidget->saveState(settings);
   botItemsWidget->saveState(settings);
@@ -193,7 +193,7 @@ void MainWindow::updateViewMenu()
 {
   viewMenu->clear();
 
-  viewMenu->addAction(toggleViewAction(marketsWidget));
+  viewMenu->addAction(toggleViewAction(brokersWidget));
   viewMenu->addAction(toggleViewAction(ordersWidget));
   viewMenu->addAction(toggleViewAction(transactionsWidget));
   viewMenu->addSeparator();

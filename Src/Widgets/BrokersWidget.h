@@ -1,13 +1,13 @@
 
 #pragma once
 
-class MarketsWidget : public QWidget, public Entity::Listener
+class BrokersWidget : public QWidget, public Entity::Listener
 {
   Q_OBJECT
 
 public:
-  MarketsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService);
-  ~MarketsWidget();
+  BrokersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService);
+  ~BrokersWidget();
 
   void saveState(QSettings& settings);
 
@@ -22,7 +22,7 @@ private:
   QSortFilterProxyModel* proxyModel;
 
   QSet<EUserBroker*> selection;
-  quint64 selectedMarketId;
+  quint64 selectedBrokerId;
 
   QAction* addAction;
   QAction* editAction;

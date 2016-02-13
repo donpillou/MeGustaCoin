@@ -57,7 +57,7 @@
 
 #include "Markets/DataService.h"
 
-#include "Widgets/MarketsWidget.h"
+#include "Widgets/BrokersWidget.h"
 #include "Widgets/OrdersWidget.h"
 #include "Widgets/BotSessionsWidget.h"
 #include "Widgets/BotLogWidget.h"
