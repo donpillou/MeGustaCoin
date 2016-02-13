@@ -147,7 +147,7 @@ void MarketTransactionModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botMarketTransaction:
+  case EType::userBrokerTransaction:
     {
       EBotMarketTransaction* eTransaction = dynamic_cast<EBotMarketTransaction*>(&entity);
       int index = transactions.size();
@@ -168,7 +168,7 @@ void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity
 {
   switch((EType)oldEntity.getType())
   {
-  case EType::botMarketTransaction:
+  case EType::userBrokerTransaction:
     {
       EBotMarketTransaction* oldEBotMarketTransaction = dynamic_cast<EBotMarketTransaction*>(&oldEntity);
       EBotMarketTransaction* newEBotMarketTransaction = dynamic_cast<EBotMarketTransaction*>(&newEntity);
@@ -206,7 +206,7 @@ void MarketTransactionModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botMarketTransaction:
+  case EType::userBrokerTransaction:
     {
       EBotMarketTransaction* eTransaction = dynamic_cast<EBotMarketTransaction*>(&entity);
       int index = transactions.indexOf(eTransaction);
@@ -227,7 +227,7 @@ void MarketTransactionModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {
-  case EType::botMarketTransaction:
+  case EType::userBrokerTransaction:
     if(!transactions.isEmpty())
     {
       emit beginResetModel();

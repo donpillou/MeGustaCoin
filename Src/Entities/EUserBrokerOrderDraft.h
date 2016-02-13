@@ -1,13 +1,13 @@
 
 #pragma once
 
-class EBotMarketOrderDraft : public EBotMarketOrder
+class EUserBrokerOrderDraft : public EUserBrokerOrder
 {
 public:
-  static const EType eType = EType::botMarketOrderDraft;
+  static const EType eType = EType::userBrokerOrderDraft;
 
 public:
-  EBotMarketOrderDraft(quint64 id, Type type, const QDateTime& date, double price) : EBotMarketOrder(eType, id)
+  EUserBrokerOrderDraft(quint64 id, Type type, const QDateTime& date, double price) : EUserBrokerOrder(eType, id)
   {
     this->type = type;
     this->date = date;

@@ -1,12 +1,12 @@
 
 #pragma once
 
-class EBotMarketOrderDraft;
+class EUserBrokerOrderDraft;
 
-class EBotMarketOrder : public Entity // todo: rename to EBotUserBrokerOrder
+class EUserBrokerOrder : public Entity // todo: rename to EBotUserBrokerOrder
 {
 public:
-  static const EType eType = EType::botMarketOrder;
+  static const EType eType = EType::userBrokerOrder;
 
 public:
   enum class Type
@@ -32,7 +32,7 @@ public:
   };
 
 public:
-  EBotMarketOrder(const meguco_user_broker_order_entity& data) : Entity(eType, data.entity.id)
+  EUserBrokerOrder(const meguco_user_broker_order_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     date = QDateTime::fromMSecsSinceEpoch(data.entity.time);
@@ -45,7 +45,7 @@ public:
     //timeout = data.timeout;
   }
 
-  EBotMarketOrder(quint64 id, const EBotMarketOrderDraft& order);
+  EUserBrokerOrder(quint64 id, const EUserBrokerOrderDraft& order);
   /*
   void toEntity(meguco_user_market_order_entity& entity) const
   {
@@ -84,7 +84,7 @@ public:
   void setState(State state) {this->state = state;}
 
 protected:
-  EBotMarketOrder(EType type, quint64 id) : Entity(type, id) {}
+  EUserBrokerOrder(EType type, quint64 id) : Entity(type, id) {}
 
 protected:
   Type type;

@@ -34,7 +34,7 @@ private:
   QTreeView* orderView;
   QSortFilterProxyModel* proxyModel;
 
-  QSet<EBotMarketOrder*> selection;
+  QSet<EUserBrokerOrder*> selection;
 
   QAction* refreshAction;
   QAction* buyAction;
@@ -42,7 +42,7 @@ private:
   QAction* submitAction;
   QAction* cancelAction;
 
-  void addOrderDraft(EBotMarketOrder::Type type);
+  void addOrderDraft(EUserBrokerOrder::Type type);
 
 private:
   void updateTitle(EDataService& eDataService);

@@ -23,7 +23,7 @@ public:
   MarketOrderModel(Entity::Manager& entityManager);
   ~MarketOrderModel();
 
-  QModelIndex getDraftAmountIndex(EBotMarketOrderDraft& draft);
+  QModelIndex getDraftAmountIndex(EUserBrokerOrderDraft& draft);
 
 signals:
   void editedOrderPrice(const QModelIndex& index, double price);
@@ -32,7 +32,7 @@ signals:
 private:
   Entity::Manager& entityManager;
   EBrokerType* eBrokerType;
-  QList<EBotMarketOrder*> orders;
+  QList<EUserBrokerOrder*> orders;
   QVariant draftStr;
   QVariant submittingStr;
   QVariant updatingStr;

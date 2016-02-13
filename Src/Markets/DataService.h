@@ -23,12 +23,12 @@ public:
   void refreshBrokerTransactions();
   void refreshBrokerBalance();
 
-  EBotMarketOrderDraft& createBrokerOrderDraft(EBotMarketOrder::Type type, double price);
-  void removeBrokerOrderDraft(EBotMarketOrderDraft &draft);
-  void submitBrokerOrderDraft(EBotMarketOrderDraft& draft);
-  void cancelBrokerOrder(EBotMarketOrder& order);
-  void updateBrokerOrder(EBotMarketOrder& order, double price, double amount);
-  void removeBrokerOrder(EBotMarketOrder& order);
+  EUserBrokerOrderDraft& createBrokerOrderDraft(EUserBrokerOrder::Type type, double price);
+  void removeBrokerOrderDraft(EUserBrokerOrderDraft &draft);
+  void submitBrokerOrderDraft(EUserBrokerOrderDraft& draft);
+  void cancelBrokerOrder(EUserBrokerOrder& order);
+  void updateBrokerOrder(EUserBrokerOrder& order, double price, double amount);
+  void removeBrokerOrder(EUserBrokerOrder& order);
 
   void createSession(const QString& name, quint64 engineId, quint64 marketId);
   void removeSession(quint32 sessionId);

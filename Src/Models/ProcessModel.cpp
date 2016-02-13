@@ -87,7 +87,7 @@ void ProcessModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
-  case EType::botMarketTransaction:
+  case EType::userBrokerTransaction:
     {
       EProcess* oldEProcess = dynamic_cast<EProcess*>(&oldEntity);
       EProcess* newEProcess = dynamic_cast<EProcess*>(&newEntity);

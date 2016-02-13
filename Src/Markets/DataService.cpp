@@ -349,8 +349,8 @@ void DataService::WorkerThread::setState(EDataService::State state)
         globalEntityManager.removeAll<EBotSessionLogMessage>();
         globalEntityManager.removeAll<EBotSessionMarker>();
         globalEntityManager.removeAll<EBotMarketTransaction>();
-        globalEntityManager.removeAll<EBotMarketOrder>();
-        globalEntityManager.removeAll<EBotMarketOrderDraft>();
+        globalEntityManager.removeAll<EUserBrokerOrder>();
+        globalEntityManager.removeAll<EUserBrokerOrderDraft>();
         globalEntityManager.removeAll<EUserBrokerBalance>();
         globalEntityManager.removeAll<EUserBroker>();
         globalEntityManager.removeAll<EProcess>();
@@ -598,18 +598,18 @@ void DataService::WorkerThread::clearBrokerBalance()
 
 void DataService::WorkerThread::receivedBrokerOrder(const meguco_user_broker_order_entity& order)
 {
-  delegateEntity(new EBotMarketOrder(order));
+  delegateEntity(new EUserBrokerOrder(order));
 }
 
 void DataService::WorkerThread::removedBrokerOrder(quint64 orderId)
 {
-  removeEntity(EType::botMarketOrder, orderId);
+  removeEntity(EType::userBrokerOrder, orderId);
 }
 
 void DataService::WorkerThread::clearBrokerOrders()
 {
-  clearEntities(EType::botMarketOrder);
-  clearEntities(EType::botMarketOrderDraft);
+  clearEntities(EType::userBrokerOrder);
+  clearEntities(EType::userBrokerOrderDraft);
 }
 
 void DataService::WorkerThread::receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction)
@@ -619,12 +619,12 @@ void DataService::WorkerThread::receivedBrokerTransaction(const meguco_user_brok
 
 void DataService::WorkerThread::removedBrokerTransaction(quint64 transactionId)
 {
-  removeEntity(EType::botMarketTransaction, transactionId);
+  removeEntity(EType::userBrokerTransaction, transactionId);
 }
 
 void DataService::WorkerThread::clearBrokerTransactions()
 {
-  clearEntities(EType::botMarketTransaction);
+  clearEntities(EType::userBrokerTransaction);
 }
 
 void DataService::WorkerThread::receivedBrokerLog(const meguco_log_entity& log, const QString& message)
@@ -883,34 +883,34 @@ void DataService::refreshBrokerBalance()
     thread->interrupt();
 }
 
-EBotMarketOrderDraft& DataService::createBrokerOrderDraft(EBotMarketOrder::Type type, double price)
+EUserBrokerOrderDraft& DataService::createBrokerOrderDraft(EUserBrokerOrder::Type type, double price)
 {
-  quint32 id = globalEntityManager.getNewEntityId<EBotMarketOrderDraft>();
-  EBotMarketOrderDraft* eBotMarketOrderDraft = new EBotMarketOrderDraft(id, type, QDateTime::currentDateTime(), price);
+  quint32 id = globalEntityManager.getNewEntityId<EUserBrokerOrderDraft>();
+  EUserBrokerOrderDraft* eBotMarketOrderDraft = new EUserBrokerOrderDraft(id, type, QDateTime::currentDateTime(), price);
   globalEntityManager.delegateEntity(*eBotMarketOrderDraft);
   return *eBotMarketOrderDraft;
 }
 
-void DataService::removeBrokerOrderDraft(EBotMarketOrderDraft &draft)
+void DataService::removeBrokerOrderDraft(EUserBrokerOrderDraft &draft)
 {
-  globalEntityManager.removeEntity<EBotMarketOrderDraft>(draft.getId());
+  globalEntityManager.removeEntity<EUserBrokerOrderDraft>(draft.getId());
 }
 
-void DataService::submitBrokerOrderDraft(EBotMarketOrderDraft& draft)
+void DataService::submitBrokerOrderDraft(EUserBrokerOrderDraft& draft)
 {
-  if(draft.getState() != EBotMarketOrder::State::draft)
+  if(draft.getState() != EUserBrokerOrder::State::draft)
     return;
-  draft.setState(EBotMarketOrder::State::submitting);
+  draft.setState(EUserBrokerOrder::State::submitting);
   globalEntityManager.updatedEntity(draft);
 
   class SubmitBrokerOrderJob : public Job, public Event
   {
   public:
-    SubmitBrokerOrderJob(quint64 draftId, EBotMarketOrder::Type type, double price, double amount) : 
+    SubmitBrokerOrderJob(quint64 draftId, EUserBrokerOrder::Type type, double price, double amount) : 
       draftId(draftId), type(type), price(price), amount(amount), orderId(0) {}
   private:
     quint64 draftId;
-    EBotMarketOrder::Type type;
+    EUserBrokerOrder::Type type;
     double price;
     double amount;
     quint64 orderId;
@@ -925,10 +925,10 @@ void DataService::submitBrokerOrderDraft(EBotMarketOrderDraft& draft)
     {
       if(!orderId) // todo: this is impossible
         return;
-      EBotMarketOrderDraft* draft = dataService.globalEntityManager.getEntity<EBotMarketOrderDraft>(draftId);
+      EUserBrokerOrderDraft* draft = dataService.globalEntityManager.getEntity<EUserBrokerOrderDraft>(draftId);
       if(draft)
       {
-        EBotMarketOrder* order = new EBotMarketOrder(orderId, *draft);
+        EUserBrokerOrder* order = new EUserBrokerOrder(orderId, *draft);
         dataService.globalEntityManager.delegateEntity(*order, *draft);
       }
     }
@@ -940,11 +940,11 @@ void DataService::submitBrokerOrderDraft(EBotMarketOrderDraft& draft)
     thread->interrupt();
 }
 
-void DataService::cancelBrokerOrder(EBotMarketOrder& order)
+void DataService::cancelBrokerOrder(EUserBrokerOrder& order)
 {
-  if(order.getState() != EBotMarketOrder::State::open)
+  if(order.getState() != EUserBrokerOrder::State::open)
     return;
-  order.setState(EBotMarketOrder::State::canceling);
+  order.setState(EUserBrokerOrder::State::canceling);
   globalEntityManager.updatedEntity(order);
 
   class CancelBrokerOrderJob : public Job
@@ -969,11 +969,11 @@ void DataService::cancelBrokerOrder(EBotMarketOrder& order)
     thread->interrupt();
 }
 
-void DataService::updateBrokerOrder(EBotMarketOrder& order, double price, double amount)
+void DataService::updateBrokerOrder(EUserBrokerOrder& order, double price, double amount)
 {
-  if(order.getState() != EBotMarketOrder::State::open)
+  if(order.getState() != EUserBrokerOrder::State::open)
     return;
-  order.setState(EBotMarketOrder::State::updating);
+  order.setState(EUserBrokerOrder::State::updating);
   globalEntityManager.updatedEntity(order);
 
   class UpdateBrokerOrderJob : public Job
@@ -1000,11 +1000,11 @@ void DataService::updateBrokerOrder(EBotMarketOrder& order, double price, double
     thread->interrupt();
 }
 
-void DataService::removeBrokerOrder(EBotMarketOrder& order)
+void DataService::removeBrokerOrder(EUserBrokerOrder& order)
 {
-  if(order.getState() != EBotMarketOrder::State::open)
+  if(order.getState() != EUserBrokerOrder::State::open)
     return;
-  order.setState(EBotMarketOrder::State::removing);
+  order.setState(EUserBrokerOrder::State::removing);
   globalEntityManager.updatedEntity(order);
 
   class RemoveBrokerOrderJob : public Job

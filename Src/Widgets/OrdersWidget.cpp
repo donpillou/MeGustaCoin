@@ -105,15 +105,15 @@ void OrdersWidget::saveState(QSettings& settings)
 
 void OrdersWidget::newBuyOrder()
 {
-  addOrderDraft(EBotMarketOrder::Type::buy);
+  addOrderDraft(EUserBrokerOrder::Type::buy);
 }
 
 void OrdersWidget::newSellOrder()
 {
-  addOrderDraft(EBotMarketOrder::Type::sell);
+  addOrderDraft(EUserBrokerOrder::Type::sell);
 }
 
-void OrdersWidget::addOrderDraft(EBotMarketOrder::Type type)
+void OrdersWidget::addOrderDraft(EUserBrokerOrder::Type type)
 {
   EDataService* eDataService = entityManager.getEntity<EDataService>(0);
   EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eDataService->getSelectedBrokerId());
@@ -129,10 +129,10 @@ void OrdersWidget::addOrderDraft(EBotMarketOrder::Type type)
   {
     EDataTickerData* eDataTickerData = channelEntityManager->getEntity<EDataTickerData>(0);
     if(eDataTickerData)
-      price = type == EBotMarketOrder::Type::buy ? (eDataTickerData->getBid() + 0.01) : (eDataTickerData->getAsk() - 0.01);
+      price = type == EUserBrokerOrder::Type::buy ? (eDataTickerData->getBid() + 0.01) : (eDataTickerData->getAsk() - 0.01);
   }
 
-  EBotMarketOrderDraft& eBotMarketOrderDraft = dataService.createBrokerOrderDraft(type, price);
+  EUserBrokerOrderDraft& eBotMarketOrderDraft = dataService.createBrokerOrderDraft(type, price);
   QModelIndex amountProxyIndex = orderModel.getDraftAmountIndex(eBotMarketOrderDraft);
   QModelIndex amountIndex = proxyModel->mapFromSource(amountProxyIndex);
   orderView->setCurrentIndex(amountIndex);
@@ -145,32 +145,32 @@ void OrdersWidget::submitOrder()
   foreach(const QModelIndex& proxyIndex, selection)
   {
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
-    if(eBotMarketOrder->getState() == EBotMarketOrder::State::draft)
-      dataService.submitBrokerOrderDraft(*(EBotMarketOrderDraft*)eBotMarketOrder);
+    EUserBrokerOrder* eBotMarketOrder = (EUserBrokerOrder*)index.internalPointer();
+    if(eBotMarketOrder->getState() == EUserBrokerOrder::State::draft)
+      dataService.submitBrokerOrderDraft(*(EUserBrokerOrderDraft*)eBotMarketOrder);
   }
 }
 
 void OrdersWidget::cancelOrder()
 {
   QModelIndexList selection = orderView->selectionModel()->selectedRows();
-  QList<EBotMarketOrder*> ordersToRemove;
-  QList<EBotMarketOrderDraft*> draftsToRemove;
-  QList<EBotMarketOrder*> ordersToCancel;
+  QList<EUserBrokerOrder*> ordersToRemove;
+  QList<EUserBrokerOrderDraft*> draftsToRemove;
+  QList<EUserBrokerOrder*> ordersToCancel;
   foreach(const QModelIndex& proxyIndex, selection)
   {
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
+    EUserBrokerOrder* eBotMarketOrder = (EUserBrokerOrder*)index.internalPointer();
     switch(eBotMarketOrder->getState())
     {
-    case EBotMarketOrder::State::draft:
-      draftsToRemove.append((EBotMarketOrderDraft*)eBotMarketOrder);
+    case EUserBrokerOrder::State::draft:
+      draftsToRemove.append((EUserBrokerOrderDraft*)eBotMarketOrder);
       break;
-    case EBotMarketOrder::State::canceled:
-    case EBotMarketOrder::State::closed:
+    case EUserBrokerOrder::State::canceled:
+    case EUserBrokerOrder::State::closed:
       ordersToRemove.append(eBotMarketOrder);
       break;
-    case EBotMarketOrder::State::open:
+    case EUserBrokerOrder::State::open:
       ordersToCancel.append(eBotMarketOrder);
       break;
     default:
@@ -179,19 +179,19 @@ void OrdersWidget::cancelOrder()
   }
   while(!ordersToCancel.isEmpty())
   {
-    QList<EBotMarketOrder*>::Iterator last = --ordersToCancel.end();
+    QList<EUserBrokerOrder*>::Iterator last = --ordersToCancel.end();
     dataService.cancelBrokerOrder(**last);
     ordersToCancel.erase(last);
   }
   while(!draftsToRemove.isEmpty())
   {
-    QList<EBotMarketOrderDraft*>::Iterator last = --draftsToRemove.end();
-    dataService.removeBrokerOrderDraft(*(EBotMarketOrderDraft*)*last);
+    QList<EUserBrokerOrderDraft*>::Iterator last = --draftsToRemove.end();
+    dataService.removeBrokerOrderDraft(**last);
     draftsToRemove.erase(last);
   }
   while(!ordersToRemove.isEmpty())
   {
-    QList<EBotMarketOrder*>::Iterator last = --ordersToRemove.end();
+    QList<EUserBrokerOrder*>::Iterator last = --ordersToRemove.end();
     dataService.removeBrokerOrder(**last);
     ordersToRemove.erase(last);
   }
@@ -199,13 +199,13 @@ void OrdersWidget::cancelOrder()
 
 void OrdersWidget::editedOrderPrice(const QModelIndex& index, double price)
 {
-  EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
+  EUserBrokerOrder* eBotMarketOrder = (EUserBrokerOrder*)index.internalPointer();
   dataService.updateBrokerOrder(*eBotMarketOrder, price, eBotMarketOrder->getAmount());
 }
 
 void OrdersWidget::editedOrderAmount(const QModelIndex& index, double amount)
 {
-  EBotMarketOrder* eBotMarketOrder = (EBotMarketOrder*)index.internalPointer();
+  EUserBrokerOrder* eBotMarketOrder = (EUserBrokerOrder*)index.internalPointer();
   dataService.updateBrokerOrder(*eBotMarketOrder, eBotMarketOrder->getPrice(), amount);
 }
 
@@ -216,7 +216,7 @@ void OrdersWidget::orderSelectionChanged()
   for(QModelIndexList::Iterator i = modelSelection.begin(), end = modelSelection.end(); i != end; ++i)
   {
     QModelIndex modelIndex = proxyModel->mapToSource(*i);
-    EBotMarketOrder* eOrder = (EBotMarketOrder*)modelIndex.internalPointer();
+    EUserBrokerOrder* eOrder = (EUserBrokerOrder*)modelIndex.internalPointer();
     selection.insert(eOrder);
   }
   updateToolBarButtons();
@@ -227,7 +227,7 @@ void OrdersWidget::orderDataChanged(const QModelIndex& topLeft, const QModelInde
   QModelIndex index = topLeft;
   for(int i = topLeft.row(), end = bottomRight.row();;)
   {
-    EBotMarketOrder* eOrder = (EBotMarketOrder*)index.internalPointer();
+    EUserBrokerOrder* eOrder = (EUserBrokerOrder*)index.internalPointer();
     if(selection.contains(eOrder))
     {
       orderSelectionChanged();
@@ -247,10 +247,10 @@ void OrdersWidget::updateToolBarButtons()
   bool canCancel = connected && !selection.isEmpty();
 
   bool draftSelected = false;
-  for(QSet<EBotMarketOrder*>::Iterator i = selection.begin(), end = selection.end(); i != end; ++i)
+  for(QSet<EUserBrokerOrder*>::Iterator i = selection.begin(), end = selection.end(); i != end; ++i)
   {
-    EBotMarketOrder* eBotMarketOrder = *i;
-    if(eBotMarketOrder->getState() == EBotMarketOrder::State::draft)
+    EUserBrokerOrder* eBotMarketOrder = *i;
+    if(eBotMarketOrder->getState() == EUserBrokerOrder::State::draft)
     {
       draftSelected = true;
       break;

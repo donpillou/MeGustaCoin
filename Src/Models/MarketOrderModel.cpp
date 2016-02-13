@@ -7,8 +7,8 @@ MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<EBotMarketOrder>(*this);
-  entityManager.registerListener<EBotMarketOrderDraft>(*this);
+  entityManager.registerListener<EUserBrokerOrder>(*this);
+  entityManager.registerListener<EUserBrokerOrderDraft>(*this);
   entityManager.registerListener<EDataService>(*this);
 
   eBrokerType = 0;
@@ -16,12 +16,12 @@ MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
 
 MarketOrderModel::~MarketOrderModel()
 {
-  entityManager.unregisterListener<EBotMarketOrder>(*this);
-  entityManager.unregisterListener<EBotMarketOrderDraft>(*this);
+  entityManager.unregisterListener<EUserBrokerOrder>(*this);
+  entityManager.unregisterListener<EUserBrokerOrderDraft>(*this);
   entityManager.unregisterListener<EDataService>(*this);
 }
 
-QModelIndex MarketOrderModel::getDraftAmountIndex(EBotMarketOrderDraft& draft)
+QModelIndex MarketOrderModel::getDraftAmountIndex(EUserBrokerOrderDraft& draft)
 {
   int index = orders.indexOf(&draft);
   return createIndex(index, (int)Column::amount, &draft);
@@ -51,7 +51,7 @@ int MarketOrderModel::columnCount(const QModelIndex& parent) const
 
 QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
 {
-  const EBotMarketOrder* eOrder = (const EBotMarketOrder*)index.internalPointer();
+  const EUserBrokerOrder* eOrder = (const EUserBrokerOrder*)index.internalPointer();
   if(!eOrder)
     return QVariant();
 
@@ -72,9 +72,9 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
     if((Column)index.column() == Column::type)
       switch(eOrder->getType())
       {
-      case EBotMarketOrder::Type::sell:
+      case EUserBrokerOrder::Type::sell:
         return sellIcon;
-      case EBotMarketOrder::Type::buy:
+      case EUserBrokerOrder::Type::buy:
         return buyIcon;
       default:
         break;
@@ -97,9 +97,9 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
     case Column::type:
       switch(eOrder->getType())
       {
-      case EBotMarketOrder::Type::buy:
+      case EUserBrokerOrder::Type::buy:
         return buyStr;
-      case EBotMarketOrder::Type::sell:
+      case EUserBrokerOrder::Type::sell:
         return sellStr;
       default:
         break;
@@ -116,26 +116,26 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
     case Column::state:
       switch(eOrder->getState())
       {
-      case EBotMarketOrder::State::draft:
+      case EUserBrokerOrder::State::draft:
         return draftStr;
-      case EBotMarketOrder::State::submitting:
+      case EUserBrokerOrder::State::submitting:
         return submittingStr;
-      case EBotMarketOrder::State::updating:
+      case EUserBrokerOrder::State::updating:
         return updatingStr;
-      case EBotMarketOrder::State::open:
+      case EUserBrokerOrder::State::open:
         return openStr;
-      case EBotMarketOrder::State::canceling:
+      case EUserBrokerOrder::State::canceling:
         return cancelingStr;
-      case EBotMarketOrder::State::canceled:
+      case EUserBrokerOrder::State::canceled:
         return canceledStr;
-      case EBotMarketOrder::State::closed:
+      case EUserBrokerOrder::State::closed:
         return closedStr;
-      case EBotMarketOrder::State::error:
+      case EUserBrokerOrder::State::error:
         return errorStr;
       }
       break;
     case Column::total:
-        return eOrder->getType() == EBotMarketOrder::Type::sell ? (QString("+") + eBrokerType->formatPrice(eOrder->getTotal())) : eBrokerType->formatPrice(-eOrder->getTotal());
+        return eOrder->getType() == EUserBrokerOrder::Type::sell ? (QString("+") + eBrokerType->formatPrice(eOrder->getTotal())) : eBrokerType->formatPrice(-eOrder->getTotal());
     }
   }
   return QVariant();
@@ -143,12 +143,12 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags MarketOrderModel::flags(const QModelIndex &index) const
 {
-  const EBotMarketOrder* eOrder = (const EBotMarketOrder*)index.internalPointer();
+  const EUserBrokerOrderDraft* eOrder = (const EUserBrokerOrderDraft*)index.internalPointer();
   if(!eOrder)
     return 0;
 
   Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-  if(eOrder->getState() == EBotMarketOrder::State::open || eOrder->getState() == EBotMarketOrder::State::draft)
+  if(eOrder->getState() == EUserBrokerOrder::State::open || eOrder->getState() == EUserBrokerOrder::State::draft)
   {
     Column column = (Column)index.column();
     if(column == Column::amount || column == Column::price)
@@ -162,11 +162,11 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
   if (role != Qt::EditRole)
     return false;
 
-  EBotMarketOrder* eOrder = (EBotMarketOrder*)index.internalPointer();
+  EUserBrokerOrder* eOrder = (EUserBrokerOrder*)index.internalPointer();
   if(!eOrder)
     return false;
 
-  if(eOrder->getState() != EBotMarketOrder::State::draft && eOrder->getState() != EBotMarketOrder::State::open)
+  if(eOrder->getState() != EUserBrokerOrder::State::draft && eOrder->getState() != EUserBrokerOrder::State::open)
     return false;
 
   switch((Column)index.column())
@@ -176,18 +176,18 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
       double newPrice = value.toDouble();
       if(newPrice <= 0. || newPrice == eOrder->getPrice())
         return false;
-      if(eOrder->getState() == EBotMarketOrder::State::draft)
+      if(eOrder->getState() == EUserBrokerOrder::State::draft)
       {
         EUserBrokerBalance* eUserBrokerBalance = entityManager.getEntity<EUserBrokerBalance>(0);
         if(eUserBrokerBalance)
         {
-          double total = eOrder->getType() == EBotMarketOrder::Type::buy ?
+          double total = eOrder->getType() == EUserBrokerOrder::Type::buy ?
             qCeil(eOrder->getAmount() * newPrice * (1. + eUserBrokerBalance->getFee()) * 100.) / 100. :
             qFloor(eOrder->getAmount() * newPrice * (1. - eUserBrokerBalance->getFee()) * 100.) / 100.;
           eOrder->setPrice(newPrice, total);
         }
       }
-      else if(eOrder->getState() == EBotMarketOrder::State::open)
+      else if(eOrder->getState() == EUserBrokerOrder::State::open)
       {
         if(eOrder->getPrice() != newPrice)
           emit editedOrderPrice(index, newPrice);
@@ -199,18 +199,18 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
       double newAmount = value.toDouble();
       if(newAmount <= 0. || newAmount == eOrder->getAmount())
         return false;
-      if(eOrder->getState() == EBotMarketOrder::State::draft)
+      if(eOrder->getState() == EUserBrokerOrder::State::draft)
       {
         EUserBrokerBalance* eUserBrokerBalance = entityManager.getEntity<EUserBrokerBalance>(0);
         if(eUserBrokerBalance)
         {
-          double total = eOrder->getType() == EBotMarketOrder::Type::buy ?
+          double total = eOrder->getType() == EUserBrokerOrder::Type::buy ?
             qCeil(newAmount * eOrder->getPrice() * (1. + eUserBrokerBalance->getFee()) * 100.) / 100. :
             qFloor(newAmount * eOrder->getPrice() * (1. - eUserBrokerBalance->getFee()) * 100.) / 100.;
           eOrder->setAmount(newAmount, total);
         }
       }
-      else if(eOrder->getState() == EBotMarketOrder::State::open)
+      else if(eOrder->getState() == EUserBrokerOrder::State::open)
       {
         if(eOrder->getAmount() != newAmount)
           emit editedOrderAmount(index, newAmount);
@@ -267,10 +267,10 @@ void MarketOrderModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botMarketOrder:
-  case EType::botMarketOrderDraft:
+  case EType::userBrokerOrder:
+  case EType::userBrokerOrderDraft:
     {
-      EBotMarketOrder* eOrder = dynamic_cast<EBotMarketOrder*>(&entity);
+      EUserBrokerOrder* eOrder = dynamic_cast<EUserBrokerOrder*>(&entity);
       int index = orders.size();
       beginInsertRows(QModelIndex(), index, index);
       orders.append(eOrder);
@@ -289,11 +289,11 @@ void MarketOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
-  case EType::botMarketOrder:
-  case EType::botMarketOrderDraft:
+  case EType::userBrokerOrder:
+  case EType::userBrokerOrderDraft:
     {
-      EBotMarketOrder* oldEBotMarketOrder = dynamic_cast<EBotMarketOrder*>(&oldEntity);
-      EBotMarketOrder* newEBotMarketOrder = dynamic_cast<EBotMarketOrder*>(&newEntity);
+      EUserBrokerOrder* oldEBotMarketOrder = dynamic_cast<EUserBrokerOrder*>(&oldEntity);
+      EUserBrokerOrder* newEBotMarketOrder = dynamic_cast<EUserBrokerOrder*>(&newEntity);
       int index = orders.indexOf(oldEBotMarketOrder);
       orders[index] = newEBotMarketOrder; 
       QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotMarketOrder);
@@ -333,10 +333,10 @@ void MarketOrderModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
-  case EType::botMarketOrder:
-  case EType::botMarketOrderDraft:
+  case EType::userBrokerOrder:
+  case EType::userBrokerOrderDraft:
     {
-      EBotMarketOrder* eOrder = dynamic_cast<EBotMarketOrder*>(&entity);
+      EUserBrokerOrder* eOrder = dynamic_cast<EUserBrokerOrder*>(&entity);
       int index = orders.indexOf(eOrder);
       beginRemoveRows(QModelIndex(), index, index);
       orders.removeAt(index);
@@ -355,8 +355,8 @@ void MarketOrderModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {
-  case EType::botMarketOrder:
-  case EType::botMarketOrderDraft:
+  case EType::userBrokerOrder:
+  case EType::userBrokerOrderDraft:
     if(!orders.isEmpty())
     {
       emit beginResetModel();
