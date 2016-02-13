@@ -16,7 +16,7 @@
 #include "Entities/EBotSessionTransaction.h"
 #include "Entities/EUserSessionAsset.h"
 #include "Entities/EUserSessionAssetDraft.h"
-#include "Entities/EBotSessionLogMessage.h"
+#include "Entities/EUserSessionLogMessage.h"
 #include "Entities/EBotSessionProperty.h"
 #include "Entities/EBotType.h"
 #include "Entities/EUserSession.h"

@@ -6,12 +6,12 @@ SessionLogModel::SessionLogModel(Entity::Manager& entityManager) :
   informationIcon(QIcon(":/Icons/information.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<EBotSessionLogMessage>(*this);
+  entityManager.registerListener<EUserSessionLogMessage>(*this);
 }
 
 SessionLogModel::~SessionLogModel()
 {
-  entityManager.unregisterListener<EBotSessionLogMessage>(*this);
+  entityManager.unregisterListener<EUserSessionLogMessage>(*this);
 
   qDeleteAll(messages);
 }
@@ -84,7 +84,7 @@ QVariant SessionLogModel::headerData(int section, Qt::Orientation orientation, i
 
 void SessionLogModel::addedEntity(Entity& entity)
 {
-  EBotSessionLogMessage* eSessionLogMessage = dynamic_cast<EBotSessionLogMessage*>(&entity);
+  EUserSessionLogMessage* eSessionLogMessage = dynamic_cast<EUserSessionLogMessage*>(&entity);
   if(eSessionLogMessage)
   {
     int index = messages.size();

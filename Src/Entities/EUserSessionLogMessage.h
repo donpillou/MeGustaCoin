@@ -1,13 +1,13 @@
 
 #pragma once
 
-class EBotSessionLogMessage : public Entity
+class EUserSessionLogMessage : public Entity
 {
 public:
   static const EType eType = EType::userSessionLogMessage;
 
 public:
-  EBotSessionLogMessage(const meguco_log_entity& data, const QString& message) : Entity(eType, data.entity.id), message(message)
+  EUserSessionLogMessage(const meguco_log_entity& data, const QString& message) : Entity(eType, data.entity.id), message(message)
   {
     date = QDateTime::fromMSecsSinceEpoch(data.entity.time);
   }
