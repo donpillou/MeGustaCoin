@@ -4,12 +4,12 @@
 SessionPropertyModel::SessionPropertyModel(Entity::Manager& entityManager) :
   entityManager(entityManager)
 {
-  entityManager.registerListener<EBotSessionProperty>(*this);
+  entityManager.registerListener<EUserSessionProperty>(*this);
 }
 
 SessionPropertyModel::~SessionPropertyModel()
 {
-  entityManager.unregisterListener<EBotSessionProperty>(*this);
+  entityManager.unregisterListener<EUserSessionProperty>(*this);
 }
 
 QModelIndex SessionPropertyModel::index(int row, int column, const QModelIndex& parent) const
@@ -36,7 +36,7 @@ int SessionPropertyModel::columnCount(const QModelIndex& parent) const
 
 QVariant SessionPropertyModel::data(const QModelIndex& index, int role) const
 {
-  const EBotSessionProperty* eProperty = (const EBotSessionProperty*)index.internalPointer();
+  const EUserSessionProperty* eProperty = (const EUserSessionProperty*)index.internalPointer();
   if(!eProperty)
     return QVariant();
 
@@ -54,7 +54,7 @@ QVariant SessionPropertyModel::data(const QModelIndex& index, int role) const
     switch((Column)index.column())
     {
     case Column::value:
-      if(eProperty->getType() == EBotSessionProperty::Type::number)
+      if(eProperty->getType() == EUserSessionProperty::Type::number)
         return eProperty->getValue().toDouble();
       else
         return eProperty->getValue();
@@ -70,7 +70,7 @@ QVariant SessionPropertyModel::data(const QModelIndex& index, int role) const
     case Column::value:
       {
         const QString& unit = eProperty->getUnit();
-        QString value = eProperty->getType() == EBotSessionProperty::Type::number ? QLocale::system().toString(fabs(eProperty->getValue().toDouble()), 'g', 8) : eProperty->getValue();
+        QString value = eProperty->getType() == EUserSessionProperty::Type::number ? QLocale::system().toString(fabs(eProperty->getValue().toDouble()), 'g', 8) : eProperty->getValue();
         return unit.isEmpty() ? value : tr("%1 %2").arg(value, unit);
       }
     }
@@ -80,7 +80,7 @@ QVariant SessionPropertyModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags SessionPropertyModel::flags(const QModelIndex &index) const
 {
-  const EBotSessionProperty* eProperty = (const EBotSessionProperty*)index.internalPointer();
+  const EUserSessionProperty* eProperty = (const EUserSessionProperty*)index.internalPointer();
   if(!eProperty)
     return 0;
 
@@ -89,7 +89,7 @@ Qt::ItemFlags SessionPropertyModel::flags(const QModelIndex &index) const
   {
   case Column::value:
     {
-      if(!(eProperty->getFlags() & EBotSessionProperty::readOnly))
+      if(!(eProperty->getFlags() & EUserSessionProperty::readOnly))
         flags |= Qt::ItemIsEditable;
     }
     break;
@@ -104,16 +104,16 @@ bool SessionPropertyModel::setData(const QModelIndex & index, const QVariant & v
   if (role != Qt::EditRole)
     return false;
 
-  const EBotSessionProperty* eProperty = (const EBotSessionProperty*)index.internalPointer();
+  const EUserSessionProperty* eProperty = (const EUserSessionProperty*)index.internalPointer();
   if(!eProperty)
     return false;
 
   switch((Column)index.column())
   {
   case Column::value:
-    if(!(eProperty->getFlags() & EBotSessionProperty::readOnly))
+    if(!(eProperty->getFlags() & EUserSessionProperty::readOnly))
     {
-      if(eProperty->getType() == EBotSessionProperty::Type::number)
+      if(eProperty->getType() == EUserSessionProperty::Type::number)
       {
         double newValue = value.toDouble();
         if(newValue != eProperty->getValue().toDouble())
@@ -166,7 +166,7 @@ void SessionPropertyModel::addedEntity(Entity& entity)
   {
   case EType::userSessionProperty:
     {
-      EBotSessionProperty* eProperty = dynamic_cast<EBotSessionProperty*>(&entity);
+      EUserSessionProperty* eProperty = dynamic_cast<EUserSessionProperty*>(&entity);
       int index = properties.size();
       beginInsertRows(QModelIndex(), index, index);
       properties.append(eProperty);
@@ -185,8 +185,8 @@ void SessionPropertyModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   {
   case EType::userSessionProperty:
     {
-      EBotSessionProperty* oldEBotSessionProperty = dynamic_cast<EBotSessionProperty*>(&oldEntity);
-      EBotSessionProperty* newEBotSessionProperty = dynamic_cast<EBotSessionProperty*>(&newEntity);
+      EUserSessionProperty* oldEBotSessionProperty = dynamic_cast<EUserSessionProperty*>(&oldEntity);
+      EUserSessionProperty* newEBotSessionProperty = dynamic_cast<EUserSessionProperty*>(&newEntity);
       int index = properties.indexOf(oldEBotSessionProperty);
       properties[index] = newEBotSessionProperty; 
       QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionProperty);
@@ -206,7 +206,7 @@ void SessionPropertyModel::removedEntity(Entity& entity)
   {
   case EType::userSessionProperty:
     {
-      EBotSessionProperty* eProperty = dynamic_cast<EBotSessionProperty*>(&entity);
+      EUserSessionProperty* eProperty = dynamic_cast<EUserSessionProperty*>(&entity);
       int index = properties.indexOf(eProperty);
       beginRemoveRows(QModelIndex(), index, index);
       properties.removeAt(index);

@@ -42,7 +42,7 @@ public:
   void removeSessionAsset(EUserSessionAsset& asset);
   void removeSessionAssetDraft(EUserSessionAssetDraft& draft);
 
-  void updateSessionProperty(EBotSessionProperty& property, const QString& value);
+  void updateSessionProperty(EUserSessionProperty& property, const QString& value);
 
 private:
   class WorkerThread;

@@ -24,7 +24,7 @@ signals:
 
 private:
   Entity::Manager& entityManager;
-  QList<EBotSessionProperty*> properties;
+  QList<EUserSessionProperty*> properties;
 
 private: // QAbstractItemModel
   virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const;

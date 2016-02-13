@@ -60,13 +60,13 @@ void BotPropertiesWidget::saveState(QSettings& settings)
 
 void BotPropertiesWidget::editedProperty(const QModelIndex& index, const QString& value)
 {
-  EBotSessionProperty* eProperty = (EBotSessionProperty*)index.internalPointer();
+  EUserSessionProperty* eProperty = (EUserSessionProperty*)index.internalPointer();
   dataService.updateSessionProperty(*eProperty, value);
 }
 
 void BotPropertiesWidget::editedProperty(const QModelIndex& index, double value)
 {
-  EBotSessionProperty* eProperty = (EBotSessionProperty*)index.internalPointer();
+  EUserSessionProperty* eProperty = (EUserSessionProperty*)index.internalPointer();
   dataService.updateSessionProperty(*eProperty, QString::number(value));
 }
 

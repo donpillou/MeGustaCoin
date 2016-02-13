@@ -343,7 +343,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
         globalEntityManager.removeAll<EBrokerType>();
         globalEntityManager.removeAll<EBotSessionTransaction>();
         globalEntityManager.removeAll<EUserSessionAsset>();
-        globalEntityManager.removeAll<EBotSessionProperty>();
+        globalEntityManager.removeAll<EUserSessionProperty>();
         globalEntityManager.removeAll<EUserSessionAssetDraft>();
         globalEntityManager.removeAll<EUserSessionOrder>();
         globalEntityManager.removeAll<EUserSessionLogMessage>();
@@ -695,7 +695,7 @@ void DataService::WorkerThread::clearSessionLog()
 
 void DataService::WorkerThread::receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit)
 {
-  delegateEntity(new EBotSessionProperty(property, name, value, unit));
+  delegateEntity(new EUserSessionProperty(property, name, value, unit));
 }
 
 void DataService::WorkerThread::removedSessionProperty(quint64 propertyId)
@@ -1266,7 +1266,7 @@ void DataService::removeSessionAssetDraft(EUserSessionAssetDraft& draft)
   globalEntityManager.removeEntity<EUserSessionAssetDraft>(draft.getId());
 }
 
-void DataService::updateSessionProperty(EBotSessionProperty& property, const QString& value)
+void DataService::updateSessionProperty(EUserSessionProperty& property, const QString& value)
 {
   class UpdateSessionPropertyJob : public Job
   {

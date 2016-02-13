@@ -1,7 +1,7 @@
 
 #pragma once
 
-class EBotSessionProperty : public Entity
+class EUserSessionProperty : public Entity
 {
 public:
   static const EType eType = EType::userSessionProperty;
@@ -20,7 +20,7 @@ public:
   };
 
 public:
-  EBotSessionProperty(const meguco_user_session_property_entity& data, const QString& name, const QString& value, const QString& unit) : Entity(eType, data.entity.id), name(name), value(value), unit(unit)
+  EUserSessionProperty(const meguco_user_session_property_entity& data, const QString& name, const QString& value, const QString& unit) : Entity(eType, data.entity.id), name(name), value(value), unit(unit)
   {
     type = (Type)data.type;
     flags = data.flags;

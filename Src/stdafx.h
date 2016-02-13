@@ -17,7 +17,7 @@
 #include "Entities/EUserSessionAsset.h"
 #include "Entities/EUserSessionAssetDraft.h"
 #include "Entities/EUserSessionLogMessage.h"
-#include "Entities/EBotSessionProperty.h"
+#include "Entities/EUserSessionProperty.h"
 #include "Entities/EBotType.h"
 #include "Entities/EUserSession.h"
 #include "Entities/EUserBroker.h"
