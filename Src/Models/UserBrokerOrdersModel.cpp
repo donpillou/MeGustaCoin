@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
+UserBrokerOrdersModel::UserBrokerOrdersModel(Entity::Manager& entityManager) :
   entityManager(entityManager),
   draftStr(tr("draft")), submittingStr(tr("submitting...")), updatingStr(tr("updating...")), openStr(tr("open")), cancelingStr(tr("canceling...")), canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), errorStr(tr("error")),
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
@@ -14,42 +14,42 @@ MarketOrderModel::MarketOrderModel(Entity::Manager& entityManager) :
   eBrokerType = 0;
 }
 
-MarketOrderModel::~MarketOrderModel()
+UserBrokerOrdersModel::~UserBrokerOrdersModel()
 {
   entityManager.unregisterListener<EUserBrokerOrder>(*this);
   entityManager.unregisterListener<EUserBrokerOrderDraft>(*this);
   entityManager.unregisterListener<EConnection>(*this);
 }
 
-QModelIndex MarketOrderModel::getDraftAmountIndex(EUserBrokerOrderDraft& draft)
+QModelIndex UserBrokerOrdersModel::getDraftAmountIndex(EUserBrokerOrderDraft& draft)
 {
   int index = orders.indexOf(&draft);
   return createIndex(index, (int)Column::amount, &draft);
 }
 
-QModelIndex MarketOrderModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex UserBrokerOrdersModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
     return createIndex(row, column, orders.at(row));
   return QModelIndex();
 }
 
-QModelIndex MarketOrderModel::parent(const QModelIndex& child) const
+QModelIndex UserBrokerOrdersModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int MarketOrderModel::rowCount(const QModelIndex& parent) const
+int UserBrokerOrdersModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : orders.size();
 }
 
-int MarketOrderModel::columnCount(const QModelIndex& parent) const
+int UserBrokerOrdersModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
+QVariant UserBrokerOrdersModel::data(const QModelIndex& index, int role) const
 {
   const EUserBrokerOrder* eOrder = (const EUserBrokerOrder*)index.internalPointer();
   if(!eOrder)
@@ -141,7 +141,7 @@ QVariant MarketOrderModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-Qt::ItemFlags MarketOrderModel::flags(const QModelIndex &index) const
+Qt::ItemFlags UserBrokerOrdersModel::flags(const QModelIndex &index) const
 {
   const EUserBrokerOrderDraft* eOrder = (const EUserBrokerOrderDraft*)index.internalPointer();
   if(!eOrder)
@@ -157,7 +157,7 @@ Qt::ItemFlags MarketOrderModel::flags(const QModelIndex &index) const
   return flags;
 }
 
-bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value, int role)
+bool UserBrokerOrdersModel::setData(const QModelIndex & index, const QVariant & value, int role)
 {
   if (role != Qt::EditRole)
     return false;
@@ -224,7 +224,7 @@ bool MarketOrderModel::setData(const QModelIndex & index, const QVariant & value
   return false;
 }
 
-QVariant MarketOrderModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant UserBrokerOrdersModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -263,7 +263,7 @@ QVariant MarketOrderModel::headerData(int section, Qt::Orientation orientation, 
   return QVariant();
 }
 
-void MarketOrderModel::addedEntity(Entity& entity)
+void UserBrokerOrdersModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -285,7 +285,7 @@ void MarketOrderModel::addedEntity(Entity& entity)
   }
 }
 
-void MarketOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserBrokerOrdersModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
@@ -324,12 +324,12 @@ void MarketOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   }
 }
 
-void MarketOrderModel::addedEntity(Entity& entity, Entity& replacedEntity)
+void UserBrokerOrdersModel::addedEntity(Entity& entity, Entity& replacedEntity)
 {
   updatedEntitiy(replacedEntity, entity);
 }
 
-void MarketOrderModel::removedEntity(Entity& entity)
+void UserBrokerOrdersModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -351,7 +351,7 @@ void MarketOrderModel::removedEntity(Entity& entity)
   }
 }
 
-void MarketOrderModel::removedAll(quint32 type)
+void UserBrokerOrdersModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {

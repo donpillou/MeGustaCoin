@@ -1,7 +1,7 @@
 
 #pragma once
 
-class MarketOrderModel : public QAbstractItemModel, public Entity::Listener
+class UserBrokerOrdersModel : public QAbstractItemModel, public Entity::Listener
 {
   Q_OBJECT
 
@@ -20,8 +20,8 @@ public:
   };
 
 public:
-  MarketOrderModel(Entity::Manager& entityManager);
-  ~MarketOrderModel();
+  UserBrokerOrdersModel(Entity::Manager& entityManager);
+  ~UserBrokerOrdersModel();
 
   QModelIndex getDraftAmountIndex(EUserBrokerOrderDraft& draft);
 
@@ -75,17 +75,17 @@ private:
   {
     const EUserSessionOrder* leftOrder = (const EUserSessionOrder*)left.internalPointer();
     const EUserSessionOrder* rightOrder = (const EUserSessionOrder*)right.internalPointer();
-    switch((MarketOrderModel::Column)left.column())
+    switch((UserBrokerOrdersModel::Column)left.column())
     {
-    case MarketOrderModel::Column::date:
+    case UserBrokerOrdersModel::Column::date:
       return leftOrder->getDate().msecsTo(rightOrder->getDate()) > 0;
-    case MarketOrderModel::Column::value:
+    case UserBrokerOrdersModel::Column::value:
       return leftOrder->getAmount() * leftOrder->getPrice() < rightOrder->getAmount() * rightOrder->getPrice();
-    case MarketOrderModel::Column::amount:
+    case UserBrokerOrdersModel::Column::amount:
       return leftOrder->getAmount() < rightOrder->getAmount();
-    case MarketOrderModel::Column::price:
+    case UserBrokerOrdersModel::Column::price:
       return leftOrder->getPrice() < rightOrder->getPrice();
-    case MarketOrderModel::Column::total:
+    case UserBrokerOrdersModel::Column::total:
       return leftOrder->getTotal() < rightOrder->getTotal();
     default:
       break;

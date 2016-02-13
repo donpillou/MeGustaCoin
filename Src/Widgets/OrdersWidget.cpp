@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), orderModel(entityManager)
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), ordersModel(entityManager)
 {
   entityManager.registerListener<EConnection>(*this);
 
@@ -40,7 +40,7 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
   orderView->setUniformRowHeights(true);
   proxyModel = new MarketOrderSortProxyModel(this);
   proxyModel->setDynamicSortFilter(true);
-  proxyModel->setSourceModel(&orderModel);
+  proxyModel->setSourceModel(&ordersModel);
   orderView->setModel(proxyModel);
   orderView->setSortingEnabled(true);
   orderView->setRootIsDecorated(false);
@@ -59,7 +59,7 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
       return widget;
     }
   };
-  orderView->setItemDelegateForColumn((int)MarketOrderModel::Column::amount, new OrderDelegate(this));
+  orderView->setItemDelegateForColumn((int)UserBrokerOrdersModel::Column::amount, new OrderDelegate(this));
   orderView->setEditTriggers(QAbstractItemView::SelectedClicked | QAbstractItemView::DoubleClicked);
   orderView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -70,10 +70,10 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
   layout->addWidget(orderView);
   setLayout(layout);
 
-  connect(&orderModel, SIGNAL(editedOrderPrice(const QModelIndex&, double)), this, SLOT(editedOrderPrice(const QModelIndex&, double)));
-  connect(&orderModel, SIGNAL(editedOrderAmount(const QModelIndex&, double)), this, SLOT(editedOrderAmount(const QModelIndex&, double)));
+  connect(&ordersModel, SIGNAL(editedOrderPrice(const QModelIndex&, double)), this, SLOT(editedOrderPrice(const QModelIndex&, double)));
+  connect(&ordersModel, SIGNAL(editedOrderAmount(const QModelIndex&, double)), this, SLOT(editedOrderAmount(const QModelIndex&, double)));
   connect(orderView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(orderSelectionChanged()));
-  connect(&orderModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(orderDataChanged(const QModelIndex&, const QModelIndex&)));
+  connect(&ordersModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(orderDataChanged(const QModelIndex&, const QModelIndex&)));
 
   QHeaderView* headerView = orderView->header();
   headerView->resizeSection(0, 50);
@@ -133,7 +133,7 @@ void OrdersWidget::addOrderDraft(EUserBrokerOrder::Type type)
   }
 
   EUserBrokerOrderDraft& eBotMarketOrderDraft = dataService.createBrokerOrderDraft(type, price);
-  QModelIndex amountProxyIndex = orderModel.getDraftAmountIndex(eBotMarketOrderDraft);
+  QModelIndex amountProxyIndex = ordersModel.getDraftAmountIndex(eBotMarketOrderDraft);
   QModelIndex amountIndex = proxyModel->mapFromSource(amountProxyIndex);
   orderView->setCurrentIndex(amountIndex);
   orderView->edit(amountIndex);

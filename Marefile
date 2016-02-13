@@ -53,7 +53,7 @@ targets = {
       "Src/Widgets/BotItemsWidget.h"
       "Src/Widgets/BotPropertiesWidget.h"
       "Src/Widgets/TradesWidget.h"
-      "Src/Models/MarketOrderModel.h"
+      "Src/Models/UserBrokerOrdersModel.h"
       "Src/Models/SessionItemModel.h"
       "Src/Models/SessionPropertyModel.h"
       "Src/Markets/DataService.h"
