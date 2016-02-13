@@ -28,7 +28,7 @@ private:
   Entity::Manager& entityManager;
   DataService& dataService;
 
-  BotSessionModel botSessionModel;
+  UserSessionsModel sessionsModel;
   SessionOrderModel orderModel;
   SessionTransactionModel transactionModel;
 

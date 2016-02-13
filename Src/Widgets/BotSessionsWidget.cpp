@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  dataService(dataService), botSessionModel(entityManager), orderModel(entityManager), transactionModel(entityManager), selectedSessionId(0)
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  dataService(dataService), sessionsModel(entityManager), orderModel(entityManager), transactionModel(entityManager), selectedSessionId(0)
 {
   entityManager.registerListener<EConnection>(*this);
 
@@ -37,16 +37,16 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
   sessionView->setUniformRowHeights(true);
   proxyModel = new QSortFilterProxyModel(this);
   proxyModel->setDynamicSortFilter(true);
-  proxyModel->setSourceModel(&botSessionModel);
+  proxyModel->setSourceModel(&sessionsModel);
   sessionView->setModel(proxyModel);
   sessionView->setSortingEnabled(true);
   sessionView->setRootIsDecorated(false);
   sessionView->setAlternatingRowColors(true);
   connect(sessionView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(sessionSelectionChanged()));
-  connect(&botSessionModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(sessionDataChanged(const QModelIndex&, const QModelIndex&)));
-  connect(&botSessionModel, SIGNAL(rowsRemoved(const QModelIndex&, int, int)), this, SLOT(sessionDataRemoved(const QModelIndex&, int, int)));
-  connect(&botSessionModel, SIGNAL(modelReset()), this, SLOT(sessionDataReset()));
-  connect(&botSessionModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(sessionDataAdded(const QModelIndex&, int, int)));
+  connect(&sessionsModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(sessionDataChanged(const QModelIndex&, const QModelIndex&)));
+  connect(&sessionsModel, SIGNAL(rowsRemoved(const QModelIndex&, int, int)), this, SLOT(sessionDataRemoved(const QModelIndex&, int, int)));
+  connect(&sessionsModel, SIGNAL(modelReset()), this, SLOT(sessionDataReset()));
+  connect(&sessionsModel, SIGNAL(rowsInserted(const QModelIndex&, int, int)), this, SLOT(sessionDataAdded(const QModelIndex&, int, int)));
 
   QVBoxLayout* layout = new QVBoxLayout;
   layout->setMargin(0);
@@ -218,7 +218,7 @@ void BotSessionsWidget::sessionDataRemoved(const QModelIndex& parent, int start,
 {
   for(int i = start;;)
   {
-    QModelIndex index = botSessionModel.index(i, 0, parent);
+    QModelIndex index = sessionsModel.index(i, 0, parent);
     EUserSession* eBotSession = (EUserSession*)index.internalPointer();
     selection.remove(eBotSession);
     if(i++ == end)
@@ -237,12 +237,12 @@ void BotSessionsWidget::sessionDataAdded(const QModelIndex& parent, int start, i
   {
     for(int i = start;;)
     {
-      QModelIndex index = botSessionModel.index(i, 0, parent);
+      QModelIndex index = sessionsModel.index(i, 0, parent);
       EUserSession* eSession = (EUserSession*)index.internalPointer();
       if(eSession->getId() == selectedSessionId)
       {
         QModelIndex proxyIndex = proxyModel->mapFromSource(index);
-        QModelIndex proxyIndexEnd = proxyModel->mapFromSource(botSessionModel.index(i, botSessionModel.columnCount(parent) - 1, parent));
+        QModelIndex proxyIndexEnd = proxyModel->mapFromSource(sessionsModel.index(i, sessionsModel.columnCount(parent) - 1, parent));
         sessionView->selectionModel()->select(QItemSelection(proxyIndex, proxyIndexEnd), QItemSelectionModel::Select);
         break;
       }

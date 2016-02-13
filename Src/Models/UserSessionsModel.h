@@ -1,7 +1,7 @@
 
 #pragma once
 
-class BotSessionModel : public QAbstractItemModel, public Entity::Listener
+class UserSessionsModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
   enum class Column
@@ -15,8 +15,8 @@ public:
   };
 
 public:
-  BotSessionModel(Entity::Manager& entityManager);
-  ~BotSessionModel();
+  UserSessionsModel(Entity::Manager& entityManager);
+  ~UserSessionsModel();
 
 private:
   Entity::Manager& entityManager;

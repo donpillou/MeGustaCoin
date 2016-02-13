@@ -49,7 +49,7 @@
 #include "Models/SessionLogModel.h"
 #include "Models/MarketOrderModel.h"
 #include "Models/MarketTransactionModel.h"
-#include "Models/BotSessionModel.h"
+#include "Models/UserSessionsModel.h"
 #include "Models/UserBrokersModel.h"
 #include "Models/TradeModel.h"
 #include "Models/LogModel.h"

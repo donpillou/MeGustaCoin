@@ -1,40 +1,40 @@
 
 #include "stdafx.h"
 
-BotSessionModel::BotSessionModel(Entity::Manager& entityManager) : entityManager(entityManager),
+UserSessionsModel::UserSessionsModel(Entity::Manager& entityManager) : entityManager(entityManager),
   stoppedVar(tr("stopped")), startingVar(tr("starting")), runningVar(tr("running")), simulatingVar(tr("simulating")), stoppingVar(tr("stopping"))
 {
   entityManager.registerListener<EUserSession>(*this);
 }
 
-BotSessionModel::~BotSessionModel()
+UserSessionsModel::~UserSessionsModel()
 {
   entityManager.unregisterListener<EUserSession>(*this);
 }
 
-QModelIndex BotSessionModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex UserSessionsModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
     return createIndex(row, column, sessions.at(row));
   return QModelIndex();
 }
 
-QModelIndex BotSessionModel::parent(const QModelIndex& child) const
+QModelIndex UserSessionsModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int BotSessionModel::rowCount(const QModelIndex& parent) const
+int UserSessionsModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : sessions.size();
 }
 
-int BotSessionModel::columnCount(const QModelIndex& parent) const
+int UserSessionsModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant BotSessionModel::data(const QModelIndex& index, int role) const
+QVariant UserSessionsModel::data(const QModelIndex& index, int role) const
 {
   const EUserSession* eSession = (const EUserSession*)index.internalPointer();
   if(!eSession)
@@ -76,7 +76,7 @@ QVariant BotSessionModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-QVariant BotSessionModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant UserSessionsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -98,7 +98,7 @@ QVariant BotSessionModel::headerData(int section, Qt::Orientation orientation, i
   return QVariant();
 }
 
-void BotSessionModel::addedEntity(Entity& entity)
+void UserSessionsModel::addedEntity(Entity& entity)
 {
   EUserSession* eSession = dynamic_cast<EUserSession*>(&entity);
   if(eSession)
@@ -112,7 +112,7 @@ void BotSessionModel::addedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void BotSessionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserSessionsModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   EUserSession* oldESession = dynamic_cast<EUserSession*>(&oldEntity);
   if(oldESession)
@@ -128,7 +128,7 @@ void BotSessionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   Q_ASSERT(false);
 }
 
-void BotSessionModel::removedEntity(Entity& entity)
+void UserSessionsModel::removedEntity(Entity& entity)
 {
   EUserSession* eSession = dynamic_cast<EUserSession*>(&entity);
   if(eSession)
@@ -142,7 +142,7 @@ void BotSessionModel::removedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void BotSessionModel::removedAll(quint32 type)
+void UserSessionsModel::removedAll(quint32 type)
 {
   if((EType)type == EType::userSession)
   {
