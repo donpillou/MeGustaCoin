@@ -26,7 +26,7 @@ public:
   SessionItemModel(Entity::Manager& entityManager);
   ~SessionItemModel();
 
-  QModelIndex getDraftAmountIndex(EBotSessionItemDraft& draft);
+  QModelIndex getDraftAmountIndex(EUserSessionAssetDraft& draft);
 
 signals:
   void editedItemFlipPrice(const QModelIndex& index, double price);
@@ -34,7 +34,7 @@ signals:
 private:
   Entity::Manager& entityManager;
   EBrokerType* eBrokerType;
-  QList<EBotSessionItem*> items;
+  QList<EUserSessionAsset*> items;
   QVariant draftStr;
   QVariant buyStr;
   QVariant sellStr;
@@ -70,8 +70,8 @@ public:
 private: // QSortFilterProxyModel
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
-    const EBotSessionItem* leftItem = (const EBotSessionItem*)left.internalPointer();
-    const EBotSessionItem* rightItem = (const EBotSessionItem*)right.internalPointer();
+    const EUserSessionAsset* leftItem = (const EUserSessionAsset*)left.internalPointer();
+    const EUserSessionAsset* rightItem = (const EUserSessionAsset*)right.internalPointer();
     switch((SessionItemModel::Column)left.column())
     {
     case SessionItemModel::Column::date:

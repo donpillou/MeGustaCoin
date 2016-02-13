@@ -1,9 +1,9 @@
 
 #pragma once
 
-class EBotSessionItemDraft;
+class EUserSessionAssetDraft;
 
-class EBotSessionItem : public Entity // todo: rename SessionAsset
+class EUserSessionAsset : public Entity // todo: rename SessionAsset
 {
 public:
   static const EType eType = EType::userSessionItem;
@@ -27,7 +27,7 @@ public:
   };
 
 public:
-  EBotSessionItem(const meguco_user_session_asset_entity& data) : Entity(eType, data.entity.id)
+  EUserSessionAsset(const meguco_user_session_asset_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     state = (State)data.state;
@@ -41,7 +41,7 @@ public:
     flipPrice = data.flip_price;
     orderId = data.order_id;
   }
-  EBotSessionItem(quint64 id, const EBotSessionItemDraft& sessionItem);
+  EUserSessionAsset(quint64 id, const EUserSessionAssetDraft& sessionItem);
 
   Type getType() const {return type;}
   State getState() const {return state;}
@@ -60,7 +60,7 @@ public:
   quint64 getOrderId() const {return orderId;}
 
 protected:
-  EBotSessionItem(EType type, quint64 id) : Entity(type, id) {}
+  EUserSessionAsset(EType type, quint64 id) : Entity(type, id) {}
 
 protected:
   Type type;

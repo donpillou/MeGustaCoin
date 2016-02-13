@@ -29,7 +29,7 @@ private:
   QTreeView* itemView;
   QSortFilterProxyModel* proxyModel;
 
-  QSet<EBotSessionItem*> selection;
+  QSet<EUserSessionAsset*> selection;
 
   QAction* buyAction;
   QAction* sellAction;
@@ -37,7 +37,7 @@ private:
   QAction* cancelAction;
 
 private:
-  void addSessionItemDraft(EBotSessionItem::Type type);
+  void addSessionItemDraft(EUserSessionAsset::Type type);
   void updateToolBarButtons();
 
 private: // Entity::Listener

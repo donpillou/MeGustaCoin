@@ -36,11 +36,11 @@ public:
   void stopSession(quint32 sessionId);
   void startSession(quint32 sessionId, meguco_user_session_mode mode);
 
-  EBotSessionItemDraft& createSessionAssetDraft(EBotSessionItem::Type type, double flipPrice);
-  void submitSessionAssetDraft(EBotSessionItemDraft& draft);
-  void updateSessionAsset(EBotSessionItem& asset, double flipPrice);
-  void removeSessionAsset(EBotSessionItem& asset);
-  void removeSessionAssetDraft(EBotSessionItemDraft& draft);
+  EUserSessionAssetDraft& createSessionAssetDraft(EUserSessionAsset::Type type, double flipPrice);
+  void submitSessionAssetDraft(EUserSessionAssetDraft& draft);
+  void updateSessionAsset(EUserSessionAsset& asset, double flipPrice);
+  void removeSessionAsset(EUserSessionAsset& asset);
+  void removeSessionAssetDraft(EUserSessionAssetDraft& draft);
 
   void updateSessionProperty(EBotSessionProperty& property, const QString& value);
 

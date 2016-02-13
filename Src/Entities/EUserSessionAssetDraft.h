@@ -1,13 +1,13 @@
 
 #pragma once
 
-class EBotSessionItemDraft : public EBotSessionItem
+class EUserSessionAssetDraft : public EUserSessionAsset
 {
 public:
   static const EType eType = EType::userSessionItemDraft;
 
 public:
-  EBotSessionItemDraft(quint64 id, Type type, const QDateTime& date, double flipPrice) : EBotSessionItem(eType, id)
+  EUserSessionAssetDraft(quint64 id, Type type, const QDateTime& date, double flipPrice) : EUserSessionAsset(eType, id)
   {
     this->type = type;
     this->state = State::draft;

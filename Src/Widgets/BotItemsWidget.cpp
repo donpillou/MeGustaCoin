@@ -90,12 +90,12 @@ void BotItemsWidget::saveState(QSettings& settings)
 
 void BotItemsWidget::newBuyItem()
 {
-  addSessionItemDraft(EBotSessionItem::Type::buy);
+  addSessionItemDraft(EUserSessionAsset::Type::buy);
 }
 
 void BotItemsWidget::newSellItem()
 {
-  addSessionItemDraft(EBotSessionItem::Type::sell);
+  addSessionItemDraft(EUserSessionAsset::Type::sell);
 }
 
 void BotItemsWidget::submitItem()
@@ -104,28 +104,28 @@ void BotItemsWidget::submitItem()
   foreach(const QModelIndex& proxyIndex, selection)
   {
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    EBotSessionItem* eBotSessionItem = (EBotSessionItem*)index.internalPointer();
-    if(eBotSessionItem->getState() == EBotSessionItem::State::draft)
-      dataService.submitSessionAssetDraft(*(EBotSessionItemDraft*)eBotSessionItem);
+    EUserSessionAsset* eAsset = (EUserSessionAsset*)index.internalPointer();
+    if(eAsset->getState() == EUserSessionAsset::State::draft)
+      dataService.submitSessionAssetDraft(*(EUserSessionAssetDraft*)eAsset);
   }
 }
 
 void BotItemsWidget::cancelItem()
 {
   QModelIndexList selection = itemView->selectionModel()->selectedRows();
-  QList<EBotSessionItem*> itemsToRemove;
-  QList<EBotSessionItem*> itemsToCancel;
+  QList<EUserSessionAsset*> itemsToRemove;
+  QList<EUserSessionAsset*> itemsToCancel;
   foreach(const QModelIndex& proxyIndex, selection)
   {
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
-    EBotSessionItem* eItem = (EBotSessionItem*)index.internalPointer();
+    EUserSessionAsset* eItem = (EUserSessionAsset*)index.internalPointer();
     switch(eItem->getState())
     {
-    case EBotSessionItem::State::draft:
+    case EUserSessionAsset::State::draft:
       itemsToRemove.append(eItem);
       break;
-    case EBotSessionItem::State::waitBuy:
-    case EBotSessionItem::State::waitSell:
+    case EUserSessionAsset::State::waitBuy:
+    case EUserSessionAsset::State::waitSell:
       itemsToCancel.append(eItem);
       break;
     default:
@@ -145,20 +145,20 @@ void BotItemsWidget::cancelItem()
 
   while(!itemsToCancel.isEmpty())
   {
-    QList<EBotSessionItem*>::Iterator last = --itemsToCancel.end();
-    dataService.removeSessionAsset(*(EBotSessionItem*)*last);
+    QList<EUserSessionAsset*>::Iterator last = --itemsToCancel.end();
+    dataService.removeSessionAsset(*(EUserSessionAsset*)*last);
     itemsToCancel.erase(last);
   }
   while(!itemsToRemove.isEmpty())
   {
-    QList<EBotSessionItem*>::Iterator last = --itemsToRemove.end();
-    dataService.removeSessionAssetDraft(*(EBotSessionItemDraft*)*last);
+    QList<EUserSessionAsset*>::Iterator last = --itemsToRemove.end();
+    dataService.removeSessionAssetDraft(*(EUserSessionAssetDraft*)*last);
     itemsToRemove.erase(last);
   }
 
 }
 
-void BotItemsWidget::addSessionItemDraft(EBotSessionItem::Type type)
+void BotItemsWidget::addSessionItemDraft(EUserSessionAsset::Type type)
 {
   EDataService* eDataService = entityManager.getEntity<EDataService>(0);
   EUserSession* eSession = entityManager.getEntity<EUserSession>(eDataService->getSelectedSessionId());
@@ -177,11 +177,11 @@ void BotItemsWidget::addSessionItemDraft(EBotSessionItem::Type type)
   {
     EDataTickerData* eDataTickerData = channelEntityManager->getEntity<EDataTickerData>(0);
     if(eDataTickerData)
-      price = type == EBotSessionItem::Type::buy ? (eDataTickerData->getBid() + 0.01) : (eDataTickerData->getAsk() - 0.01);
+      price = type == EUserSessionAsset::Type::buy ? (eDataTickerData->getBid() + 0.01) : (eDataTickerData->getAsk() - 0.01);
   }
 
-  EBotSessionItemDraft& eBotSessionItemDraft = dataService.createSessionAssetDraft(type, price);
-  QModelIndex amountProxyIndex = itemModel.getDraftAmountIndex(eBotSessionItemDraft);
+  EUserSessionAssetDraft& eAssetDraft = dataService.createSessionAssetDraft(type, price);
+  QModelIndex amountProxyIndex = itemModel.getDraftAmountIndex(eAssetDraft);
   QModelIndex amountIndex = proxyModel->mapFromSource(amountProxyIndex);
   itemView->setCurrentIndex(amountIndex);
   itemView->edit(amountIndex);
@@ -194,7 +194,7 @@ void BotItemsWidget::itemSelectionChanged()
   for(QModelIndexList::Iterator i = modelSelection.begin(), end = modelSelection.end(); i != end; ++i)
   {
     QModelIndex modelIndex = proxyModel->mapToSource(*i);
-    EBotSessionItem* eItem = (EBotSessionItem*)modelIndex.internalPointer();
+    EUserSessionAsset* eItem = (EUserSessionAsset*)modelIndex.internalPointer();
     selection.insert(eItem);
   }
   updateToolBarButtons();
@@ -205,7 +205,7 @@ void BotItemsWidget::itemDataChanged(const QModelIndex& topLeft, const QModelInd
   QModelIndex index = topLeft;
   for(int i = topLeft.row(), end = bottomRight.row();;)
   {
-    EBotSessionItem* eItem = (EBotSessionItem*)index.internalPointer();
+    EUserSessionAsset* eItem = (EUserSessionAsset*)index.internalPointer();
     if(selection.contains(eItem))
     {
       itemSelectionChanged();
@@ -219,7 +219,7 @@ void BotItemsWidget::itemDataChanged(const QModelIndex& topLeft, const QModelInd
 
 void BotItemsWidget::editedItemFlipPrice(const QModelIndex& index, double flipPrice)
 {
-  EBotSessionItem* eitem = (EBotSessionItem*)index.internalPointer();
+  EUserSessionAsset* eitem = (EUserSessionAsset*)index.internalPointer();
   dataService.updateSessionAsset(*eitem, flipPrice);
 }
 
@@ -231,10 +231,10 @@ void BotItemsWidget::updateToolBarButtons()
   bool canCancel = !selection.isEmpty();
 
   bool draftSelected = false;
-  for(QSet<EBotSessionItem*>::Iterator i = selection.begin(), end = selection.end(); i != end; ++i)
+  for(QSet<EUserSessionAsset*>::Iterator i = selection.begin(), end = selection.end(); i != end; ++i)
   {
-    EBotSessionItem* eBotMarketOrder = *i;
-    if(eBotMarketOrder->getState() == EBotSessionItem::State::draft)
+    EUserSessionAsset* eAsset = *i;
+    if(eAsset->getState() == EUserSessionAsset::State::draft)
     {
       draftSelected = true;
       break;

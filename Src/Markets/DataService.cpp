@@ -342,9 +342,9 @@ void DataService::WorkerThread::setState(EDataService::State state)
         globalEntityManager.removeAll<EUserSession>();
         globalEntityManager.removeAll<EBrokerType>();
         globalEntityManager.removeAll<EBotSessionTransaction>();
-        globalEntityManager.removeAll<EBotSessionItem>();
+        globalEntityManager.removeAll<EUserSessionAsset>();
         globalEntityManager.removeAll<EBotSessionProperty>();
-        globalEntityManager.removeAll<EBotSessionItemDraft>();
+        globalEntityManager.removeAll<EUserSessionAssetDraft>();
         globalEntityManager.removeAll<EBotSessionOrder>();
         globalEntityManager.removeAll<EBotSessionLogMessage>();
         globalEntityManager.removeAll<EBotSessionMarker>();
@@ -664,7 +664,7 @@ void DataService::WorkerThread::clearSessionTransactions()
 
 void DataService::WorkerThread::receivedSessionAsset(const meguco_user_session_asset_entity& asset)
 {
-  delegateEntity(new EBotSessionItem(asset));
+  delegateEntity(new EUserSessionAsset(asset));
 }
 
 void DataService::WorkerThread::removedSessionAsset(quint64 assertId)
@@ -1161,28 +1161,28 @@ void DataService::selectSession(quint32 sessionId)
     thread->interrupt();
 }
 
-EBotSessionItemDraft& DataService::createSessionAssetDraft(EBotSessionItem::Type type, double flipPrice)
+EUserSessionAssetDraft& DataService::createSessionAssetDraft(EUserSessionAsset::Type type, double flipPrice)
 {
-  quint32 id = globalEntityManager.getNewEntityId<EBotSessionItemDraft>();
-  EBotSessionItemDraft* eBotSessionItemDraft = new EBotSessionItemDraft(id, type, QDateTime::currentDateTime(), flipPrice);
-  globalEntityManager.delegateEntity(*eBotSessionItemDraft);
-  return *eBotSessionItemDraft;
+  quint32 id = globalEntityManager.getNewEntityId<EUserSessionAssetDraft>();
+  EUserSessionAssetDraft* eAssetDraft = new EUserSessionAssetDraft(id, type, QDateTime::currentDateTime(), flipPrice);
+  globalEntityManager.delegateEntity(*eAssetDraft);
+  return *eAssetDraft;
 }
 
-void DataService::submitSessionAssetDraft(EBotSessionItemDraft& draft)
+void DataService::submitSessionAssetDraft(EUserSessionAssetDraft& draft)
 {
-  if(draft.getState() != EBotSessionItemDraft::State::draft)
+  if(draft.getState() != EUserSessionAssetDraft::State::draft)
     return;
-  draft.setState(EBotSessionItemDraft::State::submitting);
+  draft.setState(EUserSessionAssetDraft::State::submitting);
   globalEntityManager.updatedEntity(draft);
 
   class SubmitSessionAssetJob : public Job
   {
   public:
-    SubmitSessionAssetJob(EBotSessionItem::Type type, double balanceComm, double balanceBase, double flipPrice) : 
+    SubmitSessionAssetJob(EUserSessionAsset::Type type, double balanceComm, double balanceBase, double flipPrice) : 
       type(type), balanceComm(balanceComm), balanceBase(balanceBase), flipPrice(flipPrice) {}
   private:
-    EBotSessionItem::Type type;
+    EUserSessionAsset::Type type;
     double balanceComm;
     double balanceBase;
     double flipPrice;
@@ -1202,11 +1202,11 @@ void DataService::submitSessionAssetDraft(EBotSessionItemDraft& draft)
     thread->interrupt();
 }
 
-void DataService::updateSessionAsset(EBotSessionItem& asset, double flipPrice)
+void DataService::updateSessionAsset(EUserSessionAsset& asset, double flipPrice)
 {
-  if(asset.getState() != EBotSessionItem::State::waitBuy && asset.getState() != EBotSessionItem::State::waitSell)
+  if(asset.getState() != EUserSessionAsset::State::waitBuy && asset.getState() != EUserSessionAsset::State::waitSell)
     return;
-  asset.setState(EBotSessionItem::State::updating);
+  asset.setState(EUserSessionAsset::State::updating);
   globalEntityManager.updatedEntity(asset);
 
   class UpdateSessionAssetJob : public Job
@@ -1232,11 +1232,11 @@ void DataService::updateSessionAsset(EBotSessionItem& asset, double flipPrice)
     thread->interrupt();
 }
 
-void DataService::removeSessionAsset(EBotSessionItem& asset)
+void DataService::removeSessionAsset(EUserSessionAsset& asset)
 {
-  if(asset.getState() != EBotSessionItem::State::waitBuy && asset.getState() != EBotSessionItem::State::waitSell)
+  if(asset.getState() != EUserSessionAsset::State::waitBuy && asset.getState() != EUserSessionAsset::State::waitSell)
     return;
-  asset.setState(EBotSessionItem::State::removing);
+  asset.setState(EUserSessionAsset::State::removing);
   globalEntityManager.updatedEntity(asset);
 
   class RemoveSessionAssetJob : public Job
@@ -1261,9 +1261,9 @@ void DataService::removeSessionAsset(EBotSessionItem& asset)
     thread->interrupt();
 }
 
-void DataService::removeSessionAssetDraft(EBotSessionItemDraft& draft)
+void DataService::removeSessionAssetDraft(EUserSessionAssetDraft& draft)
 {
-  globalEntityManager.removeEntity<EBotSessionItemDraft>(draft.getId());
+  globalEntityManager.removeEntity<EUserSessionAssetDraft>(draft.getId());
 }
 
 void DataService::updateSessionProperty(EBotSessionProperty& property, const QString& value)

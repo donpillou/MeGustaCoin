@@ -8,8 +8,8 @@ SessionItemModel::SessionItemModel(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<EBotSessionItem>(*this);
-  entityManager.registerListener<EBotSessionItemDraft>(*this);
+  entityManager.registerListener<EUserSessionAsset>(*this);
+  entityManager.registerListener<EUserSessionAssetDraft>(*this);
   entityManager.registerListener<EDataService>(*this);
 
   eBrokerType = 0;
@@ -17,15 +17,15 @@ SessionItemModel::SessionItemModel(Entity::Manager& entityManager) :
 
 SessionItemModel::~SessionItemModel()
 {
-  entityManager.unregisterListener<EBotSessionItem>(*this);
-  entityManager.unregisterListener<EBotSessionItemDraft>(*this);
+  entityManager.unregisterListener<EUserSessionAsset>(*this);
+  entityManager.unregisterListener<EUserSessionAssetDraft>(*this);
   entityManager.unregisterListener<EDataService>(*this);
 }
 
-QModelIndex SessionItemModel::getDraftAmountIndex(EBotSessionItemDraft& draft)
+QModelIndex SessionItemModel::getDraftAmountIndex(EUserSessionAssetDraft& draft)
 {
   int index = items.indexOf(&draft);
-  return createIndex(index, (int)(draft.getType() == EBotSessionItem::Type::buy ? Column::balanceBase : Column::balanceComm), &draft);
+  return createIndex(index, (int)(draft.getType() == EUserSessionAsset::Type::buy ? Column::balanceBase : Column::balanceComm), &draft);
 }
 
 QModelIndex SessionItemModel::index(int row, int column, const QModelIndex& parent) const
@@ -52,7 +52,7 @@ int SessionItemModel::columnCount(const QModelIndex& parent) const
 
 QVariant SessionItemModel::data(const QModelIndex& index, int role) const
 {
-  const EBotSessionItem* eItem = (const EBotSessionItem*)index.internalPointer();
+  const EUserSessionAsset* eItem = (const EUserSessionAsset*)index.internalPointer();
   if(!eItem)
     return QVariant();
 
@@ -78,9 +78,9 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     case Column::type:
       switch(eItem->getType())
       {
-      case EBotSessionItem::Type::sell:
+      case EUserSessionAsset::Type::sell:
         return sellIcon;
-      case EBotSessionItem::Type::buy:
+      case EUserSessionAsset::Type::buy:
         return buyIcon;
       default:
         break;
@@ -89,14 +89,14 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     case Column::state:
       switch(eItem->getState())
       {
-      case EBotSessionItem::State::waitSell:
-      case EBotSessionItem::State::selling:
+      case EUserSessionAsset::State::waitSell:
+      case EUserSessionAsset::State::selling:
         return sellIcon;
-      case EBotSessionItem::State::waitBuy:
-      case EBotSessionItem::State::buying:
+      case EUserSessionAsset::State::waitBuy:
+      case EUserSessionAsset::State::buying:
         return buyIcon;
-      case EBotSessionItem::State::draft:
-        return eItem->getType() == EBotSessionItem::Type::sell ? sellIcon : buyIcon;
+      case EUserSessionAsset::State::draft:
+        return eItem->getType() == EUserSessionAsset::Type::sell ? sellIcon : buyIcon;
       default:
         break;
       }
@@ -124,9 +124,9 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     case Column::type:
       switch(eItem->getType())
       {
-      case EBotSessionItem::Type::buy:
+      case EUserSessionAsset::Type::buy:
         return buyStr;
-      case EBotSessionItem::Type::sell:
+      case EUserSessionAsset::Type::sell:
         return sellStr;
       default:
         break;
@@ -135,15 +135,15 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
     case Column::state:
       switch(eItem->getState())
       {
-      case EBotSessionItem::State::waitBuy:
+      case EUserSessionAsset::State::waitBuy:
         return buyStr;
-      case EBotSessionItem::State::buying:
+      case EUserSessionAsset::State::buying:
         return buyingStr;
-      case EBotSessionItem::State::waitSell:
+      case EUserSessionAsset::State::waitSell:
         return sellStr;
-      case EBotSessionItem::State::selling:
+      case EUserSessionAsset::State::selling:
         return sellingStr;
-      case EBotSessionItem::State::draft:
+      case EUserSessionAsset::State::draft:
         return draftStr;
       default:
         break;
@@ -172,22 +172,22 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags SessionItemModel::flags(const QModelIndex &index) const
 {
-  const EBotSessionItem* eItem = (const EBotSessionItem*)index.internalPointer();
+  const EUserSessionAsset* eItem = (const EUserSessionAsset*)index.internalPointer();
   if(!eItem)
     return 0;
 
   Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-  switch((EBotSessionItem::State)eItem->getState())
+  switch((EUserSessionAsset::State)eItem->getState())
   {
-  case EBotSessionItem::State::draft:
+  case EUserSessionAsset::State::draft:
     {
       Column column = (Column)index.column();
-      if(column == (eItem->getType() == EBotSessionItem::Type::buy ? Column::balanceBase : Column::balanceComm) || column == Column::flipPrice)
+      if(column == (eItem->getType() == EUserSessionAsset::Type::buy ? Column::balanceBase : Column::balanceComm) || column == Column::flipPrice)
         flags |= Qt::ItemIsEditable;
     }
     break;
-  case EBotSessionItem::State::waitBuy:
-  case EBotSessionItem::State::waitSell:
+  case EUserSessionAsset::State::waitBuy:
+  case EUserSessionAsset::State::waitSell:
     {
       Column column = (Column)index.column();
       if(column == Column::flipPrice)
@@ -205,13 +205,13 @@ bool SessionItemModel::setData(const QModelIndex & index, const QVariant & value
   if (role != Qt::EditRole)
     return false;
 
-  EBotSessionItem* eItem = (EBotSessionItem*)index.internalPointer();
+  EUserSessionAsset* eItem = (EUserSessionAsset*)index.internalPointer();
   if(!eItem)
     return false;
 
   switch(eItem->getState())
   {
-  case EBotSessionItem::State::draft:
+  case EUserSessionAsset::State::draft:
     switch((Column)index.column())
     {
     case Column::flipPrice:
@@ -219,27 +219,27 @@ bool SessionItemModel::setData(const QModelIndex & index, const QVariant & value
         double newPrice = value.toDouble();
         if(newPrice <= 0. || newPrice == eItem->getPrice())
           return false;
-        if(eItem->getState() == EBotSessionItem::State::draft)
+        if(eItem->getState() == EUserSessionAsset::State::draft)
           eItem->setFlipPrice(newPrice);
         return true;
       }
     case Column::balanceBase:
-      if(eItem->getType() == EBotSessionItem::Type::buy)
+      if(eItem->getType() == EUserSessionAsset::Type::buy)
       {
         double newBalanceBase = value.toDouble();
         if(newBalanceBase <= 0. || newBalanceBase == eItem->getBalanceBase())
           return false;
-        if(eItem->getState() == EBotSessionItem::State::draft)
+        if(eItem->getState() == EUserSessionAsset::State::draft)
           eItem->setBalanceBase(newBalanceBase);
         return true;
       }
     case Column::balanceComm:
-      if(eItem->getType() == EBotSessionItem::Type::sell)
+      if(eItem->getType() == EUserSessionAsset::Type::sell)
       {
         double newBalanceComm = value.toDouble();
         if(newBalanceComm <= 0. || newBalanceComm == eItem->getBalanceComm())
           return false;
-        if(eItem->getState() == EBotSessionItem::State::draft)
+        if(eItem->getState() == EUserSessionAsset::State::draft)
           eItem->setBalanceComm(newBalanceComm);
         return true;
       }
@@ -247,8 +247,8 @@ bool SessionItemModel::setData(const QModelIndex & index, const QVariant & value
       break;
     }
     break;
-  case EBotSessionItem::State::waitBuy:
-  case EBotSessionItem::State::waitSell:
+  case EUserSessionAsset::State::waitBuy:
+  case EUserSessionAsset::State::waitSell:
     if((Column)index.column() == Column::flipPrice)
     {
       double newFlipPrice = value.toDouble();
@@ -318,7 +318,7 @@ void SessionItemModel::addedEntity(Entity& entity)
   case EType::userSessionItem:
   case EType::userSessionItemDraft:
     {
-      EBotSessionItem* eItem = dynamic_cast<EBotSessionItem*>(&entity);
+      EUserSessionAsset* eItem = dynamic_cast<EUserSessionAsset*>(&entity);
       int index = items.size();
       beginInsertRows(QModelIndex(), index, index);
       items.append(eItem);
@@ -340,8 +340,8 @@ void SessionItemModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   case EType::userSessionItem:
   case EType::userSessionItemDraft:
     {
-      EBotSessionItem* oldEBotSessionItem = dynamic_cast<EBotSessionItem*>(&oldEntity);
-      EBotSessionItem* newEBotSessionItem = dynamic_cast<EBotSessionItem*>(&newEntity);
+      EUserSessionAsset* oldEBotSessionItem = dynamic_cast<EUserSessionAsset*>(&oldEntity);
+      EUserSessionAsset* newEBotSessionItem = dynamic_cast<EUserSessionAsset*>(&newEntity);
       int index = items.indexOf(oldEBotSessionItem);
       items[index] = newEBotSessionItem; 
       QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionItem);
@@ -388,7 +388,7 @@ void SessionItemModel::removedEntity(Entity& entity)
   case EType::userSessionItem:
   case EType::userSessionItemDraft:
     {
-      EBotSessionItem* eItem = dynamic_cast<EBotSessionItem*>(&entity);
+      EUserSessionAsset* eItem = dynamic_cast<EUserSessionAsset*>(&entity);
       int index = items.indexOf(eItem);
       beginRemoveRows(QModelIndex(), index, index);
       items.removeAt(index);
