@@ -94,8 +94,8 @@ void DataService::subscribe(const QString& channelName, Entity::Manager& channel
         EDataSubscription* eDataSubscription = channelEntityManager->getEntity<EDataSubscription>(0);
         eDataSubscription->setState(EDataSubscription::State::subscribed);
         channelEntityManager->updatedEntity(*eDataSubscription);
-        EDataMarket* eDataMarket = dataService.globalEntityManager.getEntity<EDataMarket>(channelId);
-        dataService.addLogMessage(ELogMessage::Type::information, QString("Subscribed to channel %1.").arg(eDataMarket->getName()));
+        EMarket* eMarket = dataService.globalEntityManager.getEntity<EMarket>(channelId);
+        dataService.addLogMessage(ELogMessage::Type::information, QString("Subscribed to channel %1.").arg(eMarket->getName()));
       }
     }
   };
@@ -196,9 +196,9 @@ void DataService::addLogMessage(ELogMessage::Type type, const QString& message)
 
 quint32 DataService::getChannelId(const QString& channelName)
 {
-  QList<EDataMarket*> eDataMarkets;
-  globalEntityManager.getAllEntities<EDataMarket>(eDataMarkets);
-  for(QList<EDataMarket*>::Iterator i = eDataMarkets.begin(), end = eDataMarkets.end(); i != end; ++i)
+  QList<EMarket*> eDataMarkets;
+  globalEntityManager.getAllEntities<EMarket>(eDataMarkets);
+  for(QList<EMarket*>::Iterator i = eDataMarkets.begin(), end = eDataMarkets.end(); i != end; ++i)
     if((*i)->getName() == channelName)
       return (*i)->getId();
   return 0;
@@ -361,7 +361,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
       }
       eDataService->setState(state);
       if(state == EDataService::State::offline)
-        globalEntityManager.removeAll<EDataMarket>();
+        globalEntityManager.removeAll<EMarket>();
       globalEntityManager.updatedEntity(*eDataService);
     }
   };
@@ -454,7 +454,7 @@ void DataService::WorkerThread::run()
 
 void DataService::WorkerThread::receivedMarket(quint32 tableId, const QString& channelName)
 {
-  delegateEntity(new EDataMarket(tableId, channelName));
+  delegateEntity(new EMarket(tableId, channelName));
 }
 
 void DataService::WorkerThread::receivedBroker(quint32 brokerId,const meguco_user_broker_entity& broker, const QString& userName)

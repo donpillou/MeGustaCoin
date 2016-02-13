@@ -207,9 +207,9 @@ void MainWindow::updateViewMenu()
   viewMenu->addAction(toggleViewAction(logWidget));
   viewMenu->addAction(toggleViewAction(processesWidget));
   viewMenu->addSeparator();
-  QList<EDataMarket*> channels;
-  globalEntityManager.getAllEntities<EDataMarket>(channels);
-  for(QList<EDataMarket*>::Iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+  QList<EMarket*> channels;
+  globalEntityManager.getAllEntities<EMarket>(channels);
+  for(QList<EMarket*>::Iterator i = channels.begin(), end = channels.end(); i != end; ++i)
   {
     const QString& channelName = (*i)->getName();
     QMenu* subMenu = viewMenu->addMenu(channelName);
@@ -253,10 +253,10 @@ MainWindow::ChannelData* MainWindow::getChannelData(const QString& channelName)
   QHash<QString, ChannelData>::Iterator it = channelDataMap.find(channelName);
   if(it == channelDataMap.end())
   {
-    QList<EDataMarket*> channels;
-    EDataMarket* eDataMarket = 0;
-    globalEntityManager.getAllEntities<EDataMarket>(channels);
-    for(QList<EDataMarket*>::Iterator i = channels.begin(), end = channels.end(); i != end; ++i)
+    QList<EMarket*> channels;
+    EMarket* eDataMarket = 0;
+    globalEntityManager.getAllEntities<EMarket>(channels);
+    for(QList<EMarket*>::Iterator i = channels.begin(), end = channels.end(); i != end; ++i)
       if((*i)->getName() == channelName)
         eDataMarket = *i;
     if(!eDataMarket)

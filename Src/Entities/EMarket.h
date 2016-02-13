@@ -1,13 +1,13 @@
 
 #pragma once
 
-class EDataMarket : public Entity
+class EMarket : public Entity
 {
 public:
   static const EType eType = EType::dataMarket;
 
 public:
-  EDataMarket(quint64 entityId, const QString& name) : Entity(eType, entityId)
+  EMarket(quint64 entityId, const QString& name) : Entity(eType, entityId)
   {
     this->name = name;
     int firstSlash = name.indexOf('/');
