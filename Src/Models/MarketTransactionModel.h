@@ -24,7 +24,7 @@ public:
 private:
   Entity::Manager& entityManager;
   EBrokerType* eBrokerType;
-  QList<EBotMarketTransaction*> transactions;
+  QList<EUserBrokerTransaction*> transactions;
   QVariant buyStr;
   QVariant sellStr;
   QVariant sellIcon;

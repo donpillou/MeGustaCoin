@@ -348,7 +348,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
         globalEntityManager.removeAll<EBotSessionOrder>();
         globalEntityManager.removeAll<EBotSessionLogMessage>();
         globalEntityManager.removeAll<EBotSessionMarker>();
-        globalEntityManager.removeAll<EBotMarketTransaction>();
+        globalEntityManager.removeAll<EUserBrokerTransaction>();
         globalEntityManager.removeAll<EUserBrokerOrder>();
         globalEntityManager.removeAll<EUserBrokerOrderDraft>();
         globalEntityManager.removeAll<EUserBrokerBalance>();
@@ -614,7 +614,7 @@ void DataService::WorkerThread::clearBrokerOrders()
 
 void DataService::WorkerThread::receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction)
 {
-  delegateEntity(new EBotMarketTransaction(transaction));
+  delegateEntity(new EUserBrokerTransaction(transaction));
 }
 
 void DataService::WorkerThread::removedBrokerTransaction(quint64 transactionId)

@@ -1,7 +1,7 @@
 
 #pragma once
 
-class EBotMarketTransaction : public Entity
+class EUserBrokerTransaction : public Entity
 {
 public:
   static const EType eType = EType::userBrokerTransaction;
@@ -13,7 +13,7 @@ public:
   };
 
 public:
-  EBotMarketTransaction(const meguco_user_broker_transaction_entity& data) : Entity(eType, data.entity.id)
+  EUserBrokerTransaction(const meguco_user_broker_transaction_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     date = QDateTime::fromMSecsSinceEpoch(data.entity.time);

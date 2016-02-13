@@ -23,7 +23,7 @@
 #include "Entities/EUserBroker.h"
 #include "Entities/EUserBrokerOrder.h"
 #include "Entities/EUserBrokerOrderDraft.h"
-#include "Entities/EBotMarketTransaction.h"
+#include "Entities/EUserBrokerTransaction.h"
 #include "Entities/EBrokerType.h"
 #include "Entities/EUserBrokerBalance.h"
 #include "Entities/ELogMessage.h"

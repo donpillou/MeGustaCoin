@@ -7,7 +7,7 @@ MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<EBotMarketTransaction>(*this);
+  entityManager.registerListener<EUserBrokerTransaction>(*this);
   entityManager.registerListener<EDataService>(*this);
 
   eBrokerType = 0;
@@ -15,7 +15,7 @@ MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
 
 MarketTransactionModel::~MarketTransactionModel()
 {
-  entityManager.unregisterListener<EBotMarketTransaction>(*this);
+  entityManager.unregisterListener<EUserBrokerTransaction>(*this);
   entityManager.unregisterListener<EDataService>(*this);
 }
 
@@ -43,7 +43,7 @@ int MarketTransactionModel::columnCount(const QModelIndex& parent) const
 
 QVariant MarketTransactionModel::data(const QModelIndex& index, int role) const
 {
-  const EBotMarketTransaction* eTransaction = (const EBotMarketTransaction*)index.internalPointer();
+  const EUserBrokerTransaction* eTransaction = (const EUserBrokerTransaction*)index.internalPointer();
   if(!eTransaction)
     return QVariant();
 
@@ -65,9 +65,9 @@ QVariant MarketTransactionModel::data(const QModelIndex& index, int role) const
     if((Column)index.column() == Column::type)
       switch(eTransaction->getType())
       {
-      case EBotMarketTransaction::Type::sell:
+      case EUserBrokerTransaction::Type::sell:
         return sellIcon;
-      case EBotMarketTransaction::Type::buy:
+      case EUserBrokerTransaction::Type::buy:
         return buyIcon;
       default:
         break;
@@ -79,9 +79,9 @@ QVariant MarketTransactionModel::data(const QModelIndex& index, int role) const
     case Column::type:
       switch(eTransaction->getType())
       {
-      case EBotMarketTransaction::Type::buy:
+      case EUserBrokerTransaction::Type::buy:
         return buyStr;
-      case EBotMarketTransaction::Type::sell:
+      case EUserBrokerTransaction::Type::sell:
         return sellStr;
       default:
         break;
@@ -97,7 +97,7 @@ QVariant MarketTransactionModel::data(const QModelIndex& index, int role) const
     case Column::fee:
       return eBrokerType->formatPrice(eTransaction->getFee());
     case Column::total:
-      return eTransaction->getType() == EBotMarketTransaction::Type::sell ? (QString("+") + eBrokerType->formatPrice(eTransaction->getTotal())) : eBrokerType->formatPrice(-eTransaction->getTotal());
+      return eTransaction->getType() == EUserBrokerTransaction::Type::sell ? (QString("+") + eBrokerType->formatPrice(eTransaction->getTotal())) : eBrokerType->formatPrice(-eTransaction->getTotal());
     }
   }
   return QVariant();
@@ -149,7 +149,7 @@ void MarketTransactionModel::addedEntity(Entity& entity)
   {
   case EType::userBrokerTransaction:
     {
-      EBotMarketTransaction* eTransaction = dynamic_cast<EBotMarketTransaction*>(&entity);
+      EUserBrokerTransaction* eTransaction = dynamic_cast<EUserBrokerTransaction*>(&entity);
       int index = transactions.size();
       beginInsertRows(QModelIndex(), index, index);
       transactions.append(eTransaction);
@@ -170,8 +170,8 @@ void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity
   {
   case EType::userBrokerTransaction:
     {
-      EBotMarketTransaction* oldEBotMarketTransaction = dynamic_cast<EBotMarketTransaction*>(&oldEntity);
-      EBotMarketTransaction* newEBotMarketTransaction = dynamic_cast<EBotMarketTransaction*>(&newEntity);
+      EUserBrokerTransaction* oldEBotMarketTransaction = dynamic_cast<EUserBrokerTransaction*>(&oldEntity);
+      EUserBrokerTransaction* newEBotMarketTransaction = dynamic_cast<EUserBrokerTransaction*>(&newEntity);
       int index = transactions.indexOf(oldEBotMarketTransaction);
       transactions[index] = newEBotMarketTransaction; 
       QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotMarketTransaction);
@@ -208,7 +208,7 @@ void MarketTransactionModel::removedEntity(Entity& entity)
   {
   case EType::userBrokerTransaction:
     {
-      EBotMarketTransaction* eTransaction = dynamic_cast<EBotMarketTransaction*>(&entity);
+      EUserBrokerTransaction* eTransaction = dynamic_cast<EUserBrokerTransaction*>(&entity);
       int index = transactions.indexOf(eTransaction);
       beginRemoveRows(QModelIndex(), index, index);
       transactions.removeAt(index);
