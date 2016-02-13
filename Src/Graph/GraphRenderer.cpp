@@ -107,7 +107,7 @@ void GraphRenderer::addTradeData(const QList<EDataTradeData::Trade>& data)
   upToDate = false;
 }
 
-void GraphRenderer::addSessionMarker(const EBotSessionMarker& marker)
+void GraphRenderer::addSessionMarker(const EUserSessionMarker& marker)
 {
   markers.insert(marker.getDate() / 1000, marker.getType());
   upToDate = false;
@@ -648,15 +648,15 @@ void GraphRenderer::drawMarkers(QPainter& painter, const QRect& rect, double vmi
   QPoint* orangeLineData = (QPoint*)alloca(markers.size() * 2 * sizeof(QPoint));
   QPoint* cyanCurrentLinePoint = cyanLineData;
   QPoint* orangeCurrentLinePoint = orangeLineData;
-  for(QMap<quint64, EBotSessionMarker::Type>::ConstIterator i = markers.begin(), end = markers.end(); i != end; ++i)
+  for(QMap<quint64, EUserSessionMarker::Type>::ConstIterator i = markers.begin(), end = markers.end(); i != end; ++i)
   {
     const quint64& time = i.key();
     if(time < hmin)
       continue;
     int x = leftInt + (time - hmin) * widthInt / maxAge;
-    EBotSessionMarker::Type markerType = i.value();
+    EUserSessionMarker::Type markerType = i.value();
     QPoint* currentLinePoint;
-    if(markerType >= EBotSessionMarker::Type::goodBuy)
+    if(markerType >= EUserSessionMarker::Type::goodBuy)
     {
       currentLinePoint = orangeCurrentLinePoint;
       orangeCurrentLinePoint += 2;
@@ -670,21 +670,21 @@ void GraphRenderer::drawMarkers(QPainter& painter, const QRect& rect, double vmi
     currentLinePoint[1].setX(x);
     switch(i.value())
     {
-    case EBotSessionMarker::Type::buy:
-    case EBotSessionMarker::Type::goodBuy:
+    case EUserSessionMarker::Type::buy:
+    case EUserSessionMarker::Type::goodBuy:
       currentLinePoint[0].setY(bottomInt);
       currentLinePoint[1].setY(midInt);
       break;
-    case EBotSessionMarker::Type::buyAttempt:
+    case EUserSessionMarker::Type::buyAttempt:
       currentLinePoint[0].setY(bottomInt);
       currentLinePoint[1].setY(bottomMidInt);
       break;
-    case EBotSessionMarker::Type::sell:
-    case EBotSessionMarker::Type::goodSell:
+    case EUserSessionMarker::Type::sell:
+    case EUserSessionMarker::Type::goodSell:
       currentLinePoint[0].setY(midInt);
       currentLinePoint[1].setY(topInt);
       break;
-    case EBotSessionMarker::Type::sellAttempt:
+    case EUserSessionMarker::Type::sellAttempt:
       currentLinePoint[0].setY(topMidInt);
       currentLinePoint[1].setY(topInt);
       break;

@@ -1,7 +1,7 @@
 
 #pragma once
 
-class EBotSessionMarker : public Entity
+class EUserSessionMarker : public Entity
 {
 public:
   static const EType eType = EType::userSessionMarker;
@@ -18,7 +18,7 @@ public:
   };
 
 public:
-  EBotSessionMarker(const meguco_user_session_marker_entity& data) : Entity(eType, data.entity.id)
+  EUserSessionMarker(const meguco_user_session_marker_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     date = data.entity.time;

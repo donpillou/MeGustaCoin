@@ -21,7 +21,7 @@ public:
   void setEnabledData(GraphModel& graphModel, unsigned int data);
 
   void addTradeData(GraphModel& graphModel, const QList<EDataTradeData::Trade>& data);
-  void addSessionMarker(GraphModel& graphModel, const EBotSessionMarker& marker);
+  void addSessionMarker(GraphModel& graphModel, const EUserSessionMarker& marker);
   void clearSessionMarker(GraphModel& graphModel);
 
 private:

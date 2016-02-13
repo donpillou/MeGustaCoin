@@ -347,7 +347,7 @@ void DataService::WorkerThread::setState(EDataService::State state)
         globalEntityManager.removeAll<EUserSessionAssetDraft>();
         globalEntityManager.removeAll<EBotSessionOrder>();
         globalEntityManager.removeAll<EUserSessionLogMessage>();
-        globalEntityManager.removeAll<EBotSessionMarker>();
+        globalEntityManager.removeAll<EUserSessionMarker>();
         globalEntityManager.removeAll<EUserBrokerTransaction>();
         globalEntityManager.removeAll<EUserBrokerOrder>();
         globalEntityManager.removeAll<EUserBrokerOrderDraft>();

@@ -186,15 +186,15 @@ void GraphService::addTradeData(GraphModel& graphModel, const QList<EDataTradeDa
   jobQueue.append(new AddTradeDataJob(graphModel, data), 0);
 }
 
-void GraphService::addSessionMarker(GraphModel& graphModel, const EBotSessionMarker& marker)
+void GraphService::addSessionMarker(GraphModel& graphModel, const EUserSessionMarker& marker)
 {
   class AddSessionMarkerJob : public Job
   {
   public:
-    AddSessionMarkerJob(GraphModel& graphModel, const EBotSessionMarker& marker) : graphModel(graphModel), marker(marker) {}
+    AddSessionMarkerJob(GraphModel& graphModel, const EUserSessionMarker& marker) : graphModel(graphModel), marker(marker) {}
   private:
     GraphModel& graphModel;
-    EBotSessionMarker marker;
+    EUserSessionMarker marker;
   public: // Job
     virtual void execute(WorkerThread& workerThread)
     {

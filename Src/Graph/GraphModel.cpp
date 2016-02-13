@@ -7,14 +7,14 @@ GraphModel::GraphModel(const QString& channeName, Entity::Manager& globalEntityM
 {
   graphService.registerGraphModel(*this);
   channelEntityManager.registerListener<EDataTradeData>(*this);
-  globalEntityManager.registerListener<EBotSessionMarker>(*this);
+  globalEntityManager.registerListener<EUserSessionMarker>(*this);
   globalEntityManager.registerListener<EDataService>(*this);
 }
 
 GraphModel::~GraphModel()
 {
   channelEntityManager.unregisterListener<EDataTradeData>(*this);
-  globalEntityManager.unregisterListener<EBotSessionMarker>(*this);
+  globalEntityManager.unregisterListener<EUserSessionMarker>(*this);
   globalEntityManager.unregisterListener<EDataService>(*this);
   graphService.unregisterGraphModel(*this);
 }
@@ -63,11 +63,11 @@ void GraphModel::addedEntity(Entity& entity)
     }
     return;
   }
-  EBotSessionMarker* eBotSessionMarker = dynamic_cast<EBotSessionMarker*>(&entity);
-  if(eBotSessionMarker)
+  EUserSessionMarker* eMarker = dynamic_cast<EUserSessionMarker*>(&entity);
+  if(eMarker)
   {
-    if(addSessionMarkers)
-      graphService.addSessionMarker(*this, *eBotSessionMarker);
+    if(eMarker)
+      graphService.addSessionMarker(*this, *eMarker);
     return;
   }
   Q_ASSERT(false);
@@ -105,9 +105,9 @@ void GraphModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
           graphService.clearSessionMarker(*this);
         else
         {
-          QList<EBotSessionMarker*> sessionMarkers;
-          globalEntityManager.getAllEntities<EBotSessionMarker>(sessionMarkers);
-          for(QList<EBotSessionMarker*>::ConstIterator i = sessionMarkers.begin(), end = sessionMarkers.end(); i != end; ++i)
+          QList<EUserSessionMarker*> sessionMarkers;
+          globalEntityManager.getAllEntities<EUserSessionMarker>(sessionMarkers);
+          for(QList<EUserSessionMarker*>::ConstIterator i = sessionMarkers.begin(), end = sessionMarkers.end(); i != end; ++i)
             graphService.addSessionMarker(*this, **i);
         }
       }

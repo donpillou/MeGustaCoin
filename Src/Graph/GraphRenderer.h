@@ -38,7 +38,7 @@ public:
   const QString& getChannelName() const {return channelName;}
 
   void addTradeData(const QList<EDataTradeData::Trade>& data);
-  void addSessionMarker(const EBotSessionMarker& marker);
+  void addSessionMarker(const EUserSessionMarker& marker);
   void clearSessionMarker();
 
   bool isEnabled() const {return enabled && width != 0 && height != 0;}
@@ -75,7 +75,7 @@ private:
   TradeHandler tradeHandler;
   QList<TradeSample> tradeSamples;
   QList<TradeSample> lowResTradeSamples;
-  QMultiMap<quint64, EBotSessionMarker::Type> markers;
+  QMultiMap<quint64, EUserSessionMarker::Type> markers;
   TradeHandler::Values* values;
   bool enabled;
   bool upToDate;
