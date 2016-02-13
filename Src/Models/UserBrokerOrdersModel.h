@@ -65,10 +65,10 @@ private: // Entity::Listener
   virtual void removedAll(quint32 type);
 };
 
-class MarketOrderSortProxyModel : public QSortFilterProxyModel
+class UserBrokerOrdersSortProxyModel : public QSortFilterProxyModel
 {
 public:
-  MarketOrderSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
+  UserBrokerOrdersSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
 
 private:
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const

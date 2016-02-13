@@ -38,7 +38,7 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
 
   orderView = new QTreeView(this);
   orderView->setUniformRowHeights(true);
-  proxyModel = new MarketOrderSortProxyModel(this);
+  proxyModel = new UserBrokerOrdersSortProxyModel(this);
   proxyModel->setDynamicSortFilter(true);
   proxyModel->setSourceModel(&ordersModel);
   orderView->setModel(proxyModel);

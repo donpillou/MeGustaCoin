@@ -22,7 +22,7 @@ private:
   Entity::Manager& entityManager;
   DataService& dataService;
 
-  MarketTransactionModel transactionModel;
+  UserBrokerTransactionsModel transactionsModel;
 
   QTreeView* transactionView;
   QSortFilterProxyModel* proxyModel;

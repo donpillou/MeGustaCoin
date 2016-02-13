@@ -1,7 +1,7 @@
 
 #pragma once
 
-class MarketTransactionModel : public QAbstractItemModel, public Entity::Listener
+class UserBrokerTransactionsModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
   enum class Column
@@ -18,8 +18,8 @@ public:
   };
 
 public:
-  MarketTransactionModel(Entity::Manager& entityManager);
-  ~MarketTransactionModel();
+  UserBrokerTransactionsModel(Entity::Manager& entityManager);
+  ~UserBrokerTransactionsModel();
 
 private:
   Entity::Manager& entityManager;
@@ -46,29 +46,29 @@ private: // Entity::Listener
   virtual void removedAll(quint32 type);
 };
 
-class MarketTransactionSortProxyModel : public QSortFilterProxyModel
+class UserBrokerTransactionsSortProxyModel : public QSortFilterProxyModel
 {
 public:
-  MarketTransactionSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
+  UserBrokerTransactionsSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
 
 private: // QSortFilterProxyModel
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
     const EUserBrokerTransaction* leftTransaction = (const EUserBrokerTransaction*)left.internalPointer();
     const EUserBrokerTransaction* rightTransaction = (const EUserBrokerTransaction*)right.internalPointer();
-    switch((MarketTransactionModel::Column)left.column())
+    switch((UserBrokerTransactionsModel::Column)left.column())
     {
-    case MarketTransactionModel::Column::date:
+    case UserBrokerTransactionsModel::Column::date:
       return leftTransaction->getDate().msecsTo(rightTransaction->getDate()) > 0;
-    case MarketTransactionModel::Column::value:
+    case UserBrokerTransactionsModel::Column::value:
       return leftTransaction->getAmount() * leftTransaction->getPrice() < rightTransaction->getAmount() * rightTransaction->getPrice();
-    case MarketTransactionModel::Column::amount:
+    case UserBrokerTransactionsModel::Column::amount:
       return leftTransaction->getAmount() < rightTransaction->getAmount();
-    case MarketTransactionModel::Column::price:
+    case UserBrokerTransactionsModel::Column::price:
       return leftTransaction->getPrice() < rightTransaction->getPrice();
-    case MarketTransactionModel::Column::fee:
+    case UserBrokerTransactionsModel::Column::fee:
       return leftTransaction->getFee() < rightTransaction->getFee();
-    case MarketTransactionModel::Column::total:
+    case UserBrokerTransactionsModel::Column::total:
       return leftTransaction->getTotal() < rightTransaction->getTotal();
     default:
       break;

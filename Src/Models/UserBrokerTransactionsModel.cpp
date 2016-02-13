@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
+UserBrokerTransactionsModel::UserBrokerTransactionsModel(Entity::Manager& entityManager) :
   entityManager(entityManager),
   buyStr(tr("buy")), sellStr(tr("sell")),
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
@@ -13,35 +13,35 @@ MarketTransactionModel::MarketTransactionModel(Entity::Manager& entityManager) :
   eBrokerType = 0;
 }
 
-MarketTransactionModel::~MarketTransactionModel()
+UserBrokerTransactionsModel::~UserBrokerTransactionsModel()
 {
   entityManager.unregisterListener<EUserBrokerTransaction>(*this);
   entityManager.unregisterListener<EConnection>(*this);
 }
 
-QModelIndex MarketTransactionModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex UserBrokerTransactionsModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
     return createIndex(row, column, transactions.at(row));
   return QModelIndex();
 }
 
-QModelIndex MarketTransactionModel::parent(const QModelIndex& child) const
+QModelIndex UserBrokerTransactionsModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int MarketTransactionModel::rowCount(const QModelIndex& parent) const
+int UserBrokerTransactionsModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : transactions.size();
 }
 
-int MarketTransactionModel::columnCount(const QModelIndex& parent) const
+int UserBrokerTransactionsModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant MarketTransactionModel::data(const QModelIndex& index, int role) const
+QVariant UserBrokerTransactionsModel::data(const QModelIndex& index, int role) const
 {
   const EUserBrokerTransaction* eTransaction = (const EUserBrokerTransaction*)index.internalPointer();
   if(!eTransaction)
@@ -103,7 +103,7 @@ QVariant MarketTransactionModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-QVariant MarketTransactionModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant UserBrokerTransactionsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -143,7 +143,7 @@ QVariant MarketTransactionModel::headerData(int section, Qt::Orientation orienta
   return QVariant();
 }
 
-void MarketTransactionModel::addedEntity(Entity& entity)
+void UserBrokerTransactionsModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -164,7 +164,7 @@ void MarketTransactionModel::addedEntity(Entity& entity)
   }
 }
 
-void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserBrokerTransactionsModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
@@ -202,7 +202,7 @@ void MarketTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity
   }
 }
 
-void MarketTransactionModel::removedEntity(Entity& entity)
+void UserBrokerTransactionsModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -223,7 +223,7 @@ void MarketTransactionModel::removedEntity(Entity& entity)
   }
 }
 
-void MarketTransactionModel::removedAll(quint32 type)
+void UserBrokerTransactionsModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {

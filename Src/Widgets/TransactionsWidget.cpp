@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), transactionModel(entityManager)
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), transactionsModel(entityManager)
 {
   entityManager.registerListener<EConnection>(*this);
 
@@ -19,8 +19,8 @@ TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& s
 
   transactionView = new QTreeView(this);
   transactionView->setUniformRowHeights(true);
-  proxyModel = new MarketTransactionSortProxyModel(this);
-  proxyModel->setSourceModel(&transactionModel);
+  proxyModel = new UserBrokerTransactionsSortProxyModel(this);
+  proxyModel->setSourceModel(&transactionsModel);
   proxyModel->setDynamicSortFilter(true);
   transactionView->setModel(proxyModel);
   transactionView->setSortingEnabled(true);

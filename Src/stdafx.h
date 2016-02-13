@@ -48,7 +48,7 @@
 #include "Models/SessionPropertyModel.h"
 #include "Models/SessionLogModel.h"
 #include "Models/UserBrokerOrdersModel.h"
-#include "Models/MarketTransactionModel.h"
+#include "Models/UserBrokerTransactionsModel.h"
 #include "Models/UserSessionsModel.h"
 #include "Models/UserBrokersModel.h"
 #include "Models/TradeModel.h"
