@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
-  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  dataService(dataService), sessionsModel(entityManager), orderModel(entityManager), transactionModel(entityManager), selectedSessionId(0)
+  QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  dataService(dataService), sessionsModel(entityManager), /*ordersModel(entityManager), transactionModel(entityManager), */selectedSessionId(0)
 {
   entityManager.registerListener<EConnection>(*this);
 

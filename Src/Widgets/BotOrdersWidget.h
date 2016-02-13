@@ -9,6 +9,6 @@ public:
   void saveState(QSettings& settings);
 
 private:
-  SessionOrderModel orderModel;
+  UserSessionOrdersModel ordersModel;
   QTreeView* orderView;
 };

@@ -42,7 +42,7 @@
 #include "Graph/GraphView.h"
 #include "Graph/GraphService.h"
 
-#include "Models/SessionOrderModel.h"
+#include "Models/UserSessionOrdersModel.h"
 #include "Models/SessionTransactionModel.h"
 #include "Models/UserSessionAssetsModel.h"
 #include "Models/SessionPropertyModel.h"

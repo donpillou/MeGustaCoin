@@ -2,16 +2,16 @@
 #include "stdafx.h"
 
 BotOrdersWidget::BotOrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
-  QWidget(&tabFramework), orderModel(entityManager)
+  QWidget(&tabFramework), ordersModel(entityManager)
 {
   setWindowTitle(tr("Bot Orders"));
 
   orderView = new QTreeView(this);
   orderView->setUniformRowHeights(true);
-  SessionOrderSortProxyModel* orderProxyModel = new SessionOrderSortProxyModel(this);
-  orderProxyModel->setDynamicSortFilter(true);
-  orderProxyModel->setSourceModel(&orderModel);
-  orderView->setModel(orderProxyModel);
+  UserSessionOrderSortProxyModel* ordersProxyModel = new UserSessionOrderSortProxyModel(this);
+  ordersProxyModel->setDynamicSortFilter(true);
+  ordersProxyModel->setSourceModel(&ordersModel);
+  orderView->setModel(ordersProxyModel);
   orderView->setSortingEnabled(true);
   orderView->setRootIsDecorated(false);
   orderView->setAlternatingRowColors(true);

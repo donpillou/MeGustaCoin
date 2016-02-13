@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-SessionOrderModel::SessionOrderModel(Entity::Manager& entityManager) :
+UserSessionOrdersModel::UserSessionOrdersModel(Entity::Manager& entityManager) :
   entityManager(entityManager),
   draftStr(tr("draft")), submittingStr(tr("submitting...")), updatingStr(tr("updating...")), openStr(tr("open")), cancelingStr(tr("canceling...")), canceledStr(tr("canceled")), closedStr(tr("closed")), buyStr(tr("buy")), sellStr(tr("sell")), 
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
@@ -13,35 +13,35 @@ SessionOrderModel::SessionOrderModel(Entity::Manager& entityManager) :
   eBrokerType = 0;
 }
 
-SessionOrderModel::~SessionOrderModel()
+UserSessionOrdersModel::~UserSessionOrdersModel()
 {
   entityManager.unregisterListener<EUserSessionOrder>(*this);
   entityManager.unregisterListener<EConnection>(*this);
 }
 
-QModelIndex SessionOrderModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex UserSessionOrdersModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
     return createIndex(row, column, orders.at(row));
   return QModelIndex();
 }
 
-QModelIndex SessionOrderModel::parent(const QModelIndex& child) const
+QModelIndex UserSessionOrdersModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int SessionOrderModel::rowCount(const QModelIndex& parent) const
+int UserSessionOrdersModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : orders.size();
 }
 
-int SessionOrderModel::columnCount(const QModelIndex& parent) const
+int UserSessionOrdersModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant SessionOrderModel::data(const QModelIndex& index, int role) const
+QVariant UserSessionOrdersModel::data(const QModelIndex& index, int role) const
 {
   const EUserSessionOrder* eOrder = (const EUserSessionOrder*)index.internalPointer();
   if(!eOrder)
@@ -101,7 +101,7 @@ QVariant SessionOrderModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-QVariant SessionOrderModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant UserSessionOrdersModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -138,7 +138,7 @@ QVariant SessionOrderModel::headerData(int section, Qt::Orientation orientation,
   return QVariant();
 }
 
-void SessionOrderModel::addedEntity(Entity& entity)
+void UserSessionOrdersModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -159,7 +159,7 @@ void SessionOrderModel::addedEntity(Entity& entity)
   }
 }
 
-void SessionOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserSessionOrdersModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
@@ -201,7 +201,7 @@ void SessionOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   }
 }
 
-void SessionOrderModel::removedEntity(Entity& entity)
+void UserSessionOrdersModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -222,7 +222,7 @@ void SessionOrderModel::removedEntity(Entity& entity)
   }
 }
 
-void SessionOrderModel::removedAll(quint32 type)
+void UserSessionOrdersModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {

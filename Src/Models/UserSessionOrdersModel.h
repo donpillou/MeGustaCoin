@@ -1,7 +1,7 @@
 
 #pragma once
 
-class SessionOrderModel : public QAbstractItemModel, public Entity::Listener
+class UserSessionOrdersModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
   enum class Column
@@ -17,8 +17,8 @@ public:
   };
 
 public:
-  SessionOrderModel(Entity::Manager& entityManager);
-  ~SessionOrderModel();
+  UserSessionOrdersModel(Entity::Manager& entityManager);
+  ~UserSessionOrdersModel();
 
 private:
   Entity::Manager& entityManager;
@@ -52,27 +52,27 @@ private: // Entity::Listener
   virtual void removedAll(quint32 type);
 };
 
-class SessionOrderSortProxyModel : public QSortFilterProxyModel
+class UserSessionOrderSortProxyModel : public QSortFilterProxyModel
 {
 public:
-  SessionOrderSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
+  UserSessionOrderSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
 
 private:
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
     const EUserSessionOrder* leftOrder = (const EUserSessionOrder*)left.internalPointer();
     const EUserSessionOrder* rightOrder = (const EUserSessionOrder*)right.internalPointer();
-    switch((SessionOrderModel::Column)left.column())
+    switch((UserSessionOrdersModel::Column)left.column())
     {
-    case SessionOrderModel::Column::date:
+    case UserSessionOrdersModel::Column::date:
       return leftOrder->getDate().msecsTo(rightOrder->getDate()) > 0;
-    case SessionOrderModel::Column::value:
+    case UserSessionOrdersModel::Column::value:
       return leftOrder->getAmount() * leftOrder->getPrice() < rightOrder->getAmount() * rightOrder->getPrice();
-    case SessionOrderModel::Column::amount:
+    case UserSessionOrdersModel::Column::amount:
       return leftOrder->getAmount() < rightOrder->getAmount();
-    case SessionOrderModel::Column::price:
+    case UserSessionOrdersModel::Column::price:
       return leftOrder->getPrice() < rightOrder->getPrice();
-    case SessionOrderModel::Column::total:
+    case UserSessionOrdersModel::Column::total:
       return leftOrder->getTotal() < rightOrder->getTotal();
     default:
       break;

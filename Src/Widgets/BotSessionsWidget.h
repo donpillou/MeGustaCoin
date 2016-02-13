@@ -29,8 +29,8 @@ private:
   DataService& dataService;
 
   UserSessionsModel sessionsModel;
-  SessionOrderModel orderModel;
-  SessionTransactionModel transactionModel;
+  //UserSessionOrdersModel ordersModel;
+  //SessionTransactionModel transactionModel;
 
   QTreeView* sessionView;
   QSortFilterProxyModel* proxyModel;
