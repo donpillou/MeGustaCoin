@@ -89,6 +89,7 @@ private:
     void addMessage(ELogMessage::Type type, const QString& message);
     void delegateEntity(Entity* entity);
     void removeEntity(EType type, quint64 id);
+    void clearEntities(EType type);
 
   public:
     DataService& dataService;
@@ -123,23 +124,32 @@ private:
 
     virtual void receivedBrokerBalance(const meguco_user_broker_balance_entity& balance);
     virtual void removedBrokerBalance(quint64 balanceId);
+    virtual void clearBrokerBalance();
     virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& order);
     virtual void removedBrokerOrder(quint64 orderId);
+    virtual void clearBrokerOrders();
     virtual void receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction);
     virtual void removedBrokerTransaction(quint64 transactionId);
+    virtual void clearBrokerTransactions();
     virtual void receivedBrokerLog(const meguco_log_entity& log, const QString& message);
     virtual void removedBrokerLog(quint64 logId) {}
+    virtual void clearBrokerLog();
 
     virtual void receivedSessionOrder(const meguco_user_broker_order_entity& order);
     virtual void removedSessionOrder(quint64 orderId);
+    virtual void clearSessionOrders();
     virtual void receivedSessionTransaction(const meguco_user_broker_transaction_entity& transaction);
     virtual void removedSessionTransaction(quint64 transactionId);
+    virtual void clearSessionTransactions();
     virtual void receivedSessionAsset(const meguco_user_session_asset_entity& asset);
     virtual void removedSessionAsset(quint64 assertId);
+    virtual void clearSessionAssets();
     virtual void receivedSessionLog(const meguco_log_entity& log, const QString& message);
     virtual void removedSessionLog(quint64 logId);
+    virtual void clearSessionLog();
     virtual void receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit);
     virtual void removedSessionProperty(quint64 propertyId);
+    virtual void clearSessionProperties();
 
     virtual void receivedProcess(const meguco_process_entity& process, const QString& cmd);
     virtual void removedProcess(quint64 processId);

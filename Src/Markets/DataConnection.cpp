@@ -133,7 +133,7 @@ void DataConnection::zlimdbCallback(const zlimdb_header& message)
   case zlimdb_message_add_request:
     if(message.size >= sizeof(zlimdb_add_request) + sizeof(zlimdb_entity))
     {
-      const zlimdb_add_request* addRequest = (zlimdb_add_request*)&message;
+      const zlimdb_add_request* addRequest = (const zlimdb_add_request*)&message;
       const zlimdb_entity* entity = (const zlimdb_entity*)(addRequest + 1);
       if(sizeof(zlimdb_add_request) + entity->size <= message.size)
         addedEntity(addRequest->table_id, *entity);
@@ -142,7 +142,7 @@ void DataConnection::zlimdbCallback(const zlimdb_header& message)
   case zlimdb_message_update_request:
     if(message.size >= sizeof(zlimdb_update_request) + sizeof(zlimdb_entity))
     {
-      const zlimdb_update_request* updateRequest = (zlimdb_update_request*)&message;
+      const zlimdb_update_request* updateRequest = (const zlimdb_update_request*)&message;
       const zlimdb_entity* entity = (const zlimdb_entity*)(updateRequest + 1);
       if(sizeof(zlimdb_add_request) + entity->size <= message.size)
         updatedEntity(updateRequest->table_id, *entity);
@@ -151,8 +151,15 @@ void DataConnection::zlimdbCallback(const zlimdb_header& message)
   case zlimdb_message_remove_request:
     if(message.size >= sizeof(zlimdb_remove_request))
     {
-      const zlimdb_remove_request* removeRequest = (zlimdb_remove_request*)&message;
+      const zlimdb_remove_request* removeRequest = (const zlimdb_remove_request*)&message;
       removedEntity(removeRequest->table_id, removeRequest->id);
+    }
+    break;
+  case zlimdb_message_reload_request:
+    if(message.size >= sizeof(zlimdb_reload_request))
+    {
+      const zlimdb_reload_request* reloadRequest = (const zlimdb_reload_request*)&message;
+      reloadedTable(reloadRequest->table_id);
     }
     break;
   default:
@@ -318,6 +325,39 @@ void DataConnection::removedEntity(uint32_t tableId, uint64_t entityId)
     break;
   case TableInfo::sessionLogTable:
     callback->removedSessionLog(entityId);
+    break;
+  default:
+    break;
+  }
+}
+
+void DataConnection::reloadedTable(uint32_t tableId)
+{
+  QHash<quint32, TableInfo>::ConstIterator it = tableInfo.find(tableId);
+  if(it == tableInfo.end())
+    return;
+  const TableInfo& tableInfo = it.value();
+  switch(tableInfo.type)
+  {
+  case TableInfo::sessionOrdersTable:
+    callback->clearSessionOrders();
+    query(tableId, tableInfo.type);
+    break;
+  case TableInfo::sessionTransactionsTable:
+    callback->clearSessionTransactions();
+    query(tableId, tableInfo.type);
+    break;
+  case TableInfo::sessionAssetsTable:
+    callback->clearSessionAssets();
+    query(tableId, tableInfo.type);
+    break;
+  case TableInfo::sessionPropertiesTable:
+    callback->clearSessionProperties();
+    query(tableId, tableInfo.type);
+    break;
+  case TableInfo::sessionLogTable:
+    callback->clearSessionLog();
+    query(tableId, tableInfo.type);
     break;
   default:
     break;
@@ -676,6 +716,18 @@ bool DataConnection::subscribe(quint32 tableId, TableInfo::Type tableType, zlimd
   TableInfo& tableInfo = this->tableInfo[tableId];
   tableInfo.type = tableType;
 
+  return receiveResponse(tableType);
+}
+
+bool DataConnection::query(quint32 tableId, TableInfo::Type tableType)
+{
+  if(zlimdb_query(zdb, tableId, zlimdb_query_type_all, 0) != 0)
+    return error = getZlimDbError(), false;
+  return receiveResponse(tableType);
+}
+
+bool DataConnection::receiveResponse(TableInfo::Type tableType)
+{
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   switch(tableType)
   {
@@ -802,6 +854,11 @@ bool DataConnection::selectBroker(quint32 brokerId)
         return false;
       if(brokerData.logTableId != 0 && !unsubscribe(brokerData.logTableId))
         return false;
+
+      callback->clearBrokerBalance();
+      callback->clearBrokerOrders();
+      callback->clearBrokerTransactions();
+      callback->clearBrokerLog();
     }
   }
   this->selectedBrokerId = 0;
@@ -982,6 +1039,13 @@ bool DataConnection::selectSession(quint32 sessionId)
         return false;
       if(sessionData.propertiesTableId != 0 && !unsubscribe(sessionData.propertiesTableId))
         return false;
+
+      callback->clearSessionTransactions();
+      callback->clearSessionAssets();
+      callback->clearSessionProperties();
+      callback->clearSessionOrders();
+      callback->clearSessionLog();
+      //callback->clearSessionMarkers(); // todo: 
     }
   }
   this->selectedSessionId = 0;

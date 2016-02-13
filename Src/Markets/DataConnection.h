@@ -23,23 +23,32 @@ public:
 
     virtual void receivedBrokerBalance(const meguco_user_broker_balance_entity& balance) = 0;
     virtual void removedBrokerBalance(quint64 balanceId) = 0;
+    virtual void clearBrokerBalance() = 0;
     virtual void receivedBrokerOrder(const meguco_user_broker_order_entity& brokerOrder) = 0; 
     virtual void removedBrokerOrder(quint64 orderId) = 0;
+    virtual void clearBrokerOrders() = 0;
     virtual void receivedBrokerTransaction(const meguco_user_broker_transaction_entity& transaction) = 0;
     virtual void removedBrokerTransaction(quint64 transactionId) = 0;
+    virtual void clearBrokerTransactions() = 0;
     virtual void receivedBrokerLog(const meguco_log_entity& log, const QString& message) = 0;
     virtual void removedBrokerLog(quint64 logId) = 0;
+    virtual void clearBrokerLog() = 0;
 
     virtual void receivedSessionOrder(const meguco_user_broker_order_entity& order) = 0;
     virtual void removedSessionOrder(quint64 orderId) = 0;
+    virtual void clearSessionOrders() = 0;
     virtual void receivedSessionTransaction(const meguco_user_broker_transaction_entity& transaction) = 0;
     virtual void removedSessionTransaction(quint64 transactionId) = 0;
+    virtual void clearSessionTransactions() = 0;
     virtual void receivedSessionAsset(const meguco_user_session_asset_entity& asset) = 0;
     virtual void removedSessionAsset(quint64 assertId) = 0;
+    virtual void clearSessionAssets() = 0;
     virtual void receivedSessionLog(const meguco_log_entity& log, const QString& message) = 0;
     virtual void removedSessionLog(quint64 logId) = 0;
+    virtual void clearSessionLog() = 0;
     virtual void receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit) = 0;
     virtual void removedSessionProperty(quint64 propertyId) = 0;
+    virtual void clearSessionProperties() = 0;
 
     virtual void receivedProcess(const meguco_process_entity& process, const QString& cmd) = 0;
     virtual void removedProcess(quint64 processId) = 0;
@@ -162,12 +171,15 @@ private:
   void zlimdbCallback(const zlimdb_header& message);
 
   bool subscribe(quint32 tableId, TableInfo::Type tableType, zlimdb_query_type queryType = zlimdb_query_type_all);
+  bool query(quint32 tableId, TableInfo::Type tableType);
+  bool receiveResponse(TableInfo::Type tableType);
   bool unsubscribe(quint32 tableId);
 
   void addedEntity(uint32_t tableId, const zlimdb_entity& entity);
   void updatedEntity(uint32_t tableId, const zlimdb_entity& entity);
   void receivedEntity(uint32_t tableId, const zlimdb_entity& entity);
   void removedEntity(uint32_t tableId, uint64_t entityId);
+  void reloadedTable(uint32_t tableId);
 
   bool addedTable(const zlimdb_table_entity& table);
   void removedTable(uint32_t tableId);

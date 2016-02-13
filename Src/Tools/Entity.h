@@ -125,6 +125,11 @@ public:
       removeAll((quint32)C::eType);
     }
 
+    template <typename E> void removeAll(E eType)
+    {
+      removeAll((quint32)eType);
+    }
+
     Entity* getEntity(quint32 type, quint64 id) const
     {
       QHash<quint32, EntityTable>::ConstIterator itTable = tables.find(type);
