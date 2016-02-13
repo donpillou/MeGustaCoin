@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-SessionLogModel::SessionLogModel(Entity::Manager& entityManager) :
+UserSessionLogModel::UserSessionLogModel(Entity::Manager& entityManager) :
   entityManager(entityManager),
   informationIcon(QIcon(":/Icons/information.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
@@ -9,36 +9,36 @@ SessionLogModel::SessionLogModel(Entity::Manager& entityManager) :
   entityManager.registerListener<EUserSessionLogMessage>(*this);
 }
 
-SessionLogModel::~SessionLogModel()
+UserSessionLogModel::~UserSessionLogModel()
 {
   entityManager.unregisterListener<EUserSessionLogMessage>(*this);
 
   qDeleteAll(messages);
 }
 
-QModelIndex SessionLogModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex UserSessionLogModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
     return createIndex(row, column, messages.at(row));
   return QModelIndex();
 }
 
-QModelIndex SessionLogModel::parent(const QModelIndex& child) const
+QModelIndex UserSessionLogModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int SessionLogModel::rowCount(const QModelIndex& parent) const
+int UserSessionLogModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : messages.size();
 }
 
-int SessionLogModel::columnCount(const QModelIndex& parent) const
+int UserSessionLogModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant SessionLogModel::data(const QModelIndex& index, int role) const
+QVariant UserSessionLogModel::data(const QModelIndex& index, int role) const
 {
   const Item* item = (const Item*)index.internalPointer();
   if(!item)
@@ -62,7 +62,7 @@ QVariant SessionLogModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-QVariant SessionLogModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant UserSessionLogModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -82,7 +82,7 @@ QVariant SessionLogModel::headerData(int section, Qt::Orientation orientation, i
   return QVariant();
 }
 
-void SessionLogModel::addedEntity(Entity& entity)
+void UserSessionLogModel::addedEntity(Entity& entity)
 {
   EUserSessionLogMessage* eSessionLogMessage = dynamic_cast<EUserSessionLogMessage*>(&entity);
   if(eSessionLogMessage)
@@ -99,12 +99,12 @@ void SessionLogModel::addedEntity(Entity& entity)
   Q_ASSERT(false);
 }
 
-void SessionLogModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserSessionLogModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   addedEntity(newEntity);
 }
 
-void SessionLogModel::removedAll(quint32 type)
+void UserSessionLogModel::removedAll(quint32 type)
 {
   if((EType)type == EType::userSessionLogMessage)
   {

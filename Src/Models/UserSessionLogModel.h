@@ -1,7 +1,7 @@
 
 #pragma once
 
-class SessionLogModel : public QAbstractItemModel, public Entity::Listener
+class UserSessionLogModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
   enum class Column
@@ -13,8 +13,8 @@ public:
   };
 
 public:
-  SessionLogModel(Entity::Manager& entityManager);
-  ~SessionLogModel();
+  UserSessionLogModel(Entity::Manager& entityManager);
+  ~UserSessionLogModel();
 
 private:
   class Item

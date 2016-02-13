@@ -15,7 +15,7 @@ private slots:
   void autoScroll(int, int);
 
 private:
-  SessionLogModel logModel;
+  UserSessionLogModel logModel;
   QTreeView* logView;
   bool autoScrollEnabled;
 };
