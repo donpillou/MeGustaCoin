@@ -1,7 +1,7 @@
 
 #pragma once
 
-class SessionTransactionModel : public QAbstractItemModel, public Entity::Listener
+class UserSessionTransactionsModel : public QAbstractItemModel, public Entity::Listener
 {
 public:
   enum class Column
@@ -18,8 +18,8 @@ public:
   };
 
 public:
-  SessionTransactionModel(Entity::Manager& entityManager);
-  ~SessionTransactionModel();
+  UserSessionTransactionsModel(Entity::Manager& entityManager);
+  ~UserSessionTransactionsModel();
 
 private:
   Entity::Manager& entityManager;
@@ -46,29 +46,29 @@ private: // Entity::Listener
   virtual void removedAll(quint32 type);
 };
 
-class SessionTransactionSortProxyModel : public QSortFilterProxyModel
+class UserSessionTransactionsSortProxyModel : public QSortFilterProxyModel
 {
 public:
-  SessionTransactionSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
+  UserSessionTransactionsSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
 
 private: // QSortFilterProxyModel
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
     const EUserSessionTransaction* leftTransaction = (const EUserSessionTransaction*)left.internalPointer();
     const EUserSessionTransaction* rightTransaction = (const EUserSessionTransaction*)right.internalPointer();
-    switch((SessionTransactionModel::Column)left.column())
+    switch((UserSessionTransactionsModel::Column)left.column())
     {
-    case SessionTransactionModel::Column::date:
+    case UserSessionTransactionsModel::Column::date:
       return leftTransaction->getDate().msecsTo(rightTransaction->getDate()) > 0;
-    case SessionTransactionModel::Column::value:
+    case UserSessionTransactionsModel::Column::value:
       return leftTransaction->getAmount() * leftTransaction->getPrice() < rightTransaction->getAmount() * rightTransaction->getPrice();
-    case SessionTransactionModel::Column::amount:
+    case UserSessionTransactionsModel::Column::amount:
       return leftTransaction->getAmount() < rightTransaction->getAmount();
-    case SessionTransactionModel::Column::price:
+    case UserSessionTransactionsModel::Column::price:
       return leftTransaction->getPrice() < rightTransaction->getPrice();
-    case SessionTransactionModel::Column::fee:
+    case UserSessionTransactionsModel::Column::fee:
       return leftTransaction->getFee() < rightTransaction->getFee();
-    case SessionTransactionModel::Column::total:
+    case UserSessionTransactionsModel::Column::total:
       return leftTransaction->getTotal() < rightTransaction->getTotal();
     default:
       break;

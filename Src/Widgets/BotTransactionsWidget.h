@@ -9,6 +9,6 @@ public:
   void saveState(QSettings& settings);
 
 private:
-  SessionTransactionModel transactionModel;
+  UserSessionTransactionsModel transactionsModel;
   QTreeView* transactionView;
 };

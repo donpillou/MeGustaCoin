@@ -2,16 +2,16 @@
 #include "stdafx.h"
 
 BotTransactionsWidget::BotTransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
-  QWidget(&tabFramework), transactionModel(entityManager)
+  QWidget(&tabFramework), transactionsModel(entityManager)
 {
   setWindowTitle(tr("Bot Transactions"));
 
   transactionView = new QTreeView(this);
   transactionView->setUniformRowHeights(true);
-  SessionTransactionSortProxyModel* transactionProxyModel = new SessionTransactionSortProxyModel(this);
-  transactionProxyModel->setDynamicSortFilter(true);
-  transactionProxyModel->setSourceModel(&transactionModel);
-  transactionView->setModel(transactionProxyModel);
+  UserSessionTransactionsSortProxyModel* transactionsProxyModel = new UserSessionTransactionsSortProxyModel(this);
+  transactionsProxyModel->setDynamicSortFilter(true);
+  transactionsProxyModel->setSourceModel(&transactionsModel);
+  transactionView->setModel(transactionsProxyModel);
   transactionView->setSortingEnabled(true);
   transactionView->setRootIsDecorated(false);
   transactionView->setAlternatingRowColors(true);

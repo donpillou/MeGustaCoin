@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-SessionTransactionModel::SessionTransactionModel(Entity::Manager& entityManager) :
+UserSessionTransactionsModel::UserSessionTransactionsModel(Entity::Manager& entityManager) :
   entityManager(entityManager),
   buyStr(tr("buy")), sellStr(tr("sell")),
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
@@ -13,35 +13,35 @@ SessionTransactionModel::SessionTransactionModel(Entity::Manager& entityManager)
   eBrokerType = 0;
 }
 
-SessionTransactionModel::~SessionTransactionModel()
+UserSessionTransactionsModel::~UserSessionTransactionsModel()
 {
   entityManager.unregisterListener<EUserSessionTransaction>(*this);
   entityManager.unregisterListener<EConnection>(*this);
 }
 
-QModelIndex SessionTransactionModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex UserSessionTransactionsModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
     return createIndex(row, column, transactions.at(row));
   return QModelIndex();
 }
 
-QModelIndex SessionTransactionModel::parent(const QModelIndex& child) const
+QModelIndex UserSessionTransactionsModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int SessionTransactionModel::rowCount(const QModelIndex& parent) const
+int UserSessionTransactionsModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : transactions.size();
 }
 
-int SessionTransactionModel::columnCount(const QModelIndex& parent) const
+int UserSessionTransactionsModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant SessionTransactionModel::data(const QModelIndex& index, int role) const
+QVariant UserSessionTransactionsModel::data(const QModelIndex& index, int role) const
 {
   const EUserSessionTransaction* eTransaction = (const EUserSessionTransaction*)index.internalPointer();
   if(!eTransaction)
@@ -103,7 +103,7 @@ QVariant SessionTransactionModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-QVariant SessionTransactionModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant UserSessionTransactionsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -143,7 +143,7 @@ QVariant SessionTransactionModel::headerData(int section, Qt::Orientation orient
   return QVariant();
 }
 
-void SessionTransactionModel::addedEntity(Entity& entity)
+void UserSessionTransactionsModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -164,7 +164,7 @@ void SessionTransactionModel::addedEntity(Entity& entity)
   }
 }
 
-void SessionTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserSessionTransactionsModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
@@ -206,7 +206,7 @@ void SessionTransactionModel::updatedEntitiy(Entity& oldEntity, Entity& newEntit
   }
 }
 
-void SessionTransactionModel::removedEntity(Entity& entity)
+void UserSessionTransactionsModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -227,7 +227,7 @@ void SessionTransactionModel::removedEntity(Entity& entity)
   }
 }
 
-void SessionTransactionModel::removedAll(quint32 type)
+void UserSessionTransactionsModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {
