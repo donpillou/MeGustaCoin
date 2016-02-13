@@ -1,7 +1,7 @@
 
 #pragma once
 
-class EBotSessionOrder : public Entity
+class EUserSessionOrder : public Entity
 {
 public:
   static const EType eType = EType::userSessionOrder;
@@ -14,7 +14,7 @@ public:
   };
 
 public:
-  EBotSessionOrder(const meguco_user_broker_order_entity& data) : Entity(eType, data.entity.id)
+  EUserSessionOrder(const meguco_user_broker_order_entity& data) : Entity(eType, data.entity.id)
   {
     type = (Type)data.type;
     date = QDateTime::fromMSecsSinceEpoch(data.entity.time);

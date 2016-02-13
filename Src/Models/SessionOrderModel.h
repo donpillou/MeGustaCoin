@@ -23,7 +23,7 @@ public:
 private:
   Entity::Manager& entityManager;
   EBrokerType* eBrokerType;
-  QList<EBotSessionOrder*> orders;
+  QList<EUserSessionOrder*> orders;
   QVariant draftStr;
   QVariant submittingStr;
   QVariant updatingStr;
@@ -60,8 +60,8 @@ public:
 private:
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
-    const EBotSessionOrder* leftOrder = (const EBotSessionOrder*)left.internalPointer();
-    const EBotSessionOrder* rightOrder = (const EBotSessionOrder*)right.internalPointer();
+    const EUserSessionOrder* leftOrder = (const EUserSessionOrder*)left.internalPointer();
+    const EUserSessionOrder* rightOrder = (const EUserSessionOrder*)right.internalPointer();
     switch((SessionOrderModel::Column)left.column())
     {
     case SessionOrderModel::Column::date:

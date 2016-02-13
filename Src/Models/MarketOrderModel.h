@@ -73,8 +73,8 @@ public:
 private:
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
-    const EBotSessionOrder* leftOrder = (const EBotSessionOrder*)left.internalPointer();
-    const EBotSessionOrder* rightOrder = (const EBotSessionOrder*)right.internalPointer();
+    const EUserSessionOrder* leftOrder = (const EUserSessionOrder*)left.internalPointer();
+    const EUserSessionOrder* rightOrder = (const EUserSessionOrder*)right.internalPointer();
     switch((MarketOrderModel::Column)left.column())
     {
     case MarketOrderModel::Column::date:

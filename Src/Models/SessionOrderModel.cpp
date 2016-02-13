@@ -7,7 +7,7 @@ SessionOrderModel::SessionOrderModel(Entity::Manager& entityManager) :
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
   dateFormat(QLocale::system().dateTimeFormat(QLocale::ShortFormat))
 {
-  entityManager.registerListener<EBotSessionOrder>(*this);
+  entityManager.registerListener<EUserSessionOrder>(*this);
   entityManager.registerListener<EDataService>(*this);
 
   eBrokerType = 0;
@@ -15,7 +15,7 @@ SessionOrderModel::SessionOrderModel(Entity::Manager& entityManager) :
 
 SessionOrderModel::~SessionOrderModel()
 {
-  entityManager.unregisterListener<EBotSessionOrder>(*this);
+  entityManager.unregisterListener<EUserSessionOrder>(*this);
   entityManager.unregisterListener<EDataService>(*this);
 }
 
@@ -43,7 +43,7 @@ int SessionOrderModel::columnCount(const QModelIndex& parent) const
 
 QVariant SessionOrderModel::data(const QModelIndex& index, int role) const
 {
-  const EBotSessionOrder* eOrder = (const EBotSessionOrder*)index.internalPointer();
+  const EUserSessionOrder* eOrder = (const EUserSessionOrder*)index.internalPointer();
   if(!eOrder)
     return QVariant();
 
@@ -64,9 +64,9 @@ QVariant SessionOrderModel::data(const QModelIndex& index, int role) const
     if((Column)index.column() == Column::type)
       switch(eOrder->getType())
       {
-      case EBotSessionOrder::Type::sell:
+      case EUserSessionOrder::Type::sell:
         return sellIcon;
-      case EBotSessionOrder::Type::buy:
+      case EUserSessionOrder::Type::buy:
         return buyIcon;
       default:
         break;
@@ -78,9 +78,9 @@ QVariant SessionOrderModel::data(const QModelIndex& index, int role) const
     case Column::type:
       switch(eOrder->getType())
       {
-      case EBotSessionOrder::Type::buy:
+      case EUserSessionOrder::Type::buy:
         return buyStr;
-      case EBotSessionOrder::Type::sell:
+      case EUserSessionOrder::Type::sell:
         return sellStr;
       default:
         break;
@@ -95,7 +95,7 @@ QVariant SessionOrderModel::data(const QModelIndex& index, int role) const
     case Column::value:
       return eBrokerType->formatPrice(eOrder->getAmount() * eOrder->getPrice());
     case Column::total:
-        return eOrder->getType() == EBotSessionOrder::Type::sell ? (QString("+") + eBrokerType->formatPrice(eOrder->getTotal())) : eBrokerType->formatPrice(-eOrder->getTotal());
+        return eOrder->getType() == EUserSessionOrder::Type::sell ? (QString("+") + eBrokerType->formatPrice(eOrder->getTotal())) : eBrokerType->formatPrice(-eOrder->getTotal());
     }
   }
   return QVariant();
@@ -144,7 +144,7 @@ void SessionOrderModel::addedEntity(Entity& entity)
   {
   case EType::userSessionOrder:
     {
-      EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
+      EUserSessionOrder* eOrder = dynamic_cast<EUserSessionOrder*>(&entity);
       int index = orders.size();
       beginInsertRows(QModelIndex(), index, index);
       orders.append(eOrder);
@@ -165,8 +165,8 @@ void SessionOrderModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   {
   case EType::userSessionOrder:
     {
-      EBotSessionOrder* oldEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&oldEntity);
-      EBotSessionOrder* newEBotSessionOrder = dynamic_cast<EBotSessionOrder*>(&newEntity);
+      EUserSessionOrder* oldEBotSessionOrder = dynamic_cast<EUserSessionOrder*>(&oldEntity);
+      EUserSessionOrder* newEBotSessionOrder = dynamic_cast<EUserSessionOrder*>(&newEntity);
       int index = orders.indexOf(oldEBotSessionOrder);
       orders[index] = newEBotSessionOrder; 
       QModelIndex leftModelIndex = createIndex(index, (int)Column::first, newEBotSessionOrder);
@@ -207,7 +207,7 @@ void SessionOrderModel::removedEntity(Entity& entity)
   {
   case EType::userSessionOrder:
     {
-      EBotSessionOrder* eOrder = dynamic_cast<EBotSessionOrder*>(&entity);
+      EUserSessionOrder* eOrder = dynamic_cast<EUserSessionOrder*>(&entity);
       int index = orders.indexOf(eOrder);
       beginRemoveRows(QModelIndex(), index, index);
       orders.removeAt(index);

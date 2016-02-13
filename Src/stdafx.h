@@ -11,7 +11,7 @@
 #include "Markets/DataConnection.h"
 
 #include "Entities/EType.h"
-#include "Entities/EBotSessionOrder.h"
+#include "Entities/EUserSessionOrder.h"
 #include "Entities/EUserSessionMarker.h"
 #include "Entities/EBotSessionTransaction.h"
 #include "Entities/EUserSessionAsset.h"
