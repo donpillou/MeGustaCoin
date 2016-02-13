@@ -63,7 +63,7 @@
 #include "Widgets/BotLogWidget.h"
 #include "Widgets/BotOrdersWidget.h"
 #include "Widgets/BotTransactionsWidget.h"
-#include "Widgets/BotItemsWidget.h"
+#include "Widgets/UserSessionAssetsWidget.h"
 #include "Widgets/BotPropertiesWidget.h"
 #include "Widgets/TransactionsWidget.h"
 #include "Widgets/TradesWidget.h"

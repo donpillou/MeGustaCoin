@@ -50,7 +50,7 @@ targets = {
       "Src/Widgets/TransactionsWidget.h"
       "Src/Widgets/LogWidget.h"
       "Src/Widgets/GraphWidget.h"
-      "Src/Widgets/BotItemsWidget.h"
+      "Src/Widgets/UserSessionAssetsWidget.h"
       "Src/Widgets/BotPropertiesWidget.h"
       "Src/Widgets/TradesWidget.h"
       "Src/Models/UserBrokerOrdersModel.h"

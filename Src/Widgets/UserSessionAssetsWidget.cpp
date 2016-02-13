@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+UserSessionAssetsWidget::UserSessionAssetsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), entityManager(entityManager), dataService(dataService), assetsModel(entityManager)
 {
   entityManager.registerListener<EConnection>(*this);
@@ -75,30 +75,30 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
   headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
-BotItemsWidget::~BotItemsWidget()
+UserSessionAssetsWidget::~UserSessionAssetsWidget()
 {
   entityManager.unregisterListener<EConnection>(*this);
   entityManager.unregisterListener<EUserSession>(*this);
 }
 
-void BotItemsWidget::saveState(QSettings& settings)
+void UserSessionAssetsWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("BotItems");
   settings.setValue("HeaderState", itemView->header()->saveState());
   settings.endGroup();
 }
 
-void BotItemsWidget::newBuyItem()
+void UserSessionAssetsWidget::newBuyItem()
 {
   addSessionItemDraft(EUserSessionAsset::Type::buy);
 }
 
-void BotItemsWidget::newSellItem()
+void UserSessionAssetsWidget::newSellItem()
 {
   addSessionItemDraft(EUserSessionAsset::Type::sell);
 }
 
-void BotItemsWidget::submitItem()
+void UserSessionAssetsWidget::submitItem()
 {
   QModelIndexList selection = itemView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
@@ -110,7 +110,7 @@ void BotItemsWidget::submitItem()
   }
 }
 
-void BotItemsWidget::cancelItem()
+void UserSessionAssetsWidget::cancelItem()
 {
   QModelIndexList selection = itemView->selectionModel()->selectedRows();
   QList<EUserSessionAsset*> itemsToRemove;
@@ -158,7 +158,7 @@ void BotItemsWidget::cancelItem()
 
 }
 
-void BotItemsWidget::addSessionItemDraft(EUserSessionAsset::Type type)
+void UserSessionAssetsWidget::addSessionItemDraft(EUserSessionAsset::Type type)
 {
   EConnection* eDataService = entityManager.getEntity<EConnection>(0);
   EUserSession* eSession = entityManager.getEntity<EUserSession>(eDataService->getSelectedSessionId());
@@ -187,7 +187,7 @@ void BotItemsWidget::addSessionItemDraft(EUserSessionAsset::Type type)
   itemView->edit(amountIndex);
 }
 
-void BotItemsWidget::itemSelectionChanged()
+void UserSessionAssetsWidget::itemSelectionChanged()
 {
   QModelIndexList modelSelection = itemView->selectionModel()->selectedRows();
   selection.clear();
@@ -200,7 +200,7 @@ void BotItemsWidget::itemSelectionChanged()
   updateToolBarButtons();
 }
 
-void BotItemsWidget::itemDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+void UserSessionAssetsWidget::itemDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
   QModelIndex index = topLeft;
   for(int i = topLeft.row(), end = bottomRight.row();;)
@@ -217,13 +217,13 @@ void BotItemsWidget::itemDataChanged(const QModelIndex& topLeft, const QModelInd
   }
 }
 
-void BotItemsWidget::editedItemFlipPrice(const QModelIndex& index, double flipPrice)
+void UserSessionAssetsWidget::editedItemFlipPrice(const QModelIndex& index, double flipPrice)
 {
   EUserSessionAsset* eitem = (EUserSessionAsset*)index.internalPointer();
   dataService.updateSessionAsset(*eitem, flipPrice);
 }
 
-void BotItemsWidget::updateToolBarButtons()
+void UserSessionAssetsWidget::updateToolBarButtons()
 {
   EConnection* eDataService = entityManager.getEntity<EConnection>(0);
   bool connected = eDataService->getState() == EConnection::State::connected;
@@ -247,7 +247,7 @@ void BotItemsWidget::updateToolBarButtons()
   cancelAction->setEnabled(canCancel);
 }
 
-void BotItemsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserSessionAssetsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {
