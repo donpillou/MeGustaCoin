@@ -24,7 +24,7 @@ private:
   Entity::Manager& entityManager;
   DataService& dataService;
 
-  SessionItemModel itemModel;
+  UserSessionAssetsModel assetsModel;
 
   QTreeView* itemView;
   QSortFilterProxyModel* proxyModel;

@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-SessionItemModel::SessionItemModel(Entity::Manager& entityManager) :
+UserSessionAssetsModel::UserSessionAssetsModel(Entity::Manager& entityManager) :
   entityManager(entityManager), draftStr(tr("draft")),
   buyStr(tr("buy")), sellStr(tr("sell")),
   buyingStr(tr("buying...")), sellingStr(tr("selling...")),
@@ -15,42 +15,42 @@ SessionItemModel::SessionItemModel(Entity::Manager& entityManager) :
   eBrokerType = 0;
 }
 
-SessionItemModel::~SessionItemModel()
+UserSessionAssetsModel::~UserSessionAssetsModel()
 {
   entityManager.unregisterListener<EUserSessionAsset>(*this);
   entityManager.unregisterListener<EUserSessionAssetDraft>(*this);
   entityManager.unregisterListener<EConnection>(*this);
 }
 
-QModelIndex SessionItemModel::getDraftAmountIndex(EUserSessionAssetDraft& draft)
+QModelIndex UserSessionAssetsModel::getDraftAmountIndex(EUserSessionAssetDraft& draft)
 {
   int index = items.indexOf(&draft);
   return createIndex(index, (int)(draft.getType() == EUserSessionAsset::Type::buy ? Column::balanceBase : Column::balanceComm), &draft);
 }
 
-QModelIndex SessionItemModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex UserSessionAssetsModel::index(int row, int column, const QModelIndex& parent) const
 {
   if(hasIndex(row, column, parent))
     return createIndex(row, column, items.at(row));
   return QModelIndex();
 }
 
-QModelIndex SessionItemModel::parent(const QModelIndex& child) const
+QModelIndex UserSessionAssetsModel::parent(const QModelIndex& child) const
 {
   return QModelIndex();
 }
 
-int SessionItemModel::rowCount(const QModelIndex& parent) const
+int UserSessionAssetsModel::rowCount(const QModelIndex& parent) const
 {
   return parent.isValid() ? 0 : items.size();
 }
 
-int SessionItemModel::columnCount(const QModelIndex& parent) const
+int UserSessionAssetsModel::columnCount(const QModelIndex& parent) const
 {
   return (int)Column::last + 1;
 }
 
-QVariant SessionItemModel::data(const QModelIndex& index, int role) const
+QVariant UserSessionAssetsModel::data(const QModelIndex& index, int role) const
 {
   const EUserSessionAsset* eItem = (const EUserSessionAsset*)index.internalPointer();
   if(!eItem)
@@ -170,7 +170,7 @@ QVariant SessionItemModel::data(const QModelIndex& index, int role) const
   return QVariant();
 }
 
-Qt::ItemFlags SessionItemModel::flags(const QModelIndex &index) const
+Qt::ItemFlags UserSessionAssetsModel::flags(const QModelIndex &index) const
 {
   const EUserSessionAsset* eItem = (const EUserSessionAsset*)index.internalPointer();
   if(!eItem)
@@ -200,7 +200,7 @@ Qt::ItemFlags SessionItemModel::flags(const QModelIndex &index) const
   return flags;
 }
 
-bool SessionItemModel::setData(const QModelIndex & index, const QVariant & value, int role)
+bool UserSessionAssetsModel::setData(const QModelIndex & index, const QVariant & value, int role)
 {
   if (role != Qt::EditRole)
     return false;
@@ -263,7 +263,7 @@ bool SessionItemModel::setData(const QModelIndex & index, const QVariant & value
   return false;
 }
 
-QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant UserSessionAssetsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
   if(orientation != Qt::Horizontal)
     return QVariant();
@@ -311,7 +311,7 @@ QVariant SessionItemModel::headerData(int section, Qt::Orientation orientation, 
   return QVariant();
 }
 
-void SessionItemModel::addedEntity(Entity& entity)
+void UserSessionAssetsModel::addedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -333,7 +333,7 @@ void SessionItemModel::addedEntity(Entity& entity)
   }
 }
 
-void SessionItemModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserSessionAssetsModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch((EType)oldEntity.getType())
   {
@@ -376,12 +376,12 @@ void SessionItemModel::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
   }
 }
 
-void SessionItemModel::addedEntity(Entity& entity, Entity& replacedEntity)
+void UserSessionAssetsModel::addedEntity(Entity& entity, Entity& replacedEntity)
 {
   updatedEntitiy(replacedEntity, entity);
 }
 
-void SessionItemModel::removedEntity(Entity& entity)
+void UserSessionAssetsModel::removedEntity(Entity& entity)
 {
   switch((EType)entity.getType())
   {
@@ -403,7 +403,7 @@ void SessionItemModel::removedEntity(Entity& entity)
   }
 }
 
-void SessionItemModel::removedAll(quint32 type)
+void UserSessionAssetsModel::removedAll(quint32 type)
 {
   switch((EType)type)
   {

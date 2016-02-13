@@ -44,7 +44,7 @@
 
 #include "Models/SessionOrderModel.h"
 #include "Models/SessionTransactionModel.h"
-#include "Models/SessionItemModel.h"
+#include "Models/UserSessionAssetsModel.h"
 #include "Models/SessionPropertyModel.h"
 #include "Models/SessionLogModel.h"
 #include "Models/UserBrokerOrdersModel.h"

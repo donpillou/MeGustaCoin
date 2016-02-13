@@ -1,7 +1,7 @@
 
 #pragma once
 
-class SessionItemModel : public QAbstractItemModel, public Entity::Listener
+class UserSessionAssetsModel : public QAbstractItemModel, public Entity::Listener
 {
 Q_OBJECT
 
@@ -23,8 +23,8 @@ public:
   };
 
 public:
-  SessionItemModel(Entity::Manager& entityManager);
-  ~SessionItemModel();
+  UserSessionAssetsModel(Entity::Manager& entityManager);
+  ~UserSessionAssetsModel();
 
   QModelIndex getDraftAmountIndex(EUserSessionAssetDraft& draft);
 
@@ -62,27 +62,27 @@ private: // Entity::Listener
   virtual void removedAll(quint32 type);
 };
 
-class SessionItemSortProxyModel : public QSortFilterProxyModel
+class UserSessionAssetsSortProxyModel : public QSortFilterProxyModel
 {
 public:
-  SessionItemSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
+  UserSessionAssetsSortProxyModel(QObject* parent) : QSortFilterProxyModel(parent) {}
 
 private: // QSortFilterProxyModel
   virtual bool lessThan(const QModelIndex& left, const QModelIndex& right) const
   {
     const EUserSessionAsset* leftItem = (const EUserSessionAsset*)left.internalPointer();
     const EUserSessionAsset* rightItem = (const EUserSessionAsset*)right.internalPointer();
-    switch((SessionItemModel::Column)left.column())
+    switch((UserSessionAssetsModel::Column)left.column())
     {
-    case SessionItemModel::Column::date:
+    case UserSessionAssetsModel::Column::date:
       return leftItem->getDate().msecsTo(rightItem->getDate()) > 0;
-    case SessionItemModel::Column::balanceComm:
+    case UserSessionAssetsModel::Column::balanceComm:
       return leftItem->getBalanceComm() < rightItem->getBalanceComm();
-    case SessionItemModel::Column::balanceBase:
+    case UserSessionAssetsModel::Column::balanceBase:
       return leftItem->getBalanceBase() < rightItem->getBalanceBase();
-    case SessionItemModel::Column::price:
+    case UserSessionAssetsModel::Column::price:
       return leftItem->getPrice() < rightItem->getPrice();
-    case SessionItemModel::Column::flipPrice:
+    case UserSessionAssetsModel::Column::flipPrice:
       return leftItem->getFlipPrice() < rightItem->getFlipPrice();
     default:
       break;

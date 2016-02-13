@@ -2,7 +2,7 @@
 #include "stdafx.h"
 
 BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
-  QWidget(&tabFramework), entityManager(entityManager), dataService(dataService), itemModel(entityManager)
+  QWidget(&tabFramework), entityManager(entityManager), dataService(dataService), assetsModel(entityManager)
 {
   entityManager.registerListener<EConnection>(*this);
   entityManager.registerListener<EUserSession>(*this);
@@ -35,9 +35,9 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
 
   itemView = new QTreeView(this);
   itemView->setUniformRowHeights(true);
-  proxyModel = new SessionItemSortProxyModel(this);
+  proxyModel = new UserSessionAssetsSortProxyModel(this);
   proxyModel->setDynamicSortFilter(true);
-  proxyModel->setSourceModel(&itemModel);
+  proxyModel->setSourceModel(&assetsModel);
   itemView->setModel(proxyModel);
   itemView->setSortingEnabled(true);
   itemView->setRootIsDecorated(false);
@@ -53,8 +53,8 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
   setLayout(layout);
 
   connect(itemView->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(itemSelectionChanged()));
-  connect(&itemModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(itemDataChanged(const QModelIndex&, const QModelIndex&)));
-  connect(&itemModel, SIGNAL(editedItemFlipPrice(const QModelIndex&, double)), this, SLOT(editedItemFlipPrice(const QModelIndex&, double)));
+  connect(&assetsModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(itemDataChanged(const QModelIndex&, const QModelIndex&)));
+  connect(&assetsModel, SIGNAL(editedItemFlipPrice(const QModelIndex&, double)), this, SLOT(editedItemFlipPrice(const QModelIndex&, double)));
 
   QHeaderView* headerView = itemView->header();
   headerView->resizeSection(0, 50);
@@ -181,7 +181,7 @@ void BotItemsWidget::addSessionItemDraft(EUserSessionAsset::Type type)
   }
 
   EUserSessionAssetDraft& eAssetDraft = dataService.createSessionAssetDraft(type, price);
-  QModelIndex amountProxyIndex = itemModel.getDraftAmountIndex(eAssetDraft);
+  QModelIndex amountProxyIndex = assetsModel.getDraftAmountIndex(eAssetDraft);
   QModelIndex amountIndex = proxyModel->mapFromSource(amountProxyIndex);
   itemView->setCurrentIndex(amountIndex);
   itemView->edit(amountIndex);
