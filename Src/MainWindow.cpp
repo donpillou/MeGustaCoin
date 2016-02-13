@@ -180,7 +180,7 @@ void MainWindow::updateWindowTitle()
       if(channelEntityManager)
       {
         EMarketSubscription* eDataSubscription = channelEntityManager->getEntity<EMarketSubscription>(0);
-        EDataTickerData* eDataTickerData = channelEntityManager->getEntity<EDataTickerData>(0);
+        EMarketTickerData* eDataTickerData = channelEntityManager->getEntity<EMarketTickerData>(0);
         if(eDataSubscription && eDataTickerData)
           title += QString(" - %1 bid / %2 ask").arg(eDataSubscription->formatPrice(eDataTickerData->getBid()), eDataSubscription->formatPrice(eDataTickerData->getAsk()));
       }
@@ -406,7 +406,7 @@ void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
           if(channelData)
           {
             updateChannelSubscription(*channelData, false);
-            channelData->channelEntityManager->unregisterListener<EDataTickerData>(*this);
+            channelData->channelEntityManager->unregisterListener<EMarketTickerData>(*this);
           }
         }
         if(!selectedChannelName.isEmpty())
@@ -415,7 +415,7 @@ void MainWindow::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
             if(channelData)
             {
               dataService.subscribe(selectedChannelName, *channelData->channelEntityManager);
-              channelData->channelEntityManager->registerListener<EDataTickerData>(*this);
+              channelData->channelEntityManager->registerListener<EMarketTickerData>(*this);
             }
         }
       }

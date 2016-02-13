@@ -1,13 +1,13 @@
 
 #pragma once
 
-class EDataTickerData : public Entity
+class EMarketTickerData : public Entity
 {
 public:
   static const EType eType = EType::marketTickerData;
 
 public:
-  EDataTickerData(double ask, double bid) : Entity(eType, 0), ask(ask), bid(bid) {}
+  EMarketTickerData(double ask, double bid) : Entity(eType, 0), ask(ask), bid(bid) {}
 
   double getAsk() const {return ask;}
   double getBid() const {return bid;}

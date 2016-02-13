@@ -57,7 +57,7 @@ void DataService::subscribe(const QString& channelName, Entity::Manager& channel
     quint32 channelId;
     quint64 lastReceivedTradeId;
     EDataTradeData* eTradeData;
-    EDataTickerData* eTickerData;
+    EMarketTickerData* eTickerData;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
@@ -532,7 +532,7 @@ void DataService::WorkerThread::receivedMarketTicker(quint32 marketId, const meg
   if(data.eTradeData)
   {
     delete data.eTickerData;
-    data.eTickerData = new EDataTickerData(ticker.ask, ticker.bid);
+    data.eTickerData = new EMarketTickerData(ticker.ask, ticker.bid);
   }
   else
   {
@@ -550,7 +550,7 @@ void DataService::WorkerThread::receivedMarketTicker(quint32 marketId, const meg
         if(it == dataService.activeSubscriptions.end())
           return;
         Entity::Manager* channelEntityManager = it.value();
-        EDataTickerData* eDataTickerData = channelEntityManager->getEntity<EDataTickerData>(0);
+        EMarketTickerData* eDataTickerData = channelEntityManager->getEntity<EMarketTickerData>(0);
         if(eDataTickerData)
         {
           eDataTickerData->setData(ticker.ask, ticker.bid);
@@ -558,7 +558,7 @@ void DataService::WorkerThread::receivedMarketTicker(quint32 marketId, const meg
         }
         else
         {
-          eDataTickerData = new EDataTickerData(ticker.ask, ticker.bid);
+          eDataTickerData = new EMarketTickerData(ticker.ask, ticker.bid);
           channelEntityManager->delegateEntity(*eDataTickerData);
         }
       }

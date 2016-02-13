@@ -175,7 +175,7 @@ void BotItemsWidget::addSessionItemDraft(EUserSessionAsset::Type type)
   double price = 0;
   if(channelEntityManager)
   {
-    EDataTickerData* eDataTickerData = channelEntityManager->getEntity<EDataTickerData>(0);
+    EMarketTickerData* eDataTickerData = channelEntityManager->getEntity<EMarketTickerData>(0);
     if(eDataTickerData)
       price = type == EUserSessionAsset::Type::buy ? (eDataTickerData->getBid() + 0.01) : (eDataTickerData->getAsk() - 0.01);
   }
