@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BotLogWidget::BotLogWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
+UserSessionLogWidget::UserSessionLogWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
   QWidget(&tabFramework), logModel(entityManager), autoScrollEnabled(false)
 {
   connect(&logModel, SIGNAL(rowsAboutToBeInserted(const QModelIndex&, int, int)), this, SLOT(checkAutoScroll(const QModelIndex&, int, int)));
@@ -30,21 +30,21 @@ BotLogWidget::BotLogWidget(QTabFramework& tabFramework, QSettings& settings, Ent
   settings.endGroup();
 }
 
-void BotLogWidget::saveState(QSettings& settings)
+void UserSessionLogWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("BotLog");
   settings.setValue("HeaderState", logView->header()->saveState());
   settings.endGroup();
 }
 
-void BotLogWidget::checkAutoScroll(const QModelIndex& index, int, int)
+void UserSessionLogWidget::checkAutoScroll(const QModelIndex& index, int, int)
 {
   QScrollBar* scrollBar = logView->verticalScrollBar();
   if(scrollBar->value() == scrollBar->maximum())
     autoScrollEnabled = true;
 }
 
-void BotLogWidget::autoScroll(int, int)
+void UserSessionLogWidget::autoScroll(int, int)
 {
   if(!autoScrollEnabled)
     return;

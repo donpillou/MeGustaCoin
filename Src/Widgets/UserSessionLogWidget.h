@@ -1,12 +1,12 @@
 
 #pragma once
 
-class BotLogWidget : public QWidget
+class UserSessionLogWidget : public QWidget
 {
   Q_OBJECT
 
 public:
-  BotLogWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager);
+  UserSessionLogWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager);
 
   void saveState(QSettings& settings);
 

@@ -19,7 +19,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   sessionAssetsWidget = new UserSessionAssetsWidget(*this, settings, globalEntityManager, dataService);
   botOrdersWidget = new BotOrdersWidget(*this, settings, globalEntityManager);
   botPropertiesWidget = new BotPropertiesWidget(*this, settings, globalEntityManager, dataService);
-  botLogWidget = new BotLogWidget(*this, settings, globalEntityManager);
+  sessionLogWidget = new UserSessionLogWidget(*this, settings, globalEntityManager);
   logWidget = new LogWidget(this, settings, globalEntityManager);
   processesWidget = new ProcessesWidget(this, settings, globalEntityManager);
 
@@ -37,7 +37,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addTab(botOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(sessionAssetsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botPropertiesWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  addTab(botLogWidget, QTabFramework::InsertOnTop, transactionsWidget);
+  addTab(sessionLogWidget, QTabFramework::InsertOnTop, transactionsWidget);
 
   QMenuBar* menuBar = this->menuBar();
   QMenu* menu = menuBar->addMenu(tr("&Client"));
@@ -109,7 +109,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   sessionAssetsWidget->saveState(settings);
   botOrdersWidget->saveState(settings);
   botPropertiesWidget->saveState(settings);
-  botLogWidget->saveState(settings);
+  sessionLogWidget->saveState(settings);
   logWidget->saveState(settings);
   processesWidget->saveState(settings);
 
@@ -202,7 +202,7 @@ void MainWindow::updateViewMenu()
   viewMenu->addAction(toggleViewAction(botOrdersWidget));
   viewMenu->addAction(toggleViewAction(sessionAssetsWidget));
   viewMenu->addAction(toggleViewAction(botPropertiesWidget));
-  viewMenu->addAction(toggleViewAction(botLogWidget));
+  viewMenu->addAction(toggleViewAction(sessionLogWidget));
   viewMenu->addSeparator();
   viewMenu->addAction(toggleViewAction(logWidget));
   viewMenu->addAction(toggleViewAction(processesWidget));
