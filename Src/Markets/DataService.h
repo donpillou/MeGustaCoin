@@ -150,6 +150,9 @@ private:
     virtual void receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit);
     virtual void removedSessionProperty(quint64 propertyId);
     virtual void clearSessionProperties();
+    virtual void receivedSessionMarker(const meguco_user_session_marker_entity& marker);
+    virtual void removedSessionMarker(quint64 markerId);
+    virtual void clearSessionMarkers();
 
     virtual void receivedProcess(const meguco_process_entity& process, const QString& cmd);
     virtual void removedProcess(quint64 processId);

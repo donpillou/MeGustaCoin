@@ -49,6 +49,9 @@ public:
     virtual void receivedSessionProperty(const meguco_user_session_property_entity& property, const QString& name, const QString& value, const QString& unit) = 0;
     virtual void removedSessionProperty(quint64 propertyId) = 0;
     virtual void clearSessionProperties() = 0;
+    virtual void receivedSessionMarker(const meguco_user_session_marker_entity& marker) = 0;
+    virtual void removedSessionMarker(quint64 markerId) = 0;
+    virtual void clearSessionMarkers() = 0;
 
     virtual void receivedProcess(const meguco_process_entity& process, const QString& cmd) = 0;
     virtual void removedProcess(quint64 processId) = 0;
@@ -106,6 +109,7 @@ private:
       sessionAssetsTable,
       sessionLogTable,
       sessionPropertiesTable,
+      sessionMarkersTable,
       processesTable,
     } type;
     quint32 nameId;
@@ -144,9 +148,10 @@ private:
     quint32 assetsTableId;
     quint32 logTableId;
     quint32 propertiesTableId;
+    quint32 markersTableId;
 
   public:
-    SessionData() : sessionTableId(0), ordersTableId(0), transactionsTableId(0), assetsTableId(0), logTableId(0), propertiesTableId(0) {}
+    SessionData() : sessionTableId(0), ordersTableId(0), transactionsTableId(0), assetsTableId(0), logTableId(0), propertiesTableId(0), markersTableId(0) {}
   };
 
 private:

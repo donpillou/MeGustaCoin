@@ -275,6 +275,13 @@ void DataConnection::receivedEntity(uint32_t tableId, const zlimdb_entity& entit
               callback->receivedSessionProperty(*property, name, value, unit);
     }
     break;
+  case TableInfo::sessionMarkersTable:
+    if(entity.size >= sizeof(meguco_user_session_marker_entity))
+    {
+      const meguco_user_session_marker_entity* marker = (const meguco_user_session_marker_entity*)&entity;
+      callback->receivedSessionMarker(*marker);
+    }
+    break;
   default:
     break;
   }
@@ -326,6 +333,9 @@ void DataConnection::removedEntity(uint32_t tableId, uint64_t entityId)
   case TableInfo::sessionLogTable:
     callback->removedSessionLog(entityId);
     break;
+  case TableInfo::sessionMarkersTable:
+    callback->removedSessionMarker(entityId);
+    break;
   default:
     break;
   }
@@ -357,6 +367,10 @@ void DataConnection::reloadedTable(uint32_t tableId)
     break;
   case TableInfo::sessionLogTable:
     callback->clearSessionLog();
+    query(tableId, tableInfo.type);
+    break;
+  case TableInfo::sessionMarkersTable:
+    callback->clearSessionMarkers();
     query(tableId, tableInfo.type);
     break;
   default:
@@ -527,6 +541,8 @@ bool DataConnection::addedTable(const zlimdb_table_entity& table)
         sessionData.logTableId = table.entity.id;
       else if(tableName.endsWith("/properties"))
         sessionData.propertiesTableId = table.entity.id;
+      else if(tableName.endsWith("/markers"))
+        sessionData.markersTableId = table.entity.id;
     }
     else if(tableName.endsWith("/user"))
       userTableId = table.entity.id;
@@ -819,6 +835,13 @@ bool DataConnection::receiveResponse(TableInfo::Type tableType)
         }
     }
     break;
+  case TableInfo::sessionMarkersTable:
+    while(zlimdb_get_response(zdb, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) == 0)
+      for(const meguco_user_session_marker_entity* marker = (const meguco_user_session_marker_entity*)zlimdb_get_first_entity((zlimdb_header*)buffer, sizeof(meguco_user_session_marker_entity));
+          marker;
+          marker = (const meguco_user_session_marker_entity*)zlimdb_get_next_entity((zlimdb_header*)buffer,sizeof(meguco_user_session_marker_entity), &marker->entity))
+        callback->receivedSessionMarker(*marker);
+    break;
   default:
     Q_ASSERT(false);
     break;
@@ -1000,6 +1023,9 @@ bool DataConnection::createSession(const QString& name, quint64 botTypeId, quint
   tableName = QString("%1%2/properties").arg(sessionTablesPrefix, QString::number(sessionId));
   if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &sessionData.propertiesTableId) != 0)
     return error = getZlimDbError(), false;
+  tableName = QString("%1%2/markers").arg(sessionTablesPrefix, QString::number(sessionId));
+  if(zlimdb_add_table(zdb, tableName.toUtf8().constData(), &sessionData.markersTableId) != 0)
+    return error = getZlimDbError(), false;
   return true;
 }
 
@@ -1039,13 +1065,15 @@ bool DataConnection::selectSession(quint32 sessionId)
         return false;
       if(sessionData.propertiesTableId != 0 && !unsubscribe(sessionData.propertiesTableId))
         return false;
+      if(sessionData.markersTableId != 0 && !unsubscribe(sessionData.markersTableId))
+        return false;
 
       callback->clearSessionTransactions();
       callback->clearSessionAssets();
       callback->clearSessionProperties();
       callback->clearSessionOrders();
       callback->clearSessionLog();
-      //callback->clearSessionMarkers(); // todo: 
+      callback->clearSessionMarkers();
     }
   }
   this->selectedSessionId = 0;
@@ -1065,6 +1093,8 @@ bool DataConnection::selectSession(quint32 sessionId)
     if(sessionData.logTableId != 0 && !subscribe(sessionData.logTableId, TableInfo::sessionLogTable))
       return false;
     if(sessionData.propertiesTableId != 0 && !subscribe(sessionData.propertiesTableId, TableInfo::sessionPropertiesTable))
+      return false;
+    if(sessionData.markersTableId != 0 && !subscribe(sessionData.markersTableId, TableInfo::sessionMarkersTable))
       return false;
   }
   return true;

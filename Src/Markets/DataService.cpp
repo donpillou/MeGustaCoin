@@ -708,6 +708,21 @@ void DataService::WorkerThread::clearSessionProperties()
   clearEntities(EType::userSessionProperty);
 }
 
+void DataService::WorkerThread::receivedSessionMarker(const meguco_user_session_marker_entity& marker)
+{
+  delegateEntity(new EUserSessionMarker(marker));
+}
+
+void DataService::WorkerThread::removedSessionMarker(quint64 markerId)
+{
+  removeEntity(EType::userSessionMarker, markerId);
+}
+
+void DataService::WorkerThread::clearSessionMarkers()
+{
+  clearEntities(EType::userSessionMarker);
+}
+
 void DataService::WorkerThread::receivedProcess(const meguco_process_entity& process, const QString& cmd)
 {
   delegateEntity(new EProcess(process, cmd));
@@ -1289,4 +1304,3 @@ void DataService::updateSessionProperty(EUserSessionProperty& property, const QS
   if(wasEmpty && thread)
     thread->interrupt();
 }
-
