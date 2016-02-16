@@ -61,7 +61,7 @@
 #include "Widgets/OrdersWidget.h"
 #include "Widgets/BotSessionsWidget.h"
 #include "Widgets/UserSessionLogWidget.h"
-#include "Widgets/BotOrdersWidget.h"
+#include "Widgets/UserSessionOrdersWidget.h"
 #include "Widgets/BotTransactionsWidget.h"
 #include "Widgets/UserSessionAssetsWidget.h"
 #include "Widgets/BotPropertiesWidget.h"

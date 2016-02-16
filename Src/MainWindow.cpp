@@ -17,7 +17,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   botSessionsWidget = new BotSessionsWidget(*this, settings, globalEntityManager, dataService);
   botTransactionsWidget = new BotTransactionsWidget(*this, settings, globalEntityManager);
   sessionAssetsWidget = new UserSessionAssetsWidget(*this, settings, globalEntityManager, dataService);
-  botOrdersWidget = new BotOrdersWidget(*this, settings, globalEntityManager);
+  sessionOrdersWidget = new UserSessionOrdersWidget(*this, settings, globalEntityManager);
   botPropertiesWidget = new BotPropertiesWidget(*this, settings, globalEntityManager, dataService);
   sessionLogWidget = new UserSessionLogWidget(*this, settings, globalEntityManager);
   logWidget = new LogWidget(this, settings, globalEntityManager);
@@ -34,7 +34,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addTab(ordersWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botSessionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botTransactionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  addTab(botOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
+  addTab(sessionOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(sessionAssetsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botPropertiesWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(sessionLogWidget, QTabFramework::InsertOnTop, transactionsWidget);
@@ -107,7 +107,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   botSessionsWidget->saveState(settings);
   botTransactionsWidget->saveState(settings);
   sessionAssetsWidget->saveState(settings);
-  botOrdersWidget->saveState(settings);
+  sessionOrdersWidget->saveState(settings);
   botPropertiesWidget->saveState(settings);
   sessionLogWidget->saveState(settings);
   logWidget->saveState(settings);
@@ -199,7 +199,7 @@ void MainWindow::updateViewMenu()
   viewMenu->addSeparator();
   viewMenu->addAction(toggleViewAction(botSessionsWidget));
   viewMenu->addAction(toggleViewAction(botTransactionsWidget));
-  viewMenu->addAction(toggleViewAction(botOrdersWidget));
+  viewMenu->addAction(toggleViewAction(sessionOrdersWidget));
   viewMenu->addAction(toggleViewAction(sessionAssetsWidget));
   viewMenu->addAction(toggleViewAction(botPropertiesWidget));
   viewMenu->addAction(toggleViewAction(sessionLogWidget));

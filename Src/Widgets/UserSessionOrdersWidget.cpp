@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BotOrdersWidget::BotOrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
+UserSessionOrdersWidget::UserSessionOrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
   QWidget(&tabFramework), ordersModel(entityManager)
 {
   setWindowTitle(tr("Bot Orders"));
@@ -37,7 +37,7 @@ BotOrdersWidget::BotOrdersWidget(QTabFramework& tabFramework, QSettings& setting
   headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
-void BotOrdersWidget::saveState(QSettings& settings)
+void UserSessionOrdersWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("BotOrders");
   settings.setValue("HeaderState", orderView->header()->saveState());

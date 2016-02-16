@@ -17,7 +17,7 @@ private:
   BotSessionsWidget* botSessionsWidget;
   BotTransactionsWidget* botTransactionsWidget;
   UserSessionAssetsWidget* sessionAssetsWidget;
-  BotOrdersWidget* botOrdersWidget;
+  UserSessionOrdersWidget* sessionOrdersWidget;
   BotPropertiesWidget* botPropertiesWidget;
   UserSessionLogWidget* sessionLogWidget;
   TransactionsWidget* transactionsWidget;
