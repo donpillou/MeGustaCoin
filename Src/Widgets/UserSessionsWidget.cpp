@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+UserSessionsWidget::UserSessionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager),  dataService(dataService), sessionsModel(entityManager), /*ordersModel(entityManager), transactionModel(entityManager), */selectedSessionId(0)
 {
   entityManager.registerListener<EConnection>(*this);
@@ -65,12 +65,12 @@ BotSessionsWidget::BotSessionsWidget(QTabFramework& tabFramework, QSettings& set
   headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
-BotSessionsWidget::~BotSessionsWidget()
+UserSessionsWidget::~UserSessionsWidget()
 {
   entityManager.unregisterListener<EConnection>(*this);
 }
 
-void BotSessionsWidget::saveState(QSettings& settings)
+void UserSessionsWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("BotSessions");
   settings.setValue("HeaderState", sessionView->header()->saveState());
@@ -78,7 +78,7 @@ void BotSessionsWidget::saveState(QSettings& settings)
   settings.endGroup();
 }
 
-void BotSessionsWidget::addBot()
+void UserSessionsWidget::addBot()
 {
   BotDialog botDialog(this, entityManager);
   if(botDialog.exec() != QDialog::Accepted)
@@ -87,7 +87,7 @@ void BotSessionsWidget::addBot()
   dataService.createSession(botDialog.getName(), botDialog.getEngineId(), botDialog.getMarketId());
 }
 
-void BotSessionsWidget::cancelBot()
+void UserSessionsWidget::cancelBot()
 {
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
@@ -105,7 +105,7 @@ void BotSessionsWidget::cancelBot()
   }
 }
 
-void BotSessionsWidget::activate()
+void UserSessionsWidget::activate()
 {
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
@@ -117,7 +117,7 @@ void BotSessionsWidget::activate()
   }
 }
 
-void BotSessionsWidget::simulate()
+void UserSessionsWidget::simulate()
 {
   QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
@@ -129,7 +129,7 @@ void BotSessionsWidget::simulate()
   }
 }
 
-void BotSessionsWidget::optimize()
+void UserSessionsWidget::optimize()
 {
   //QModelIndexList selection = sessionView->selectionModel()->selectedRows();
   //foreach(const QModelIndex& proxyIndex, selection)
@@ -141,7 +141,7 @@ void BotSessionsWidget::optimize()
   //}
 }
 
-void BotSessionsWidget::updateTitle(EConnection& eDataService)
+void UserSessionsWidget::updateTitle(EConnection& eDataService)
 {
   QString stateStr = eDataService.getStateName();
   
@@ -155,7 +155,7 @@ void BotSessionsWidget::updateTitle(EConnection& eDataService)
   tabFramework.toggleViewAction(this)->setText(tr("Bot Sessions"));
 }
 
-void BotSessionsWidget::updateToolBarButtons()
+void UserSessionsWidget::updateToolBarButtons()
 {
   EConnection* eDataService = entityManager.getEntity<EConnection>(0);
   bool connected = eDataService->getState() == EConnection::State::connected;
@@ -175,7 +175,7 @@ void BotSessionsWidget::updateToolBarButtons()
   cancelAction->setEnabled(connected && sessionSelected);
 }
 
-void BotSessionsWidget::updateSelection()
+void UserSessionsWidget::updateSelection()
 {
   QModelIndexList modelSelection = sessionView->selectionModel()->selectedRows();
   selection.clear();
@@ -190,14 +190,14 @@ void BotSessionsWidget::updateSelection()
   updateToolBarButtons();
 }
 
-void BotSessionsWidget::sessionSelectionChanged()
+void UserSessionsWidget::sessionSelectionChanged()
 {
   updateSelection();
   if(!selection.isEmpty())
     dataService.selectSession((*selection.begin())->getId());
 }
 
-void BotSessionsWidget::sessionDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+void UserSessionsWidget::sessionDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
   QModelIndex index = topLeft;
   for(int i = topLeft.row(), end = bottomRight.row();;)
@@ -214,7 +214,7 @@ void BotSessionsWidget::sessionDataChanged(const QModelIndex& topLeft, const QMo
   }
 }
 
-void BotSessionsWidget::sessionDataRemoved(const QModelIndex& parent, int start, int end)
+void UserSessionsWidget::sessionDataRemoved(const QModelIndex& parent, int start, int end)
 {
   for(int i = start;;)
   {
@@ -226,12 +226,12 @@ void BotSessionsWidget::sessionDataRemoved(const QModelIndex& parent, int start,
   }
 }
 
-void BotSessionsWidget::sessionDataReset()
+void UserSessionsWidget::sessionDataReset()
 {
   selection.clear();
 }
 
-void BotSessionsWidget::sessionDataAdded(const QModelIndex& parent, int start, int end)
+void UserSessionsWidget::sessionDataAdded(const QModelIndex& parent, int start, int end)
 {
   if(selection.isEmpty() && selectedSessionId)
   {
@@ -252,7 +252,7 @@ void BotSessionsWidget::sessionDataAdded(const QModelIndex& parent, int start, i
   }
 }
 
-void BotSessionsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserSessionsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   EConnection* eDataService = dynamic_cast<EConnection*>(&newEntity);
   if(eDataService)

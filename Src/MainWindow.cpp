@@ -14,7 +14,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   brokersWidget = new BrokersWidget(*this, settings, globalEntityManager, dataService);
   ordersWidget = new OrdersWidget(*this, settings, globalEntityManager, dataService);
   transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, dataService);
-  botSessionsWidget = new BotSessionsWidget(*this, settings, globalEntityManager, dataService);
+  sessionsWidget = new UserSessionsWidget(*this, settings, globalEntityManager, dataService);
   botTransactionsWidget = new BotTransactionsWidget(*this, settings, globalEntityManager);
   sessionAssetsWidget = new UserSessionAssetsWidget(*this, settings, globalEntityManager, dataService);
   sessionOrdersWidget = new UserSessionOrdersWidget(*this, settings, globalEntityManager);
@@ -32,7 +32,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addTab(logWidget, QTabFramework::InsertBottom, brokersWidget);
   addTab(transactionsWidget, QTabFramework::InsertRight, brokersWidget);
   addTab(ordersWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  addTab(botSessionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
+  addTab(sessionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(botTransactionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(sessionOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(sessionAssetsWidget, QTabFramework::InsertOnTop, transactionsWidget);
@@ -104,7 +104,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   ordersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
   brokersWidget->saveState(settings);
-  botSessionsWidget->saveState(settings);
+  sessionsWidget->saveState(settings);
   botTransactionsWidget->saveState(settings);
   sessionAssetsWidget->saveState(settings);
   sessionOrdersWidget->saveState(settings);
@@ -197,7 +197,7 @@ void MainWindow::updateViewMenu()
   viewMenu->addAction(toggleViewAction(ordersWidget));
   viewMenu->addAction(toggleViewAction(transactionsWidget));
   viewMenu->addSeparator();
-  viewMenu->addAction(toggleViewAction(botSessionsWidget));
+  viewMenu->addAction(toggleViewAction(sessionsWidget));
   viewMenu->addAction(toggleViewAction(botTransactionsWidget));
   viewMenu->addAction(toggleViewAction(sessionOrdersWidget));
   viewMenu->addAction(toggleViewAction(sessionAssetsWidget));

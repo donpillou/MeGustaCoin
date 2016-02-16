@@ -59,7 +59,7 @@
 
 #include "Widgets/BrokersWidget.h"
 #include "Widgets/OrdersWidget.h"
-#include "Widgets/BotSessionsWidget.h"
+#include "Widgets/UserSessionsWidget.h"
 #include "Widgets/UserSessionLogWidget.h"
 #include "Widgets/UserSessionOrdersWidget.h"
 #include "Widgets/BotTransactionsWidget.h"
