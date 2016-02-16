@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BotPropertiesWidget::BotPropertiesWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+UserSessionPropertiesWidget::UserSessionPropertiesWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), dataService(dataService), propertiesModel(entityManager)
 {
   setWindowTitle(tr("Bot Properties"));
@@ -51,20 +51,20 @@ BotPropertiesWidget::BotPropertiesWidget(QTabFramework& tabFramework, QSettings&
   //headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
-void BotPropertiesWidget::saveState(QSettings& settings)
+void UserSessionPropertiesWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("BotProperties");
   settings.setValue("HeaderState", propertyView->header()->saveState());
   settings.endGroup();
 }
 
-void BotPropertiesWidget::editedProperty(const QModelIndex& index, const QString& value)
+void UserSessionPropertiesWidget::editedProperty(const QModelIndex& index, const QString& value)
 {
   EUserSessionProperty* eProperty = (EUserSessionProperty*)index.internalPointer();
   dataService.updateSessionProperty(*eProperty, value);
 }
 
-void BotPropertiesWidget::editedProperty(const QModelIndex& index, double value)
+void UserSessionPropertiesWidget::editedProperty(const QModelIndex& index, double value)
 {
   EUserSessionProperty* eProperty = (EUserSessionProperty*)index.internalPointer();
   dataService.updateSessionProperty(*eProperty, QString::number(value));

@@ -1,12 +1,12 @@
 
 #pragma once
 
-class BotPropertiesWidget : public QWidget
+class UserSessionPropertiesWidget : public QWidget
 {
   Q_OBJECT
 
 public:
-  BotPropertiesWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService);
+  UserSessionPropertiesWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService);
 
   void saveState(QSettings& settings);
 
