@@ -962,19 +962,33 @@ void DataService::cancelBrokerOrder(EUserBrokerOrder& order)
   order.setState(EUserBrokerOrder::State::canceling);
   globalEntityManager.updatedEntity(order);
 
-  class CancelBrokerOrderJob : public Job
+  class CancelBrokerOrderJob : public Job, public Event
   {
   public:
-    CancelBrokerOrderJob(quint64 orderId) : orderId(orderId) {}
+    CancelBrokerOrderJob(quint64 orderId) : orderId(orderId), result(false) {}
   private:
     quint64 orderId;
+    bool result;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      bool controlResult;
-      if(!workerThread.connection.controlBroker(orderId, meguco_user_broker_control_cancel_order, controlResult))
+      if(!workerThread.connection.controlBroker(orderId, meguco_user_broker_control_cancel_order, result))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not cancel broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      if(!result)
+      {
+        Entity::Manager& globalEntityManager = dataService.globalEntityManager;
+        EUserBrokerOrder* order = globalEntityManager.getEntity<EUserBrokerOrder>(orderId);
+        if(order)
+        {
+          order->setState(EUserBrokerOrder::State::error);
+          globalEntityManager.updatedEntity(*order);
+        }
+      }
     }
   };
 
@@ -991,21 +1005,35 @@ void DataService::updateBrokerOrder(EUserBrokerOrder& order, double price, doubl
   order.setState(EUserBrokerOrder::State::updating);
   globalEntityManager.updatedEntity(order);
 
-  class UpdateBrokerOrderJob : public Job
+  class UpdateBrokerOrderJob : public Job, public Event
   {
   public:
-    UpdateBrokerOrderJob(quint64 orderId, double price, double amount) : orderId(orderId), price(price), amount(amount) {}
+    UpdateBrokerOrderJob(quint64 orderId, double price, double amount) : orderId(orderId), price(price), amount(amount), result(false) {}
   private:
     quint64 orderId;
     double price;
     double amount;
+    bool result;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      bool controlResult;
-      if(!workerThread.connection.updateBrokerOrder(orderId, price, amount, controlResult))
+      if(!workerThread.connection.updateBrokerOrder(orderId, price, amount, result))
         workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      if(!result)
+      {
+        Entity::Manager& globalEntityManager = dataService.globalEntityManager;
+        EUserBrokerOrder* order = globalEntityManager.getEntity<EUserBrokerOrder>(orderId);
+        if(order)
+        {
+          order->setState(EUserBrokerOrder::State::error);
+          globalEntityManager.updatedEntity(*order);
+        }
+      }
     }
   };
 
@@ -1022,19 +1050,33 @@ void DataService::removeBrokerOrder(EUserBrokerOrder& order)
   order.setState(EUserBrokerOrder::State::removing);
   globalEntityManager.updatedEntity(order);
 
-  class RemoveBrokerOrderJob : public Job
+  class RemoveBrokerOrderJob : public Job, public Event
   {
   public:
-    RemoveBrokerOrderJob(quint64 orderId) : orderId(orderId) {}
+    RemoveBrokerOrderJob(quint64 orderId) : orderId(orderId), result(false) {}
   private:
     quint64 orderId;
+    bool result;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      bool controlResult;
-      if(!workerThread.connection.controlBroker(orderId, meguco_user_broker_control_remove_order, controlResult))
+      if(!workerThread.connection.controlBroker(orderId, meguco_user_broker_control_remove_order, result))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not remove broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      if(!result)
+      {
+        Entity::Manager& globalEntityManager = dataService.globalEntityManager;
+        EUserBrokerOrder* order = globalEntityManager.getEntity<EUserBrokerOrder>(orderId);
+        if(order)
+        {
+          order->setState(EUserBrokerOrder::State::error);
+          globalEntityManager.updatedEntity(*order);
+        }
+      }
     }
   };
 
@@ -1092,55 +1134,89 @@ void DataService::removeSession(quint32 sessionId)
     thread->interrupt();
 }
 
-void DataService::stopSession(quint32 sessionId)
+void DataService::stopSession(EUserSession& session)
 {
-  // todo: check session state... set state to stopping
+  if(session.getState() != EUserSession::State::running)
+    return;
+  session.setState(EUserSession::State::stopping);
+  globalEntityManager.updatedEntity(session);
 
-  class StopSessionJob : public Job
+  class StopSessionJob : public Job, public Event
   {
   public:
-    StopSessionJob(quint32 sessionId) : sessionId(sessionId) {}
+    StopSessionJob(quint32 sessionId) : sessionId(sessionId), result(false) {}
   private:
     quint32 sessionId;
+    bool result;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      bool controlResult;
-      if(!workerThread.connection.controlUser(sessionId, meguco_user_control_stop_session, 0, 0, controlResult))
+      if(!workerThread.connection.controlUser(sessionId, meguco_user_control_stop_session, 0, 0, result))
           return workerThread.addMessage(ELogMessage::Type::error, QString("Could not stop session: %1").arg(workerThread.connection.getLastError())), false;
       return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      if(!result)
+      {
+        Entity::Manager& globalEntityManager = dataService.globalEntityManager;
+        EUserSession* session = globalEntityManager.getEntity<EUserSession>(sessionId);
+        if(session)
+        {
+          session->setState(EUserSession::State::error);
+          globalEntityManager.updatedEntity(*session);
+        }
+      }
     }
   };
 
   bool wasEmpty;
-  jobQueue.append(new StopSessionJob(sessionId), &wasEmpty);
+  jobQueue.append(new StopSessionJob(session.getId()), &wasEmpty);
   if(wasEmpty && thread)
     thread->interrupt();
 }
 
-void DataService::startSession(quint32 sessionId, meguco_user_session_mode mode)
+void DataService::startSession(EUserSession& session, meguco_user_session_mode mode)
 {
-  // todo: check session state... set state to starting
+  if(session.getState() != EUserSession::State::stopped)
+    return;
+  session.setState(EUserSession::State::starting);
+  globalEntityManager.updatedEntity(session);
 
-  class StartSessionJob : public Job
+  class StartSessionJob : public Job, public Event
   {
   public:
-    StartSessionJob(quint32 sessionId, meguco_user_session_mode mode) : sessionId(sessionId), mode(mode) {}
+    StartSessionJob(quint32 sessionId, meguco_user_session_mode mode) : sessionId(sessionId), mode(mode), result(false) {}
   private:
     quint32 sessionId;
     uint8_t mode;
+    bool result;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      bool controlResult;
-      if(!workerThread.connection.controlUser(sessionId, meguco_user_control_start_session, &mode, sizeof(uint8_t), controlResult))
+      if(!workerThread.connection.controlUser(sessionId, meguco_user_control_start_session, &mode, sizeof(uint8_t), result))
           return workerThread.addMessage(ELogMessage::Type::error, QString("Could not start session: %1").arg(workerThread.connection.getLastError())), false;
       return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      if(!result)
+      {
+        Entity::Manager& globalEntityManager = dataService.globalEntityManager;
+        EUserSession* session = globalEntityManager.getEntity<EUserSession>(sessionId);
+        if(session)
+        {
+          session->setState(EUserSession::State::error);
+          globalEntityManager.updatedEntity(*session);
+        }
+      }
     }
   };
 
   bool wasEmpty;
-  jobQueue.append(new StartSessionJob(sessionId, mode), &wasEmpty);
+  jobQueue.append(new StartSessionJob(session.getId(), mode), &wasEmpty);
   if(wasEmpty && thread)
     thread->interrupt();
 }
@@ -1224,20 +1300,34 @@ void DataService::updateSessionAsset(EUserSessionAsset& asset, double flipPrice)
   asset.setState(EUserSessionAsset::State::updating);
   globalEntityManager.updatedEntity(asset);
 
-  class UpdateSessionAssetJob : public Job
+  class UpdateSessionAssetJob : public Job, public Event
   {
   public:
-    UpdateSessionAssetJob(quint64 assetId, double flipPrice) : assetId(assetId), flipPrice(flipPrice) {}
+    UpdateSessionAssetJob(quint64 assetId, double flipPrice) : assetId(assetId), flipPrice(flipPrice), result(false) {}
   private:
     quint64 assetId;
     double flipPrice;
+    bool result;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      bool controlResult;
-      if(!workerThread.connection.updateSessionAsset(assetId, flipPrice, controlResult))
+      if(!workerThread.connection.updateSessionAsset(assetId, flipPrice, result))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not control broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
+    }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      if(!result)
+      {
+        Entity::Manager& globalEntityManager = dataService.globalEntityManager;
+        EUserSessionAsset* asset = globalEntityManager.getEntity<EUserSessionAsset>(assetId);
+        if(asset)
+        {
+          asset->setState(EUserSessionAsset::State::error);
+          globalEntityManager.updatedEntity(*asset);
+        }
+      }
     }
   };
 

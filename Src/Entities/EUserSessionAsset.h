@@ -24,6 +24,7 @@ public:
     draft,
     updating,
     removing,
+    error,
   };
 
 public:

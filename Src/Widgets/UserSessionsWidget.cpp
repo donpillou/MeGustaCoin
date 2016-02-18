@@ -101,7 +101,7 @@ void UserSessionsWidget::cancelBot()
       dataService.removeSession(eSession->getId());
     }
     else
-      dataService.stopSession(eSession->getId());
+      dataService.stopSession(*eSession);
   }
 }
 
@@ -113,7 +113,7 @@ void UserSessionsWidget::activate()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EUserSession* eSession = (EUserSession*)index.internalPointer();
     if(eSession->getState() == EUserSession::State::stopped)
-      dataService.startSession(eSession->getId(), meguco_user_session_live);
+      dataService.startSession(*eSession, meguco_user_session_live);
   }
 }
 
@@ -125,7 +125,7 @@ void UserSessionsWidget::simulate()
     QModelIndex index = proxyModel->mapToSource(proxyIndex);
     EUserSession* eSession = (EUserSession*)index.internalPointer();
     if(eSession->getState() == EUserSession::State::stopped)
-      dataService.startSession(eSession->getId(), meguco_user_session_simulation);
+      dataService.startSession(*eSession, meguco_user_session_simulation);
   }
 }
 

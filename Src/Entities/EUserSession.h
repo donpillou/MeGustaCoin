@@ -13,6 +13,7 @@ public:
     starting = meguco_user_session_starting,
     stopping = meguco_user_session_stopping,
     running = meguco_user_session_running,
+    error,
   };
 
   enum class Mode
@@ -35,6 +36,7 @@ public:
   quint64 getBotTypeId() const {return botTypeId;}
   quint64 getBrokerId() const {return brokerId;}
   State getState() const {return state;}
+  void setState(State state) {this->state = state;}
   Mode getMode() const {return mode;}
 
 private:

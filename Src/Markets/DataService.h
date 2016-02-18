@@ -33,8 +33,8 @@ public:
   void createSession(const QString& name, quint64 engineId, quint64 marketId);
   void removeSession(quint32 sessionId);
   void selectSession(quint32 sessionId);
-  void stopSession(quint32 sessionId);
-  void startSession(quint32 sessionId, meguco_user_session_mode mode);
+  void stopSession(EUserSession& session);
+  void startSession(EUserSession& session, meguco_user_session_mode mode);
 
   EUserSessionAssetDraft& createSessionAssetDraft(EUserSessionAsset::Type type, double flipPrice);
   void submitSessionAssetDraft(EUserSessionAssetDraft& draft);
