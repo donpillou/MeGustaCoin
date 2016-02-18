@@ -1045,7 +1045,7 @@ void DataService::updateBrokerOrder(EUserBrokerOrder& order, double price, doubl
 
 void DataService::removeBrokerOrder(EUserBrokerOrder& order)
 {
-  if(order.getState() != EUserBrokerOrder::State::open)
+  if(order.getState() != EUserBrokerOrder::State::open && order.getState() != EUserBrokerOrder::State::closed && order.getState() != EUserBrokerOrder::State::canceled)
     return;
   order.setState(EUserBrokerOrder::State::removing);
   globalEntityManager.updatedEntity(order);
