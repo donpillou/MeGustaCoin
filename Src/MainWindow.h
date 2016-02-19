@@ -15,7 +15,7 @@ private:
   UserBrokersWidget* brokersWidget;
   UserBrokerOrdersWidget* brokerOrdersWidget;
   UserSessionsWidget* sessionsWidget;
-  UserBokerTransactionsWidget* brokerTransactionsWidget;
+  UserBrokerTransactionsWidget* brokerTransactionsWidget;
   UserSessionAssetsWidget* sessionAssetsWidget;
   UserSessionOrdersWidget* sessionOrdersWidget;
   UserSessionPropertiesWidget* sessionPropertiesWidget;

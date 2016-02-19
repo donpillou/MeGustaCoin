@@ -15,7 +15,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   brokerOrdersWidget = new UserBrokerOrdersWidget(*this, settings, globalEntityManager, dataService);
   transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, dataService);
   sessionsWidget = new UserSessionsWidget(*this, settings, globalEntityManager, dataService);
-  brokerTransactionsWidget = new UserBokerTransactionsWidget(*this, settings, globalEntityManager);
+  brokerTransactionsWidget = new UserBrokerTransactionsWidget(*this, settings, globalEntityManager);
   sessionAssetsWidget = new UserSessionAssetsWidget(*this, settings, globalEntityManager, dataService);
   sessionOrdersWidget = new UserSessionOrdersWidget(*this, settings, globalEntityManager);
   sessionPropertiesWidget = new UserSessionPropertiesWidget(*this, settings, globalEntityManager, dataService);
