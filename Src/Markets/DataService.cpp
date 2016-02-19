@@ -936,9 +936,10 @@ void DataService::submitBrokerOrderDraft(EUserBrokerOrderDraft& draft)
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not create broker order: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
+  private: // Event
     virtual void handle(DataService& dataService)
     {
-      if(!orderId) // todo: this is impossible
+      if(!orderId)
         return;
       EUserBrokerOrderDraft* draft = dataService.globalEntityManager.getEntity<EUserBrokerOrderDraft>(draftId);
       if(draft)
@@ -1267,28 +1268,41 @@ void DataService::submitSessionAssetDraft(EUserSessionAssetDraft& draft)
   draft.setState(EUserSessionAssetDraft::State::submitting);
   globalEntityManager.updatedEntity(draft);
 
-  class SubmitSessionAssetJob : public Job
+  class SubmitSessionAssetJob : public Job, public Event
   {
   public:
-    SubmitSessionAssetJob(EUserSessionAsset::Type type, double balanceComm, double balanceBase, double flipPrice) : 
-      type(type), balanceComm(balanceComm), balanceBase(balanceBase), flipPrice(flipPrice) {}
+    SubmitSessionAssetJob(quint64 draftId, EUserSessionAsset::Type type, double balanceComm, double balanceBase, double flipPrice) : 
+      draftId(draftId), type(type), balanceComm(balanceComm), balanceBase(balanceBase), flipPrice(flipPrice), assetId(0) {}
   private:
+    quint64 draftId;
     EUserSessionAsset::Type type;
     double balanceComm;
     double balanceBase;
     double flipPrice;
+    quint64 assetId;
   private: // Job
     virtual bool execute(WorkerThread& workerThread)
     {
-      quint64 assetId;
       if(!workerThread.connection.createSessionAsset((meguco_user_session_asset_type)type, balanceComm, balanceBase, flipPrice, assetId))
         return workerThread.addMessage(ELogMessage::Type::error, QString("Could not create session asset: %1").arg(workerThread.connection.getLastError())), false;
       return true;
     }
+  private: // Event
+    virtual void handle(DataService& dataService)
+    {
+      if(!assetId)
+        return;
+      EUserSessionAssetDraft* draft = dataService.globalEntityManager.getEntity<EUserSessionAssetDraft>(draftId);
+      if(draft)
+      {
+        EUserSessionAsset* asset = new EUserSessionAsset(assetId, *draft);
+        dataService.globalEntityManager.delegateEntity(*asset, *draft);
+      }
+    }
   };
 
   bool wasEmpty;
-  jobQueue.append(new SubmitSessionAssetJob(draft.getType(), draft.getBalanceComm(), draft.getBalanceBase(), draft.getFlipPrice()), &wasEmpty);
+  jobQueue.append(new SubmitSessionAssetJob(draft.getId(), draft.getType(), draft.getBalanceComm(), draft.getBalanceBase(), draft.getFlipPrice()), &wasEmpty);
   if(wasEmpty && thread)
     thread->interrupt();
 }
