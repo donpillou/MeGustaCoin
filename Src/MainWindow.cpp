@@ -11,7 +11,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(&liveTradesSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveTradeWidget(const QString&)));
   connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
 
-  brokersWidget = new BrokersWidget(*this, settings, globalEntityManager, dataService);
+  brokersWidget = new UserBrokersWidget(*this, settings, globalEntityManager, dataService);
   ordersWidget = new OrdersWidget(*this, settings, globalEntityManager, dataService);
   transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, dataService);
   sessionsWidget = new UserSessionsWidget(*this, settings, globalEntityManager, dataService);

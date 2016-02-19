@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BrokersWidget::BrokersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+UserBrokersWidget::UserBrokersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), userBrokersModel(entityManager), selectedBrokerId(0)
 {
   entityManager.registerListener<EConnection>(*this);
@@ -56,12 +56,12 @@ BrokersWidget::BrokersWidget(QTabFramework& tabFramework, QSettings& settings, E
   headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
-BrokersWidget::~BrokersWidget()
+UserBrokersWidget::~UserBrokersWidget()
 {
   entityManager.unregisterListener<EConnection>(*this);
 }
 
-void BrokersWidget::saveState(QSettings& settings)
+void UserBrokersWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("Brokers");
   settings.setValue("HeaderState", marketView->header()->saveState());
@@ -69,7 +69,7 @@ void BrokersWidget::saveState(QSettings& settings)
   settings.endGroup();
 }
 
-void BrokersWidget::addMarket()
+void UserBrokersWidget::addMarket()
 {
   MarketDialog marketDialog(this, entityManager);
   if(marketDialog.exec() != QDialog::Accepted)
@@ -78,11 +78,11 @@ void BrokersWidget::addMarket()
   dataService.createBroker(marketDialog.getMarketAdapterId(),  marketDialog.getUserName(), marketDialog.getKey(), marketDialog.getSecret());
 }
 
-void BrokersWidget::editMarket()
+void UserBrokersWidget::editMarket()
 {
 }
 
-void BrokersWidget::removeMarket()
+void UserBrokersWidget::removeMarket()
 {
   if(QMessageBox::question(this, tr("Delete Market"), tr("Do you really want to delete the selected market?"), QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
     return;
@@ -96,7 +96,7 @@ void BrokersWidget::removeMarket()
   }
 }
 
-void BrokersWidget::updateTitle(EConnection& eDataService)
+void UserBrokersWidget::updateTitle(EConnection& eDataService)
 {
   QString stateStr = eDataService.getStateName();
 
@@ -110,7 +110,7 @@ void BrokersWidget::updateTitle(EConnection& eDataService)
   tabFramework.toggleViewAction(this)->setText(tr("Brokers"));
 }
 
-void BrokersWidget::updateToolBarButtons()
+void UserBrokersWidget::updateToolBarButtons()
 {
   EConnection* eDataService = entityManager.getEntity<EConnection>(0);
   bool connected = eDataService->getState() == EConnection::State::connected;
@@ -121,7 +121,7 @@ void BrokersWidget::updateToolBarButtons()
   removeAction->setEnabled(connected && marketSelected);
 }
 
-void BrokersWidget::updateSelection()
+void UserBrokersWidget::updateSelection()
 {
   QModelIndexList modelSelection = marketView->selectionModel()->selectedRows();
   selection.clear();
@@ -136,14 +136,14 @@ void BrokersWidget::updateSelection()
   updateToolBarButtons();
 }
 
-void BrokersWidget::marketSelectionChanged()
+void UserBrokersWidget::marketSelectionChanged()
 {
   updateSelection();
   if(!selection.isEmpty())
     dataService.selectBroker((*selection.begin())->getId());
 }
 
-void BrokersWidget::marketDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+void UserBrokersWidget::marketDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
   QModelIndex index = topLeft;
   for(int i = topLeft.row(), end = bottomRight.row();;)
@@ -160,7 +160,7 @@ void BrokersWidget::marketDataChanged(const QModelIndex& topLeft, const QModelIn
   }
 }
 
-void BrokersWidget::marketDataRemoved(const QModelIndex& parent, int start, int end)
+void UserBrokersWidget::marketDataRemoved(const QModelIndex& parent, int start, int end)
 {
   for(int i = start;;)
   {
@@ -172,12 +172,12 @@ void BrokersWidget::marketDataRemoved(const QModelIndex& parent, int start, int 
   }
 }
 
-void BrokersWidget::marketDataReset()
+void UserBrokersWidget::marketDataReset()
 {
   selection.clear();
 }
 
-void BrokersWidget::marketDataAdded(const QModelIndex& parent, int start, int end)
+void UserBrokersWidget::marketDataAdded(const QModelIndex& parent, int start, int end)
 {
   if(selection.isEmpty() && selectedBrokerId)
   {
@@ -198,7 +198,7 @@ void BrokersWidget::marketDataAdded(const QModelIndex& parent, int start, int en
   }
 }
 
-void BrokersWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserBrokersWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {

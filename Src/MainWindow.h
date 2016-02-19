@@ -12,7 +12,7 @@ public:
 private:
   QSettings settings;
 
-  BrokersWidget* brokersWidget;
+  UserBrokersWidget* brokersWidget;
   OrdersWidget* ordersWidget;
   UserSessionsWidget* sessionsWidget;
   UserBokerTransactionsWidget* brokerTransactionsWidget;
