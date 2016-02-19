@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-BotTransactionsWidget::BotTransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
+UserBokerTransactionsWidget::UserBokerTransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager) :
   QWidget(&tabFramework), transactionsModel(entityManager)
 {
   setWindowTitle(tr("Bot Transactions"));
@@ -38,8 +38,7 @@ BotTransactionsWidget::BotTransactionsWidget(QTabFramework& tabFramework, QSetti
   headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
-
-void BotTransactionsWidget::saveState(QSettings& settings)
+void UserBokerTransactionsWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("BotTransactions");
   settings.setValue("HeaderState", transactionView->header()->saveState());
