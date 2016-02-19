@@ -47,7 +47,7 @@ targets = {
       "Src/Widgets/UserBrokerOrdersWidget.h"
       "Src/Widgets/UserSessionsWidget.h"
       "Src/Widgets/UserSessionLogWidget.h"
-      "Src/Widgets/TransactionsWidget.h"
+      "Src/Widgets/UserBrokerTransactionsWidget.h"
       "Src/Widgets/LogWidget.h"
       "Src/Widgets/GraphWidget.h"
       "Src/Widgets/UserSessionAssetsWidget.h"

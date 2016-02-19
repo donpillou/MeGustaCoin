@@ -13,7 +13,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
 
   brokersWidget = new UserBrokersWidget(*this, settings, globalEntityManager, dataService);
   brokerOrdersWidget = new UserBrokerOrdersWidget(*this, settings, globalEntityManager, dataService);
-  transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, dataService);
+  brokerTransactionsWidget = new UserBrokerTransactionsWidget(*this, settings, globalEntityManager, dataService);
   sessionsWidget = new UserSessionsWidget(*this, settings, globalEntityManager, dataService);
   sessionTransactionsWidget = new UserSessionTransactionsWidget(*this, settings, globalEntityManager);
   sessionAssetsWidget = new UserSessionAssetsWidget(*this, settings, globalEntityManager, dataService);
@@ -30,14 +30,14 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addTab(brokersWidget);
   addTab(processesWidget, QTabFramework::InsertOnTop, brokersWidget); // todo: insert hidden
   addTab(logWidget, QTabFramework::InsertBottom, brokersWidget);
-  addTab(transactionsWidget, QTabFramework::InsertRight, brokersWidget);
-  addTab(brokerOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  addTab(sessionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  addTab(sessionTransactionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  addTab(sessionOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  addTab(sessionAssetsWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  addTab(sessionPropertiesWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  addTab(sessionLogWidget, QTabFramework::InsertOnTop, transactionsWidget);
+  addTab(brokerTransactionsWidget, QTabFramework::InsertRight, brokersWidget);
+  addTab(brokerOrdersWidget, QTabFramework::InsertOnTop, brokerTransactionsWidget);
+  addTab(sessionsWidget, QTabFramework::InsertOnTop, brokerTransactionsWidget);
+  addTab(sessionTransactionsWidget, QTabFramework::InsertOnTop, brokerTransactionsWidget);
+  addTab(sessionOrdersWidget, QTabFramework::InsertOnTop, brokerTransactionsWidget);
+  addTab(sessionAssetsWidget, QTabFramework::InsertOnTop, brokerTransactionsWidget);
+  addTab(sessionPropertiesWidget, QTabFramework::InsertOnTop, brokerTransactionsWidget);
+  addTab(sessionLogWidget, QTabFramework::InsertOnTop, brokerTransactionsWidget);
 
   QMenuBar* menuBar = this->menuBar();
   QMenu* menu = menuBar->addMenu(tr("&Client"));
@@ -102,7 +102,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
   settings.setValue("Layout", saveLayout());
   brokerOrdersWidget->saveState(settings);
-  transactionsWidget->saveState(settings);
+  brokerTransactionsWidget->saveState(settings);
   brokersWidget->saveState(settings);
   sessionsWidget->saveState(settings);
   sessionTransactionsWidget->saveState(settings);
@@ -195,7 +195,7 @@ void MainWindow::updateViewMenu()
 
   viewMenu->addAction(toggleViewAction(brokersWidget));
   viewMenu->addAction(toggleViewAction(brokerOrdersWidget));
-  viewMenu->addAction(toggleViewAction(transactionsWidget));
+  viewMenu->addAction(toggleViewAction(brokerTransactionsWidget));
   viewMenu->addSeparator();
   viewMenu->addAction(toggleViewAction(sessionsWidget));
   viewMenu->addAction(toggleViewAction(sessionTransactionsWidget));

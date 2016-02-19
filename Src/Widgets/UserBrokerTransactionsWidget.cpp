@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+UserBrokerTransactionsWidget::UserBrokerTransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), transactionsModel(entityManager)
 {
   entityManager.registerListener<EConnection>(*this);
@@ -51,19 +51,19 @@ TransactionsWidget::TransactionsWidget(QTabFramework& tabFramework, QSettings& s
   headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
-TransactionsWidget::~TransactionsWidget()
+UserBrokerTransactionsWidget::~UserBrokerTransactionsWidget()
 {
   entityManager.unregisterListener<EConnection>(*this);
 }
 
-void TransactionsWidget::saveState(QSettings& settings)
+void UserBrokerTransactionsWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("Transactions");
   settings.setValue("HeaderState", transactionView->header()->saveState());
   settings.endGroup();
 }
 
-void TransactionsWidget::updateToolBarButtons()
+void UserBrokerTransactionsWidget::updateToolBarButtons()
 {
   EConnection* eDataService = entityManager.getEntity<EConnection>(0);
   bool connected = eDataService->getState() == EConnection::State::connected;
@@ -72,12 +72,12 @@ void TransactionsWidget::updateToolBarButtons()
   refreshAction->setEnabled(brokerSelected);
 }
 
-void TransactionsWidget::refresh()
+void UserBrokerTransactionsWidget::refresh()
 {
   dataService.refreshBrokerTransactions();
 }
 
-void TransactionsWidget::updateTitle(EConnection& eDataService)
+void UserBrokerTransactionsWidget::updateTitle(EConnection& eDataService)
 {
   QString stateStr = eDataService.getStateName();
   QString title;
@@ -92,7 +92,7 @@ void TransactionsWidget::updateTitle(EConnection& eDataService)
   tabFramework.toggleViewAction(this)->setText(tr("Transactions"));
 }
 
-void TransactionsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserBrokerTransactionsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {

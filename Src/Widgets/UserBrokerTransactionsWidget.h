@@ -1,13 +1,13 @@
 
 #pragma once
 
-class TransactionsWidget : public QWidget, public Entity::Listener
+class UserBrokerTransactionsWidget : public QWidget, public Entity::Listener
 {
   Q_OBJECT
 
 public:
-  TransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService);
-  ~TransactionsWidget();
+  UserBrokerTransactionsWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService);
+  ~UserBrokerTransactionsWidget();
 
   void saveState(QSettings& settings);
 

@@ -20,7 +20,7 @@ private:
   UserSessionOrdersWidget* sessionOrdersWidget;
   UserSessionPropertiesWidget* sessionPropertiesWidget;
   UserSessionLogWidget* sessionLogWidget;
-  TransactionsWidget* transactionsWidget;
+  UserBrokerTransactionsWidget* brokerTransactionsWidget;
   LogWidget* logWidget;
   ProcessesWidget* processesWidget;
 
