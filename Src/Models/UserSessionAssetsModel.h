@@ -36,6 +36,7 @@ private:
   EBrokerType* eBrokerType;
   QList<EUserSessionAsset*> items;
   QVariant draftStr;
+  QVariant submittingStr;
   QVariant buyStr;
   QVariant sellStr;
   QVariant buyingStr;

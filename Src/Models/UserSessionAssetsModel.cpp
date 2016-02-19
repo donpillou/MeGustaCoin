@@ -3,6 +3,7 @@
 
 UserSessionAssetsModel::UserSessionAssetsModel(Entity::Manager& entityManager) :
   entityManager(entityManager), draftStr(tr("draft")),
+  submittingStr("submitting..."),
   buyStr(tr("buy")), sellStr(tr("sell")),
   buyingStr(tr("buying...")), sellingStr(tr("selling...")),
   sellIcon(QIcon(":/Icons/money.png")), buyIcon(QIcon(":/Icons/bitcoin.png")),
@@ -135,6 +136,8 @@ QVariant UserSessionAssetsModel::data(const QModelIndex& index, int role) const
     case Column::state:
       switch(eItem->getState())
       {
+      case EUserSessionAsset::State::submitting:
+        return submittingStr;
       case EUserSessionAsset::State::waitBuy:
         return buyStr;
       case EUserSessionAsset::State::buying:
