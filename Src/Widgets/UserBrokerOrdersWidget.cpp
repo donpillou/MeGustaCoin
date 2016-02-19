@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 
-OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
+UserBrokerOrdersWidget::UserBrokerOrdersWidget(QTabFramework& tabFramework, QSettings& settings, Entity::Manager& entityManager, DataService& dataService) :
   QWidget(&tabFramework), tabFramework(tabFramework), entityManager(entityManager), dataService(dataService), ordersModel(entityManager)
 {
   entityManager.registerListener<EConnection>(*this);
@@ -91,29 +91,29 @@ OrdersWidget::OrdersWidget(QTabFramework& tabFramework, QSettings& settings, Ent
   headerView->setResizeMode(0, QHeaderView::Stretch);
 }
 
-OrdersWidget::~OrdersWidget()
+UserBrokerOrdersWidget::~UserBrokerOrdersWidget()
 {
   entityManager.unregisterListener<EConnection>(*this);
 }
 
-void OrdersWidget::saveState(QSettings& settings)
+void UserBrokerOrdersWidget::saveState(QSettings& settings)
 {
   settings.beginGroup("Orders");
   settings.setValue("HeaderState", orderView->header()->saveState());
   settings.endGroup();
 }
 
-void OrdersWidget::newBuyOrder()
+void UserBrokerOrdersWidget::newBuyOrder()
 {
   addOrderDraft(EUserBrokerOrder::Type::buy);
 }
 
-void OrdersWidget::newSellOrder()
+void UserBrokerOrdersWidget::newSellOrder()
 {
   addOrderDraft(EUserBrokerOrder::Type::sell);
 }
 
-void OrdersWidget::addOrderDraft(EUserBrokerOrder::Type type)
+void UserBrokerOrdersWidget::addOrderDraft(EUserBrokerOrder::Type type)
 {
   EConnection* eDataService = entityManager.getEntity<EConnection>(0);
   EUserBroker* eUserBroker = entityManager.getEntity<EUserBroker>(eDataService->getSelectedBrokerId());
@@ -139,7 +139,7 @@ void OrdersWidget::addOrderDraft(EUserBrokerOrder::Type type)
   orderView->edit(amountIndex);
 }
 
-void OrdersWidget::submitOrder()
+void UserBrokerOrdersWidget::submitOrder()
 {
   QModelIndexList selection = orderView->selectionModel()->selectedRows();
   foreach(const QModelIndex& proxyIndex, selection)
@@ -151,7 +151,7 @@ void OrdersWidget::submitOrder()
   }
 }
 
-void OrdersWidget::cancelOrder()
+void UserBrokerOrdersWidget::cancelOrder()
 {
   QModelIndexList selection = orderView->selectionModel()->selectedRows();
   QList<EUserBrokerOrder*> ordersToRemove;
@@ -197,19 +197,19 @@ void OrdersWidget::cancelOrder()
   }
 }
 
-void OrdersWidget::editedOrderPrice(const QModelIndex& index, double price)
+void UserBrokerOrdersWidget::editedOrderPrice(const QModelIndex& index, double price)
 {
   EUserBrokerOrder* eBotMarketOrder = (EUserBrokerOrder*)index.internalPointer();
   dataService.updateBrokerOrder(*eBotMarketOrder, price, eBotMarketOrder->getAmount());
 }
 
-void OrdersWidget::editedOrderAmount(const QModelIndex& index, double amount)
+void UserBrokerOrdersWidget::editedOrderAmount(const QModelIndex& index, double amount)
 {
   EUserBrokerOrder* eBotMarketOrder = (EUserBrokerOrder*)index.internalPointer();
   dataService.updateBrokerOrder(*eBotMarketOrder, eBotMarketOrder->getPrice(), amount);
 }
 
-void OrdersWidget::orderSelectionChanged()
+void UserBrokerOrdersWidget::orderSelectionChanged()
 {
   QModelIndexList modelSelection = orderView->selectionModel()->selectedRows();
   selection.clear();
@@ -222,7 +222,7 @@ void OrdersWidget::orderSelectionChanged()
   updateToolBarButtons();
 }
 
-void OrdersWidget::orderDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
+void UserBrokerOrdersWidget::orderDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight)
 {
   QModelIndex index = topLeft;
   for(int i = topLeft.row(), end = bottomRight.row();;)
@@ -239,7 +239,7 @@ void OrdersWidget::orderDataChanged(const QModelIndex& topLeft, const QModelInde
   }
 }
 
-void OrdersWidget::updateToolBarButtons()
+void UserBrokerOrdersWidget::updateToolBarButtons()
 {
   EConnection* eDataService = entityManager.getEntity<EConnection>(0);
   bool connected = eDataService->getState() == EConnection::State::connected;
@@ -264,13 +264,13 @@ void OrdersWidget::updateToolBarButtons()
   cancelAction->setEnabled(canCancel);
 }
 
-void OrdersWidget::refresh()
+void UserBrokerOrdersWidget::refresh()
 {
   dataService.refreshBrokerOrders();
   dataService.refreshBrokerBalance();
 }
 
-void OrdersWidget::updateTitle(EConnection& eDataService)
+void UserBrokerOrdersWidget::updateTitle(EConnection& eDataService)
 {
   QString stateStr = eDataService.getStateName();
   QString title;
@@ -285,7 +285,7 @@ void OrdersWidget::updateTitle(EConnection& eDataService)
   tabFramework.toggleViewAction(this)->setText(tr("Orders"));
 }
 
-void OrdersWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
+void UserBrokerOrdersWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)
 {
   switch ((EType)newEntity.getType())
   {

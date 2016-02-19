@@ -12,7 +12,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   connect(&liveGraphSignalMapper, SIGNAL(mapped(const QString&)), this, SLOT(createLiveGraphWidget(const QString&)));
 
   brokersWidget = new UserBrokersWidget(*this, settings, globalEntityManager, dataService);
-  ordersWidget = new OrdersWidget(*this, settings, globalEntityManager, dataService);
+  brokerOrdersWidget = new UserBrokerOrdersWidget(*this, settings, globalEntityManager, dataService);
   transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, dataService);
   sessionsWidget = new UserSessionsWidget(*this, settings, globalEntityManager, dataService);
   brokerTransactionsWidget = new UserBokerTransactionsWidget(*this, settings, globalEntityManager);
@@ -31,7 +31,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addTab(processesWidget, QTabFramework::InsertOnTop, brokersWidget); // todo: insert hidden
   addTab(logWidget, QTabFramework::InsertBottom, brokersWidget);
   addTab(transactionsWidget, QTabFramework::InsertRight, brokersWidget);
-  addTab(ordersWidget, QTabFramework::InsertOnTop, transactionsWidget);
+  addTab(brokerOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(sessionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(brokerTransactionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(sessionOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
@@ -101,7 +101,7 @@ void MainWindow::startDataService()
 void MainWindow::closeEvent(QCloseEvent* event)
 {
   settings.setValue("Layout", saveLayout());
-  ordersWidget->saveState(settings);
+  brokerOrdersWidget->saveState(settings);
   transactionsWidget->saveState(settings);
   brokersWidget->saveState(settings);
   sessionsWidget->saveState(settings);
@@ -194,7 +194,7 @@ void MainWindow::updateViewMenu()
   viewMenu->clear();
 
   viewMenu->addAction(toggleViewAction(brokersWidget));
-  viewMenu->addAction(toggleViewAction(ordersWidget));
+  viewMenu->addAction(toggleViewAction(brokerOrdersWidget));
   viewMenu->addAction(toggleViewAction(transactionsWidget));
   viewMenu->addSeparator();
   viewMenu->addAction(toggleViewAction(sessionsWidget));

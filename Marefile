@@ -44,7 +44,7 @@ targets = {
       "Src/Graph/GraphModel.h"
       "Src/Graph/GraphService.h"
       "Src/Widgets/UserBrokersWidget.h"
-      "Src/Widgets/OrdersWidget.h"
+      "Src/Widgets/UserBrokerOrdersWidget.h"
       "Src/Widgets/UserSessionsWidget.h"
       "Src/Widgets/UserSessionLogWidget.h"
       "Src/Widgets/TransactionsWidget.h"
