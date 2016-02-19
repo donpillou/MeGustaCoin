@@ -15,7 +15,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   brokerOrdersWidget = new UserBrokerOrdersWidget(*this, settings, globalEntityManager, dataService);
   transactionsWidget = new TransactionsWidget(*this, settings, globalEntityManager, dataService);
   sessionsWidget = new UserSessionsWidget(*this, settings, globalEntityManager, dataService);
-  brokerTransactionsWidget = new UserBrokerTransactionsWidget(*this, settings, globalEntityManager);
+  sessionTransactionsWidget = new UserSessionTransactionsWidget(*this, settings, globalEntityManager);
   sessionAssetsWidget = new UserSessionAssetsWidget(*this, settings, globalEntityManager, dataService);
   sessionOrdersWidget = new UserSessionOrdersWidget(*this, settings, globalEntityManager);
   sessionPropertiesWidget = new UserSessionPropertiesWidget(*this, settings, globalEntityManager, dataService);
@@ -33,7 +33,7 @@ MainWindow::MainWindow() : settings(QSettings::IniFormat, QSettings::UserScope, 
   addTab(transactionsWidget, QTabFramework::InsertRight, brokersWidget);
   addTab(brokerOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(sessionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
-  addTab(brokerTransactionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
+  addTab(sessionTransactionsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(sessionOrdersWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(sessionAssetsWidget, QTabFramework::InsertOnTop, transactionsWidget);
   addTab(sessionPropertiesWidget, QTabFramework::InsertOnTop, transactionsWidget);
@@ -105,7 +105,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
   transactionsWidget->saveState(settings);
   brokersWidget->saveState(settings);
   sessionsWidget->saveState(settings);
-  brokerTransactionsWidget->saveState(settings);
+  sessionTransactionsWidget->saveState(settings);
   sessionAssetsWidget->saveState(settings);
   sessionOrdersWidget->saveState(settings);
   sessionPropertiesWidget->saveState(settings);
@@ -198,7 +198,7 @@ void MainWindow::updateViewMenu()
   viewMenu->addAction(toggleViewAction(transactionsWidget));
   viewMenu->addSeparator();
   viewMenu->addAction(toggleViewAction(sessionsWidget));
-  viewMenu->addAction(toggleViewAction(brokerTransactionsWidget));
+  viewMenu->addAction(toggleViewAction(sessionTransactionsWidget));
   viewMenu->addAction(toggleViewAction(sessionOrdersWidget));
   viewMenu->addAction(toggleViewAction(sessionAssetsWidget));
   viewMenu->addAction(toggleViewAction(sessionPropertiesWidget));

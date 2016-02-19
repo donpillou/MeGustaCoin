@@ -62,7 +62,7 @@
 #include "Widgets/UserSessionsWidget.h"
 #include "Widgets/UserSessionLogWidget.h"
 #include "Widgets/UserSessionOrdersWidget.h"
-#include "Widgets/UserBrokerTransactionsWidget.h"
+#include "Widgets/UserSessionTransactionsWidget.h"
 #include "Widgets/UserSessionAssetsWidget.h"
 #include "Widgets/UserSessionPropertiesWidget.h"
 #include "Widgets/TransactionsWidget.h"
