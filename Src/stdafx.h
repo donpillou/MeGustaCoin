@@ -7,6 +7,7 @@
 
 #include "Tools/JobQueue.h"
 #include "Tools/Entity.h"
+#include "Tools/Json.h"
 
 #include "Markets/DataConnection.h"
 
