@@ -1261,6 +1261,39 @@ EUserSessionAssetDraft& DataService::createSessionAssetDraft(EUserSessionAsset::
   return *eAssetDraft;
 }
 
+void DataService::createSessionAsset(EUserSessionAsset::Type type, EUserSessionAsset::State state, double price, double investComm, double investBase, double balanceComm, double balanceBase, double profitablePrice, double flipPrice)
+{
+  class CreateSessionAsset : public Job
+  {
+  public:
+    CreateSessionAsset(EUserSessionAsset::Type type, EUserSessionAsset::State state, double price, double investComm, double investBase, double balanceComm, double balanceBase, double profitablePrice, double flipPrice) : 
+      type(type), state(state), price(price), investComm(investComm), investBase(investBase), balanceComm(balanceComm), balanceBase(balanceBase), profitablePrice(profitablePrice), flipPrice(flipPrice) {}
+  private:
+    EUserSessionAsset::Type type;
+    EUserSessionAsset::State state;
+    double price;
+    double investComm;
+    double investBase;
+    double balanceComm;
+    double balanceBase;
+    double profitablePrice;
+    double flipPrice;
+  private: // Job
+    virtual bool execute(WorkerThread& workerThread)
+    {
+      quint64 assetId;
+      if(!workerThread.connection.createSessionAsset((meguco_user_session_asset_type)type, (meguco_user_session_asset_state)state, price, investComm, investBase, balanceComm, balanceBase, profitablePrice, flipPrice, assetId))
+        return workerThread.addMessage(ELogMessage::Type::error, QString("Could not create session asset: %1").arg(workerThread.connection.getLastError())), false;
+      return true;
+    }
+  };
+
+  bool wasEmpty;
+  jobQueue.append(new CreateSessionAsset(type, state, price, investComm, investBase, balanceComm, balanceBase, profitablePrice, flipPrice), &wasEmpty);
+  if(wasEmpty && thread)
+    thread->interrupt();
+}
+
 void DataService::submitSessionAssetDraft(EUserSessionAssetDraft& draft)
 {
   if(draft.getState() != EUserSessionAssetDraft::State::draft)

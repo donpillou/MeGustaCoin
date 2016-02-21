@@ -37,12 +37,15 @@ public:
   void startSession(EUserSession& session, meguco_user_session_mode mode);
 
   EUserSessionAssetDraft& createSessionAssetDraft(EUserSessionAsset::Type type, double flipPrice);
+  void createSessionAsset(EUserSessionAsset::Type type, EUserSessionAsset::State state, double price, double investComm, double investBase, double balanceComm, double balanceBase, double profitablePrice, double flipPrice);
   void submitSessionAssetDraft(EUserSessionAssetDraft& draft);
   void updateSessionAsset(EUserSessionAsset& asset, double flipPrice);
   void removeSessionAsset(EUserSessionAsset& asset);
   void removeSessionAssetDraft(EUserSessionAssetDraft& draft);
 
   void updateSessionProperty(EUserSessionProperty& property, const QString& value);
+
+  void addLogMessage(ELogMessage::Type type, const QString& message);
 
 private:
   class WorkerThread;
@@ -169,7 +172,6 @@ private:
   QHash<QString, Entity::Manager*> subscriptions;
 
 private:
-  void addLogMessage(ELogMessage::Type type, const QString& message);
   //void controlBroker(meguco_user_broker_control_code code);
   //void controlBrokerOrder(quint64 orderId, meguco_user_broker_order_control_code code, const void* data, size_t size);
   //void controlSession(quint32 sessionId, meguco_user_session_control_code code); // todo: ??

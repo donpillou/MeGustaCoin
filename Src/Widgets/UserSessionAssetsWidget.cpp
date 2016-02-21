@@ -33,6 +33,14 @@ UserSessionAssetsWidget::UserSessionAssetsWidget(QTabFramework& tabFramework, QS
   cancelAction->setShortcut(QKeySequence(Qt::Key_Delete));
   connect(cancelAction, SIGNAL(triggered()), this, SLOT(cancelItem()));
 
+  importAction = toolBar->addAction(QIcon(":/Icons/table_import.png"), tr("&Import"));
+  importAction->setEnabled(false);
+  connect(importAction, SIGNAL(triggered()), this, SLOT(importAssets()));
+
+  exportAction = toolBar->addAction(QIcon(":/Icons/table_export.png"), tr("&Export"));
+  exportAction->setEnabled(false);
+  connect(exportAction, SIGNAL(triggered()), this, SLOT(exportAssets()));
+
   itemView = new QTreeView(this);
   itemView->setUniformRowHeights(true);
   proxyModel = new UserSessionAssetsSortProxyModel(this);
@@ -158,6 +166,90 @@ void UserSessionAssetsWidget::cancelItem()
 
 }
 
+void UserSessionAssetsWidget::importAssets()
+{
+  QString fileName = QFileDialog::getOpenFileName(parentWidget(), tr("Import Assets"), QString(), tr("JSON File (*.json)"));
+  if(fileName.isEmpty())
+    return;
+
+  QFile file(fileName);
+  if(!file.open(QIODevice::ReadOnly))
+    return (void)QMessageBox::critical(parentWidget(), tr("Import Failed"), tr("Could not open file \"%1\": %2").arg(fileName, file.errorString()));
+
+  const QVariantList list = Json::parse(file.readAll()).toList();
+  foreach(const QVariant& assetVar, list)
+  {
+    const QVariantMap assetData = assetVar.toMap();
+
+    EUserSessionAsset::Type type = (EUserSessionAsset::Type)assetData["type"].toInt();
+    switch(type)
+    {
+    case EUserSessionAsset::Type::buy:
+    case EUserSessionAsset::Type::sell:
+      break;
+    default:
+      dataService.addLogMessage(ELogMessage::Type::warning, tr("Skipped session with invalid type"));
+      continue;
+    }
+    EUserSessionAsset::State state = (EUserSessionAsset::State)assetData["state"].toInt();
+    switch(state)
+    {
+    case EUserSessionAsset::State::waitBuy:
+    case EUserSessionAsset::State::waitSell:
+      break;
+    default:
+      dataService.addLogMessage(ELogMessage::Type::warning, tr("Skipped session with invalid state"));
+      continue;
+    }
+    double price = assetData["price"].toDouble();
+    double investComm = assetData["investComm"].toDouble();
+    double investBase = assetData["investBase"].toDouble();
+    double balanceComm = assetData["balanceComm"].toDouble();
+    double balanceBase = assetData["balanceBase"].toDouble();
+    double profitablePrice = assetData["profitablePrice"].toDouble();
+    double flipPrice = assetData["flipPrice"].toDouble();
+
+    dataService.createSessionAsset(type, state, price, investComm, investBase, balanceComm, balanceBase, profitablePrice, flipPrice);
+  }
+}
+
+void UserSessionAssetsWidget::exportAssets()
+{
+  QString fileName = QFileDialog::getSaveFileName(parentWidget(), tr("Export Selected Assets"), QString(), tr("JSON File (*.json)"));
+  if(fileName.isEmpty())
+    return;
+
+  QVariantList data;
+  QModelIndexList selection = itemView->selectionModel()->selectedRows();
+  foreach(const QModelIndex& proxyIndex, selection)
+  {
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
+    EUserSessionAsset* eAsset = (EUserSessionAsset*)index.internalPointer();
+    if(eAsset->getState() != EUserSessionAsset::State::waitBuy && eAsset->getState() != EUserSessionAsset::State::waitSell)
+      continue;
+
+    QVariantMap assetData;
+    assetData["id"] = eAsset->getId();
+    assetData["type"] = (int)eAsset->getType();
+    assetData["state"] = (int)eAsset->getState();
+    assetData["date"] = eAsset->getDate().toMSecsSinceEpoch();
+    assetData["price"] = eAsset->getPrice();
+    assetData["investComm"] = eAsset->getInvestComm();
+    assetData["investBase"] = eAsset->getInvestBase();
+    assetData["balanceComm"] = eAsset->getBalanceComm();
+    assetData["balanceBase"] = eAsset->getBalanceBase();
+    assetData["profitablePrice"] = eAsset->getProfitablePrice();
+    assetData["flipPrice"] = eAsset->getFlipPrice();
+    assetData["orderId"] = eAsset->getOrderId();
+    data.append(assetData);
+  }
+
+  QFile file(fileName);
+  if(!file.open(QIODevice::WriteOnly))
+    return (void)QMessageBox::critical(parentWidget(), tr("Export Failed"), tr("Could not open file \"%1\": %2").arg(fileName, file.errorString()));
+  file.write(Json::generate(data));
+}
+
 void UserSessionAssetsWidget::addSessionItemDraft(EUserSessionAsset::Type type)
 {
   EConnection* eDataService = entityManager.getEntity<EConnection>(0);
@@ -231,12 +323,20 @@ void UserSessionAssetsWidget::updateToolBarButtons()
   bool canCancel = !selection.isEmpty();
 
   bool draftSelected = false;
+  bool canExport = false;
   for(QSet<EUserSessionAsset*>::Iterator i = selection.begin(), end = selection.end(); i != end; ++i)
   {
     EUserSessionAsset* eAsset = *i;
-    if(eAsset->getState() == EUserSessionAsset::State::draft)
+    switch(eAsset->getState())
     {
+    case EUserSessionAsset::State::draft:
       draftSelected = true;
+      break;
+    case EUserSessionAsset::State::waitBuy:
+    case EUserSessionAsset::State::waitSell:
+      canExport = true;
+      break;
+    default:
       break;
     }
   }
@@ -245,6 +345,8 @@ void UserSessionAssetsWidget::updateToolBarButtons()
   sellAction->setEnabled(sessionSelected);
   submitAction->setEnabled(draftSelected);
   cancelAction->setEnabled(canCancel);
+  exportAction->setEnabled(canExport);
+  importAction->setEnabled(sessionSelected);
 }
 
 void UserSessionAssetsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)

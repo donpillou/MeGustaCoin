@@ -16,6 +16,8 @@ private slots:
   void newSellItem();
   void submitItem();
   void cancelItem();
+  void importAssets();
+  void exportAssets();
   void itemSelectionChanged();
   void itemDataChanged(const QModelIndex& topLeft, const QModelIndex& bottomRight);
   void editedItemFlipPrice(const QModelIndex& index, double price);
@@ -35,6 +37,8 @@ private:
   QAction* sellAction;
   QAction* submitAction;
   QAction* cancelAction;
+  QAction* importAction;
+  QAction* exportAction;
 
 private:
   void addSessionItemDraft(EUserSessionAsset::Type type);

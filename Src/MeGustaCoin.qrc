@@ -25,5 +25,7 @@
   <file>Icons/close_hot.png</file>
   <file>Icons/close_cold.png</file>
   <file>Icons/close_pressed.png</file>
+  <file>Icons/table_import.png</file>
+  <file>Icons/table_export.png</file>
 </qresource>
 </RCC>

@@ -87,6 +87,7 @@ public:
   bool controlSession(quint64 entityId, meguco_user_session_control_code controlCode, bool& result); // todo: rename to controlSession
 
   bool createSessionAsset(meguco_user_session_asset_type type, double balanceComm, double balanceBase, double flipPrice, quint64& assetId);
+  bool createSessionAsset(meguco_user_session_asset_type type, meguco_user_session_asset_state state, double price, double investComm, double investBase, double balanceComm, double balanceBase, double profitablePrice, double flipPrice, quint64& assetId);
   bool updateSessionAsset(quint64 assetId, double flipPrice, bool& result);
 
   bool updateSessionProperty(quint64 propertyId, const QString& value);

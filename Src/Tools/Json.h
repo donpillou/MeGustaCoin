@@ -4,6 +4,6 @@
 class Json
 {
 public:
-  //static QVariantList parseList(const QByteArray& byteArray);
   static QVariant parse(const QByteArray& byteArray);
+  static QByteArray generate(const QVariant& variant);
 };

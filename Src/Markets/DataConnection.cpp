@@ -1164,6 +1164,44 @@ bool DataConnection::createSessionAsset(meguco_user_session_asset_type type, dou
   return assetId = *response, true;
 }
 
+bool DataConnection::createSessionAsset(meguco_user_session_asset_type type, meguco_user_session_asset_state state, double price, double investComm, double investBase, double balanceComm, double balanceBase, double profitablePrice, double flipPrice, quint64& assetId)
+{
+  QHash<quint32, SessionData>::ConstIterator it = sessionData.find(this->selectedSessionId);
+  if(it == sessionData.end())
+    return error = "Unknown session id", false;
+  const SessionData& sessionData = *it;
+  if(!sessionData.sessionTableId)
+    return error = "Unknown session table id", false;
+
+  meguco_user_session_asset_entity asset;
+  setEntityHeader(asset.entity, 0, 0, sizeof(asset));
+  asset.type = type;
+  asset.state = state;
+  asset.price = price;
+  asset.invest_comm = investComm;
+  asset.invest_base = investBase;
+  asset.balance_comm = balanceComm;
+  asset.balance_base = balanceBase;
+  asset.profitable_price = profitablePrice;
+  asset.flip_price = flipPrice;
+  asset.order_id = 0;
+
+  char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
+  if(zlimdb_control(zdb, sessionData.sessionTableId, 0, meguco_user_session_control_create_asset, &asset.entity, asset.entity.size, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE) != 0)
+  {
+    if(zlimdb_errno() == 0)
+      return assetId = 0, true;
+    return error = getZlimDbError(), false;
+  }
+  uint64_t* response = (uint64_t*)zlimdb_get_response_data((zlimdb_header*)buffer, sizeof(uint64_t));
+  if(!response)
+  {
+    zlimdb_seterrno(zlimdb_local_error_invalid_response);
+    return error = getZlimDbError(), false;
+  }
+  return assetId = *response, true;
+}
+
 bool DataConnection::updateSessionAsset(quint64 assetId, double flipPrice, bool& result)
 {
   QHash<quint32, SessionData>::ConstIterator it = sessionData.find(this->selectedSessionId);

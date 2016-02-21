@@ -291,3 +291,124 @@ QVariant Json::parse(const QByteArray& byteArray)
     return var;
   return var;
 }
+
+QByteArray Json::generate(const QVariant& variant)
+{
+  struct Generator
+  {
+    static bool generateString(const QByteArray& str, QByteArray& result)
+    {
+      size_t strLen = str.length();
+      result.reserve(result.length() + 2 + strLen * 2);
+      result += '"';
+      for(const char* start = str, * p = start;;)
+      {
+        const char* e = strpbrk(p, "\"\\");
+        if(!e)
+        {
+          result.append(p, strLen - (p - start));
+          break;
+        }
+        if(e > p)
+          result.append(p, e - p);
+        switch(*e)
+        {
+        case '"':
+          result += "\\\"";
+          break;
+        case '\\':
+          result += "\\\\";
+          break;
+        }
+        p = e + 1;
+      }
+      result += '"';
+      return true;
+    }
+
+    static bool generate(const QByteArray& space, const QVariant& variant, QByteArray& result)
+    {
+      switch(variant.type())
+      {
+        case QVariant::Invalid:
+          result.append("null", 4);
+          return true;
+        case QVariant::Bool:
+        case QVariant::Double:
+        case QVariant::Int:
+        case QVariant::UInt:
+        case QVariant::LongLong:
+        case QVariant::ULongLong:
+        {
+          result.append(variant.toString().toAscii());
+          return true;
+        }
+        case QVariant::String:
+        {
+          if(!generateString(variant.toString().toUtf8().constData(), result))
+          return true;
+        }
+        case QVariant::Map:
+        {
+          const QVariantMap map = variant.toMap();
+          if(map.isEmpty())
+            result.append("{}", 2);
+          else
+          {
+            result.append("{\n", 2);
+            QByteArray newSpace = space;
+            newSpace.append("  ", 2);
+            for(QVariantMap::ConstIterator i = map.begin(), end = map.end();;)
+            {
+              result.append(newSpace);
+              if(!generateString(i.key().toUtf8(), result))
+                return false;
+              result.append(": ", 2);
+              if(!generate(newSpace, i.value(), result))
+                return false;
+              if(++i == end)
+                break;
+              result.append(",\n", 2);
+            }
+            result.append("\n", 1);
+            result.append(space);
+            result.append("}", 1);
+          }
+          return true;
+        }
+        case QVariant::List:
+        {
+          const QVariantList list = variant.toList();
+          if(list.isEmpty())
+            result.append("[]", 2);
+          else
+          {
+            result.append("[\n", 2);
+            QByteArray newSpace = space;
+            newSpace.append("  ", 2);
+            for(QVariantList::ConstIterator i = list.begin(), end = list.end();;)
+            {
+              result.append(newSpace);
+              if(!generate(newSpace, *i, result))
+                return false;
+              if(++i == end)
+                break;
+              result.append(",\n", 2);
+            }
+            result.append("\n", 1);
+            result.append(space);
+            result.append("]", 1);
+          }
+          return true;
+        }
+        default:
+          return false;
+      }
+    }
+  };
+  QByteArray result;
+  if(!Generator::generate(QByteArray(), variant, result))
+    return QByteArray();
+  result.append("\n");
+  return result;
+}
