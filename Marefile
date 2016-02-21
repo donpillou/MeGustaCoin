@@ -39,7 +39,7 @@ targets = {
     }
     
     qtRessourceFiles = "Src/Icons/**.png"
-    qtRccFiles = "Src/MeGustaCoin.qrc"
+    qtRccFiles = "Src/MegucoClient.qrc"
     qtMocFiles = {
       "Src/Graph/GraphModel.h"
       "Src/Graph/GraphService.h"
