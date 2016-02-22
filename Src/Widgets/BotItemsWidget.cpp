@@ -180,7 +180,7 @@ void BotItemsWidget::exportAssets()
     QVariantMap assetData;
     assetData["id"] = eAsset->getId();
     assetData["type"] = (int)eAsset->getType();
-    assetData["state"] = (int)eAsset->getState();
+    assetData["state"] = (int)eAsset->getState() + 1;
     assetData["date"] = eAsset->getDate().toMSecsSinceEpoch();
     assetData["price"] = eAsset->getPrice();
     assetData["investComm"] = eAsset->getInvestComm();
