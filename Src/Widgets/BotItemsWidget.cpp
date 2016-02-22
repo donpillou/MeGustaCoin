@@ -33,6 +33,10 @@ BotItemsWidget::BotItemsWidget(QTabFramework& tabFramework, QSettings& settings,
   cancelAction->setShortcut(QKeySequence(Qt::Key_Delete));
   connect(cancelAction, SIGNAL(triggered()), this, SLOT(cancelItem()));
 
+  exportAction = toolBar->addAction(QIcon(":/Icons/table_export.png"), tr("&Export"));
+  exportAction->setEnabled(false);
+  connect(exportAction, SIGNAL(triggered()), this, SLOT(exportAssets()));
+
   itemView = new QTreeView(this);
   itemView->setUniformRowHeights(true);
   proxyModel = new SessionItemSortProxyModel(this);
@@ -156,6 +160,43 @@ void BotItemsWidget::cancelItem()
     botService.removeSessionItemDraft(*(EBotSessionItemDraft*)*last);
     itemsToRemove.erase(last);
   }
+}
+
+void BotItemsWidget::exportAssets()
+{
+  QString fileName = QFileDialog::getSaveFileName(parentWidget(), tr("Export Selected Assets"), QString(), tr("JSON File (*.json)"));
+  if(fileName.isEmpty())
+    return;
+
+  QVariantList data;
+  QModelIndexList selection = itemView->selectionModel()->selectedRows();
+  foreach(const QModelIndex& proxyIndex, selection)
+  {
+    QModelIndex index = proxyModel->mapToSource(proxyIndex);
+    EBotSessionItem* eAsset = (EBotSessionItem*)index.internalPointer();
+    if(eAsset->getState() != EBotSessionItem::State::waitBuy && eAsset->getState() != EBotSessionItem::State::waitSell)
+      continue;
+
+    QVariantMap assetData;
+    assetData["id"] = eAsset->getId();
+    assetData["type"] = (int)eAsset->getType();
+    assetData["state"] = (int)eAsset->getState();
+    assetData["date"] = eAsset->getDate().toMSecsSinceEpoch();
+    assetData["price"] = eAsset->getPrice();
+    assetData["investComm"] = eAsset->getInvestComm();
+    assetData["investBase"] = eAsset->getInvestBase();
+    assetData["balanceComm"] = eAsset->getBalanceComm();
+    assetData["balanceBase"] = eAsset->getBalanceBase();
+    assetData["profitablePrice"] = eAsset->getProfitablePrice();
+    assetData["flipPrice"] = eAsset->getFlipPrice();
+    assetData["orderId"] = eAsset->getOrderId();
+    data.append(assetData);
+  }
+
+  QFile file(fileName);
+  if(!file.open(QIODevice::WriteOnly))
+    return (void)QMessageBox::critical(parentWidget(), tr("Export Failed"), tr("Could not open file \"%1\": %2").arg(fileName, file.errorString()));
+  file.write(Json::generate(data));
 
 }
 
@@ -232,12 +273,20 @@ void BotItemsWidget::updateToolBarButtons()
   bool canCancel = !selection.isEmpty();
 
   bool draftSelected = false;
+  bool canExport = false;
   for(QSet<EBotSessionItem*>::Iterator i = selection.begin(), end = selection.end(); i != end; ++i)
   {
     EBotSessionItem* eBotMarketOrder = *i;
-    if(eBotMarketOrder->getState() == EBotSessionItem::State::draft)
+    switch(eBotMarketOrder->getState())
     {
+    case EBotSessionItem::State::draft:
       draftSelected = true;
+      break;
+    case EBotSessionItem::State::waitBuy:
+    case EBotSessionItem::State::waitSell:
+      canExport = true;
+      break;
+    default:
       break;
     }
   }
@@ -246,6 +295,7 @@ void BotItemsWidget::updateToolBarButtons()
   sellAction->setEnabled(sessionSelected);
   submitAction->setEnabled(draftSelected);
   cancelAction->setEnabled(canCancel);
+  exportAction->setEnabled(canExport);
 }
 
 void BotItemsWidget::updatedEntitiy(Entity& oldEntity, Entity& newEntity)

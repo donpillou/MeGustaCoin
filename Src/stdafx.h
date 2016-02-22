@@ -7,6 +7,7 @@
 #include "Tools/Sha256.h"
 #include "Tools/JobQueue.h"
 #include "Tools/Entity.h"
+#include "Tools/Json.h"
 #include "QTabFramework.h"
 
 #include "Markets/DataProtocol.h"
