@@ -718,9 +718,9 @@ bool DataConnection::removeBroker(quint32 brokerId)
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   if(zlimdb_control(zdb, userTableId, brokerId, meguco_user_control_remove_broker, 0, 0, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
     return error = getZlimDbError(), false;
-  this->brokerData.erase(it);
   if(selectedBrokerId == brokerId)
-    selectedBrokerId = 0;
+    selectBroker(0);
+  this->brokerData.erase(it);
   return true;
 }
 
@@ -854,7 +854,8 @@ bool DataConnection::receiveResponse(TableInfo::Type tableType)
 bool DataConnection::unsubscribe(quint32 tableId)
 {
   if(zlimdb_unsubscribe(zdb, tableId) != 0)
-    return error = getZlimDbError(), false;
+    if(zlimdb_errno() != zlimdb_error_subscription_not_found)
+      return error = getZlimDbError(), false;
   tableInfo.remove(tableId);
   return true;
 }
@@ -1039,9 +1040,9 @@ bool DataConnection::removeSession(quint32 sessionId)
   char buffer[ZLIMDB_MAX_MESSAGE_SIZE];
   if(zlimdb_control(zdb, userTableId, sessionId, meguco_user_control_remove_session, 0, 0, (zlimdb_header*)buffer, ZLIMDB_MAX_MESSAGE_SIZE))
     return error = getZlimDbError(), false;
-  this->sessionData.erase(it);
   if(selectedSessionId == sessionId)
-    selectedSessionId = 0;
+    selectSession(0);
+  this->sessionData.erase(it);
   return true;
 }
 
