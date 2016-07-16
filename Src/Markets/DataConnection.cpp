@@ -950,13 +950,13 @@ bool DataConnection::createBrokerOrder(meguco_user_broker_order_type type, doubl
       return orderId = 0, true;
     return error = getZlimDbError(), false;
   }
-  uint64_t* response = (uint64_t*)zlimdb_get_response_data((zlimdb_header*)buffer, sizeof(uint64_t));
+  const meguco_user_broker_order_entity* response = (const meguco_user_broker_order_entity*)zlimdb_get_response_data((zlimdb_header*)buffer, sizeof(meguco_user_broker_order_entity));
   if(!response)
   {
     zlimdb_seterrno(zlimdb_local_error_invalid_response);
     return error = getZlimDbError(), false;
   }
-  orderId = *response;
+  orderId = response->entity.id;
   return true;
 }
 
