@@ -939,9 +939,15 @@ void DataService::submitBrokerOrderDraft(EUserBrokerOrderDraft& draft)
   private: // Event
     virtual void handle(DataService& dataService)
     {
-      if(!orderId)
-        return;
       EUserBrokerOrderDraft* draft = dataService.globalEntityManager.getEntity<EUserBrokerOrderDraft>(draftId);
+      if(!draft)
+        return;
+      if(!orderId)
+      {
+        draft->setState(EUserBrokerOrder::State::draft);
+        dataService.globalEntityManager.updatedEntity(*draft);
+        return;
+      }
       if(draft)
       {
         EUserBrokerOrder* order = new EUserBrokerOrder(orderId, *draft);
@@ -1323,9 +1329,15 @@ void DataService::submitSessionAssetDraft(EUserSessionAssetDraft& draft)
   private: // Event
     virtual void handle(DataService& dataService)
     {
-      if(!assetId)
-        return;
       EUserSessionAssetDraft* draft = dataService.globalEntityManager.getEntity<EUserSessionAssetDraft>(draftId);
+      if(!draft)
+        return;
+      if(!assetId)
+      {
+        draft->setState(EUserSessionAssetDraft::State::draft);
+        dataService.globalEntityManager.updatedEntity(*draft);
+        return;
+      }
       if(draft)
       {
         EUserSessionAsset* asset = new EUserSessionAsset(assetId, *draft);
