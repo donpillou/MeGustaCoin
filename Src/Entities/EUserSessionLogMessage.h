@@ -9,7 +9,7 @@ public:
 public:
   EUserSessionLogMessage(const meguco_log_entity& data, const QString& message) : Entity(eType, data.entity.id), message(message)
   {
-    date = QDateTime::fromMSecsSinceEpoch(data.entity.time);
+    date = QDateTime::fromMSecsSinceEpoch(data.time);
   }
 
   const QDateTime& getDate() const {return date;}
